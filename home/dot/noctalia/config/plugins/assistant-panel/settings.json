@@ -1,0 +1,29 @@
+{
+  "maxHistoryLength": 100,
+  "panelDetached": true,
+  "panelPosition": "right",
+  "panelHeightRatio": 0.85,
+  "panelWidth": 520,
+  "scale": 1,
+  "ai": {
+    "provider": "google",
+    "model": "gemini-2.5-flash",
+    "apiKeys": {
+      "google": ""
+    },
+    "temperature": 0.7,
+    "systemPrompt": "You are a helpful assistant integrated into a Linux desktop shell. Be concise and helpful.",
+    "maxHistoryLength": 100,
+    "openaiLocal": false,
+    "openaiBaseUrl": "https://api.openai.com/v1/chat/completions",
+    "models": {}
+  },
+  "translator": {
+    "backend": "google",
+    "sourceLanguage": "auto",
+    "targetLanguage": "en",
+    "realTimeTranslation": true,
+    "deeplApiKey": ""
+  },
+  "attachmentStyle": "connected"
+}

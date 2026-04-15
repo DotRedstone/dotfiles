@@ -1,0 +1,11 @@
+[config]
+
+[templates]
+
+[templates.starship]
+input_path = "/home/dot/.dotfiles/home/dot/starship/starship.toml.template"
+output_path = "/home/dot/.cache/starship.toml"
+
+[templates.zellij]
+input_path = "/home/dot/.dotfiles/home/dot/zellij/config.kdl.template"
+output_path = "/home/dot/.cache/zellij.kdl"

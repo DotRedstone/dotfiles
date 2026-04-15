@@ -1,0 +1,122 @@
+// ---
+// Warden Niri Configuration
+// ---
+
+spawn-at-startup "dbus-update-activation-environment" "--systemd" "DISPLAY" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
+spawn-at-startup "fcitx5" "-d" "--replace"
+spawn-at-startup "awww-daemon"
+spawn-at-startup "noctalia-shell"
+spawn-at-startup "xwayland-satellite"
+
+// [Monitor Settings]
+output "eDP-1" {
+    mode "3072x1920@165.002"
+    scale 1.75
+}
+
+output "HDMI-A-1" {
+    mode "2560x1440@143.981"
+    scale 1.0
+}
+
+// [Layout]
+layout {
+    gaps 14
+    background-color "transparent"
+    center-focused-column "never"
+    default-column-width { proportion 0.5; }
+    focus-ring {
+        width 3
+        active-color "#b4befe"
+        inactive-color "#313244"
+    }
+}
+
+// [Keybindings]
+binds {
+    // Basic
+    Mod+Return { spawn "wezterm"; }
+    Mod+W { spawn "firefox"; }
+    Mod+E { spawn "nautilus"; }
+    Mod+Q { close-window; }
+    Mod+Shift+E { quit; }
+
+    // Focus
+    Mod+L { focus-column-right; }
+    Mod+J { focus-window-down; }
+    Mod+K { focus-window-up; }
+
+    // Movement
+    Mod+Shift+L { move-column-right; }
+    Mod+Shift+J { move-window-down; }
+    Mod+Shift+K { move-window-up; }
+
+    // Monitor Switching
+    Mod+Ctrl+H { move-column-to-monitor-left; }
+    Mod+Ctrl+L { move-column-to-monitor-right; }
+
+    // Mouse & Scroll
+    Mod+WheelScrollDown      { focus-column-right; }
+    Mod+WheelScrollUp        { focus-column-left; }
+    Mod+Alt+WheelScrollDown  { focus-workspace-down; }
+    Mod+Alt+WheelScrollUp    { focus-workspace-up; }
+
+    // Noctalia Integration
+    Print { spawn "noctalia-shell" "ipc" "call" "screen-toolkit" "screenshot"; }
+    Mod+Shift+S { spawn "noctalia-shell" "ipc" "call" "screen-toolkit" "screenshot"; }
+    Mod+R { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
+    Mod+N { spawn "noctalia-shell" "ipc" "call" "notifications" "toggle"; }
+    Mod+V { spawn "noctalia-shell" "ipc" "call" "clipboard" "toggle"; }
+    Mod+I { spawn "noctalia-shell" "ipc" "call" "controlCenter" "toggle"; }
+    Mod+P { spawn "noctalia-shell" "ipc" "call" "power" "toggle"; }
+
+    // Window Management
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+C { center-column; }
+    Mod+Comma  { consume-window-into-column; }
+    Mod+Period { expel-window-from-column; }
+
+    // Workspaces
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+0 { focus-workspace 10; }
+
+    // Workspace Movement
+    Mod+Alt+1 { move-column-to-workspace 1; }
+    Mod+Alt+2 { move-column-to-workspace 2; }
+    Mod+Alt+3 { move-column-to-workspace 3; }
+    Mod+Alt+4 { move-column-to-workspace 4; }
+    Mod+Alt+5 { move-column-to-workspace 5; }
+    Mod+Alt+6 { move-column-to-workspace 6; }
+    Mod+Alt+7 { move-column-to-workspace 7; }
+    Mod+Alt+8 { move-column-to-workspace 8; }
+    Mod+Alt+9 { move-column-to-workspace 9; }
+    Mod+Alt+0 { move-column-to-workspace 10; }
+
+    // Resizing
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+}
+
+input {
+    focus-follows-mouse max-scroll-amount="0%"
+}
+
+include "./noctalia.kdl"
+
+window-rule {
+    geometry-corner-radius 20
+    clip-to-geometry true
+    draw-border-with-background false
+    opacity 0.9
+}

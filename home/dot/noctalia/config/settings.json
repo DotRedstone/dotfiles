@@ -165,7 +165,7 @@
                     "showMemoryAsPercent": true,
                     "showMemoryUsage": true,
                     "showNetworkStats": false,
-                    "showSwapUsage": false,
+                    "showSwapUsage": true,
                     "textColor": "primary",
                     "useMonospaceFont": true,
                     "usePadding": true

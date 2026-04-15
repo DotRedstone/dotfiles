@@ -15,9 +15,10 @@
       "/var/lib/bluetooth"
       "/var/lib/nixos"
       "/var/lib/libvirt"
+      "/var/lib/systemd"
       "/etc/NetworkManager/system-connections"
     ];
-    files = [ "/etc/machine-id" ];
+    files = [];
 
     users.dot = {
       directories = [

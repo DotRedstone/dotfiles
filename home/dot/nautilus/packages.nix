@@ -9,8 +9,10 @@
     nautilus
 
     # [Preview & Quick Look]
-    sushi   # macOS-style spacebar preview
-    loupe   # Modern MD3 image viewer
-    evince  # Document and PDF viewer
+    sushi
+    loupe
+    evince
+    gnome-autoar
+    file-roller
   ];
 }

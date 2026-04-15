@@ -4,7 +4,6 @@
 # ---
 
 { config, lib, ... }: {
-  imports = [ ./layout.nix ];
 
   programs.starship = {
     enable = true;

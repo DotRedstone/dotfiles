@@ -1,0 +1,160 @@
+{
+  "todos": [
+    {
+      "id": 1775813088225,
+      "text": "worker",
+      "completed": false,
+      "createdAt": "2026-04-10T09:24:48.225Z",
+      "pageId": 0,
+      "priority": "high",
+      "details": ""
+    },
+    {
+      "id": 1775813082394,
+      "text": "集群",
+      "completed": false,
+      "createdAt": "2026-04-10T09:24:42.394Z",
+      "pageId": 0,
+      "priority": "high",
+      "details": ""
+    },
+    {
+      "id": 1775813075095,
+      "text": "机票",
+      "completed": false,
+      "createdAt": "2026-04-10T09:24:35.095Z",
+      "pageId": 0,
+      "priority": "high",
+      "details": ""
+    },
+    {
+      "id": 1775581451997,
+      "text": "starship",
+      "completed": false,
+      "createdAt": "2026-04-07T17:04:11.997Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775411060157,
+      "text": "icon",
+      "completed": false,
+      "createdAt": "2026-04-05T17:44:20.157Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775393349481,
+      "text": "telegram配色",
+      "completed": false,
+      "createdAt": "2026-04-05T12:49:09.481Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775393339108,
+      "text": "窗口保留",
+      "completed": false,
+      "createdAt": "2026-04-05T12:48:59.108Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775407435374,
+      "text": "firefox透明",
+      "completed": true,
+      "createdAt": "2026-04-05T16:43:55.374Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775407446722,
+      "text": "firefox配置原子化",
+      "completed": true,
+      "createdAt": "2026-04-05T16:44:06.722Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775415814006,
+      "text": "音乐客户端",
+      "completed": true,
+      "createdAt": "2026-04-05T19:03:34.006Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775393363489,
+      "text": "环境",
+      "completed": true,
+      "createdAt": "2026-04-05T12:49:23.489Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775393343081,
+      "text": "swap",
+      "completed": true,
+      "createdAt": "2026-04-05T12:49:03.081Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775581446301,
+      "text": "vscode",
+      "completed": true,
+      "createdAt": "2026-04-07T17:04:06.301Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775415168797,
+      "text": "nixvim",
+      "completed": true,
+      "createdAt": "2026-04-05T18:52:48.797Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    },
+    {
+      "id": 1775398247990,
+      "text": "快捷键",
+      "completed": true,
+      "createdAt": "2026-04-05T14:10:47.990Z",
+      "pageId": 0,
+      "priority": "medium",
+      "details": ""
+    }
+  ],
+  "pages": [
+    {
+      "id": 0,
+      "name": "General"
+    }
+  ],
+  "current_page_id": 0,
+  "count": 15,
+  "completedCount": 8,
+  "showCompleted": true,
+  "showBackground": true,
+  "isExpanded": false,
+  "useCustomColors": false,
+  "priorityColors": {
+    "high": "#f44336",
+    "medium": "#2196f3",
+    "low": "#9e9e9e"
+  },
+  "exportPath": "~/Documents",
+  "exportFormat": "markdown",
+  "exportEmptySections": false
+}

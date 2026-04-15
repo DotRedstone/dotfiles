@@ -1,0 +1,60 @@
+{
+  "palette": {
+    "title": "调色板",
+    "cssVars": "复制为 CSS 变量",
+    "hexList": "复制 Hex 列表"
+  },
+  "messages": {
+    "picker-cancelled": "取色已取消。",
+    "no-text": "未检测到文本。",
+    "no-qr": "未检测到二维码。",
+    "lens-failed": "Google Lens 上传失败。",
+    "capture-failed": "屏幕截图失败。",
+    "pinned": "已置顶到屏幕。",
+    "palette-failed": "色板提取失败。",
+    "translate-failed": "翻译失败。",
+    "measure-saved": "已保存至 {dest}",
+    "measure-failed": "截图失败。",
+    "measure-copied": "测量信息已复制。",
+    "measure-pinned": "已置顶。"
+  },
+  "settings": {
+    "ocrLanguages": "OCR 语言",
+    "deps": "系统依赖项"
+  },
+  "annotate": {
+    "copied": "已复制到剪贴板",
+    "copyFailed": "复制失败",
+    "saveFailed": "保存标注失败",
+    "savedTo": "已保存至 {dest}",
+    "saveFileFailed": "保存文件失败",
+    "colorSize": "颜色与大小"
+  },
+  "record": {
+    "stop": "停止",
+    "saveMp4": "保存 MP4",
+    "saveGif": "保存 GIF",
+    "savingMp4": "正在保存 MP4...",
+    "convertingGif": "正在转换为 GIF...",
+    "mp4Ready": "MP4 已就绪",
+    "gifReady": "GIF 已就绪",
+    "saved": "已保存至 ~/Videos",
+    "failed": "录制失败或已取消",
+    "saveMp4Failed": "保存 MP4 失败",
+    "saveGifFailed": "GIF 转换失败",
+    "discard": "丢弃"
+  },
+  "pin": {
+    "close": "关闭"
+  },
+  "measure": {
+    "hint": "点击并拖动进行测量",
+    "subHint": "置顶以保留 · 再次拖动以替换 · ESC 关闭",
+    "copyMeasurement": "复制测量值",
+    "screenshot": "带辅助线截图",
+    "pin": "置顶",
+    "discard": "丢弃",
+    "copy": "复制",
+    "remove": "移除"
+  }
+}

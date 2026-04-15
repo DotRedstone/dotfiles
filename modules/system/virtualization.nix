@@ -23,6 +23,8 @@
     };
   };
 
+  systemd.services.libvirtd.serviceConfig.LoadCredential = "";
+
   # [Management Tools]
   programs.virt-manager.enable = true;
 }

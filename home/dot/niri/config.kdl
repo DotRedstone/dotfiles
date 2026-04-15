@@ -62,8 +62,8 @@ binds {
     Mod+Alt+WheelScrollUp    { focus-workspace-up; }
 
     // Noctalia Integration
-    Print { spawn "noctalia-shell" "ipc" "call" "screen-toolkit" "screenshot"; }
-    Mod+Shift+S { spawn "noctalia-shell" "ipc" "call" "screen-toolkit" "screenshot"; }
+    Mod+Shift+S { spawn "sh" "-c" "grim -g \"$(slurp)\" - | wl-copy"; }
+    Print { spawn "sh" "-c" "grim - | wl-copy"; }
     Mod+R { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
     Mod+N { spawn "noctalia-shell" "ipc" "call" "notifications" "toggle"; }
     Mod+V { spawn "noctalia-shell" "ipc" "call" "clipboard" "toggle"; }

@@ -648,7 +648,7 @@
         "overlayLayer": true
     },
     "plugins": {
-        "autoUpdate": true,
+        "autoUpdate": false,
         "notifyUpdates": true
     },
     "sessionMenu": {

@@ -2,40 +2,51 @@
 # Module: Rime Input Logic
 # Description: Key bindings for candidate selection and first/last char commit
 # ---
-
-{ ... }: {
-  # [Global Rime Settings]
-  home.file.".local/share/fcitx5/rime/default.custom.yaml" = {
+{ pkgs, ... }: {
+  home.file.".local/share/fcitx5/rime/lua" = {
+    source = "${pkgs.rime-ice}/share/rime-data/lua";
+    recursive = true;
     force = true;
-    text = ''
-      patch:
-        schema_list:
-          - schema: rime_ice
-        "menu/page_size": 10
-        # Key bindings for selection
-        "key_binder/bindings":
-          - { when: has_menu, accept: Control_L, send: 2 }
-          - { when: has_menu, accept: Control_R, send: 3 }
-          - { when: has_menu, accept: bracketleft, send: "Control+Shift+1" }  # Select First Char
-          - { when: has_menu, accept: bracketright, send: "Control+Shift+2" } # Select Last Char
-    '';
   };
 
-  # [Rime Ice Specific Patch]
-  home.file.".local/share/fcitx5/rime/rime_ice.custom.yaml" = {
-    force = true;
-    text = ''
-      patch:
-        # --- ASCII / Chinese Switch ---
-        "ascii_composer/good_old_caps_lock": true
-        "ascii_composer/switch_key/Caps_Lock": clear
-        "ascii_composer/switch_key/Shift_L": commit_code
-        "ascii_composer/switch_key/Shift_R": commit_code
-        "ascii_composer/switch_key/Control_L": noop
-        "ascii_composer/switch_key/Control_R": noop
-        
-        # Disable uppercase patterns to prevent interference with Shift logic
-        "recognizer/patterns/uppercase": ""
-    '';
-  };
+  home.file.".local/share/fcitx5/rime/rime.lua".text = ''
+    function select_character(key, env)
+      local engine = env.engine
+      local context = engine.context
+      local k = key:repr()
+      if context:is_composing() and (k == "bracketleft" or k == "bracketright") then
+        local cand = context:get_selected_candidate() or context:get_candidate_list():to_table()[1]
+        if cand then
+          local text = cand.text
+          if k == "bracketleft" then
+            engine:commit_text(text:sub(1, utf8.offset(text, 2) - 1))
+          else
+            engine:commit_text(text:sub(utf8.offset(text, utf8.len(text))))
+          end
+          context:clear()
+          return 1
+        end
+      end
+      return 2
+    end
+  '';
+
+  home.file.".local/share/fcitx5/rime/default.custom.yaml".text = ''
+    patch:
+      schema_list: [{schema: rime_ice}]
+      "menu/page_size": 10
+  '';
+
+  home.file.".local/share/fcitx5/rime/rime_ice.custom.yaml".text = ''
+    patch:
+      "ascii_composer/good_old_caps_lock": true
+      "ascii_composer/switch_key/Caps_Lock": clear
+      "ascii_composer/switch_key/Shift_L": commit_code
+      "ascii_composer/switch_key/Shift_R": commit_code
+      "key_binder/bindings":
+        - { when: has_menu, accept: Control_L, send: 2 }
+        - { when: has_menu, accept: Control_R, send: 3 }
+      "engine/processors/@before 0": "lua_processor@select_character"
+      "recognizer/patterns/uppercase": ""
+  '';
 }

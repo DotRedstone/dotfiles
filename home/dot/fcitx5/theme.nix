@@ -10,9 +10,9 @@
     text = ''
       Vertical Candidate List=False
       Theme=OriDark
-      Font="Sans Serif 12"
-      MenuFont="Sans Serif 12"
-      TrayFont="Sans Serif 12"
+      Font="Maple Mono NF 13"
+      MenuFont="Maple Mono NF 13"
+      TrayFont="Maple Mono NF 10"
     '';
   };
 

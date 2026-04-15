@@ -1,38 +1,75 @@
 # ---
 # Module: Starship Layout
-# Description: Structural configuration for the prompt segments
+# Description: Minimalist "Warden" Capsule Prompt (Nerd Fonts only, No Emojis)
 # ---
 
 { ... }: {
   # [Layout Template]
   # Source for noctalia's generation script
   home.file.".config/starship/layout.toml".text = ''
-    [character]
-    success_symbol = "[󰄬](primary bold) "
-    error_symbol = "[󰅖](error bold) "
+    add_newline = false
 
-    [directory]
-    style = "primary bold"
-    truncation_length = 3
-    fish_style_pwd_dir_length = 1
+    format = """$username$hostname$cmd_duration 󰜥 $directory $git_branch\n$character"""
 
-    [git_branch]
-    symbol = " "
-    style = "secondary bold"
-
-    [git_status]
-    style = "error bold"
-    format = "([$all_status$ahead_behind]($style) )"
+    [username]
+    show_always = true
+    style_user = "bold bg:primary fg:black"
+    style_root = "bold bg:error fg:black"
+    format = "[](bold primary)[$user]($style)"
+    disabled = false
 
     [hostname]
     ssh_only = false
-    format = "[@$hostname](tertiary bold) "
+    format = "[•$hostname](bold bg:primary fg:black)[](bold primary)"
+    disabled = false
 
     [cmd_duration]
-    style = "secondary bold"
-    format = "took [$duration]($style) "
+    min_time = 0
+    format = " [](bold tertiary)[󰪢 $duration](bold bg:tertiary fg:black)[](bold tertiary)"
 
-    [status]
+    [directory]
+    style = "bold bg:secondary fg:black"
+    truncation_length = 6
+    truncation_symbol = " ••/"
+    home_symbol = "  "
+    read_only = "  "
+    format = "[](bold secondary)[󰉋 $path]($style)[](bold secondary)"
+
+    [directory.substitutions]
+    "Desktop" = "  "
+    "Documents" = "  "
+    "Downloads" = "  "
+    "Music" = " 󰎈 "
+    "Pictures" = "  "
+    "Videos" = "  "
+    "GitHub" = " 󰊤 "
+    ".dotfiles" = "  "
+
+    [git_branch]
+    style = "bold bg:primary fg:black"
+    symbol = "󰘬"
+    truncation_length = 12
+    format = " [](bold primary)[$symbol $branch$all_status]($style)[](bold primary)"
+
+    [git_status]
+    disabled = false
+    conflicted = " 󱓷 "
+    ahead = " 󰁟 "
+    behind = " 󰁞 "
+    diverged = " 󰃻 "
+    untracked = " ? "
+    stashed = " 󰀦 "
+    modified = " ! "
+    staged = " + "
+    renamed = " 󰒲 "
+    deleted = " - "
+    format = "$all_status"
+
+    [character]
+    success_symbol = "[   ](bold primary)"
+    error_symbol = "[   ](bold error)"
+
+    [package]
     disabled = true
   '';
 }

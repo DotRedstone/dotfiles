@@ -39,6 +39,9 @@
     ./neovim
     ./vscode
     ./dev
+
+    # --- Game ---
+    ./prism-launcher
   ];
 
   # [Identity]

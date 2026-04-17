@@ -1,18 +1,36 @@
 # ---
 # Module: Desktop Environment
-# Description: Niri compositor, SDDM greeter, and graphics acceleration
+# Description: Niri compositor, SDDM with KWin (Final Polish for Cursor)
 # ---
 
-{ pkgs, inputs, ... }: {
+{ pkgs, inputs, lib, ... }: {
   imports = [ inputs.silent-sddm.nixosModules.default ];
 
   # [Compositor & Display Manager]
   programs.niri.enable = true;
   services.displayManager.defaultSession = "niri";
-  
+
   services.displayManager.sddm = {
     enable = true;
-    wayland.enable = true;
+    wayland = {
+      enable = true;
+      compositor = "kwin";
+    };
+    extraPackages = [ pkgs.bibata-cursors ];
+    settings = {
+      Theme = {
+        CursorTheme = "Bibata-Modern-Classic";
+        CursorSize = 24;
+      };
+    };
+  };
+
+  # [Intel & Wayland Cursor Fix]
+  systemd.services.display-manager.environment = {
+    KWIN_FORCE_SW_CURSOR = "1";
+    KWIN_DRM_USE_MODIFIERS = "0";
+    XCURSOR_PATH = "/run/current-system/sw/share/icons";
+    QT_WAYLAND_SHELL_INTEGRATION = "layer-shell";
   };
 
   programs.silentSDDM = {
@@ -27,6 +45,7 @@
     extraPackages = with pkgs; [
       intel-media-driver
       intel-vaapi-driver
+      libvdpau-va-gl
       intel-compute-runtime
     ];
   };
@@ -35,8 +54,13 @@
   xdg.portal = {
     enable = true;
     xdgOpenUsePortal = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
-    config.niri.default = [ "gnome" "gtk" ];
+    extraPortals = [
+      pkgs.xdg-desktop-portal-gtk
+      pkgs.xdg-desktop-portal-gnome
+    ];
+    config.niri = {
+      default = [ "gnome" "gtk" ];
+    };
   };
 
   # [Services]

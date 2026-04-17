@@ -1,16 +1,20 @@
 # ---
 # Module: Flake Entry
-# Description: Main entry point for Warden (System) and dot (Home)
+# Description: Main entry point for Warden (NixOS) and Beacon (macOS)
 # ---
 
 {
-  description = "dot's Warden NixOS configuration";
+  description = "dot's Flake configuration for NixOS and macOS";
 
   inputs = {
     # [Core]
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    # [macOS]
+    darwin.url = "github:LnL7/nix-darwin";
+    darwin.inputs.nixpkgs.follows = "nixpkgs";
 
     # [Persistence]
     impermanence.url = "github:nix-community/impermanence";
@@ -25,22 +29,38 @@
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, darwin, ... }@inputs:
     let
-      system = "x86_64-linux";
+      linuxSystem = "x86_64-linux";
+      darwinSystem = "aarch64-darwin";
     in {
 
-    # [System - nrs]
+    # [System - NixOS]
     nixosConfigurations.warden = nixpkgs.lib.nixosSystem {
-      inherit system;
+      system = linuxSystem;
       specialArgs = { inherit inputs; };
       modules = [ ./hosts/warden ];
     };
 
-    # [Home - hms]
+    # [System - macOS]
+    darwinConfigurations.beacon = darwin.lib.darwinSystem {
+      system = darwinSystem;
+      specialArgs = { inherit inputs; };
+      modules = [
+        ./hosts/beacon
+        home-manager.darwinModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.dot = import ./home/dot/mac.nix;
+        }
+      ];
+    };
+
+    # [Home - Standalone Linux]
     homeConfigurations."dot@warden" = home-manager.lib.homeManagerConfiguration {
       pkgs = import nixpkgs {
-        inherit system;
+        system = linuxSystem;
         config.allowUnfree = true;
       };
       extraSpecialArgs = { inherit inputs; };

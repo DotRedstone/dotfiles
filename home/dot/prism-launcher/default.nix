@@ -5,9 +5,6 @@
 
 { pkgs, ... }: {
   home.packages = with pkgs; [
-    prism-launcher
-    jdk8
-    jdk17
-    jdk21
+    prismlauncher
   ];
 }

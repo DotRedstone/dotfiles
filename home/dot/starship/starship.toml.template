@@ -1,7 +1,7 @@
 palette = "noctalia"
 add_newline = false
 
-format = """$username$hostname$cmd_duration 󰜥 $directory $git_branch\n$character"""
+format = """${custom.user_host_noenv}${custom.user_host_env} 󰜥 $directory $git_branch$cmd_duration\n$direnv${custom.venv}$nodejs$rust$golang$c${custom.status_dot}$character"""
 
 [palettes.noctalia]
 primary = "{{colors.primary.default.hex}}"
@@ -9,22 +9,52 @@ secondary = "{{colors.secondary.default.hex}}"
 tertiary = "{{colors.tertiary.default.hex}}"
 error = "{{colors.error.default.hex}}"
 
+[custom.user_host_noenv]
+when = 'test -z "$VIRTUAL_ENV" && test -z "$DIRENV_DIR" && test ! -f package.json && test ! -f Cargo.toml && test ! -f go.mod'
+command = 'echo "dot•warden"'
+format = "[](bold primary)[$output](bold bg:primary fg:235)[](bold primary)"
+
+[custom.user_host_env]
+when = 'test -n "$VIRTUAL_ENV" || test -n "$DIRENV_DIR" || test -f package.json || test -f Cargo.toml || test -f go.mod'
+command = 'echo "dot•warden"'
+format = "[](bold tertiary)[$output](bold bg:tertiary fg:235)[](bold tertiary)"
 
 [username]
-show_always = true
-style_user = "bold bg:primary fg:235"
-style_root = "bold bg:error fg:235"
-format = "[](bold primary)[$user]($style)"
-disabled = false
-
+disabled = true
 [hostname]
-ssh_only = false
-format = "[•$hostname](bold bg:primary fg:235)[](bold primary)"
-disabled = false
+disabled = true
 
 [cmd_duration]
 min_time = 0
 format = " [](bold tertiary)[󰪢 $duration](bold bg:tertiary fg:235)[](bold tertiary)"
+disabled = false
+
+[direnv]
+format = "[](bold primary)[ ](bold bg:primary fg:235)[](bold primary) "
+style = "bold"
+disabled = false
+
+[custom.venv]
+when = 'test -n "$VIRTUAL_ENV"'
+command = 'basename "$VIRTUAL_ENV"'
+format = "[](bold primary)[󰌠 $output](bold bg:primary fg:235)[](bold primary) "
+
+[nodejs]
+format = "[](bold primary)[󰎙 $version](bold bg:primary fg:235)[](bold primary) "
+detect_files = ["package.json", ".node-version", ".nvmrc"]
+style = "bold"
+
+[rust]
+format = "[](bold primary)[󱘗 $version](bold bg:primary fg:235)[](bold primary) "
+style = "bold"
+
+[golang]
+format = "[](bold primary)[󰟓 $version](bold bg:primary fg:235)[](bold primary) "
+style = "bold"
+
+[c]
+format = "[](bold primary)[ $version](bold bg:primary fg:235)[](bold primary) "
+style = "bold"
 
 [directory]
 style = "bold bg:secondary fg:235"
@@ -48,25 +78,19 @@ format = "[](bold secondary)[󰉋 $path]($style)[](bold secondary)"
 style = "bold bg:primary fg:235"
 symbol = "󰘬"
 truncation_length = 12
-format = " [](bold primary)[$symbol $branch$all_status]($style)[](bold primary)"
+format = "[](bold primary)[$symbol $branch$all_status]($style)[](bold primary)"
 
 [git_status]
 disabled = false
-conflicted = " 󱓷 "
-ahead = " 󰁟 "
-behind = " 󰁞 "
-diverged = " 󰃻 "
-untracked = " ? "
-stashed = " 󰀦 "
-modified = " ! "
-staged = " + "
-renamed = " 󰒲 "
-deleted = " - "
-format = "$all_status"
+
+[custom.status_dot]
+when = 'test -z "$VIRTUAL_ENV" && test -z "$DIRENV_DIR" && test ! -f package.json && test ! -f Cargo.toml && test ! -f go.mod'
+command = 'echo ""'
+format = "[$output ](bold primary)"
 
 [character]
-success_symbol = "[   ](bold primary)"
-error_symbol = "[   ](bold error)"
+success_symbol = "[](bold primary)"
+error_symbol = "[ ](bold error)"
 
 [package]
 disabled = true

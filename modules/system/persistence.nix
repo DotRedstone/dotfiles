@@ -13,7 +13,6 @@
     directories = [
       "/var/log"
       "/var/lib/bluetooth"
-      "/var/lib/bluevein"
       "/var/lib/nixos"
       "/var/lib/libvirt"
       "/var/lib/systemd"

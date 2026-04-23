@@ -26,8 +26,8 @@ in
 {
   systemd.services.bluevein = {
     description = "BlueVein - Dual System Bluetooth Key Sync";
-    after = [ "bluetooth.service" ];
-    wants = [ "bluetooth.service" ];
+    before = [ "bluetooth.service" ];
+    requiredBy = [ "bluetooth.service" ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
@@ -49,6 +49,7 @@ in
     environment = {
       BLUEVEIN_ADAPTER_MAC = "E4:C7:67:8B:AB:4F";
       BLUEVEIN_INTERVAL = "30";
+      BLUEVEIN_EFI_DEVICE = "/dev/nvme0n1p1";
     };
   };
 }

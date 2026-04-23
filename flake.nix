@@ -24,15 +24,11 @@
     nixvim.url = "github:nix-community/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
-    # [Bluetooth]
-    bluevein.url = "github:meowrch/BlueVein";
-    bluevein.flake = false;
-
     # [Security]
     sops-nix.url = "github:Mic92/sops-nix";
   };
 
-  outputs = { self, nixpkgs, home-manager, bluevein, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
     let
       system = "x86_64-linux";
     in {

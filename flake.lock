@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "bluevein": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1776872399,
-        "narHash": "sha256-WSDEQ+rs0fyAtanb0jgQzA+d8XNdA2i6bd+lmkXrUwM=",
-        "owner": "meowrch",
-        "repo": "BlueVein",
-        "rev": "c6cd9658060474d837c0a3ecd7561cece868c545",
-        "type": "github"
-      },
-      "original": {
-        "owner": "meowrch",
-        "repo": "BlueVein",
-        "type": "github"
-      }
-    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
@@ -227,7 +211,6 @@
     },
     "root": {
       "inputs": {
-        "bluevein": "bluevein",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
         "nixpkgs": "nixpkgs_2",

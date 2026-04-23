@@ -28,6 +28,7 @@
     ./nautilus
     ./flclash
     ./ssh
+    ./secrets
 
     # --- Daily Applications ---
     ./firefox

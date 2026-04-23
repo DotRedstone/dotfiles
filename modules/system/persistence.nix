@@ -28,6 +28,7 @@
         ".local/share/PrismLauncher"
         ".local/state/nvim"
         ".config/flclash"
+        ".config/sops"
         ".xwechat" "xwechat_files"
         ".local/share/AyuGramDesktop"
         ".local/share/fcitx5" ".config/fcitx5"

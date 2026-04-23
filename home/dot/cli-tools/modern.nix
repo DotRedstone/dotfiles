@@ -17,6 +17,8 @@
     tealdeer    # man (tldr)
     xh          # curl (HTTPie-like)
     gping       # visual ping
+    sops        # Sophisticated secrets editor
+    age         # Modern, simple, and secure encryption
   ];
 
   # [Shell Integrations]

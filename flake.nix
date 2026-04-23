@@ -24,9 +24,12 @@
     nixvim.url = "github:nix-community/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
-    # [Bluetooth] Dual-system Bluetooth key sync
+    # [Bluetooth]
     bluevein.url = "github:meowrch/BlueVein";
     bluevein.flake = false;
+
+    # [Security]
+    sops-nix.url = "github:Mic92/sops-nix";
   };
 
   outputs = { self, nixpkgs, home-manager, bluevein, ... }@inputs:

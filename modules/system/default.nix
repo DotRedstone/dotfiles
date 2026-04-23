@@ -12,6 +12,7 @@
     ./i18n.nix          # Locale & Input
     ./hardware.nix      # Power, Audio, Bluetooth
     ./network.nix       # Connectivity
+    ./bluevein.nix      # Dual-system Bluetooth key sync
     ./desktop.nix       # Niri & Graphics
     ./fonts.nix         # Typography
     ./virtualization.nix# Docker & KVM

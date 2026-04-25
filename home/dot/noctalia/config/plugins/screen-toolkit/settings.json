@@ -1,8 +1,18 @@
 {
   "colorHistory": [
+    "#362F32",
     "#151316"
   ],
-  "paletteColors": [],
+  "paletteColors": [
+    "#231F25",
+    "#312B32",
+    "#5B535D",
+    "#857688",
+    "#AC9CB1",
+    "#D5B9DB",
+    "#D0C2D8",
+    "#DEC8EA"
+  ],
   "installedLangs": [
     "eng"
   ],
@@ -16,9 +26,10 @@
   "stateIsRunning": false,
   "stateActiveTool": "",
   "stateMirrorVisible": false,
-  "resultHex": "#151316",
-  "resultRgb": "rgb(21, 19, 22)",
-  "resultHsv": "hsv(280, 14%, 9%)",
-  "resultHsl": "hsl(280, 7%, 8%)",
-  "colorCapturePath": "/tmp/screen-toolkit-colorpicker.png"
+  "resultHex": "#362F32",
+  "resultRgb": "rgb(54, 47, 50)",
+  "resultHsv": "hsv(334, 13%, 21%)",
+  "resultHsl": "hsl(334, 7%, 20%)",
+  "colorCapturePath": "/tmp/screen-toolkit-colorpicker.png",
+  "colorCacheBust": 1777017569777
 }

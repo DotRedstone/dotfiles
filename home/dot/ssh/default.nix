@@ -59,4 +59,9 @@
       Include ${config.sops.templates."ssh-config".path}
     '';
   };
+
+  # [SSH Config Permissions Fix]
+  # Home Manager creates symlinks to nix store (perms 777), which SSH rejects.
+  # Force the config file to be a real copy with correct permissions.
+  home.file.".ssh/config".force = true;
 }

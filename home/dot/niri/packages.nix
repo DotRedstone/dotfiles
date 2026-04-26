@@ -11,6 +11,7 @@
     # [Screenshot & Clipboard]
     cliphist
     wl-clipboard
+    wtype       # Key simulation for Mac-style shortcuts
     grim
     slurp
     swappy

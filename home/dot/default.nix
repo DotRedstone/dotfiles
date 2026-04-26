@@ -26,7 +26,6 @@
     # --- File Management & Networking ---
     ./yazi
     ./nautilus
-    ./flclash
     ./ssh
     ./secrets
 

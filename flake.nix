@@ -53,7 +53,10 @@
         config.allowUnfree = true;
       };
       extraSpecialArgs = { inherit inputs; };
-      modules = [ ./home/dot ];
+      modules = [ 
+        ./home/dot 
+        inputs.nixvim.homeModules.nixvim
+      ];
     };
   };
 }

@@ -43,9 +43,11 @@
       "ascii_composer/switch_key/Caps_Lock": clear
       "ascii_composer/switch_key/Shift_L": commit_code
       "ascii_composer/switch_key/Shift_R": commit_code
-      "key_binder/bindings":
-        - { when: has_menu, accept: Control_L, send: 2 }
-        - { when: has_menu, accept: Control_R, send: 3 }
+      "key_binder/bindings/+":
+        - { when: has_menu, accept: semicolon, send: "2" }
+        - { when: has_menu, accept: apostrophe, send: "3" }
+        - { when: has_menu, accept: Control_L, send: noop }
+        - { when: has_menu, accept: Control_R, send: noop }
       "engine/processors/@before 0": "lua_processor@select_character"
       "recognizer/patterns/uppercase": ""
   '';

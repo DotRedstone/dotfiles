@@ -32,6 +32,12 @@ layout {
     }
 }
 
+// [Blur Settings]
+blur {
+    passes 2
+    offset 2.5
+}
+
 // [Keybindings]
 binds {
     // Basic
@@ -129,5 +135,11 @@ window-rule {
     geometry-corner-radius 20
     clip-to-geometry true
     draw-border-with-background false
-    opacity 0.9
+    opacity 0.75
+    background-effect {
+        blur true
+        xray true
+        noise 0.02
+        saturation 1.5
+    }
 }

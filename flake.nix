@@ -26,9 +26,13 @@
 
     # [Security]
     sops-nix.url = "github:Mic92/sops-nix";
+
+    # [Antigravity]
+    antigravity-nix.url = "github:jacopone/antigravity-nix";
+    antigravity-nix.inputs.nixpkgs.follows = "nixpkgs"; 
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, antigravity-nix, ... }@inputs:
     let
       system = "x86_64-linux";
     in {

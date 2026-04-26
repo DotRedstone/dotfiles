@@ -1,6 +1,6 @@
 # ---
 # Module: Neovim Core
-# Description: Main Neovim configuration and provider settings
+# Description: Neovim configuration with LazyVim bootstrap
 # ---
 
 { pkgs, ... }: {
@@ -16,6 +16,12 @@
     withPython3 = true;
     withRuby = false;
     withNodeJs = true;
+
+    # [Bootstrap]
+    initLua = ''
+      -- bootstrap lazy.nvim, LazyVim and your plugins
+      require("config.lazy")
+    '';
 
     # [Internal Toolchain]
     extraPackages = with pkgs; [

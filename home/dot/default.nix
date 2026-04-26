@@ -40,6 +40,7 @@
     ./neovim
     ./vscode
     ./dev
+    ./antigravity
 
     # --- Game ---
     ./prism-launcher

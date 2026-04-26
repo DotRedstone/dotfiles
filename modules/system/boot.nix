@@ -49,14 +49,19 @@
       fi
       btrfs subvolume snapshot /btrfs_tmp/@blank /btrfs_tmp/@
 
-      # Clean up old roots, keeping only the last 5
+      # [Snapshot Maintenance]
+      # Only delete if more than 30 snapshots exist AND they are older than 30 days
       if [ -d /btrfs_tmp/old_roots ]; then
-          echo "Cleaning up old Btrfs snapshots..."
-          # List by time (newest first), skip the first 5, delete the rest
-          ls -1t /btrfs_tmp/old_roots | tail -n +6 | while read -r snapshot; do
-              echo "Deleting old snapshot: $snapshot"
-              btrfs subvolume delete "/btrfs_tmp/old_roots/$snapshot"
-          done
+          snapshot_count=$(ls -1 /btrfs_tmp/old_roots | wc -l)
+          if [ "$snapshot_count" -gt 30 ]; then
+              # Find subvolumes older than 30 days
+              find /btrfs_tmp/old_roots -maxdepth 1 -mtime +30 -type d | while read -r snapshot; do
+                  # Re-check count to ensure we always keep at least 30
+                  if [ "$(ls -1 /btrfs_tmp/old_roots | wc -l)" -gt 30 ]; then
+                      btrfs subvolume delete "$snapshot"
+                  fi
+              done
+          fi
       fi
 
       umount /btrfs_tmp

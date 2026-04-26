@@ -14,6 +14,3 @@ output_path = "/home/dot/.cache/zellij.kdl"
 input_path = "/home/dot/.dotfiles/home/dot/nixvim/colors.lua.template"
 output_path = "/home/dot/.cache/nvim_colors.lua"
 
-[templates.antigravity]
-input_path = "/home/dot/.dotfiles/home/dot/antigravity/theme.json.template"
-output_path = "/home/dot/.cache/antigravity_theme.json"

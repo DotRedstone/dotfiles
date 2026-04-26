@@ -19,6 +19,5 @@
     tree
     gnused
     fastfetch
-    btop # Keep as backup monitor
   ];
 }

@@ -9,3 +9,7 @@ output_path = "/home/dot/.cache/starship.toml"
 [templates.zellij]
 input_path = "/home/dot/.dotfiles/home/dot/zellij/config.kdl.template"
 output_path = "/home/dot/.cache/zellij.kdl"
+
+[templates.neovim]
+input_path = "/home/dot/.dotfiles/home/dot/nixvim/colors.lua.template"
+output_path = "/home/dot/.cache/nvim_colors.lua"

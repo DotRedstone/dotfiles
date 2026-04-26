@@ -38,7 +38,7 @@
     ./netease-music
 
     # --- Development ---
-    ./neovim
+    ./nixvim
     ./vscode
     ./dev
     ./antigravity

@@ -1,30 +1,21 @@
 # ---
 # Module: Networking
-# Description: NetworkManager and Polkit rules for proxy tools
+# Description: NetworkManager, proxy client, and firewall rules
 # ---
 
 { pkgs, ... }: {
   # [NetworkManager]
   networking.networkmanager.enable = true;
 
-  # [Privilege Escalation - FlClash]
-  # Allow wheel group to run flclash TUN mode without password
+  # [Proxy Client - Clash Verge Rev]
+  # NixOS official module handles TUN privileges automatically
+  programs.clash-verge = {
+    enable = true;
+    tunMode = true;
+    autoStart = false;
+  };
 
-  security.sudo.extraRules = [{
-    users = [ "dot" ];
-    commands = [{
-      command = "${pkgs.flclash}/bin/flclash";
-      options = [ "NOPASSWD" ];
-    }];
-  }];
-
-  security.polkit.extraConfig = ''
-    polkit.addRule(function(action, subject) {
-      if ((action.id == "org.freedesktop.policykit.exec" &&
-           action.lookup("program") == "${pkgs.flclash}/bin/flclash") &&
-          subject.isInGroup("wheel")) {
-        return polkit.Result.YES;
-      }
-    });
-  '';
+  # [Firewall]
+  # Trust the TUN interface created by Clash Verge
+  networking.firewall.trustedInterfaces = [ "tun0" "Meta" ];
 }

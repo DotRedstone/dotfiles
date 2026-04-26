@@ -17,12 +17,15 @@
       "/var/lib/libvirt"
       "/var/lib/systemd"
       "/etc/NetworkManager/system-connections"
+      "/etc/ssh"
+      "/var/lib/docker"
+      "/var/lib/AccountsService"
     ];
     files = [];
 
     users.dot = {
       directories = [
-        ".dotfiles" ".ssh" ".mozilla"
+        ".dotfiles" ".ssh" ".mozilla" ".config/mozilla"
         "Documents" "Downloads" "Pictures"
         ".local/share/fish" ".local/share/nvim"
         ".local/share/PrismLauncher"
@@ -32,6 +35,10 @@
         ".xwechat" "xwechat_files"
         ".local/share/AyuGramDesktop"
         ".local/share/fcitx5" ".config/fcitx5"
+        ".gemini"
+        ".config/QQ" ".local/share/Tencent"
+        ".config/Code" ".vscode"
+        ".config/netease-cloud-music"
       ];
     };
   };

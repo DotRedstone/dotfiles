@@ -34,6 +34,7 @@
     ./firefox
     ./wechat
     ./telegram
+    ./qq
     ./netease-music
 
     # --- Development ---

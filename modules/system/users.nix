@@ -7,7 +7,7 @@
   users.users.dot = {
     isNormalUser = true;
     shell = pkgs.fish;
-    extraGroups = [ "wheel" "networkmanager" "video" "audio" "docker" "libvirtd" "input" ];
+    extraGroups = [ "wheel" "networkmanager" "network" "netdev" "video" "audio" "docker" "libvirtd" "input" ];
   };
 
   programs.fish.enable = true;

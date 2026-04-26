@@ -47,20 +47,40 @@
         flash = true,
         notify = true,
         which_key = true,
+        lualine = true,
       },
       color_overrides = {
-        mocha = {
-          base = custom_palette.base,
-          mantle = custom_palette.mantle,
-          crust = custom_palette.crust,
-          text = custom_palette.text,
-        },
-        latte = {
-          base = custom_palette.base,
-          mantle = custom_palette.mantle,
-          crust = custom_palette.crust,
-          text = custom_palette.text,
-        },
+        all = {
+          base = custom_palette.base;
+          mantle = custom_palette.mantle;
+          crust = custom_palette.crust;
+          text = custom_palette.text;
+          subtext0 = custom_palette.subtext0;
+          subtext1 = custom_palette.subtext1;
+          surface0 = custom_palette.surface0;
+          surface1 = custom_palette.surface1;
+          surface2 = custom_palette.surface2;
+          overlay0 = custom_palette.overlay0;
+          overlay1 = custom_palette.overlay1;
+          overlay2 = custom_palette.overlay2;
+          
+          blue = custom_palette.blue;
+          cyan = custom_palette.cyan;
+          green = custom_palette.green;
+          magenta = custom_palette.magenta;
+          red = custom_palette.red;
+          yellow = custom_palette.yellow;
+          
+          -- Map MD3 roles to catppuccin
+          rosewater = custom_palette.tertiary;
+          flamingo = custom_palette.primary;
+          pink = custom_palette.tertiary;
+          mauve = custom_palette.primary;
+          maroon = custom_palette.error;
+          peach = custom_palette.secondary;
+          teal = custom_palette.secondary;
+          lavender = custom_palette.primary;
+        };
       }
     })
 

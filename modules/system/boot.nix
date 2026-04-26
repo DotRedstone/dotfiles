@@ -48,6 +48,17 @@
           mv /btrfs_tmp/@ /btrfs_tmp/old_roots/$timestamp
       fi
       btrfs subvolume snapshot /btrfs_tmp/@blank /btrfs_tmp/@
+
+      # Clean up old roots, keeping only the last 5
+      if [ -d /btrfs_tmp/old_roots ]; then
+          echo "Cleaning up old Btrfs snapshots..."
+          # List by time (newest first), skip the first 5, delete the rest
+          ls -1t /btrfs_tmp/old_roots | tail -n +6 | while read -r snapshot; do
+              echo "Deleting old snapshot: $snapshot"
+              btrfs subvolume delete "/btrfs_tmp/old_roots/$snapshot"
+          done
+      fi
+
       umount /btrfs_tmp
     '';
   };

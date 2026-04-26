@@ -2,11 +2,11 @@
 // Warden Niri Configuration
 // ---
 
-spawn-at-startup "dbus-update-activation-environment" "--systemd" "DISPLAY" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP"
-spawn-at-startup "fcitx5" "-d" "--replace"
+spawn-at-startup "xwayland-satellite"
+spawn-at-startup "dbus-update-activation-environment" "--systemd" "--all"
 spawn-at-startup "awww-daemon"
 spawn-at-startup "noctalia-shell"
-spawn-at-startup "xwayland-satellite"
+spawn-at-startup "sh" "-c" "sleep 1 && fcitx5 -d --replace"
 
 // [Monitor Settings]
 output "eDP-1" {
@@ -109,6 +109,9 @@ binds {
 }
 
 input {
+    keyboard {
+        numlock
+    }
     focus-follows-mouse max-scroll-amount="0%"
 }
 

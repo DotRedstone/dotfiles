@@ -7,11 +7,15 @@
   imports = [ inputs.silent-sddm.nixosModules.default ];
 
   # [Compositor & Display Manager]
-  programs.niri.enable = true;
+  programs.niri = {
+    enable = true;
+    package = inputs.niri.packages.${pkgs.system}.niri;
+  };
   services.displayManager.defaultSession = "niri";
 
   services.displayManager.sddm = {
     enable = true;
+    autoNumlock = true;
     wayland = {
       enable = true;
       compositor = "kwin";
@@ -59,7 +63,8 @@
       pkgs.xdg-desktop-portal-gnome
     ];
     config.niri = {
-      default = [ "gnome" "gtk" ];
+      default = lib.mkForce [ "gtk" ];
+      "org.freedesktop.impl.portal.ScreenCast" = lib.mkForce [ "gnome" ];
     };
   };
 

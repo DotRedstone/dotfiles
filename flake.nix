@@ -19,6 +19,8 @@
     noctalia.url = "github:noctalia-dev/noctalia-shell";
     silent-sddm.url = "github:uiriansan/SilentSDDM";
     silent-sddm.inputs.nixpkgs.follows = "nixpkgs";
+    niri.url = "github:YaLTeR/niri";
+    niri.inputs.nixpkgs.follows = "nixpkgs";
 
     # [Editor]
     nixvim.url = "github:nix-community/nixvim";
@@ -32,7 +34,7 @@
     antigravity-nix.inputs.nixpkgs.follows = "nixpkgs"; 
   };
 
-  outputs = { self, nixpkgs, home-manager, antigravity-nix, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, antigravity-nix, niri, ... }@inputs:
     let
       system = "x86_64-linux";
     in {

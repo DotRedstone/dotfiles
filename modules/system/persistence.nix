@@ -26,11 +26,12 @@
     users.dot = {
       directories = [
         ".dotfiles" ".ssh" ".mozilla" ".config/mozilla"
+        "Code" "Projects"
         "Documents" "Downloads" "Pictures"
         ".local/share/fish" ".local/share/nvim"
         ".local/share/PrismLauncher"
         ".local/state/nvim"
-        ".config/flclash"
+        ".config/clash-verge-rev"
         ".config/sops"
         ".xwechat" "xwechat_files"
         ".local/share/AyuGramDesktop"

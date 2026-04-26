@@ -360,7 +360,7 @@
     },
     "colorSchemes": {
         "darkMode": true,
-        "generationMethod": "content",
+        "generationMethod": "fruit-salad",
         "manualSunrise": "06:30",
         "manualSunset": "18:30",
         "monitorForColors": "eDP-1",
@@ -840,15 +840,15 @@
         "useWallhaven": true,
         "viewMode": "browse",
         "wallhavenApiKey": "",
-        "wallhavenCategories": "111",
+        "wallhavenCategories": "010",
         "wallhavenOrder": "desc",
         "wallhavenPurity": "100",
         "wallhavenQuery": "",
-        "wallhavenRatios": "",
+        "wallhavenRatios": "landscape",
         "wallhavenResolutionHeight": "",
         "wallhavenResolutionMode": "atleast",
         "wallhavenResolutionWidth": "",
-        "wallhavenSorting": "relevance",
+        "wallhavenSorting": "toplist",
         "wallpaperChangeMode": "random"
     }
 }

@@ -75,8 +75,25 @@
   services.tumbler.enable = true;
   programs.dconf.enable = true;
 
-  # [Theming]
-  environment.systemPackages = [ pkgs.bibata-cursors ];
+  # [Theming & Desktop Tools]
+  environment.systemPackages = with pkgs; [ 
+    bibata-cursors 
+    polkit_gnome # Required for graphical sudo prompts
+  ];
+
+  # [Polkit Agent Service]
+  systemd.user.services.polkit-gnome-authentication-agent-1 = {
+    description = "polkit-gnome-authentication-agent-1";
+    wantedBy = [ "graphical-session.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+      Restart = "on-failure";
+      RestartSec = 1;
+      TimeoutStopSec = 10;
+    };
+  };
+
   environment.variables = {
     XCURSOR_THEME = "Bibata-Modern-Classic";
     XCURSOR_SIZE = "24";

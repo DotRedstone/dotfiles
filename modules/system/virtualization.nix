@@ -28,8 +28,4 @@
   # [Management Tools]
   programs.virt-manager.enable = true;
 
-  environment.systemPackages = with pkgs; [
-    quickemu      # Modern CLI for running optimized VMs
-    quickgui      # Optional GUI for quickemu
-  ];
 }

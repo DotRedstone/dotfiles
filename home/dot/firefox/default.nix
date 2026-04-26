@@ -9,10 +9,6 @@
     ./theme.nix
   ];
 
-  # [Persistence Hack]
-  # Force link to .mozilla to keep profile data safe across reboots
-  home.file.".config/mozilla/firefox".source = 
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.mozilla/firefox";
 
   # [Native Messaging]
   # Required for Pywalfox to sync system colors with the browser
@@ -27,6 +23,8 @@
   # [Profile Definition]
   programs.firefox = {
     enable = true;
+    configPath = "${config.xdg.configHome}/mozilla/firefox";
+    languagePacks = [ "zh-CN" ];
     profiles.dot = {
       id = 0;
       isDefault = true;

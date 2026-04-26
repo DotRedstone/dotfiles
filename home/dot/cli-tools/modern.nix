@@ -9,6 +9,7 @@
     fd          # Modern find
     ripgrep     # Modern grep
     xh          # Modern curl
+    btop        # System monitor (Managed by Noctalia)
     
     # Aesthetics
     cbonsai
@@ -99,15 +100,6 @@
     };
   };
 
-  # Btop: System monitor with Catppuccin theme
-  programs.btop = {
-    enable = true;
-    settings = {
-      color_theme = "catppuccin_mocha";
-      theme_background = false; # Use terminal background
-      vim_keys = true;
-    };
-  };
 
   # Shell aliases to map classic commands to modern ones
   home.shellAliases = {

@@ -13,6 +13,14 @@
       extensions = with pkgs.vscode-extensions; [
         # UI & Icons
         catppuccin.catppuccin-vsc-icons
+        (pkgs.vscode-utils.buildVscodeMarketplaceExtension {
+          mktplcRef = {
+            name = "noctaliatheme";
+            publisher = "noctalia";
+            version = "0.0.5";
+            sha256 = "sha256-aTSk3yYkBw5GrD0CbRL2wo3SlBffzBTDe1pZoZa1URQ=";
+          };
+        })
 
         # Core Productivity
         asvetliakov.vscode-neovim        # Neovim backend integration

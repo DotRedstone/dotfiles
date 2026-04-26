@@ -135,6 +135,14 @@ input {
     keyboard {
         numlock
     }
+
+    touchpad {
+        tap
+        dwt
+        natural-scroll
+        click-method "clickfinger"
+    }
+
     focus-follows-mouse max-scroll-amount="0%"
 }
 

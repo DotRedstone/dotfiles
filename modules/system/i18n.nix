@@ -45,4 +45,16 @@
       ];
     };
   };
+
+  # [KMSCON - Modern TTY]
+  # Replaces the Linux console with a hardware-accelerated terminal
+  services.kmscon = {
+    enable = true;
+    hwRender = true;
+    fonts = [{
+      name = "Maple Mono NF";
+      package = pkgs.maple-mono.NF;
+    }];
+    extraConfig = "font-size=12";
+  };
 }

@@ -19,6 +19,18 @@
     "inactiveColor": {
       "desc": "未激活图标的颜色。",
       "label": "未激活图标颜色"
+    },
+    "enableToast": {
+      "desc": "当状态改变时显示提示消息。",
+      "label": "启用通知提醒"
+    },
+    "micFilterRegex": {
+      "desc": "用于过滤麦克风应用的正则表达式。匹配的应用将完全排除在检测之外。",
+      "label": "麦克风过滤正则"
+    },
+    "camFilterRegex": {
+      "desc": "用于过滤摄像头应用的正则表达式。匹配的应用将完全排除在检测之外。",
+      "label": "摄像头过滤正则"
     }
   },
   "tooltip": {

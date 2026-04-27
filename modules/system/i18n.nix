@@ -3,7 +3,7 @@
 # Description: System locale and Fcitx5 input method configuration
 # ---
 
-{ pkgs, lib, ... }: {
+{ pkgs, ... }: {
   # [Locale]
   time.timeZone = "Asia/Shanghai";
   i18n.defaultLocale = "zh_CN.UTF-8";
@@ -20,30 +20,17 @@
   };
 
   # [Locales Archive]
-  # Generating all locales is the most robust way to avoid "missing locale" fallbacks
-  i18n.supportedLocales = [ "all" ];
-  
-  # Ensure glibcLocales is matching the system glibc
-  i18n.glibcLocales = pkgs.glibcLocales;
+  i18n.supportedLocales = [ "zh_CN.UTF-8/UTF-8" "en_US.UTF-8/UTF-8" ];
 
-  # Global environment variables
+  # [Environment]
   environment.variables = {
     LANG = "zh_CN.UTF-8";
     LANGUAGE = "zh_CN:zh";
-    LC_ALL = "zh_CN.UTF-8";
   };
-
-  # Session variables for Wayland (automatically inherited by systemd --user)
   environment.sessionVariables = {
     LANG = "zh_CN.UTF-8";
     LANGUAGE = "zh_CN:zh";
-    LC_ALL = "zh_CN.UTF-8";
   };
-
-  # Force systemd user session to inherit these
-  systemd.user.extraConfig = ''
-    DefaultEnvironment="LANG=zh_CN.UTF-8" "LANGUAGE=zh_CN:zh" "LC_ALL=zh_CN.UTF-8"
-  '';
 
   environment.etc."machine-id".text = "2ff1b656a580496793ee96248624a908";
 

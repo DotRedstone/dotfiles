@@ -26,6 +26,11 @@
       package = pkgs.bibata-cursors; 
       size = 24; 
     };
+
+    font = {
+      name = "Maple Mono NF";
+      size = 11;
+    };
   };
 
 
@@ -34,6 +39,9 @@
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
       gtk-theme = "adw-gtk3";
+      font-name = "Maple Mono NF 11";
+      document-font-name = "Maple Mono NF 11";
+      monospace-font-name = "Maple Mono NF 11";
     };
   };
 }

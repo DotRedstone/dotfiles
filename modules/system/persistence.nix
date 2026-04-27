@@ -40,7 +40,6 @@
         ".config/QQ" ".local/share/Tencent"
         ".config/Code" ".vscode"
         ".config/Antigravity" ".antigravity"
-        ".config/noctalia"
         ".config/virt-manager" ".local/share/libvirt"
         ".config/dconf"
         ".config/netease-cloud-music"

@@ -115,6 +115,8 @@ in {
   };
 
   # [Services]
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.sddm.enableGnomeKeyring = true;
   services.gvfs.enable = true;
   services.udisks2.enable = true;
   services.devmon.enable = true;
@@ -124,6 +126,8 @@ in {
   # [Theming & Desktop Tools]
   environment.systemPackages = with pkgs; [ 
     bibata-cursors 
+    libsecret # Secret Service helpers for apps such as VS Code
+    seahorse # GUI for inspecting/unlocking GNOME keyrings
     polkit_gnome # Required for graphical sudo prompts
   ];
 

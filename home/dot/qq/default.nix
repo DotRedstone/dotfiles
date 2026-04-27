@@ -4,5 +4,9 @@
 # ---
 
 { pkgs, ... }: {
-  home.packages = [ pkgs.qq ];
+  home.packages = [
+    (pkgs.qq.override {
+      commandLineArgs = "--password-store=gnome-libsecret";
+    })
+  ];
 }

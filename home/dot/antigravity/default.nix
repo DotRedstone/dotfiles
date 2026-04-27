@@ -4,8 +4,21 @@
 # ---
 
 { inputs, pkgs, ... }:
+
+let
+  antigravity = inputs.antigravity-nix.packages.${pkgs.system}.default;
+in
 {
   home.packages = [
-    inputs.antigravity-nix.packages.${pkgs.system}.default
+    (pkgs.symlinkJoin {
+      name = "google-antigravity-with-keyring";
+      paths = [ antigravity ];
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        rm -f $out/bin/antigravity
+        makeWrapper ${antigravity}/bin/antigravity $out/bin/antigravity \
+          --add-flags "--password-store=gnome-libsecret"
+      '';
+    })
   ];
 }

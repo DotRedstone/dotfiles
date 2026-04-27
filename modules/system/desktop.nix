@@ -29,11 +29,6 @@
     };
   };
 
-  # [NumLock Fix for SDDM-Wayland/KWin]
-  systemd.tmpfiles.rules = [
-    "f /var/lib/sddm/.config/kcminputrc 0644 sddm sddm - [Keyboard]\nNumLock=0"
-  ];
-
   # [Intel & Wayland Cursor Fix]
   systemd.services.display-manager.environment = {
     KWIN_FORCE_SW_CURSOR = "1";
@@ -83,8 +78,6 @@
   # [Theming & Desktop Tools]
   environment.systemPackages = with pkgs; [ 
     bibata-cursors 
-    gsettings-desktop-schemas
-    gtk3
     polkit_gnome # Required for graphical sudo prompts
   ];
 

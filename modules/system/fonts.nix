@@ -7,6 +7,7 @@
   fonts = {
     packages = with pkgs; [
       maple-mono.NF
+      inter
       noto-fonts-cjk-sans
       noto-fonts-cjk-serif
       noto-fonts-color-emoji

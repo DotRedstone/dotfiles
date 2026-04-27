@@ -8,6 +8,7 @@
     ./nix.nix           # Flake & Package settings
     ./boot.nix          # Rollback & Bootloader
     ./persistence.nix   # Warden Vault
+    ./persist-snapshots.nix # Persist Data Protection
     ./users.nix         # dot's Identity
     ./i18n.nix          # Locale & Input
     ./hardware.nix      # Power, Audio, Bluetooth

@@ -3,7 +3,7 @@
 # Description: System locale and Fcitx5 input method configuration
 # ---
 
-{ pkgs, lib, ... }: {
+{ pkgs, ... }: {
   # [Locale]
   time.timeZone = "Asia/Shanghai";
   i18n.defaultLocale = "zh_CN.UTF-8";
@@ -20,9 +20,17 @@
   };
 
   # [Locales Archive]
-  # Force loading of localizations for all apps
   i18n.supportedLocales = [ "zh_CN.UTF-8/UTF-8" "en_US.UTF-8/UTF-8" ];
-  environment.variables.LOCALE_ARCHIVE = lib.mkForce "${pkgs.glibcLocales}/lib/locale/locale-archive";
+
+  # [Environment]
+  environment.variables = {
+    LANG = "zh_CN.UTF-8";
+    LANGUAGE = "zh_CN:zh";
+  };
+  environment.sessionVariables = {
+    LANG = "zh_CN.UTF-8";
+    LANGUAGE = "zh_CN:zh";
+  };
 
   environment.etc."machine-id".text = "2ff1b656a580496793ee96248624a908";
 

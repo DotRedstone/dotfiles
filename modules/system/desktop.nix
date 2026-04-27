@@ -57,14 +57,30 @@ in {
     "d ${sddmStateDir}/.config 0750 sddm sddm -"
     "C+ ${sddmStateDir}/.config/kcminputrc 0644 sddm sddm - ${sddmKcminputrc}"
     "C+ ${sddmStateDir}/.config/kwinrc 0644 sddm sddm - ${sddmKwinrc}"
+    "z ${sddmStateDir} 0755 sddm sddm -"
+    "z ${sddmStateDir}/.config 0750 sddm sddm -"
+    "z ${sddmStateDir}/.config/kcminputrc 0644 sddm sddm -"
+    "z ${sddmStateDir}/.config/kwinrc 0644 sddm sddm -"
   ];
 
   # [Intel & Wayland Cursor Fix]
-  systemd.services.display-manager.environment = {
-    KWIN_FORCE_SW_CURSOR = "1";
-    KWIN_DRM_USE_MODIFIERS = "0";
-    XCURSOR_PATH = "/run/current-system/sw/share/icons";
-    QT_WAYLAND_SHELL_INTEGRATION = "layer-shell";
+  systemd.services.display-manager = {
+    # tmpfiles runs during activation, but an already persisted /var/lib/sddm can
+    # keep stale ownership. Reinstall these files immediately before SDDM starts
+    # so KWin reads the NumLock config from an sddm-owned HOME every boot.
+    preStart = ''
+      ${pkgs.coreutils}/bin/install -d -o sddm -g sddm -m 0755 ${sddmStateDir}
+      ${pkgs.coreutils}/bin/install -d -o sddm -g sddm -m 0750 ${sddmStateDir}/.config
+      ${pkgs.coreutils}/bin/install -o sddm -g sddm -m 0644 ${sddmKcminputrc} ${sddmStateDir}/.config/kcminputrc
+      ${pkgs.coreutils}/bin/install -o sddm -g sddm -m 0644 ${sddmKwinrc} ${sddmStateDir}/.config/kwinrc
+    '';
+
+    environment = {
+      KWIN_FORCE_SW_CURSOR = "1";
+      KWIN_DRM_USE_MODIFIERS = "0";
+      XCURSOR_PATH = "/run/current-system/sw/share/icons";
+      QT_WAYLAND_SHELL_INTEGRATION = "layer-shell";
+    };
   };
 
   programs.silentSDDM = {

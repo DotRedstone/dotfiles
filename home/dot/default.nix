@@ -35,6 +35,8 @@
     ./telegram
     ./qq
     ./netease-music
+    ./zathura
+    ./multimedia
 
     # --- Development ---
     ./nixvim
@@ -44,6 +46,7 @@
 
     # --- Game ---
     ./prism-launcher
+    ./mangohud
   ];
 
   # [Identity]

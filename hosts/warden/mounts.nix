@@ -5,8 +5,8 @@
 
 { lib, ... }:
 let
-  ssd = "/dev/disk/by-id/nvme-YMTC_PC300-1TB-D_YMA21T0JA240450BCL-part5";
-  efi = "/dev/disk/by-id/nvme-YMTC_PC300-1TB-D_YMA21T0JA240450BCL-part1";
+  ssd = "/dev/disk/by-label/nixos";
+  efi = "/dev/disk/by-label/WARDEN_BOOT";
   btrfsOptions = [ "compress=zstd" "noatime" ];
 in {
   # [Btrfs Subvolumes]

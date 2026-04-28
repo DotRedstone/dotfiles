@@ -14,7 +14,7 @@
       trap 'umount /btrfs_tmp 2>/dev/null || true' EXIT
 
       mkdir -p /btrfs_tmp
-      mount -t btrfs /dev/disk/by-id/nvme-YMTC_PC300-1TB-D_YMA21T0JA240450BCL-part5 /btrfs_tmp
+      mount -t btrfs /dev/disk/by-label/nixos /btrfs_tmp
 
       timestamp=$(date "+%Y-%m-%d_%H:%M:%S")
       mkdir -p /btrfs_tmp/persist_snapshots

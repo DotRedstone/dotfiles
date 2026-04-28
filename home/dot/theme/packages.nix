@@ -17,7 +17,6 @@ in
     bibata-cursors
     adw-gtk3
     matugen
-    awww
   ];
 
   # [Module Injection]

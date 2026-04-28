@@ -7,7 +7,7 @@
   # [Docker]
   virtualisation.docker = {
     enable = true;
-    # Prevent Docker from taking over iptables to avoid firewall conflicts
+    enableOnBoot = false; # Don't start on boot to save memory
     daemon.settings = {
       iptables = false;
     };
@@ -16,6 +16,7 @@
   # [KVM / QEMU]
   virtualisation.libvirtd = {
     enable = true;
+    # Will be socket-activated or started manually via virt-manager
     qemu = {
       runAsRoot = false;
       swtpm.enable = true;

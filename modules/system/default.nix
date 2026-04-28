@@ -14,6 +14,7 @@
     ./hardware.nix      # Power, Audio, Bluetooth
     ./network.nix       # Connectivity
     ./desktop.nix       # Niri & Graphics
+    ./chrome.nix        # Chrome policy defaults
     ./fonts.nix         # Typography
     ./virtualization.nix# Docker & KVM
     ./keyd.nix          # Key Remapping

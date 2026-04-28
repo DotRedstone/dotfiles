@@ -31,6 +31,7 @@
 
     # --- Daily Applications ---
     ./firefox
+    ./chrome
     ./wechat
     ./telegram
     ./qq

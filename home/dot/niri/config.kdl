@@ -4,7 +4,6 @@
 
 spawn-at-startup "xwayland-satellite"
 spawn-at-startup "dbus-update-activation-environment" "--systemd" "--all"
-spawn-at-startup "awww-daemon"
 spawn-at-startup "noctalia-shell"
 spawn-at-startup "sh" "-c" "sleep 1 && fcitx5 -d --replace"
 

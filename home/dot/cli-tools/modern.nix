@@ -101,6 +101,9 @@
   };
 
 
+  # [Fastfetch Config]
+  xdg.configFile."fastfetch/config.jsonc".source = ./fastfetch.json;
+
   # Shell aliases to map classic commands to modern ones
   home.shellAliases = {
     ls = "eza";

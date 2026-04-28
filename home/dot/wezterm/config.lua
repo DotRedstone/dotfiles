@@ -16,6 +16,14 @@ config.font = wezterm.font_with_fallback({
 config.font_size = 12
 config.window_background_opacity = 0.95
 
+-- [Animation & Cursor]
+config.default_cursor_style = "BlinkingBar"
+config.cursor_blink_ease_in = "EaseIn"
+config.cursor_blink_ease_out = "EaseOut"
+config.animation_fps = 165 -- Sync with your high refresh rate monitor
+config.cursor_thickness = "2pt"
+config.cursor_blink_rate = 500
+
 -- [UI & Layout]
 config.enable_tab_bar = false
 config.window_decorations = "NONE"

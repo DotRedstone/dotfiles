@@ -41,7 +41,7 @@
     path = with pkgs; [ coreutils util-linux btrfs-progs ];
     script = ''
       mkdir -p /btrfs_tmp
-      mount -t btrfs /dev/disk/by-label/nixos /btrfs_tmp
+      mount -t btrfs /dev/disk/by-uuid/c8f96d2d-8a97-4cbb-8a17-bb9de844060b /btrfs_tmp
       if [ -e /btrfs_tmp/@ ]; then
           timestamp=$(date "+%Y-%m-%d_%H:%M:%S")
           mkdir -p /btrfs_tmp/old_roots

@@ -5,8 +5,8 @@
 
 { lib, ... }:
 let
-  ssd = "/dev/disk/by-label/nixos";
-  efi = "/dev/disk/by-label/WARDEN_BOOT";
+  ssd = "/dev/disk/by-uuid/c8f96d2d-8a97-4cbb-8a17-bb9de844060b";
+  efi = "/dev/disk/by-uuid/624B-904B";
   btrfsOptions = [ "compress=zstd" "noatime" ];
 in {
   # [Btrfs Subvolumes]

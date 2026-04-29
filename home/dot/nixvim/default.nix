@@ -18,6 +18,9 @@
     black
     isort
     cmake-format
+    typst
+    typstyle
+    tinymist
   ];
 
   programs.nixvim = {
@@ -1286,6 +1289,15 @@
             };
           };
           marksman.enable = true;
+          tinymist = {
+            enable = true;
+            settings = {
+              autoArchive = true;
+              formatterMode = "typstyle";
+              exportPdf = "onSave";
+              semanticTokens = "disable";
+            };
+          };
           nil_ls.enable = true;
           pyright.enable = true;
           ruff.enable = true;
@@ -1372,6 +1384,7 @@
               "prettierd"
               "prettier"
             ];
+            typst = [ "typstyle" ];
             toml = [ "taplo" ];
             cmake = [ "cmake_format" ];
           };

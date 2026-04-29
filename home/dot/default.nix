@@ -37,6 +37,7 @@
     ./qq
     ./netease-music
     ./zathura
+    ./office
     ./multimedia
 
     # --- Development ---

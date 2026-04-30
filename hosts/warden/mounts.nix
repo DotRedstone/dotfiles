@@ -20,7 +20,7 @@ in {
     device = ssd;
     fsType = "btrfs";
     options = [ "subvol=@home" ] ++ btrfsOptions;
-    neededForBoot = true;
+    neededForBoot = true; # Must be true for early user login
   };
 
   fileSystems."/nix" = lib.mkForce {
@@ -32,8 +32,8 @@ in {
   fileSystems."/persist" = lib.mkForce {
     device = ssd;
     fsType = "btrfs";
-    options = [ "subvol=@persist" ] ++ btrfsOptions;
-    neededForBoot = true; # Critical for Impermanence
+    options = [ "subvol=@persist" ] ++ btrfsOptions; # Must NOT include 'ro'
+    neededForBoot = true; # Critical for Impermanence: must be true
   };
 
   fileSystems."/var/log" = lib.mkForce {

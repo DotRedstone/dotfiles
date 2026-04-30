@@ -58,6 +58,7 @@ struct Bridge {
     state_path: PathBuf,
     cache: HashMap<String, String>,
     keys: HashMap<String, String>,
+    memory_key_candidates: Vec<String>,
     scanned_memory: bool,
 }
 
@@ -98,6 +99,7 @@ impl Bridge {
             state_path,
             cache,
             keys: HashMap::new(),
+            memory_key_candidates: Vec::new(),
             scanned_memory: false,
         })
     }
@@ -256,26 +258,44 @@ impl Bridge {
             }
         }
 
-        let mut candidates: Vec<String> = self.cache.values().cloned().collect();
+        let mut candidates = Vec::new();
+        for key in self.cache.values() {
+            if !candidates.contains(key) {
+                candidates.push(key.clone());
+            }
+        }
+
         if !self.scanned_memory {
-            for key in memory_candidates() {
-                if !candidates.contains(&key) {
-                    candidates.push(key);
+            let found = memory_candidates();
+            println!("wechat-notify-bridge: found {} memory key candidates", found.len());
+            for key in found {
+                if !self.memory_key_candidates.contains(&key) {
+                    self.memory_key_candidates.push(key);
                 }
             }
             self.scanned_memory = true;
         }
 
-        for key in candidates {
-            if validate_key(db, &key) {
-                self.cache.insert(label.to_string(), key.clone());
-                self.keys.insert(label.to_string(), key.clone());
-                save_key_cache(&self.cache_path, &self.cache)?;
-                return Ok(key);
+        for key in &self.memory_key_candidates {
+            if !candidates.contains(key) {
+                candidates.push(key.clone());
             }
         }
 
-        Err(io::Error::new(io::ErrorKind::NotFound, format!("no key for {label}")).into())
+        for key in &candidates {
+            if validate_key(db, key) {
+                println!("wechat-notify-bridge: validated key for {}", label);
+                self.cache.insert(label.to_string(), key.clone());
+                self.keys.insert(label.to_string(), key.clone());
+                save_key_cache(&self.cache_path, &self.cache)?;
+                return Ok(key.clone());
+            }
+        }
+
+        Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            format!("no key for {} after trying {} candidates", label, candidates.len())
+        ).into())
     }
 
     fn name2id(&self, msg_db: &Path, msg_key: &str) -> Result<Vec<(i64, String)>> {
@@ -893,6 +913,7 @@ fn memory_candidates() -> Vec<String> {
 
 fn wechat_pids() -> Vec<i32> {
     let uid = current_uid();
+    let self_pid = std::process::id() as i32;
     let mut pids = Vec::new();
     let Ok(entries) = fs::read_dir("/proc") else {
         return pids;
@@ -906,12 +927,17 @@ fn wechat_pids() -> Vec<i32> {
         let Ok(pid) = name.parse::<i32>() else {
             continue;
         };
+        if pid == self_pid {
+            continue;
+        }
         let proc_dir = entry.path();
         if proc_uid(&proc_dir) != Some(uid) {
             continue;
         }
+
+        let comm = fs::read_to_string(proc_dir.join("comm")).unwrap_or_default().trim().to_string();
         let cmdline = fs::read(proc_dir.join("cmdline")).unwrap_or_default();
-        if cmdline.windows(b"com.tencent.wechat/files/wechat".len()).any(|w| {
+        if comm == "wechat" || cmdline.windows(b"com.tencent.wechat/files/wechat".len()).any(|w| {
             w == b"com.tencent.wechat/files/wechat"
         }) || cmdline.windows(b"WeChatAppEx".len()).any(|w| w == b"WeChatAppEx")
         {
@@ -1001,20 +1027,28 @@ fn scan_mem_range(mem: &File, start: u64, end: u64, seen: &mut Vec<String>) {
 }
 
 fn collect_keys(data: &[u8], seen: &mut Vec<String>) {
-    if data.len() < 99 {
-        return;
-    }
-
-    for idx in 0..=data.len() - 99 {
-        if data[idx] != b'x' || data[idx + 1] != b'\'' || data[idx + 98] != b'\'' {
-            continue;
-        }
-        let key = &data[idx + 2..idx + 98];
-        if key.iter().all(|byte| byte.is_ascii_hexdigit()) {
-            let key = String::from_utf8_lossy(key).to_ascii_lowercase();
-            if !seen.contains(&key) {
-                seen.push(key);
+    let mut i = 0;
+    while i + 3 < data.len() {
+        if data[i] == b'x' && data[i + 1] == b'\'' {
+            let start = i + 2;
+            let mut j = start;
+            while j < data.len() && (data[j] as char).is_ascii_hexdigit() {
+                j += 1;
             }
+            if j < data.len() && data[j] == b'\'' {
+                let len = j - start;
+                if len == 64 || len == 96 {
+                    let key = String::from_utf8_lossy(&data[start..j]).to_ascii_lowercase();
+                    if !seen.contains(&key) {
+                        seen.push(key);
+                    }
+                }
+                i = j;
+            } else {
+                i += 1;
+            }
+        } else {
+            i += 1;
         }
     }
 }

@@ -6,7 +6,7 @@
 { inputs, pkgs, ... }:
 
 let
-  antigravity = inputs.antigravity-nix.packages.${pkgs.system}.default;
+  antigravity = inputs.antigravity-nix.packages.${pkgs.system}.google-antigravity-no-fhs;
 in
 {
   home.packages = [

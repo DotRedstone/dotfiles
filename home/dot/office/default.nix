@@ -5,6 +5,6 @@
 
 { pkgs, ... }: {
   home.packages = with pkgs; [
-    onlyoffice-bin
+    onlyoffice-desktopeditors
   ];
 }

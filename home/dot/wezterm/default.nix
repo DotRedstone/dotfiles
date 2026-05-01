@@ -10,4 +10,6 @@
   # Symlinking for live-reloading without home-manager activation
   xdg.configFile."wezterm/wezterm.lua".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/home/dot/wezterm/config.lua";
+  xdg.configFile."wezterm/modules".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/home/dot/wezterm/modules";
 }

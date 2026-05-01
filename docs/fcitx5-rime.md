@@ -6,7 +6,7 @@
 
 | 模块 | 职责 |
 | :--- | :--- |
-| `env.nix` | 定义 IM 相关的环境变量 (GTK, QT, XMODIFIERS) |
+| `env.nix` | 定义 IM 环境变量（在 Wayland 下不设置 GTK_IM_MODULE 以使用原生前端） |
 | `config/behavior.nix` | Fcitx5 基础行为设置 (CapsLock 处理, 输入状态共享) |
 | `config/hotkeys.nix` | Fcitx5 触发键与切换键定义 |
 | `rime/schema.nix` | Rime 方案选择与分页设置 |

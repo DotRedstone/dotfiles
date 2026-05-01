@@ -50,6 +50,7 @@
     # --- Game ---
     ./prism-launcher
     ./mangohud
+    ./steam
   ];
 
   # [Identity]

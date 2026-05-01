@@ -2,25 +2,28 @@
 
 本仓库采用了高度模块化的 Nix 结构，遵循“单一职责”原则，确保系统与用户配置既能统一管理又能独立验证。
 
-## 目录结构与职责
+## 核心结构
 
-- **`flake.nix`**: 整个仓库的入口，定义了输入 (inputs) 和输出 (outputs)，包括 NixOS 实例和 Home Manager 实例。
-- **`hosts/warden/`**: 特定主机的硬件配置文件。
-  - 包含硬件扫描 (`hardware-configuration.nix`)、挂载点 (`mounts.nix`) 以及主机名、内核参数等身份定义。
-- **`modules/system/`**: NixOS 系统级模块。
-  - 负责引导 (boot)、用户账户 (users)、字体 (fonts)、网络 (network) 以及全局持久化策略 (persistence)。
-- **`home/dot/`**: Home Manager 用户级模块。
-  - 负责具体应用的配置、桌面环境设置以及用户环境变量。
-  - 核心子模块包括：
-    - `fcitx5/`: 输入法环境与主题。
-    - `noctalia/`: 桌面 Shell 与视觉同步逻辑。
-    - `wechat/`: 微信客户端及其通知桥接。
-    - `niri/`: 窗口管理器设置。
+| 目录/文件 | 职责 | 作用域 |
+| :--- | :--- | :--- |
+| `flake.nix` | 整个仓库的入口，定义 inputs 和 outputs | Flake |
+| `hosts/warden/` | 主机特定配置（硬件、挂载点、内核参数） | Host |
+| `modules/system/` | NixOS 系统级功能模块 | System |
+| `home/dot/` | Home Manager 用户环境与应用配置 | Home Manager |
+| `scripts/` | 手动诊断脚本与维护助手 | Script |
 
-## 配置验证规则
+## 模块边界与原则
 
-- **Home Manager 改动**: 运行 `home-manager build --flake .#dot@warden` 验证。
-- **System 改动**: 运行 `sudo nixos-rebuild dry-run --flake .#warden` 验证。
-- **模块边界**:
-  - 禁止将特定应用的 workaround 写进全局系统配置。
-  - 保持模块独立性，减少跨目录的隐式依赖。
+- **Host vs System**: `hosts/` 目录仅存放与物理硬件强相关的配置。通用的系统逻辑（如 Docker, I18N）应封装在 `modules/system/` 中。
+- **System vs Home**: 系统级配置（如引导、文件系统、全局服务）位于 `modules/system/`；用户级配置（如桌面环境、编辑器、个人应用）位于 `home/dot/`。
+- **禁止全局污染**: 禁止将特定应用的 workaround（如特定环境变量或补丁）写进全局系统配置。应将其保留在应用所在的 Home Manager 模块中。
+
+## 验证流程
+
+- **Home Manager 改动**: 运行 `home-manager build --flake .#dot@warden`。
+- **NixOS 系统改动**: 运行 `sudo nixos-rebuild dry-run --flake .#warden`。
+- **全局验证**: 运行 `nix flake check .`。
+
+相关链接：
+- [日常维护](./maintenance.md)
+- [持久化存储](./impermanence.md)

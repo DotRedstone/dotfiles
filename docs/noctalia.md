@@ -1,23 +1,36 @@
-# Noctalia 视觉系统 (Visual System)
+# Noctalia 视觉系统
 
-Noctalia 是本系统的核心视觉系统与桌面外壳 (Shell)，基于 Material Design 3 规范构建。
+Noctalia 是系统的核心外壳 (Shell) 与视觉样式管理中心，基于 Material Design 3 (MD3) 规范构建。
 
-## 核心功能
+## 动态配色同步 (User Templates)
 
-- **动态调色盘**: 随壁纸自动生成配色方案。
-- **User Templates**: Noctalia 的模板系统允许将动态配色同步到非原生应用中。
-  - **Starship**: 终端提示符配色。
-  - **Zellij**: 终端复用器主题。
-  - **NixVim**: 编辑器色彩体系。
-  - **Fcitx5**: 输入法皮肤配色。
-- **Noctalia Shell**: 提供 Launcher, Notifications, Control Center 等核心 UI 组件。
+本系统利用 Noctalia 的 `User Templates` 功能实现全局配色方案的实时同步。
 
-## 配色原则
+### 工作机制
+- **`input_path`**: 存放于 `.dotfiles` 仓库中的 `.template` 文件。
+- **`output_path`**: 渲染后的配置文件路径（通常位于 `~/.cache` 或应用配置目录）。
+- **`post_hook`**: 渲染完成后执行的命令（如 `fcitx5 -r -d`）。
 
-- **MD3 Semantic Tokens**: 配置文件应优先使用语义化色彩 Token（如 `primary`, `surface`, `on_surface`）而非具体的十六进制色值。
-- **同步逻辑**: 模板文件存放在仓库中，Noctalia 运行时会渲染结果。
+### 受控应用列表
+| 应用 | 模板路径 | 输出路径 |
+| :--- | :--- | :--- |
+| **Starship** | `home/dot/starship/starship.toml.template` | `~/.cache/starship.toml` |
+| **Zellij** | `home/dot/zellij/config.kdl.template` | `~/.cache/zellij.kdl` |
+| **NixVim** | `home/dot/nixvim/colors.lua.template` | `~/.cache/nvim_colors.lua` |
+| **Fcitx5** | `home/dot/fcitx5/templates/...` | `~/.local/share/fcitx5/themes/...` |
 
-## 维护禁令
+## MD3 设计规范
 
-- **不提交生成文件**: 严禁将 Noctalia 生成的 `.cache` 或渲染后的配置文件提交至 Git。
-- **读写权限**: 确保生成目录（如输入法皮肤目录）在 Home Manager 中保持可写，不要将其作为只读的 `symlinkJoin` 挂载。
+在修改模板或自定义样式时，应严格遵循 MD3 语义化 Token：
+- `surface` / `on_surface`: 基础背景与文字。
+- `primary` / `on_primary`: 核心强调色。
+- `surface_variant` / `outline`: 边框与次要装饰。
+
+## 维护原则
+
+- **禁填生成文件**: 严禁将渲染后的输出文件提交至 Git 仓库，保持仓库的“干净”。
+- **读写权限**: 确保 `output_path` 所在的目录在 Home Manager 中保持可写，不要将其误设为只读的 `symlinkJoin`。
+
+相关链接：
+- [Niri 桌面配置](./desktop-niri.md)
+- [输入法配置](./fcitx5-rime.md)

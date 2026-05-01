@@ -1,23 +1,35 @@
 # 持久化存储 (Impermanence)
 
-本系统采用 Btrfs 子卷配合 [Impermanence](https://github.com/nix-community/impermanence) 实现了无状态根目录 (Stateless Root) 设计。
+本系统采用 Btrfs 子卷配合 [Impermanence](https://github.com/nix-community/impermanence) 实现了“无状态根目录 (Stateless Root)”设计。
 
-## Btrfs 结构
+## Btrfs 子卷布局
 
-- **`/` (@)**: 根目录。每次启动时，系统会将该子卷回滚至干净快照或清空，强制保持无状态。
-- **`/persist` (@persist)**: 持久化层。所有需要跨重启保存的数据都必须链接到此分区。
-- **`/home` (@home)**: 用户家目录。
-- **`/var/log` (@log)**: 日志存储。独立挂载，**不要**在 Impermanence 配置中重复定义持久化以避免冲突。
+| 子卷路径 | 挂载点 | 职责 |
+| :--- | :--- | :--- |
+| `@` | `/` | 根目录。每次启动时回滚至干净状态。 |
+| `@home` | `/home` | 用户家目录。 |
+| `@nix` | `/nix` | Nix Store。 |
+| `@persist` | `/persist` | **持久化层**。存放必须保留的数据。 |
+| `@log` | `/var/log` | 日志存储。作为独立子卷，**禁止**在 Impermanence 中再次持久化。 |
+| `@swap` | `/swap` | 交换文件目录。 |
 
-## 安全与禁令
+## 持久化原则
 
-- **`/persist` 状态**: 必须保持可写 (`writable`)。
-- **身份文件禁止持久化**:
-  - 禁止持久化 `/etc/shadow`, `/etc/passwd`, `/etc/group`, `/etc/gshadow`。
-  - 密码哈希应存储在 `/persist/secrets/*.passwd` 并在 `users.nix` 中引用。
+- **`/persist` 必须可写**: 所有的持久化路径都会链接至此，确保其分区未被挂载为只读。
+- **系统身份敏感信息禁令**:
+  - **严禁**持久化 `/etc/shadow`, `/etc/passwd`, `/etc/group`, `/etc/gshadow`。
+  - 密码哈希统一存放在 `/persist/secrets/*.passwd` 并在 `users.nix` 中引用。
+- ** neededForBoot**: 关键挂载点（如 `/persist`）在 `mounts.nix` 中必须标记为 `neededForBoot = true`。
 
-## 维护注意事项
+## 维护与风险
 
-- **快照恢复**: 恢复快照后，务必检查 `/persist` 分区的挂载状态与权限。
-- **变更验证**: 修改 `persistence.nix` 前，先执行 `dry-run` 检查是否会导致系统无法引导。
-- **挂载点检查**: 确保关键持久化路径（如 SSH key, GPG, 浏览器配置）在 `/persist` 下确实存在且权限正确。
+> [!CAUTION]
+> 修改 `persistence.nix` 之前务必执行 `nixos-rebuild dry-run`。
+> 错误的持久化配置可能导致系统在引导阶段因为挂载失败而进入应急模式 (Emergency Mode)。
+
+- **恢复快照**: 在回滚 `@persist` 子卷前，请确保已备份最新的密钥。
+- **挂载点检查**: 修改持久化目录后，检查 `ls -la` 确认软链接指向正确。
+
+相关链接：
+- [架构概览](./architecture.md)
+- [密钥管理](./secrets-sops.md)

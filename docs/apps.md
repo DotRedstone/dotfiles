@@ -1,27 +1,42 @@
 # 应用列表 (Applications)
 
-本页简述了系统中已配置的应用及其特殊说明。
+本页记录了系统中常用应用的配置来源及其特定的使用建议。
 
-## 通讯与协作
+## 通讯应用
 
-- **QQ**: 使用 `pkgs.qq`，已配置 `gnome-libsecret` 作为密码存储后端。支持原生桌面通知。
-- **微信 (WeChat)**: 详见 [WeChat 专项说明](./wechat.md)。
-- **Telegram**: 官方客户端，保持默认更新。
+- **QQ**: 
+  - 包装版本: `pkgs.qq`
+  - 参数: 强制启用 `--password-store=gnome-libsecret` 以支持密码记忆。
+- **微信 (WeChat)**: 
+  - 详情参见 [WeChat 专项说明](./wechat.md)。
+- **Telegram**: 
+  - 包含 `AyuGramDesktop` 等变体，支持消息撤回可见等特性。
 
-## 开发工具
+## 生产力与开发
 
-- **Antigravity**: 高性能 AI 协作助手。采用 `no-fhs` 变体以解决在某些环境下的启动卡顿问题，禁止随意改回 FHS。
-- **VSCode**: 辅助编辑器，通过 Home Manager 管理。
+- **Antigravity**: 
+  - **核心限制**: 使用 `no-fhs` 变体以避免在无状态根目录下由于 FHS 环境导致的加载卡顿。
+  - 参数: 已通过 Wrapper 注入 `--password-store=gnome-libsecret`。
+- **VSCode**: 全功能编辑器，作为 NixVim 的辅助。
+- **Firefox**: 
+  - **持久化**: 个人资料 (Profile) 位于 `.mozilla` 目录。
+- **Chrome**: 
+  - 已通过 `modules/system/chrome.nix` 注入企业级管理策略（如禁用部分隐私追踪）。
 
-## 媒体与阅读
+## 工具与媒体
 
-- **Firefox**: 主力浏览器，包含管理策略。
-- **Chrome**: 辅助浏览器。
-- **网易云音乐 (Netease)**: 使用非官方客户端，已优化 HiDPI 显示。
-- **Zathura**: 极简 PDF 阅读器。
+- **Yazi**: 
+  - 命令行文件管理器。在 Shell 中通过别名 `y` 启动，支持退出时自动切换目录。
+- **Zathura**: 基于键盘驱动的 PDF 阅读器。
+- **Prism Launcher**: Minecraft 启动器，持久化路径已配置。
+- **MangoHud**: 游戏性能监测层，常用于 Steam 应用。
 
-## 系统工具
+## 系统实用工具
 
-- **Prism Launcher**: Minecraft 启动器。
-- **MangoHud**: 游戏性能监测层。
-- **Nautilus**: 系统默认文件管理器。
+- **Nautilus**: 默认 GUI 文件管理器。
+- **Clipper**: 集成在 Noctalia Shell 中的剪贴板管理器，可通过 `Mod+B` 调出。
+
+相关链接：
+- [微信集成](./wechat.md)
+- [终端 (WezTerm)](./terminal-wezterm.md)
+- [编辑器 (NixVim)](./editor-nixvim.md)

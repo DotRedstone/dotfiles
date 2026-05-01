@@ -3,7 +3,7 @@
 # Description: Classic UI configuration with Mellow & Inflex Themes
 # ---
 
-{ pkgs, ... }: 
+{ lib, ... }:
 # let
 #   # 1. Fetch Mellow themes
 #   mellowThemes = pkgs.fetchFromGitHub {
@@ -12,7 +12,7 @@
 #     rev = "a66028fe22daa81df20e7aac1575918347b60a40";
 #     sha256 = "0zg2c42lqbng8kb36w5basjj52jmk9ra050kzh011czp25k8k59m";
 #   };
-# 
+#
 #   # 2. Fetch Inflex themes
 #   inflexThemes = pkgs.fetchFromGitHub {
 #     owner = "sanweiya";
@@ -21,32 +21,61 @@
 #     sha256 = "12rngpcv3ly2d38vcvi9gja5rdfgy2rjhndf0g3y8jp7pn49dh43";
 #   };
 # in
+let
+  staticThemes = lib.listToAttrs (
+    map
+      (theme: {
+        name = ".local/share/fcitx5/themes/${theme.name}";
+        value = {
+          source = theme.source;
+          recursive = true;
+        };
+      })
+      [
+        {
+          name = "OriDark";
+          source = ./ori-theme/OriDark;
+        }
+        {
+          name = "OriLight";
+          source = ./ori-theme/OriLight;
+        }
+        {
+          name = "noctalia-mellow";
+          source = ./custom-themes/noctalia-mellow;
+        }
+        {
+          name = "noctalia-mellow-dark";
+          source = ./custom-themes/noctalia-mellow-dark;
+        }
+        {
+          name = "noctalia-inflex";
+          source = ./custom-themes/noctalia-inflex;
+        }
+        {
+          name = "noctalia-inflex-dark";
+          source = ./custom-themes/noctalia-inflex-dark;
+        }
+      ]
+  );
+in
 {
-  # [UI Settings]
-  home.file.".config/fcitx5/conf/classicui.conf" = {
-    force = true;
-    text = ''
-      Vertical Candidate List=False
-      Theme=noctalia-mellow-dark
-      Font="Maple Mono NF 13"
-      MenuFont="Maple Mono NF 13"
-      TrayFont="Maple Mono NF 10"
-    '';
-  };
-
-  # [Theme Assets]
-  # Merge local custom themes into a single directory using symlinkJoin
-  home.file.".local/share/fcitx5/themes" = {
-    source = pkgs.symlinkJoin {
-      name = "fcitx5-themes-all";
-      paths = [ 
-        # mellowThemes 
-        # inflexThemes 
-        ./ori-theme 
-        ./custom-themes
-      ];
+  home.file = {
+    # [UI Settings]
+    ".config/fcitx5/conf/classicui.conf" = {
+      force = true;
+      text = ''
+        Vertical Candidate List=False
+        Theme=noctalia-mellow-dark-sync
+        Font="Maple Mono NF 13"
+        MenuFont="Maple Mono NF 13"
+        TrayFont="Maple Mono NF 10"
+      '';
     };
-    recursive = true;
-    force = true;
-  };
+
+    # Keep the generated theme directory as a normal writable directory for
+    # Noctalia user templates.
+    ".local/share/fcitx5/themes/noctalia-mellow-dark-sync/.hm-keep".text = "";
+  }
+  // staticThemes;
 }

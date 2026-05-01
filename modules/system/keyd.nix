@@ -1,6 +1,7 @@
 # ---
 # Module: Keyd
-# Description: Kernel-level key remapping for Super key consistency
+# Description: Kernel-level key remapping for Super key consistency across apps
+# Scope: System
 # ---
 
 { ... }: {

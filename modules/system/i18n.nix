@@ -1,6 +1,7 @@
 # ---
-# Module: i18n
-# Description: System locale and Fcitx5 input method configuration (Shim)
+# Module: i18n Switchboard
+# Description: Import switchboard for system-level localization and input methods
+# Scope: System
 # ---
 
 { ... }: {

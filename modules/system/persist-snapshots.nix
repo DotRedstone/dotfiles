@@ -1,6 +1,9 @@
 # ---
 # Module: Persist Snapshots
 # Description: Daily Btrfs snapshots of @persist subvolume for data protection
+# Scope: System
+# Notes:
+# - Snapshots are stored in /persist_snapshots
 # ---
 
 { pkgs, ... }: {

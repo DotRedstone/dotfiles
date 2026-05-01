@@ -1,6 +1,7 @@
 # ---
 # Module: Noctalia Entry
-# Description: Desktop shell components and UI logic
+# Description: Import switchboard for Noctalia-shell and its configuration
+# Scope: Home Manager
 # ---
 
 {

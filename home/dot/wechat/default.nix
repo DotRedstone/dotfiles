@@ -1,6 +1,10 @@
 # ---
-# Module: WeChat
-# Description: Official WeChat for Linux client plus Noctalia notification bridge
+# Module: WeChat Entry
+# Description: Official WeChat for Linux client with Noctalia notification bridge support
+# Scope: Home Manager
+# Notes:
+# - Relies on a custom notifyBridge to extract messages from the WeChat SQLite database
+# - Noctalia handles the actual display of the bridge's output
 # ---
 
 { pkgs, ... }:

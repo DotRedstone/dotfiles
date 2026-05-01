@@ -1,6 +1,9 @@
 # ---
 # Module: User Management
-# Description: User definition for 'dot' and system shell
+# Description: User definition for 'dot' and system shell configuration
+# Scope: System
+# Notes:
+# - mutableUsers is disabled; password hashes must be managed in /persist/secrets
 # ---
 
 { pkgs, ... }: {

@@ -1,6 +1,7 @@
 # ---
 # Module: i18n Entry
-# Description: Unified entry point for system locale and input method configurations
+# Description: Import switchboard for system localization and input methods
+# Scope: System
 # ---
 
 { ... }: {

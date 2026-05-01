@@ -1,6 +1,7 @@
 # ---
 # Module: Typography
 # Description: System-wide fonts and fontconfig settings
+# Scope: System
 # ---
 
 { pkgs, ... }: {

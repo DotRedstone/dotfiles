@@ -1,6 +1,7 @@
 # ---
-# Module: Fcitx5 Entry
+# Module: Fcitx5 Switchboard
 # Description: Unified entry point for Fcitx5 environment, config, Rime, and themes
+# Scope: Home Manager
 # ---
 
 { ... }: {

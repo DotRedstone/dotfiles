@@ -1,6 +1,7 @@
 # ---
 # Module: Hardware Services
-# Description: Power management, Audio (PipeWire), and Bluetooth
+# Description: Power management, Audio (PipeWire), and Bluetooth configuration
+# Scope: System
 # ---
 
 { pkgs, ... }: {

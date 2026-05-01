@@ -1,6 +1,7 @@
 # ---
-# Module: Niri Window Manager
-# Description: Scrollable-tiling Wayland compositor and environment
+# Module: Niri Entry
+# Description: Import switchboard for Niri compositor and its utilities
+# Scope: Home Manager
 # ---
 
 { ... }: {

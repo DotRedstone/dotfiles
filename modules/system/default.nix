@@ -1,6 +1,7 @@
 # ---
 # Module: System Switchboard
-# Description: Unified entry point for all system modules
+# Description: Unified entry point for all system-level modules
+# Scope: System
 # ---
 
 { ... }: {

@@ -10,6 +10,7 @@
 | `hosts/warden/` | 主机特定配置（硬件、挂载点、内核参数） | Host |
 | `modules/system/` | NixOS 系统级功能模块 | System |
 | `modules/system/desktop/` | 原子化的桌面环境组件 (Niri, SDDM, Graphics, etc.) | System |
+| `modules/system/users/` | 原子化的用户账户、Shell 及核心工具链配置 | System |
 | `home/dot/` | Home Manager 用户环境与应用配置 | Home Manager |
 | `scripts/` | 手动诊断脚本与维护助手 | Script |
 

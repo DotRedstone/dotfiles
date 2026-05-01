@@ -1,6 +1,7 @@
 # ---
 # Module: NixVim - UI Plugins
 # Description: Visual interface enhancements (Lualine, Bufferline, Noice, etc.)
+# Scope: Home Manager
 # ---
 
 { ... }: {

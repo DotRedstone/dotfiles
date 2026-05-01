@@ -1,6 +1,7 @@
 # ---
 # Module: System Input Method
 # Description: Configuration for Fcitx5 and Rime engine at the system level
+# Scope: System
 # ---
 
 { pkgs, ... }: {

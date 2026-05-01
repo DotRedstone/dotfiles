@@ -1,6 +1,7 @@
 # ---
 # Module: Chrome - Vertical Tabs
 # Description: Activation script to patch Chrome profile for vertical tabs
+# Scope: Home Manager
 # ---
 
 { config, lib, pkgs, ... }: {

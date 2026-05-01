@@ -1,6 +1,7 @@
 # ---
 # Module: NixVim Plugins Switchboard
 # Description: Imports all atomized plugin groups
+# Scope: Home Manager
 # ---
 
 { ... }: {

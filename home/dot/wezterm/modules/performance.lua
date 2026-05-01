@@ -1,3 +1,9 @@
+-- ---
+-- Module: WezTerm - Performance
+-- Description: WebGPU backend and Wayland enablement
+-- Scope: Home Manager
+-- ---
+
 local M = {}
 
 function M.apply(config, _)

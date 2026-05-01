@@ -1,6 +1,6 @@
 # ---
-# Module: Home Entry
-# Description: Main Home Manager configuration for user 'dot'
+# Module: Home Switchboard
+# Description: Unified entry point for all Home Manager modules for user 'dot'
 # Scope: Home Manager
 # ---
 

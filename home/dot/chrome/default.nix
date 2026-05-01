@@ -1,5 +1,5 @@
 # ---
-# Module: Google Chrome Switchboard
+# Module: Chrome Switchboard
 # Description: Unified entry point for Chrome package, flags, and UI tweaks
 # Scope: Home Manager
 # ---

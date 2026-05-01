@@ -1,6 +1,7 @@
 # ---
 # Module: NixVim - Treesitter
 # Description: Incremental parsing and syntax highlighting with Treesitter
+# Scope: Home Manager
 # ---
 
 { ... }: {

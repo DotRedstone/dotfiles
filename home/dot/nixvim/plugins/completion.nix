@@ -1,6 +1,7 @@
 # ---
 # Module: NixVim - Completion Plugins
 # Description: Blink-cmp completion engine with Copilot and snippet support
+# Scope: Home Manager
 # ---
 
 { ... }: {

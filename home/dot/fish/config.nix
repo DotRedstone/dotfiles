@@ -1,6 +1,7 @@
 # ---
 # Module: Fish Shell Configuration
 # Description: Interactive shell settings, abbreviations, and plugins
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

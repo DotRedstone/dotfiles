@@ -1,6 +1,7 @@
 # ---
 # Module: NixVim - Navigation Plugins
 # Description: Navigation and key discovery tools (Flash, Which-key)
+# Scope: Home Manager
 # ---
 
 { ... }: {

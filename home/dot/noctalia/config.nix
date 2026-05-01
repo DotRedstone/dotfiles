@@ -1,6 +1,7 @@
 # ---
 # Module: Noctalia Program
 # Description: Noctalia-shell configuration and package overrides
+# Scope: Home Manager
 # ---
 
 { pkgs, inputs, ... }: {

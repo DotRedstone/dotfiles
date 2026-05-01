@@ -1,6 +1,7 @@
 # ---
 # Module: NixVim - LSP Plugins
 # Description: Language Server Protocol configuration and related tools
+# Scope: Home Manager
 # ---
 
 { ... }: {

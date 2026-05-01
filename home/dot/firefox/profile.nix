@@ -1,6 +1,7 @@
 # ---
 # Module: Firefox - Profile
 # Description: Main Firefox profile definition and global settings
+# Scope: Home Manager
 # ---
 
 { config, ... }: {

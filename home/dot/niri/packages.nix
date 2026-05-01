@@ -1,6 +1,7 @@
 # ---
 # Module: Niri Packages
 # Description: Core utilities for screenshot, clipboard, and desktop shell
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

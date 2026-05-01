@@ -1,6 +1,7 @@
 # ---
 # Module: System KMSCON
 # Description: Hardware-accelerated Linux console replacement with multi-font support
+# Scope: System
 # ---
 
 { pkgs, ... }: {

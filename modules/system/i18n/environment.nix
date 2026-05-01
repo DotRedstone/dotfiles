@@ -1,6 +1,7 @@
 # ---
 # Module: System i18n Environment
 # Description: System-wide locale environment variables for shells and sessions
+# Scope: System
 # ---
 
 { ... }: {

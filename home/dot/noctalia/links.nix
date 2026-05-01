@@ -1,6 +1,7 @@
 # ---
 # Module: Noctalia Links
 # Description: Symlink entire config directory to dotfiles for Git portability
+# Scope: Home Manager
 # ---
 
 { config, ... }: {

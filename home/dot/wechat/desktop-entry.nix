@@ -1,6 +1,7 @@
 # ---
 # Module: WeChat Desktop Entry
 # Description: XDG desktop entry for WeChat UOS
+# Scope: Home Manager
 # ---
 
 { ... }: {

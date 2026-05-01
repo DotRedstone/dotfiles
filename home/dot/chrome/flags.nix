@@ -1,6 +1,7 @@
 # ---
 # Module: Chrome - Flags
 # Description: Command line arguments for Wayland, IME, and experimental features
+# Scope: Home Manager
 # ---
 
 { ... }: {

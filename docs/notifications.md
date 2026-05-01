@@ -1,29 +1,39 @@
 # 系统通知 (Notifications)
 
-本系统的通知链路基于 Freedesktop 标准，由 Noctalia 提供 UI 显示。
+本系统的桌面通知遵循标准的 Freedesktop `Notify` 协议，由 Noctalia 提供 UI 显示。
 
-## 链路示意
-`App -> org.freedesktop.Notifications.Notify -> Noctalia UI`
+## 链路流程
 
-## 应用支持情况
+`应用程序 -> D-Bus (org.freedesktop.Notifications) -> Noctalia UI`
 
-- **QQ**: Linux QQ 已经过确认，原生支持发送 `Notify` 信号。因此**不需要**为 QQ 构建数据库桥接。
-- **WeChat**: 由于原生通知不可靠，本系统使用自定义的 `wechat-notify-bridge`。
+## 诊断与测试
 
-## 诊断与故障排查
-
-### 测试通知
+### 1. 手动验证
+运行以下命令验证通知 UI 是否正常工作：
 ```bash
-notify-send "Test" "Hello"
+notify-send "测试通知" "Hello, this is a test notification."
 ```
 
-### 监控总线
+### 2. 总线监控 (D-Bus)
+通过监控总线流量来判断应用是否确实发送了通知：
 ```bash
 dbus-monitor --session "type='method_call',interface='org.freedesktop.Notifications',member='Notify'"
 ```
 
-### 排查流程
-1. 检查 `noctalia-shell` 进程是否存活。
-2. 确认应用是否在正确的显示器/工作区发出通知。
-3. 检查 `mako` 或其他通知守护进程是否冲突导致抢占。
- stone
+## 应用适配情况
+
+- **Linux QQ**: 已经原生支持 `Notify` 协议。无需额外桥接，通知直接由 Noctalia 捕获。
+- **WeChat**: 官方通知机制不可靠。通过 `wechat-notify-bridge` 将数据库消息转换为系统通知信号。
+
+## 故障排查
+
+1. **通知不显示**:
+   - 检查 `noctalia-shell` 进程是否存活。
+   - 确认没有其他通知守护进程（如 `mako`, `dunst`）正在运行并抢占 D-Bus 接口。
+2. **WeChat 通知失效**:
+   - 检查 `systemctl --user status wechat-notify-bridge`。
+   - 检查微信数据库文件是否因持久化配置错误而变得不可读。
+
+相关链接：
+- [微信集成](./wechat.md)
+- [Noctalia 视觉系统](./noctalia.md)

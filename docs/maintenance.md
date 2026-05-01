@@ -1,38 +1,42 @@
 # 日常维护 (Maintenance)
 
-## 常用命令
+## 常用操作指令
 
-### 部署更新
-- **Home Manager (hms)**: `home-manager switch --flake .#dot@warden`
-- **NixOS Rebuild (nrs)**: `sudo nixos-rebuild switch --flake .#warden`
+| 任务 | 命令 | 别名 |
+| :--- | :--- | :--- |
+| **部署用户配置** | `home-manager switch --flake .#dot@warden` | `hms` |
+| **部署系统配置** | `sudo nixos-rebuild switch --flake .#warden` | `nrs` |
+| **验证用户配置** | `home-manager build --flake .#dot@warden` | - |
+| **验证系统配置** | `sudo nixos-rebuild dry-run --flake .#warden` | - |
+| **语法检查** | `nix flake check .` | - |
+| **重载输入法** | `fcitx5 -r -d` | - |
+| **重置桌面 Shell** | `systemctl --user restart noctalia.service` | - |
 
-### 检查与验证
-- **模拟构建**: `home-manager build` 或 `nixos-rebuild dry-run`。
-- **全局语法检查**: `nix flake check .`。
+## 何时需要 Reboot？
 
-## 重启与重载 (Reload)
-
-### 什么时候需要 Reboot？
-- 更新内核 (kernel)。
-- 更新引导加载程序配置 (bootloader)。
-- 更新涉及基础驱动 (如 GPU) 或文件系统挂载的改动。
-
-### 软件重载
-- **Fcitx5**: 若配置未生效，可运行 `fcitx5 -r -d` 重新加载。
-- **Noctalia**: 修改 user templates 后，通常通过 `noctalia-shell` 触发同步，或重启对应的 Home Manager 服务。
+通常情况下，NixOS 的 `switch` 操作可以实时生效，但在以下场景中需要重启系统：
+1. 更新了 **内核 (Kernel)**。
+2. 修改了 **引导加载程序 (Bootloader)** 配置。
+3. 更新了涉及 **GPU 驱动** 或核心 **系统库 (glibc)** 的改动。
+4. 修改了磁盘挂载点或 Btrfs 子卷结构。
 
 ## Git 提交规范
 
-本仓库采用 Conventional Commits 规范，并要求**使用中文描述**。
+本仓库遵循 Conventional Commits 规范，且描述信息必须使用 **中文**。
 
-### 格式
-`<type>(<scope>): <中文描述>`
+- **格式**: `<type>(<scope>): <中文说明>`
+- **常见类型**:
+  - `feat`: 新功能
+  - `fix`: 修复 Bug
+  - `docs`: 文档更新
+  - `refactor`: 重构代码
+- **示例**: `fix(fcitx5): 修复 Rime 快捷键冲突`
 
-### 示例
-- `fix(fcitx5): 修复 Rime 快捷键冲突`
-- `feat(niri): 添加新的窗口规则`
-- `docs(repo): 更新维护指南`
+## 回滚与风险提示
 
-## 回滚与风险
-- NixOS 会在引导菜单保留旧版本，若更新导致无法进入桌面，请在启动时选择上一个版本。
-- 修改 `persistence.nix` 前务必执行 `dry-run`，并确保 `/persist` 分区已正确挂载。
+- **引导回滚**: 若系统更新后无法启动，请在引导菜单（systemd-boot）中选择旧的 Generatios。
+- **Impermanence 风险**: 在修改 `persistence.nix` 之前，务必通过 `dry-run` 确认挂载点逻辑正确。若错误配置了持久化路径，可能会导致 `/persist` 目录权限混乱。
+
+相关链接：
+- [持久化存储](./impermanence.md)
+- [架构概览](./architecture.md)

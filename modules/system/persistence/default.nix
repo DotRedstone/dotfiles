@@ -9,6 +9,7 @@
     ./base.nix
     ./system-paths.nix
     ./user-core.nix
+    ./user-secrets.nix
     ./user-apps.nix
     ./user-dev.nix
     ./user-virtualization.nix

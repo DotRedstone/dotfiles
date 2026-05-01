@@ -14,7 +14,7 @@
     ./fish
     ./starship
     ./zellij
-    ./wezterm
+    # ./wezterm
     # ./kitty (Optional/Disabled)
     
     # --- Desktop & System UI ---
@@ -31,9 +31,9 @@
     ./secrets
 
     # --- Daily Applications ---
-    ./firefox
+    # ./firefox
     ./chrome
-    ./wechat
+    # ./wechat
     ./telegram
     ./qq
     ./netease-music
@@ -42,7 +42,7 @@
     ./multimedia
 
     # --- Development ---
-    ./nixvim
+    # ./nixvim
     ./vscode
     ./dev
     ./antigravity

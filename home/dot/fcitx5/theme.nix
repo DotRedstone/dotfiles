@@ -60,22 +60,44 @@ let
   );
 in
 {
-  home.file = {
-    # [UI Settings]
-    ".config/fcitx5/conf/classicui.conf" = {
-      force = true;
-      text = ''
-        Vertical Candidate List=False
-        Theme=noctalia-mellow-dark-sync
-        Font="Maple Mono NF 13"
-        MenuFont="Maple Mono NF 13"
-        TrayFont="Maple Mono NF 10"
-      '';
-    };
+  home.activation.fcitx5ClassicUiConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    conf="$HOME/.config/fcitx5/conf/classicui.conf"
+    mkdir -p "$(dirname "$conf")"
 
-    # Keep the generated theme directory as a normal writable directory for
+    # Convert symlink to real file to allow Fcitx5 GUI to save changes
+    if [ -L "$conf" ]; then
+      tmp="$(mktemp "$conf.XXXXXX")"
+      cat "$conf" > "$tmp" || true
+      rm -f "$conf"
+      mv "$tmp" "$conf"
+    fi
+
+    # Initialize file with defaults if it doesn't exist
+    if [ ! -f "$conf" ]; then
+      printf '%s\n' \
+        'Vertical Candidate List=False' \
+        'Theme=noctalia-inflex-dark-sync' \
+        'Font="Maple Mono NF 13"' \
+        'MenuFont="Maple Mono NF 13"' \
+        'TrayFont="Maple Mono NF 10"' \
+        > "$conf"
+    fi
+
+    # Ensure required keys exist without overwriting user-modified values
+    grep -q '^Vertical Candidate List=' "$conf" || printf '%s\n' 'Vertical Candidate List=False' >> "$conf"
+    grep -q '^Theme=' "$conf" || printf '%s\n' 'Theme=noctalia-inflex-dark-sync' >> "$conf"
+    grep -q '^Font=' "$conf" || printf '%s\n' 'Font="Maple Mono NF 13"' >> "$conf"
+    grep -q '^MenuFont=' "$conf" || printf '%s\n' 'MenuFont="Maple Mono NF 13"' >> "$conf"
+    grep -q '^TrayFont=' "$conf" || printf '%s\n' 'TrayFont="Maple Mono NF 10"' >> "$conf"
+  '';
+
+  home.file = {
+    # Keep generated theme directories as normal writable directories for
     # Noctalia user templates.
+    ".local/share/fcitx5/themes/noctalia-mellow-sync/.hm-keep".text = "";
     ".local/share/fcitx5/themes/noctalia-mellow-dark-sync/.hm-keep".text = "";
+    ".local/share/fcitx5/themes/noctalia-inflex-sync/.hm-keep".text = "";
+    ".local/share/fcitx5/themes/noctalia-inflex-dark-sync/.hm-keep".text = "";
   }
   // staticThemes;
 }

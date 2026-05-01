@@ -1,6 +1,7 @@
 # ---
 # Module: Virtualization
-# Description: Docker containers and KVM/QEMU virtualization
+# Description: Docker containers and KVM/QEMU virtualization services
+# Scope: System
 # ---
 
 { pkgs, ... }: {

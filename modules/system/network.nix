@@ -1,6 +1,7 @@
 # ---
 # Module: Networking
 # Description: NetworkManager, proxy client, and firewall rules
+# Scope: System
 # ---
 
 { pkgs, ... }: {

@@ -1,6 +1,9 @@
 # ---
 # Module: Boot & Kernel
 # Description: Unified bootloader, kernel parameters, and Btrfs rollback logic
+# Scope: System
+# Notes:
+# - Rollback script depends on /persist and / (Btrfs subvolumes)
 # ---
 
 { pkgs, ... }: {

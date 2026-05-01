@@ -1,6 +1,10 @@
 # ---
-# Module: Storage Mounts
+# Module: Warden Mounts
 # Description: Btrfs subvolume layout and mount options for Warden
+# Scope: Host
+# Notes:
+# - Subvolume names must match Btrfs partition structure
+# - neededForBoot is critical for Impermanence support
 # ---
 
 { lib, ... }:

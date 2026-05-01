@@ -1,6 +1,7 @@
 # ---
 # Module: Nix Settings
 # Description: Global Nix package manager and Flake configuration
+# Scope: System
 # ---
 
 { pkgs, ... }: {

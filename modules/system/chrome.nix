@@ -1,6 +1,7 @@
 # ---
 # Module: Chrome Policies
 # Description: Managed Google Chrome defaults matching the Firefox profile
+# Scope: System
 # ---
 
 { ... }:

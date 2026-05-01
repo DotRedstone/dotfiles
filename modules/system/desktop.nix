@@ -1,6 +1,7 @@
 # ---
 # Module: Desktop Environment
-# Description: Niri compositor, SDDM with KWin (Final Polish for Cursor)
+# Description: Niri compositor, SDDM with KWin backend, and system-wide UI polish
+# Scope: System
 # ---
 
 { pkgs, inputs, lib, ... }:

@@ -1,6 +1,7 @@
 # ---
 # Module: Home Entry
-# Description: Main Home Manager configuration for 'dot'
+# Description: Main Home Manager configuration for user 'dot'
+# Scope: Home Manager
 # ---
 
 { inputs, ... }: {

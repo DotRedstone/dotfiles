@@ -1,6 +1,7 @@
 # ---
 # Module: QQ
-# Description: Tencent QQ client
+# Description: Installs Tencent QQ with libsecret password-store support
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

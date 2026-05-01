@@ -1,6 +1,7 @@
 # ---
-# Module: Host Configuration
+# Module: Warden Host Entry
 # Description: Main host profile for Warden (Redmi Book Pro 16 2024)
+# Scope: Host
 # ---
 
 { ... }: {

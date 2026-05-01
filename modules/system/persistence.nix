@@ -1,6 +1,10 @@
 # ---
 # Module: Persistence
-# Description: Impermanence paths for system and user (dot)
+# Description: Impermanence paths for system and user data
+# Scope: System
+# Notes:
+# - Relies on /persist partition and @persist subvolume
+# - Critical for stateless root (root on tmpfs/rollback)
 # ---
 
 { inputs, ... }: {

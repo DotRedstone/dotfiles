@@ -1,6 +1,7 @@
 # ---
 # Module: Flake Entry
-# Description: Main entry point for Warden (System) and dot (Home)
+# Description: Main entry point for NixOS (warden) and Home Manager (dot) configurations
+# Scope: Flake
 # ---
 
 {

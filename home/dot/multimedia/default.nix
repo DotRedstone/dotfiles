@@ -1,6 +1,7 @@
 # ---
-# Category: Multimedia
+# Module: Multimedia Switchboard
 # Description: Audio/Video tools and visualizers
+# Scope: Home Manager
 # ---
 
 { ... }: {

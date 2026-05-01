@@ -5,7 +5,7 @@
 
 { ... }: {
   home.sessionVariables = {
-    GTK_IM_MODULE = "fcitx";
+    # Do not set GTK_IM_MODULE on Wayland; Fcitx5 recommends using the Wayland frontend for GTK apps.
     QT_IM_MODULE = "fcitx";
     XMODIFIERS = "@im=fcitx";
     SDL_IM_MODULE = "fcitx";

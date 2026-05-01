@@ -1,52 +1,13 @@
 # ---
-# Module: WeChat Entry
-# Description: Official WeChat for Linux client with Noctalia notification bridge support
+# Module: WeChat Switchboard
+# Description: Unified entry point for WeChat packages, entry, and bridge
 # Scope: Home Manager
-# Notes:
-# - Relies on a custom notifyBridge to extract messages from the WeChat SQLite database
-# - Noctalia handles the actual display of the bridge's output
 # ---
 
-{ pkgs, ... }:
-let
-  wechat = pkgs.callPackage ./package.nix { };
-in
-{
-  home.packages = [
-    wechat.wechat-uos
-    wechat.notifyBridge
-    pkgs.libnotify
+{ ... }: {
+  imports = [
+    ./packages.nix
+    ./desktop-entry.nix
+    ./notify-bridge.nix
   ];
-
-  xdg.desktopEntries."com.tencent.wechat" = {
-    name = "微信 UOS";
-    genericName = "WeChat UOS";
-    comment = "微信桌面版 UOS";
-    exec = "wechat-uos -- %U";
-    icon = "com.tencent.wechat";
-    terminal = false;
-    categories = [ "Chat" ];
-    startupNotify = true;
-    settings = {
-      StartupWMClass = "wechat";
-    };
-  };
-
-  systemd.user.services.wechat-notify-bridge = {
-    Unit = {
-      Description = "Bridge WeChat activity into desktop notifications";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
-    };
-
-    Service = {
-      ExecStart = "${wechat.notifyBridge}/bin/wechat-notify-bridge";
-      Restart = "on-failure";
-      RestartSec = 5;
-    };
-
-    Install = {
-      WantedBy = [ "graphical-session.target" ];
-    };
-  };
 }

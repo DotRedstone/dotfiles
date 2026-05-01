@@ -334,10 +334,10 @@
                     "colorizeSystemIcon": "none",
                     "colorizeSystemText": "none",
                     "customIconPath": "",
-                    "enableColorization": false,
+                    "enableColorization": true,
                     "icon": "noctalia",
                     "id": "ControlCenter",
-                    "useDistroLogo": false
+                    "useDistroLogo": true
                 }
             ]
         }
@@ -367,7 +367,7 @@
     },
     "colorSchemes": {
         "darkMode": true,
-        "generationMethod": "content",
+        "generationMethod": "tonal-spot",
         "manualSunrise": "08:00",
         "manualSunset": "19:00",
         "monitorForColors": "eDP-1",

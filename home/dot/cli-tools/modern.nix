@@ -3,7 +3,7 @@
 # Description: Next-generation terminal utilities and file managers
 # ---
 
-{ pkgs, ... }: {
+{ config, lib, pkgs, ... }: {
   # Standard Packages (Tools without complex config modules)
   home.packages = with pkgs; [
     fd          # Modern find
@@ -85,21 +85,16 @@
   # Lazygit: Git terminal UI
   programs.lazygit = {
     enable = true;
-    settings = {
-      gui.theme = {
-        activeBorderColor = [ "#b4befe" "bold" ];
-        inactiveBorderColor = [ "#6c7086" ];
-        optionsTextColor = [ "#89b4fa" ];
-        selectedLineBgColor = [ "#313244" ];
-        cherryPickedCommitBgColor = [ "#45475a" ];
-        cherryPickedCommitFgColor = [ "#b4befe" ];
-        unstagedChangesColor = [ "#f38ba8" ];
-        defaultFgColor = [ "#cdd6f4" ];
-        searchingActiveBorderColor = [ "#f9e2af" ];
-      };
-    };
   };
 
+  xdg.configFile."lazygit/config.yml".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.cache/lazygit.yml";
+  home.file."${config.xdg.configHome}/lazygit/config.yml" = {
+    enable = lib.mkForce true;
+    source = lib.mkForce (
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.cache/lazygit.yml"
+    );
+  };
 
   # [Fastfetch Config]
   xdg.configFile."fastfetch/config.jsonc".source = ./fastfetch.json;

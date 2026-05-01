@@ -113,16 +113,16 @@ binds {
     Mod+0 { focus-workspace 10; }
 
     // Workspace Movement
-    Mod+Alt+1 { move-column-to-workspace 1; }
-    Mod+Alt+2 { move-column-to-workspace 2; }
-    Mod+Alt+3 { move-column-to-workspace 3; }
-    Mod+Alt+4 { move-column-to-workspace 4; }
-    Mod+Alt+5 { move-column-to-workspace 5; }
-    Mod+Alt+6 { move-column-to-workspace 6; }
-    Mod+Alt+7 { move-column-to-workspace 7; }
-    Mod+Alt+8 { move-column-to-workspace 8; }
-    Mod+Alt+9 { move-column-to-workspace 9; }
-    Mod+Alt+0 { move-column-to-workspace 10; }
+    Mod+Alt+1 { spawn "niri" "msg" "action" "move-column-to-workspace" "1" "--focus" "false"; }
+    Mod+Alt+2 { spawn "niri" "msg" "action" "move-column-to-workspace" "2" "--focus" "false"; }
+    Mod+Alt+3 { spawn "niri" "msg" "action" "move-column-to-workspace" "3" "--focus" "false"; }
+    Mod+Alt+4 { spawn "niri" "msg" "action" "move-column-to-workspace" "4" "--focus" "false"; }
+    Mod+Alt+5 { spawn "niri" "msg" "action" "move-column-to-workspace" "5" "--focus" "false"; }
+    Mod+Alt+6 { spawn "niri" "msg" "action" "move-column-to-workspace" "6" "--focus" "false"; }
+    Mod+Alt+7 { spawn "niri" "msg" "action" "move-column-to-workspace" "7" "--focus" "false"; }
+    Mod+Alt+8 { spawn "niri" "msg" "action" "move-column-to-workspace" "8" "--focus" "false"; }
+    Mod+Alt+9 { spawn "niri" "msg" "action" "move-column-to-workspace" "9" "--focus" "false"; }
+    Mod+Alt+0 { spawn "niri" "msg" "action" "move-column-to-workspace" "10" "--focus" "false"; }
 
     // Resizing
     Mod+Minus { set-column-width "-10%"; }

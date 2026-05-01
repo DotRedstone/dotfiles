@@ -1,17 +1,13 @@
 # ---
-# Module: Google Chrome
-# Description: Chrome profile behavior aligned with Firefox defaults
+# Module: Google Chrome Switchboard
+# Description: Unified entry point for Chrome package, flags, and UI tweaks
+# Scope: Home Manager
 # ---
 
-{ pkgs, ... }:
-
-{
+{ ... }: {
   imports = [
-    ./settings.nix
+    ./package.nix
+    ./flags.nix
+    ./vertical-tabs.nix
   ];
-
-  programs.google-chrome = {
-    enable = true;
-    package = pkgs.google-chrome;
-  };
 }

@@ -14,6 +14,10 @@ output_path = "/home/dot/.cache/zellij.kdl"
 input_path = "/home/dot/.dotfiles/home/dot/nixvim/colors.lua.template"
 output_path = "/home/dot/.cache/nvim_colors.lua"
 
+[templates.lazygit]
+input_path = "/home/dot/.dotfiles/home/dot/cli-tools/lazygit-config.yml.template"
+output_path = "/home/dot/.cache/lazygit.yml"
+
 [templates.fcitx5_mellow_theme]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-sync/theme.conf.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-sync/theme.conf"

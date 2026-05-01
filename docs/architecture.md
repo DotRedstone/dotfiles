@@ -14,6 +14,7 @@
 | `modules/system/persistence/` | 原子化的持久化路径配置 (System, User, Apps, etc.) | System |
 | `modules/system/boot/` | 原子化的引导加载程序、内核及回滚逻辑配置 | System |
 | `modules/system/virtualization/` | 原子化的虚拟化配置 (Docker, Libvirt, Tools) | System |
+| `modules/system/hardware/` | 原子化的硬件服务 (Audio, Bluetooth, Power, Tools) | System |
 | `home/dot/` | Home Manager 用户环境与应用配置 | Home Manager |
 | `scripts/` | 手动诊断脚本与维护助手 | Script |
 

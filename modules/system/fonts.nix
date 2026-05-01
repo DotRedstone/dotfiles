@@ -9,6 +9,9 @@
     packages = with pkgs; [
       maple-mono.NF
       inter
+      lxgw-neoxihei
+      lxgw-wenkai
+      sarasa-gothic
       noto-fonts-cjk-sans
       noto-fonts-cjk-serif
       noto-fonts-color-emoji
@@ -17,9 +20,9 @@
     fontconfig = {
       enable = true;
       defaultFonts = {
-        sansSerif = [ "Maple Mono NF" "Noto Sans CJK SC" ];
-        serif     = [ "Maple Mono NF" "Noto Serif CJK SC" ];
-        monospace = [ "Maple Mono NF" "Noto Sans Mono CJK SC" ];
+        sansSerif = [ "Inter" "LXGW Neo XiHei" "Noto Sans CJK SC" ];
+        serif     = [ "LXGW WenKai" "Noto Serif CJK SC" ];
+        monospace = [ "Maple Mono NF" "Sarasa Mono SC" "Noto Sans Mono CJK SC" ];
         emoji     = [ "Noto Color Emoji" ];
       };
 
@@ -32,7 +35,7 @@
               <string>zh-cn</string>
             </test>
             <edit name="family" mode="prepend">
-              <string>Noto Sans CJK SC</string>
+              <string>LXGW Neo XiHei</string>
             </edit>
           </match>
         </fontconfig>

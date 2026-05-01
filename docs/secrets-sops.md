@@ -27,6 +27,20 @@
 - **禁止提交运行时缓存**: 如解密后的临时文件或应用生成的 Token 缓存。
 - **诊断说明**: 若应用提示密钥缺失，请检查 `sops-nix` 服務是否正常。运行 `ls -l ~/.config/sops-nix/secrets` 查看密钥是否已解密并挂载。
 
+## 仓库健康检查 (Repo Hygiene)
+
+在提交代码前，建议运行以下脚本以确保没有误提交明文密钥或错误的持久化路径：
+
+```bash
+./scripts/check-repo-hygiene.sh
+```
+
+该脚本会自动审计：
+- 是否存在明文私钥模式。
+- 是否持久化了禁止的系统路径（如 `/etc/shadow`）。
+- 是否有未加密的 SOPS 文件。
+- 是否存在未被忽略的危险文件（如 `.env` 或 `keys.txt`）。
+
 相关链接：
 - [持久化存储](./impermanence.md)
 - [Noctalia 视觉系统](./noctalia.md)

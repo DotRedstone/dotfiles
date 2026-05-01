@@ -2,7 +2,7 @@
 
 ## Repository Purpose
 
-This repository manages the user’s personal NixOS system and Home Manager configuration for host `warden` and user `dot`.
+This repository manages the user’s personal NixOS system and Home Manager configuration for host `warden` and user `dot`. For human-readable documentation, see [README.md](./README.md).
 
 Principles:
 

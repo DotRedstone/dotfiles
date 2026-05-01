@@ -1,60 +1,88 @@
 # ---
-# Module: Nixvim Options
-# Description: Global Neovim settings and behavior
+# Module: NixVim - Options
+# Description: Editor options and clipboard provider settings
+# Scope: Home Manager
 # ---
 
 { ... }: {
-  programs.nixvim.globals = {
-    mapleader = " ";
-    maplocalleader = " ";
-  };
+  programs.nixvim = {
+    opts = {
+      # UI
+      number = true;
+      relativenumber = true;
+      termguicolors = true;
+      cursorline = true;
+      signcolumn = "yes";
+      laststatus = 3;
+      cmdheight = 0;
+      pumblend = 10;
+      pumheight = 10;
+      winblend = 0;
+      scrolloff = 6;
+      sidescrolloff = 8;
+      conceallevel = 2;
+      showmode = false;
+      showtabline = 2;
+      wrap = false;
+      linebreak = true;
+      list = true;
+      listchars = "tab:  ,trail:.,extends:>,precedes:<,nbsp:+";
+      fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:";
 
-  programs.nixvim.opts = {
-    # [UI]
-    number = true;
-    relativenumber = true;
-    termguicolors = true;
-    cursorline = true;
-    signcolumn = "yes";
-    laststatus = 3;        # Global statusline
-    pumblend = 10;         # Popup blend
-    pumheight = 10;        # Maximum number of entries in a popup
-    scrolloff = 4;         # Lines of context
-    sidescrolloff = 8;     # Columns of context
-    conceallevel = 3;      # Hide * markup for bold and italic
-    wrap = false;          # Disable line wrap
+      # Search
+      ignorecase = true;
+      smartcase = true;
+      hlsearch = true;
+      incsearch = true;
+      inccommand = "nosplit";
 
-    # [Search]
-    ignorecase = true;
-    smartcase = true;
-    hlsearch = true;
-    inccommand = "nosplit"; # preview incremental substitute
+      # Indentation and formatting
+      tabstop = 2;
+      shiftwidth = 2;
+      softtabstop = 2;
+      expandtab = true;
+      smartindent = true;
+      shiftround = true;
+      breakindent = true;
+      formatoptions = "jcroqlnt";
 
-    # [Indentation & Formatting]
-    tabstop = 2;
-    shiftwidth = 2;
-    expandtab = true;
-    smartindent = true;
-    shiftround = true;     # Round indent
-    formatoptions = "jcroqlnt";
+      # Behavior
+      mouse = "a";
+      autowrite = true;
+      confirm = true;
+      splitbelow = true;
+      splitright = true;
+      splitkeep = "screen";
+      virtualedit = "block";
+      completeopt = "menu,menuone,noselect";
+      grepformat = "%f:%l:%c:%m";
+      grepprg = "rg --vimgrep";
+      jumpoptions = "view";
 
-    # [Behavior]
-    autowrite = true;      # Enable auto write
-    confirm = true;        # Confirm to save changes before exiting modified buffer
-    splitbelow = true;     # Put new windows below current
-    splitright = true;     # Put new windows right of current
-    splitkeep = "screen";
-    virtualedit = "block"; # Allow cursor to move where there is no text in visual block mode
+      # Undo, swap and session
+      undofile = true;
+      swapfile = false;
+      backup = false;
+      writebackup = false;
+      sessionoptions = "buffers,curdir,tabpages,winsize,help,globals,skiprtp,folds";
 
-    # [Undo, Swap & Session]
-    undofile = true;
-    swapfile = false;
-    backup = false;
-    sessionoptions = "buffers,curdir,tabpages,winsize,help,globals,skiprtp,folds";
+      # Folds
+      foldlevel = 99;
+      foldlevelstart = 99;
+      foldenable = true;
 
-    # [Misc]
-    updatetime = 200;      # Save swap file and trigger CursorHold
-    timeoutlen = 300;      # Lower than default (1000) to quickly trigger which-key
-    clipboard = "unnamedplus";
+      # Timing and clipboard
+      updatetime = 200;
+      timeout = true;
+      timeoutlen = 300;
+      clipboard = "unnamedplus";
+    };
+
+    clipboard.providers.wl-copy.enable = true;
+    
+    # Extra config that doesn't fit in opts
+    extraConfigLuaPost = ''
+      vim.o.winborder = "rounded"
+    '';
   };
 }

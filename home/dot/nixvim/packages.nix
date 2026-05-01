@@ -1,20 +1,30 @@
 # ---
-# Module: Neovim Dependencies
-# Description: External binaries for LSP, Treesitter, and clipboard
+# Module: NixVim - Packages
+# Description: External Home Manager packages for editor tooling (formatters, linters)
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {
-  home.packages = [
-    # [Runtime]
-    pkgs.tree-sitter
+  home.packages = with pkgs; [
+    tree-sitter
+    wl-clipboard
 
-    # [Clipboard]
-    pkgs.wl-clipboard
-
-    # [Tooling]
-    pkgs.stylua
-    pkgs.prettier
-    pkgs.ripgrep
-    pkgs.fd
+    # Formatters and linters used by conform.nvim / nvim-lint.
+    alejandra
+    nixfmt-rfc-style
+    prettierd
+    prettier
+    stylua
+    shfmt
+    shellcheck
+    markdownlint-cli
+    taplo
+    ruff
+    black
+    isort
+    cmake-format
+    typst
+    typstyle
+    tinymist
   ];
 }

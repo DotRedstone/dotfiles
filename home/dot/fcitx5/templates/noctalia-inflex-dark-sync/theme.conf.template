@@ -1,8 +1,8 @@
 [Metadata]
-Name=noctalia-mellow-dark-sync
+Name=noctalia-inflex-dark-sync
 Version=1.10
 Author=sanweiya
-Description="Noctalia dark mellow fcitx5 theme: rounded, soft, Wayland-only."
+Description="Noctalia dark inflex fcitx5 theme: rectangular, crisp, WeChat/XWayland-safe."
 
 [InputPanel]
 NormalColor={{colors.on_surface.dark.hex}}
@@ -22,7 +22,7 @@ Bottom=0
 [InputPanel/Background]
 Image=panel.svg
 Color={{colors.surface.dark.hex}}
-BorderColor={{colors.outline_variant.dark.hex}}
+BorderColor={{colors.outline.dark.hex}}
 BorderWidth=0
 Overlay=
 Gravity="Top Left"
@@ -115,7 +115,7 @@ Spacing=0
 [Menu/Background]
 Image=panel.svg
 Color={{colors.surface.dark.hex}}
-BorderColor={{colors.outline_variant.dark.hex}}
+BorderColor={{colors.outline.dark.hex}}
 BorderWidth=0
 Overlay=
 Gravity="Top Left"

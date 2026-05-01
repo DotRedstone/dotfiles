@@ -1,17 +1,17 @@
 [Metadata]
-Name=noctalia-mellow-dark-sync
+Name=noctalia-inflex-sync
 Version=1.10
 Author=sanweiya
-Description="Noctalia dark mellow fcitx5 theme: rounded, soft, Wayland-only."
+Description="Noctalia light inflex fcitx5 theme: rectangular, crisp, structured, WeChat/XWayland-safe."
 
 [InputPanel]
-NormalColor={{colors.on_surface.dark.hex}}
-HighlightCandidateColor={{colors.on_primary.dark.hex}}
+NormalColor={{colors.on_surface.light.hex}}
+HighlightCandidateColor={{colors.on_primary.light.hex}}
 EnableBlur=False
 BlurMask=
 FullWidthHighlight=True
-HighlightColor={{colors.on_primary.dark.hex}}
-HighlightBackgroundColor={{colors.primary.dark.hex}}
+HighlightColor={{colors.on_primary.light.hex}}
+HighlightBackgroundColor={{colors.primary.light.hex}}
 
 [InputPanel/BlurMargin]
 Left=0
@@ -21,8 +21,8 @@ Bottom=0
 
 [InputPanel/Background]
 Image=panel.svg
-Color={{colors.surface.dark.hex}}
-BorderColor={{colors.outline_variant.dark.hex}}
+Color={{colors.surface.light.hex}}
+BorderColor={{colors.outline.light.hex}}
 BorderWidth=0
 Overlay=
 Gravity="Top Left"
@@ -44,8 +44,8 @@ Bottom=0
 
 [InputPanel/Highlight]
 Image=highlight.svg
-Color={{colors.primary.dark.hex}}
-BorderColor={{colors.primary.dark.hex}}
+Color={{colors.primary.light.hex}}
+BorderColor={{colors.primary.light.hex}}
 BorderWidth=0
 Overlay=
 Gravity="Top Left"
@@ -108,14 +108,14 @@ Top=0
 Bottom=0
 
 [Menu]
-NormalColor={{colors.on_surface.dark.hex}}
-HighlightCandidateColor={{colors.on_primary.dark.hex}}
+NormalColor={{colors.on_surface.light.hex}}
+HighlightCandidateColor={{colors.on_primary.light.hex}}
 Spacing=0
 
 [Menu/Background]
 Image=panel.svg
-Color={{colors.surface.dark.hex}}
-BorderColor={{colors.outline_variant.dark.hex}}
+Color={{colors.surface.light.hex}}
+BorderColor={{colors.outline.light.hex}}
 BorderWidth=0
 Overlay=
 Gravity="Top Left"
@@ -137,8 +137,8 @@ Bottom=0
 
 [Menu/Highlight]
 Image=highlight.svg
-Color={{colors.primary.dark.hex}}
-BorderColor={{colors.primary.dark.hex}}
+Color={{colors.primary.light.hex}}
+BorderColor={{colors.primary.light.hex}}
 BorderWidth=0
 Overlay=
 Gravity="Top Left"
@@ -160,8 +160,8 @@ Bottom=0
 
 [Menu/Separator]
 Image=
-Color={{colors.outline_variant.dark.hex}}
-BorderColor={{colors.outline_variant.dark.hex}}
+Color={{colors.outline_variant.light.hex}}
+BorderColor={{colors.outline_variant.light.hex}}
 BorderWidth=0
 Overlay=
 Gravity="Top Left"
@@ -183,8 +183,8 @@ Bottom=0
 
 [Menu/CheckBox]
 Image=
-Color={{colors.primary.dark.hex}}
-BorderColor={{colors.primary.dark.hex}}
+Color={{colors.primary.light.hex}}
+BorderColor={{colors.primary.light.hex}}
 BorderWidth=0
 Overlay=
 Gravity="Top Left"
@@ -206,8 +206,8 @@ Bottom=0
 
 [Menu/SubMenu]
 Image=
-Color={{colors.primary.dark.hex}}
-BorderColor={{colors.primary.dark.hex}}
+Color={{colors.primary.light.hex}}
+BorderColor={{colors.primary.light.hex}}
 BorderWidth=0
 Overlay=
 Gravity="Top Left"

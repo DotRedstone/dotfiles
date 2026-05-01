@@ -14,6 +14,18 @@ output_path = "/home/dot/.cache/zellij.kdl"
 input_path = "/home/dot/.dotfiles/home/dot/nixvim/colors.lua.template"
 output_path = "/home/dot/.cache/nvim_colors.lua"
 
+[templates.fcitx5_mellow_theme]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-sync/theme.conf.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-sync/theme.conf"
+
+[templates.fcitx5_mellow_panel]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-sync/panel.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-sync/panel.svg"
+
+[templates.fcitx5_mellow_highlight]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-sync/highlight.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-sync/highlight.svg"
+
 [templates.fcitx5_mellow_dark_theme]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-dark-sync/theme.conf.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-dark-sync/theme.conf"
@@ -25,4 +37,28 @@ output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-dark-sync/pa
 [templates.fcitx5_mellow_dark_highlight]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-dark-sync/highlight.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-dark-sync/highlight.svg"
+
+[templates.fcitx5_inflex_theme]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-sync/theme.conf.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-sync/theme.conf"
+
+[templates.fcitx5_inflex_panel]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-sync/panel.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-sync/panel.svg"
+
+[templates.fcitx5_inflex_highlight]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-sync/highlight.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-sync/highlight.svg"
+
+[templates.fcitx5_inflex_dark_theme]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-dark-sync/theme.conf.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-dark-sync/theme.conf"
+
+[templates.fcitx5_inflex_dark_panel]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-dark-sync/panel.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-dark-sync/panel.svg"
+
+[templates.fcitx5_inflex_dark_highlight]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-dark-sync/highlight.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-dark-sync/highlight.svg"
 post_hook = "fcitx5 -r -d >/dev/null 2>&1 || systemctl --user restart fcitx5.service >/dev/null 2>&1 || true"

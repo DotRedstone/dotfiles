@@ -1,39 +1,15 @@
 # ---
-# Module: Firefox Browser
-# Description: Main Firefox profile with custom persistence and native messaging
+# Module: Firefox Switchboard
+# Description: Unified entry point for Firefox profile, settings, theme, and integrations
+# Scope: Home Manager
 # ---
 
-{ config, pkgs, ... }: {
+{ ... }: {
   imports = [
+    ./profile.nix
+    ./search.nix
     ./settings.nix
     ./theme.nix
+    ./native-messaging.nix
   ];
-
-
-  # [Native Messaging]
-  # Required for Pywalfox to sync system colors with the browser
-  home.file.".mozilla/native-messaging-hosts/pywalfox.json".text = builtins.toJSON {
-    name = "pywalfox";
-    description = "Pywalfox native messaging host";
-    path = "${pkgs.pywalfox-native}/bin/pywalfox";
-    type = "stdio";
-    allowed_extensions = [ "pywalfox@frewacom.org" ];
-  };
-
-  # [Profile Definition]
-  programs.firefox = {
-    enable = true;
-    configPath = "${config.xdg.configHome}/mozilla/firefox";
-    languagePacks = [ "zh-CN" ];
-    profiles.dot = {
-      id = 0;
-      isDefault = true;
-      name = "dot";
-      
-      # [Search Engine]
-      search.force = true;
-      search.default = "google";
-      search.order = [ "google" ];
-    };
-  };
 }

@@ -9,7 +9,7 @@ use std::os::unix::io::FromRawFd;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::thread;
-use std::time::{Duration, SystemTime};
+use std::time::{Duration, Instant, SystemTime};
 
 type AnyError = Box<dyn std::error::Error>;
 type Result<T> = std::result::Result<T, AnyError>;
@@ -60,6 +60,8 @@ struct Bridge {
     keys: HashMap<String, String>,
     memory_key_candidates: Vec<String>,
     scanned_memory: bool,
+    last_memory_scan: Option<Instant>,
+    memory_scan_cooldown: Duration,
 }
 
 fn main() {
@@ -101,6 +103,8 @@ impl Bridge {
             keys: HashMap::new(),
             memory_key_candidates: Vec::new(),
             scanned_memory: false,
+            last_memory_scan: None,
+            memory_scan_cooldown: Duration::from_secs(10),
         })
     }
 
@@ -265,15 +269,26 @@ impl Bridge {
             }
         }
 
-        if !self.scanned_memory {
+        let needs_rescan = self.memory_key_candidates.is_empty()
+            && self
+                .last_memory_scan
+                .map_or(true, |last| last.elapsed() >= self.memory_scan_cooldown);
+
+        if !self.scanned_memory || needs_rescan {
             let found = memory_candidates();
-            println!("wechat-notify-bridge: found {} memory key candidates", found.len());
+            if !found.is_empty() || !self.scanned_memory {
+                println!(
+                    "wechat-notify-bridge: found {} memory key candidates",
+                    found.len()
+                );
+            }
             for key in found {
                 if !self.memory_key_candidates.contains(&key) {
                     self.memory_key_candidates.push(key);
                 }
             }
             self.scanned_memory = true;
+            self.last_memory_scan = Some(Instant::now());
         }
 
         for key in &self.memory_key_candidates {

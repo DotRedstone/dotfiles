@@ -1,12 +1,13 @@
 # ---
 # Module: Fcitx5 Entry
-# Description: Unified entry point for Fcitx5, Rime logic, and themes
+# Description: Unified entry point for Fcitx5 environment, config, Rime, and themes
 # ---
 
-{
+{ ... }: {
   imports = [
-    ./config.nix
-    ./rime.nix
+    ./env.nix
+    ./config
+    ./rime
     ./theme.nix
   ];
 }

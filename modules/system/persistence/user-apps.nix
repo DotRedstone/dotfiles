@@ -9,7 +9,6 @@
     directories = [
       ".mozilla"
       ".config/mozilla"
-      ".local/share/PrismLauncher"
       ".config/clash-verge-rev"
       ".xwechat"
       "xwechat_files"

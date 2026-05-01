@@ -791,6 +791,14 @@
             {
                 "enabled": true,
                 "id": "qt"
+            },
+            {
+                "enabled": true,
+                "id": "cava"
+            },
+            {
+                "enabled": true,
+                "id": "mango"
             }
         ],
         "enableUserTheming": true

@@ -39,6 +39,7 @@
     ./netease-music
     ./zathura
     ./office
+    ./obsidian
     ./multimedia
 
     # --- Development ---

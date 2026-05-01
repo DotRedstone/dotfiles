@@ -18,6 +18,7 @@
       ".config/QQ"
       ".local/share/Tencent"
       ".config/netease-cloud-music"
+      ".config/obsidian"
       ".config/dconf"
     ];
   };

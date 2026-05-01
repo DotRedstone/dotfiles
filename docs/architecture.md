@@ -16,6 +16,7 @@
 | `modules/system/virtualization/` | 原子化的虚拟化配置 (Docker, Libvirt, Tools) | System |
 | `modules/system/hardware/` | 原子化的硬件服务 (Audio, Bluetooth, Power, Tools) | System |
 | `modules/system/nix/` | 原子化的 Nix 包管理器、GC 及 nixpkgs 配置 | System |
+| `modules/system/network/` | 原子化的网络管理、代理及防火墙配置 | System |
 | `home/dot/` | Home Manager 用户环境与应用配置 | Home Manager |
 | `scripts/` | 手动诊断脚本与维护助手 | Script |
 

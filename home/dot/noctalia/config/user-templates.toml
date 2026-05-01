@@ -14,3 +14,15 @@ output_path = "/home/dot/.cache/zellij.kdl"
 input_path = "/home/dot/.dotfiles/home/dot/nixvim/colors.lua.template"
 output_path = "/home/dot/.cache/nvim_colors.lua"
 
+[templates.fcitx5_mellow_dark_theme]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-dark-sync/theme.conf.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-dark-sync/theme.conf"
+
+[templates.fcitx5_mellow_dark_panel]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-dark-sync/panel.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-dark-sync/panel.svg"
+
+[templates.fcitx5_mellow_dark_highlight]
+input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-dark-sync/highlight.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-dark-sync/highlight.svg"
+post_hook = "fcitx5 -r -d >/dev/null 2>&1 || systemctl --user restart fcitx5.service >/dev/null 2>&1 || true"

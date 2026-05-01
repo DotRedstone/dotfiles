@@ -1,0 +1,416 @@
+# ---
+# Module: Fcitx5 Theming
+# Description: Noctalia-synced mellow dark theme with WeChat-safe rectangular assets
+# ---
+
+[Metadata]
+# Name
+Name=noctalia-mellow-dark-sync
+# Version
+Version=1.10
+# Author
+Author=sanweiya
+# Description
+Description="Noctalia-synced mellow dark fcitx5 theme with WeChat-safe rectangular assets."
+
+[InputPanel]
+# Normal text color
+NormalColor={{colors.on_surface.default.hex}}
+# Highlighted candidate text color
+HighlightCandidateColor={{colors.on_primary.default.hex}}
+# Enable blur in KWin
+EnableBlur=False
+# Blur mask
+BlurMask=
+# Use all horizontal space for highlight in vertical list
+FullWidthHighlight=True
+# Highlight text color
+HighlightColor={{colors.on_primary.default.hex}}
+# Highlight background color
+HighlightBackgroundColor={{colors.primary.default.hex}}
+
+[InputPanel/BlurMargin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[InputPanel/Background]
+# Background image
+Image=panel.svg
+# Color
+Color={{colors.surface.default.hex}}
+# Border color
+BorderColor={{colors.surface_variant.default.hex}}
+# Border width
+BorderWidth=0
+# Overlay image
+Overlay=
+# Overlay image gravity
+Gravity="Top Left"
+# Overlay image X offset
+OverlayOffsetX=0
+# Overlay image Y offset
+OverlayOffsetY=0
+# Hide overlay image if oversize
+HideOverlayIfOversize=False
+
+[InputPanel/Background/Margin]
+# Left margin
+Left=15
+# Right margin
+Right=15
+# Top margin
+Top=15
+# Bottom margin
+Bottom=15
+
+[InputPanel/Background/OverlayClipMargin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[InputPanel/Highlight]
+# Background image
+Image=highlight.svg
+# Color
+Color={{colors.primary.default.hex}}
+# Border color
+BorderColor={{colors.primary.default.hex}}
+# Border width
+BorderWidth=0
+# Overlay image
+Overlay=
+# Overlay image gravity
+Gravity="Top Left"
+# Overlay image X offset
+OverlayOffsetX=0
+# Overlay image Y offset
+OverlayOffsetY=0
+# Hide overlay image if oversize
+HideOverlayIfOversize=False
+
+[InputPanel/Highlight/Margin]
+# Left margin
+Left=15
+# Right margin
+Right=15
+# Top margin
+Top=10
+# Bottom margin
+Bottom=10
+
+[InputPanel/Highlight/OverlayClipMargin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[InputPanel/Highlight/HighlightClickMargin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[InputPanel/ContentMargin]
+# Left margin
+Left=9
+# Right margin
+Right=9
+# Top margin
+Top=7
+# Bottom margin
+Bottom=7
+
+[InputPanel/TextMargin]
+# Left margin
+Left=9
+# Right margin
+Right=9
+# Top margin
+Top=6
+# Bottom margin
+Bottom=7
+
+[InputPanel/PrevPage]
+# Image
+Image=
+
+[InputPanel/PrevPage/ClickMargin]
+# Left margin
+Left=5
+# Right margin
+Right=5
+# Top margin
+Top=4
+# Bottom margin
+Bottom=4
+
+[InputPanel/NextPage]
+# Image
+Image=
+
+[InputPanel/NextPage/ClickMargin]
+# Left margin
+Left=5
+# Right margin
+Right=5
+# Top margin
+Top=4
+# Bottom margin
+Bottom=4
+
+[InputPanel/ShadowMargin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[Menu]
+# Normal text color
+NormalColor={{colors.on_surface.default.hex}}
+# Highlighted candidate text color
+HighlightCandidateColor={{colors.on_primary.default.hex}}
+# Spacing
+Spacing=0
+
+[Menu/Background]
+# Background image
+Image=panel.svg
+# Color
+Color={{colors.surface.default.hex}}
+# Border color
+BorderColor={{colors.surface_variant.default.hex}}
+# Border width
+BorderWidth=0
+# Overlay image
+Overlay=
+# Overlay image gravity
+Gravity="Top Left"
+# Overlay image X offset
+OverlayOffsetX=0
+# Overlay image Y offset
+OverlayOffsetY=0
+# Hide overlay image if oversize
+HideOverlayIfOversize=False
+
+[Menu/Background/Margin]
+# Left margin
+Left=11
+# Right margin
+Right=11
+# Top margin
+Top=11
+# Bottom margin
+Bottom=11
+
+[Menu/Background/OverlayClipMargin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[Menu/Highlight]
+# Background image
+Image=highlight.svg
+# Color
+Color={{colors.primary.default.hex}}
+# Border color
+BorderColor={{colors.primary.default.hex}}
+# Border width
+BorderWidth=0
+# Overlay image
+Overlay=
+# Overlay image gravity
+Gravity="Top Left"
+# Overlay image X offset
+OverlayOffsetX=0
+# Overlay image Y offset
+OverlayOffsetY=0
+# Hide overlay image if oversize
+HideOverlayIfOversize=False
+
+[Menu/Highlight/Margin]
+# Left margin
+Left=5
+# Right margin
+Right=5
+# Top margin
+Top=5
+# Bottom margin
+Bottom=5
+
+[Menu/Highlight/OverlayClipMargin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[Menu/Separator]
+# Background image
+Image=
+# Color
+Color={{colors.surface_variant.default.hex}}
+# Border color
+BorderColor={{colors.surface_variant.default.hex}}
+# Border width
+BorderWidth=0
+# Overlay image
+Overlay=
+# Overlay image gravity
+Gravity="Top Left"
+# Overlay image X offset
+OverlayOffsetX=0
+# Overlay image Y offset
+OverlayOffsetY=0
+# Hide overlay image if oversize
+HideOverlayIfOversize=False
+
+[Menu/Separator/Margin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[Menu/Separator/OverlayClipMargin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[Menu/CheckBox]
+# Background image
+Image=
+# Color
+Color={{colors.primary.default.hex}}
+# Border color
+BorderColor={{colors.primary.default.hex}}
+# Border width
+BorderWidth=0
+# Overlay image
+Overlay=
+# Overlay image gravity
+Gravity="Top Left"
+# Overlay image X offset
+OverlayOffsetX=0
+# Overlay image Y offset
+OverlayOffsetY=0
+# Hide overlay image if oversize
+HideOverlayIfOversize=False
+
+[Menu/CheckBox/Margin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[Menu/CheckBox/OverlayClipMargin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[Menu/SubMenu]
+# Background image
+Image=
+# Color
+Color={{colors.primary.default.hex}}
+# Border color
+BorderColor={{colors.primary.default.hex}}
+# Border width
+BorderWidth=0
+# Overlay image
+Overlay=
+# Overlay image gravity
+Gravity="Top Left"
+# Overlay image X offset
+OverlayOffsetX=0
+# Overlay image Y offset
+OverlayOffsetY=0
+# Hide overlay image if oversize
+HideOverlayIfOversize=False
+
+[Menu/SubMenu/Margin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[Menu/SubMenu/OverlayClipMargin]
+# Left margin
+Left=0
+# Right margin
+Right=0
+# Top margin
+Top=0
+# Bottom margin
+Bottom=0
+
+[Menu/ContentMargin]
+# Left margin
+Left=11
+# Right margin
+Right=11
+# Top margin
+Top=11
+# Bottom margin
+Bottom=11
+
+[Menu/TextMargin]
+# Left margin
+Left=6
+# Right margin
+Right=6
+# Top margin
+Top=6
+# Bottom margin
+Bottom=6

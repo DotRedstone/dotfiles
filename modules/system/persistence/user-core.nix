@@ -13,7 +13,6 @@
       "Downloads"
       "Pictures"
       ".local/share/fish"
-      ".config/sops"
       ".gemini"
     ];
   };

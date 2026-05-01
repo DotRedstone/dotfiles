@@ -12,6 +12,7 @@
 | `@persist` | `/persist` | **持久化层**。存放必须保留的数据。 |
 | `@log` | `/var/log` | 日志存储。作为独立子卷，**禁止**在 Impermanence 中再次持久化。 |
 | `@swap` | `/swap` | 交换文件目录。 |
+| - | `~/.local/share/keyrings` | **GNOME Keyring** 存储（由 `user-secrets.nix` 持久化） |
 
 ## 持久化原则
 

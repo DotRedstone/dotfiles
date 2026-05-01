@@ -1,6 +1,7 @@
 -- ---
--- Warden WezTerm Configuration
+-- Module: WezTerm
 -- Description: Minimalist, high-performance terminal canvas
+-- Scope: Home Manager
 -- ---
 
 local wezterm = require 'wezterm'

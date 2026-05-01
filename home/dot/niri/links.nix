@@ -1,6 +1,7 @@
 # ---
 # Module: Niri Links
 # Description: Out-of-store symlinks for direct KDL editing
+# Scope: Home Manager
 # ---
 
 { config, ... }: {

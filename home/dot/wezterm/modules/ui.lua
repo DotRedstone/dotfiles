@@ -1,3 +1,9 @@
+-- ---
+-- Module: WezTerm - UI
+-- Description: Tab bar, window decorations, and padding settings
+-- Scope: Home Manager
+-- ---
+
 local M = {}
 
 function M.apply(config, _)

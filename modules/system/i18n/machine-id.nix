@@ -1,6 +1,7 @@
 # ---
 # Module: System Machine-ID
 # Description: Fixed machine-id for consistency across boots and persistence
+# Scope: System
 # ---
 
 { ... }: {

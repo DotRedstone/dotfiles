@@ -1,6 +1,7 @@
 # ---
 # Module: Firefox - Search
 # Description: Search engine configuration and default policies
+# Scope: Home Manager
 # ---
 
 { ... }: {

@@ -1,6 +1,7 @@
 # ---
-# Module: CLI Tools Entry
-# Description: Consolidate core, modern, and network toolsets
+# Module: CLI Tools Switchboard
+# Description: Unified entry point for core, modern, and network toolsets
+# Scope: Home Manager
 # ---
 
 { ... }: {

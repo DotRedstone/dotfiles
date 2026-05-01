@@ -1,3 +1,9 @@
+-- ---
+-- Module: WezTerm - Theme
+-- Description: Noctalia color scheme integration
+-- Scope: Home Manager
+-- ---
+
 local M = {}
 
 function M.apply(config, _)

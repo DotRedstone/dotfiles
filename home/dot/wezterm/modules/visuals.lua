@@ -1,3 +1,9 @@
+-- ---
+-- Module: WezTerm - Visuals
+-- Description: Font stack, opacity, and cursor animation settings
+-- Scope: Home Manager
+-- ---
+
 local M = {}
 
 function M.apply(config, wezterm)

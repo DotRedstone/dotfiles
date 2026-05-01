@@ -1,6 +1,7 @@
 # ---
 # Module: Firefox Theme
 # Description: Minimalist CSS for Niri compositor integration
+# Scope: Home Manager
 # ---
 
 { ... }: {

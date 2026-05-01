@@ -1,3 +1,9 @@
+-- ---
+-- Module: WezTerm - SSH
+-- Description: SSH domains for remote terminal access
+-- Scope: Home Manager
+-- ---
+
 local M = {}
 
 function M.apply(config, _)

@@ -1,6 +1,7 @@
 # ---
 # Module: NixVim - Editor Plugins
 # Description: General editing enhancements (Snacks, Telescope, Neo-tree, etc.)
+# Scope: Home Manager
 # ---
 
 { ... }: {

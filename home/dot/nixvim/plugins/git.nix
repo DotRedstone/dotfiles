@@ -1,6 +1,7 @@
 # ---
 # Module: NixVim - Git Plugins
 # Description: Git integration and diff visualization tools
+# Scope: Home Manager
 # ---
 
 { ... }: {

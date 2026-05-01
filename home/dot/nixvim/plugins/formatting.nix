@@ -1,6 +1,7 @@
 # ---
 # Module: NixVim - Formatting and Linting
 # Description: Conform.nvim for formatting and nvim-lint for static analysis
+# Scope: Home Manager
 # ---
 
 { ... }: {

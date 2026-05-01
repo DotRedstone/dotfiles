@@ -1,3 +1,9 @@
+# ---
+# Module: WeChat - Base Package
+# Description: Low-level derivation for WeChat UOS and its bridge
+# Scope: Home Manager
+# ---
+
 { pkgs }:
 let
   wechat-uos = pkgs.callPackage (pkgs.path + "/pkgs/by-name/we/wechat-uos/package.nix") {

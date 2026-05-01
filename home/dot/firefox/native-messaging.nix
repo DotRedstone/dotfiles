@@ -1,6 +1,7 @@
 # ---
 # Module: Firefox - Native Messaging
 # Description: External integrations for Firefox (Pywalfox, etc.)
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

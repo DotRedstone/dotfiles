@@ -1,3 +1,9 @@
+-- ---
+-- Module: WezTerm - Keybindings
+-- Description: Custom keyboard shortcuts for terminal management
+-- Scope: Home Manager
+-- ---
+
 local M = {}
 
 function M.apply(config, wezterm)

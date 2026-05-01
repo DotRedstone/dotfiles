@@ -1,6 +1,7 @@
 # ---
 # Module: WeChat Packages
 # Description: Official WeChat for Linux client and notification bridge packages
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }:

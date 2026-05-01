@@ -1,6 +1,7 @@
 # ---
 # Module: Chrome - Package
 # Description: Enablement and package definition for Google Chrome
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

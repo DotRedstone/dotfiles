@@ -1,6 +1,7 @@
 # ---
 # Module: Firefox Settings
 # Description: Performance, behavior, and typography overrides
+# Scope: Home Manager
 # ---
 
 { ... }: {

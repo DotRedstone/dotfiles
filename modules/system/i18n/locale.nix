@@ -1,6 +1,7 @@
 # ---
 # Module: System Locale
 # Description: Configuration for time zones, default locale, and extra locale settings
+# Scope: System
 # ---
 
 { ... }: {

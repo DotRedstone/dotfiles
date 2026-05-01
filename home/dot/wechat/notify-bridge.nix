@@ -1,6 +1,7 @@
 # ---
 # Module: WeChat Notify Bridge
 # Description: Systemd user service for the WeChat notification bridge
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }:

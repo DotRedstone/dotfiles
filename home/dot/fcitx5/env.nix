@@ -1,6 +1,7 @@
 # ---
 # Module: Fcitx5 Environment
 # Description: Global IM environment variables (GTK, QT, XMODIFIERS, etc.)
+# Scope: Home Manager
 # ---
 
 { ... }: {

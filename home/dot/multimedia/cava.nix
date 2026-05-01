@@ -1,6 +1,7 @@
 # ---
 # Module: Cava
 # Description: Console-based Audio Visualizer
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {
@@ -41,4 +42,7 @@
       };
     };
   };
+
+  # Resolve activation conflict with existing regular file
+  xdg.configFile."cava/config".force = true;
 }

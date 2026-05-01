@@ -47,13 +47,14 @@ binds {
     Mod+Shift+E { quit; }
 
     // Mac-style Shortcuts (Super+Key → Ctrl+Key)
-    Mod+C { spawn "wtype" "-M" "ctrl" "-k" "c"; }
-    Mod+V { spawn "wtype" "-M" "ctrl" "-k" "v"; }
-    Mod+X { spawn "wtype" "-M" "ctrl" "-k" "x"; }
-    Mod+Z { spawn "wtype" "-M" "ctrl" "-k" "z"; }
-    Mod+Shift+Z { spawn "wtype" "-M" "ctrl" "-M" "shift" "-k" "z"; }
-    Mod+A { spawn "wtype" "-M" "ctrl" "-k" "a"; }
-    Mod+S { spawn "wtype" "-M" "ctrl" "-k" "s"; }
+    Mod+C repeat=false { spawn "niri-mac-shortcut" "copy"; }
+    Mod+V repeat=false { spawn "niri-mac-shortcut" "paste"; }
+    Mod+X repeat=false { spawn "niri-mac-shortcut" "cut"; }
+    Mod+Z repeat=false { spawn "niri-mac-shortcut" "undo"; }
+    Mod+Shift+Z repeat=false { spawn "niri-mac-shortcut" "redo"; }
+    Mod+A repeat=false { spawn "niri-mac-shortcut" "select-all"; }
+    Mod+S repeat=false { spawn "niri-mac-shortcut" "save"; }
+    Mod+Shift+V repeat=false { spawn "niri-mac-shortcut" "paste-plain"; }
 
     // Media & Fn Keys
     XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }

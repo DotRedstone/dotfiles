@@ -8,6 +8,7 @@
   imports = [
     ./packages.nix
     ./links.nix
+    ./shortcuts.nix
   ];
 
   # [Session Variables]

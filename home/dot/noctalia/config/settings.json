@@ -483,7 +483,7 @@
         "animationDisabled": false,
         "animationSpeed": 1,
         "autoStartAuth": false,
-        "avatarImage": "/home/dot/.face",
+        "avatarImage": "/home/dot/Pictures/.face.png",
         "boxRadiusRatio": 1,
         "clockFormat": "hh\\nmm",
         "clockStyle": "custom",
@@ -819,24 +819,10 @@
     },
     "wallpaper": {
         "automationEnabled": true,
-        "directory": "/home/dot/Pictures/Wallpapers",
+        "directory": "/home/dot/Pictures/GPT chara",
         "enableMultiMonitorDirectories": false,
         "enabled": true,
         "favorites": [
-            {
-                "appearance": "dark",
-                "colorScheme": "Catppuccin",
-                "darkMode": true,
-                "generationMethod": "content",
-                "paletteColors": [
-                    "#ffb874",
-                    "#f0bd8e",
-                    "#c0cf57",
-                    "#ffb4ab"
-                ],
-                "path": "/home/dot/Pictures/Wallpapers/a6fd888b-18e0-4a51-9dd1-4a59448096a6.png",
-                "useWallpaperColors": true
-            }
         ],
         "fillColor": "#000000",
         "fillMode": "crop",

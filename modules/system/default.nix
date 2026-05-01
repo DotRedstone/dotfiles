@@ -18,6 +18,7 @@
     ./chrome.nix        # Chrome policy defaults
     ./fonts.nix         # Typography
     ./virtualization.nix# Docker & KVM
+    ./gaming            # Steam & Gaming platforms
     ./keyd.nix          # Key Remapping
   ];
 }

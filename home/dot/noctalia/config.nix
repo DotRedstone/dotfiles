@@ -35,7 +35,8 @@
       buildInputs = [ pkgs.makeWrapper ];
       postBuild = ''
         wrapProgram $out/bin/noctalia-shell \
-          --run 'secret_path="$HOME/.config/sops-nix/secrets/gemini_api_key"; if [ -r "$secret_path" ]; then export NOCTALIA_AP_GOOGLE_API_KEY="$(cat "$secret_path")"; fi'
+          --run 'gemini_path="$HOME/.config/sops-nix/secrets/gemini_api_key"; if [ -r "$gemini_path" ]; then export NOCTALIA_AP_GOOGLE_API_KEY="$(cat "$gemini_path")"; fi' \
+          --run 'wallhaven_path="$HOME/.config/sops-nix/secrets/wallhaven_api_key"; if [ -r "$wallhaven_path" ]; then export NOCTALIA_WALLHAVEN_API_KEY="$(cat "$wallhaven_path")"; fi'
       '';
     };
   };

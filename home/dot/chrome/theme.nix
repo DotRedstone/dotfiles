@@ -33,16 +33,20 @@ else:
 # [Process Check]
 chrome_was_running = False
 try:
-    check_chrome = subprocess.run(["pgrep", "-f", "chrome"], stdout=subprocess.DEVNULL)
-    if check_chrome.returncode == 0:
+    # 仅匹配名为 chrome 的进程，且排除当前脚本进程，避免误报
+    my_pid = str(os.getpid())
+    pids = subprocess.check_output(["pgrep", "-u", os.getlogin(), "-x", "chrome"]).decode().split()
+    if any(p != my_pid for p in pids):
         chrome_was_running = True
-except:
+except subprocess.CalledProcessError:
+    chrome_was_running = False
+except Exception:
     pass
 
 # [Graceful Kill]
 if chrome_was_running:
-    subprocess.run(["pkill", "-f", "chrome"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run(["pkill", "-f", "chromium"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["pkill", "-u", os.getlogin(), "-x", "chrome"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["pkill", "-u", os.getlogin(), "-x", "chromium"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     
     # [Wait For Lock]
     import time

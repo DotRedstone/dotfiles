@@ -18,6 +18,9 @@
       "gemini_api_key" = {
         sopsFile = ../../../secrets/noctalia.yaml;
       };
+      "wallhaven_api_key" = {
+        sopsFile = ../../../secrets/noctalia.yaml;
+      };
 
       # VPS Info
       "vps/beacon" = {};

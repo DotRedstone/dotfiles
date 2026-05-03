@@ -5,6 +5,9 @@
 # ---
 
 { pkgs, ... }: {
+  # [Packages]
+  home.packages = [ pkgs.pywalfox-native ];
+
   # [Native Messaging]
   # Required for Pywalfox to sync system colors with the browser
   home.file.".mozilla/native-messaging-hosts/pywalfox.json".text = builtins.toJSON {

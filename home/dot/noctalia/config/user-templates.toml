@@ -70,4 +70,4 @@ post_hook = "fcitx5 -r -d >/dev/null 2>&1 || systemctl --user restart fcitx5.ser
 [templates.chrome_theme_colors]
 input_path = "/home/dot/.dotfiles/home/dot/chrome/theme/colors.json.template"
 output_path = "/home/dot/.cache/chrome-noctalia-theme/colors.json"
-post_hook = "/home/dot/.nix-profile/bin/chrome-theme-injector >/dev/null 2>&1 || true"
+post_hook = "/home/dot/.nix-profile/bin/chrome-theme-injector >/dev/null 2>&1; pywalfox update >/dev/null 2>&1 || true"

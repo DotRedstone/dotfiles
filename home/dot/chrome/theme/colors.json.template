@@ -1,0 +1,11 @@
+{
+  "name": "Noctalia Chrome",
+  "ntpLink": "{{colors.primary.default.hex}}",
+  "frame": "{{colors.surface.default.hex}}",
+  "frameInactive": "{{colors.surface_variant.default.hex}}",
+  "toolbar": "{{colors.surface.default.hex}}",
+  "tabText": "{{colors.on_surface.default.hex}}",
+  "tabBackgroundText": "{{colors.on_surface_variant.default.hex}}",
+  "bookmarkText": "{{colors.on_surface.default.hex}}",
+  "buttonIcon": "{{colors.primary.default.hex}}"
+}

@@ -9,5 +9,6 @@
     ./package.nix
     ./flags.nix
     ./vertical-tabs.nix
+    ./theme.nix
   ];
 }

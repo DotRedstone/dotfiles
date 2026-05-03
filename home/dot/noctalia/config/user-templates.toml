@@ -66,3 +66,8 @@ output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-dark-sync/pa
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-dark-sync/highlight.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-dark-sync/highlight.svg"
 post_hook = "fcitx5 -r -d >/dev/null 2>&1 || systemctl --user restart fcitx5.service >/dev/null 2>&1 || true"
+
+[templates.chrome_theme_colors]
+input_path = "/home/dot/.dotfiles/home/dot/chrome/theme/colors.json.template"
+output_path = "/home/dot/.cache/chrome-noctalia-theme/colors.json"
+post_hook = "/home/dot/.nix-profile/bin/chrome-theme-injector >/dev/null 2>&1 || true"

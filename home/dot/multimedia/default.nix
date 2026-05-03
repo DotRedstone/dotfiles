@@ -9,6 +9,7 @@
     ./cava.nix
     ./mpv.nix
     ./imv.nix
+    ./upscayl.nix
     ./peaclock.nix
   ];
 }

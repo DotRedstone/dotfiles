@@ -49,15 +49,62 @@
       lt = "eza --tree --icons";
 
       # --- Git Operations ---
-      gs     = "git status";
-      ga     = "git add";
-      gc     = "git commit -m";
-      gp     = "git push";
-      gl     = "git log --oneline --graph --decorate";
-      gbc    = "git checkout -b";     # Create and switch to new branch
-      gbm    = "git merge";          # Merge branch
-      gamend = "git commit --amend --no-edit"; # Fix last commit
-      gundo  = "git reset --soft HEAD~1";      # Undo last commit (keep changes)
+      # Status
+      gst   = "git status";
+      gss   = "git status --short";
+
+      # Add
+      ga    = "git add";
+      gaa   = "git add -A";
+      gap   = "git add -p";
+
+      # Commit
+      gcm   = "git commit -m";
+      gca   = "git commit --amend";
+      gcan  = "git commit --amend --no-edit";
+
+      # Diff
+      gd    = "git diff";
+      gds   = "git diff --staged";
+
+      # Branch
+      gb    = "git branch";
+      gba   = "git branch -a";
+      gbd   = "git branch -d";
+      gbD   = "git branch -D";
+
+      # Switch
+      gsw   = "git switch";
+      gsc   = "git switch -c";
+
+      # Fetch / Pull / Push
+      gf    = "git fetch";
+      gfa   = "git fetch --all --prune";
+      gpl   = "git pull --ff-only";
+      gps   = "git push";
+      gpsu  = "git push -u origin HEAD";
+      gpf   = "git push --force-with-lease";
+
+      # Rebase / Merge
+      grb   = "git rebase";
+      grbi  = "git rebase -i";
+      grbc  = "git rebase --continue";
+      grba  = "git rebase --abort";
+      gm    = "git merge";
+
+      # Stash
+      gsta  = "git stash push";
+      gstaa = "git stash push -u";
+      gstl  = "git stash list";
+      gstp  = "git stash pop";
+
+      # Log
+      gl    = "git log --oneline --graph --decorate";
+      gla   = "git log --oneline --graph --decorate --all";
+      gls   = "git log --stat";
+
+      # Undo
+      gundo = "git reset --soft HEAD~1";
 
       # --- NixOS Management (nh/nrs) ---
       nrs    = "nh os switch -H warden ~/.dotfiles";

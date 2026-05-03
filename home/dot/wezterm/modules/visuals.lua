@@ -14,7 +14,7 @@ function M.apply(config, wezterm)
     { family = 'Symbols Nerd Font Mono', weight = 'Regular' },
   })
   config.font_size = 12
-  config.window_background_opacity = 0.95
+  config.window_background_opacity = 1.0
 
   -- [Animation & Cursor]
   config.default_cursor_style = "BlinkingBar"

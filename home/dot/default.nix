@@ -23,6 +23,7 @@
     ./theme
     ./fcitx5
     ./cli-tools
+    ./monitoring
 
     # --- File Management & Networking ---
     ./yazi

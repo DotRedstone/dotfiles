@@ -11,5 +11,6 @@
     ./settings.nix
     ./theme.nix
     ./native-messaging.nix
+    ./extensions.nix
   ];
 }

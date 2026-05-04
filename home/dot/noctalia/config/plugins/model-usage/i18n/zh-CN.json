@@ -1,0 +1,113 @@
+{
+  "general": {
+    "settings_title": "模型用量设置",
+    "section_general": "常规",
+    "bar_display_mode": "状态栏显示模式",
+    "bar_display_mode_desc": "显示当前 Provider 或在已启用的 Provider 之间轮询",
+    "bar_display_mode_active": "当前 Provider",
+    "bar_display_mode_cycle": "轮询 Provider",
+    "cycle_interval": "轮询间隔 (秒)",
+    "bar_metric": "状态栏指标",
+    "bar_metric_desc": "胶囊栏显示的数值类型",
+    "bar_metric_prompts": "提示词 (Prompts)",
+    "bar_metric_tokens": "Tokens",
+    "bar_metric_usage": "用量百分比 %",
+    "usage_display_mode": "百分比显示方式",
+    "usage_display_mode_desc": "显示已使用的百分比或剩余的百分比",
+    "usage_display_mode_usage": "显示用量 (Used)",
+    "usage_display_mode_remaining": "显示余量 (Remaining)",
+    "refresh_interval": "刷新频率 (秒)",
+    "refresh_interval_desc": "当文件监听失效时的备选轮询间隔",
+    "section_providers": "数据源 (Providers)",
+    "auth_local": "本地文件",
+    "auth_github": "GitHub 认证",
+    "auth_apikey": "API Key",
+    "auth_cli": "CLI 封装",
+    "reset_button": "重置"
+  },
+  "panel": {
+    "no_providers": "未启用任何 Provider。请在设置中启用。",
+    "waiting_data": " — 正在等待数据...",
+    "usage_suffix": " 用量",
+    "rate_limit_title": "额度限制",
+    "resets_in": "将在 {time} 后重置",
+    "today_title": "今日统计",
+    "prompts": "个提示词",
+    "sessions": "个会话",
+    "tokens": "Tokens",
+    "last_7_days": "最近 7 天",
+    "all_time": "累计数据",
+    "messages": "条消息",
+    "input": "输入",
+    "output": "输出",
+    "cache_read": "缓存读取",
+    "cache_write": "缓存写入"
+  },
+  "bar": {
+    "tooltip_today": " — 今日: ",
+    "tooltip_prompts": " 提示词, ",
+    "tooltip_sessions": " 会话, ",
+    "tooltip_tokens": " Tokens",
+    "context_refresh": "刷新",
+    "context_settings": "小部件设置"
+  },
+  "providers": {
+    "claude_name": "Claude Code",
+    "codex_name": "Codex",
+    "copilot_name": "Copilot",
+    "openrouter_name": "OpenRouter",
+    "zen_name": "Zen (opencode.ai)",
+    "antigravity_name": "Antigravity",
+    "claude": {
+      "weekly_label": "每周限额 (7天)",
+      "session_label": "会话限额 (5h)",
+      "auth_help": "运行 `claude auth login` 以恢复权威用量数据。",
+      "waiting_auth": "等待认证",
+      "token_expired": "Token 已过期"
+    },
+    "codex": {
+      "5h_window": "5h 窗口",
+      "7d_window": "7d 窗口",
+      "h_window": "h 窗口",
+      "auth_help": "运行 `codex` 进行认证。"
+    },
+    "antigravity": {
+      "credits_label": "Prompt Credits",
+      "auth_help": "数据来自 antigravity-usage-json"
+    },
+    "zen": {
+      "auth_help": "检查您的 Zen API Key。",
+      "key_required": "需要 API Key",
+      "key_invalid": "API Key 无效",
+      "key_valid": "API Key 有效",
+      "key_checking": "正在检查 API Key...",
+      "usage_unavailable": "用量接口不可用"
+    },
+    "openrouter": {
+      "spending_limit": "消费限制",
+      "auth_help": "检查您的 OpenRouter API Key。",
+      "spending_label": "已消费 (${spent} / ${limit})",
+      "budget_label": "预算 (${spent} / ${budget})",
+      "no_limit": "无消费限制",
+      "free": "免费",
+      "paid": "付费"
+    },
+    "copilot": {
+      "auth_help": "运行 `gh auth login` 重新认证。",
+      "gh_missing": "未找到 gh CLI",
+      "no_token": "无 Token",
+      "not_auth": "未认证",
+      "token_invalid": "Token 无效"
+    },
+    "common": {
+      "now": "现在",
+      "sun": "周日",
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六"
+    }
+  }
+}

@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# antigravity-usage-json
+# Wrapper: call antigravity-usage --json, sanitize, normalize, and cache.
+
+set -euo pipefail
+
+CACHE_DIR="${HOME}/.cache/noctalia/model-usage"
+CACHE_FILE="${CACHE_DIR}/antigravity.json"
+
+fail_json() {
+  local msg="${1:-unknown error}"
+  printf '{"ok":false,"provider":"antigravity","error":"%s"}\n' "$msg"
+  exit 0
+}
+
+mkdir -p "$CACHE_DIR"
+
+RAW=""
+if command -v antigravity-usage >/dev/null 2>&1; then
+  RAW=$(antigravity-usage --json 2>/dev/null || true)
+elif [ -x "${HOME}/.nix-profile/bin/antigravity-usage" ]; then
+  RAW=$("${HOME}/.nix-profile/bin/antigravity-usage" --json 2>/dev/null || true)
+fi
+
+# Skip 'antigravity usage' fallback as it may conflict with file opening behavior
+
+
+# Fallback: Node CLI from npm when standalone collector is unavailable.
+if [ -z "$RAW" ] && command -v pnpm >/dev/null 2>&1 && command -v node >/dev/null 2>&1; then
+  RAW=$(pnpm dlx antigravity-usage --json 2>/dev/null || true)
+elif [ -z "$RAW" ] && [ -x "${HOME}/.nix-profile/bin/pnpm" ] && [ -x "${HOME}/.nix-profile/bin/node" ]; then
+  RAW=$("${HOME}/.nix-profile/bin/pnpm" dlx antigravity-usage --json 2>/dev/null || true)
+fi
+
+if [ -z "$RAW" ]; then
+  fail_json "antigravity usage collector unavailable"
+fi
+
+# Validate JSON
+if ! echo "$RAW" | jq empty 2>/dev/null; then
+  fail_json "invalid json"
+fi
+
+# Sanitize and normalize with jq:
+# - Redact email
+# - Convert 0~1 percentages to 0~100
+# - Build standardized output
+RESULT=$(echo "$RAW" | jq '
+  def redact_email:
+    if . == null then null
+    elif type == "string" then
+      (split("@") | if length > 1 then
+        (.[0] | if length > 2 then .[:2] + ("*" * (length - 2)) else . end) + "@" + .[1]
+      else "***" end)
+    else .
+    end;
+
+  def pct_to_100(v):
+    if v == null then 0
+    elif v <= 1 then (v * 100 | round)
+    else (v | round)
+    end;
+
+  {
+    ok: true,
+    provider: "antigravity",
+    fetchedAt: (now | todate),
+    promptCredits: (
+      if (.prompt_credits or .promptCredits) then
+        (.prompt_credits // .promptCredits) as $pc |
+        {
+          available: ($pc.available // 0),
+          monthly: ($pc.monthly // 0),
+          usedPercent: (
+            if ($pc.usedPercent // $pc.usedPercentage // null) != null then
+              pct_to_100($pc.usedPercent // $pc.usedPercentage)
+            elif ($pc.monthly // 0) > 0 then
+              ((1 - (($pc.available // 0) / $pc.monthly)) * 100 | round)
+            else 0 end
+          ),
+          remainingPercent: (
+            if ($pc.remainingPercent // $pc.remainingPercentage // null) != null then
+              pct_to_100($pc.remainingPercent // $pc.remainingPercentage)
+            elif ($pc.monthly // 0) > 0 then
+              ((($pc.available // 0) / $pc.monthly) * 100 | round)
+            else 100 end
+          )
+        }
+      else null
+      end
+    ),
+    models: [
+      (.models // .quotas // [] | .[] |
+        (
+          if (.used_percent // .usage_percent // null) != null then
+            {
+              label: (.label // .model // .name // "Unknown"),
+              usedPercent: pct_to_100(.used_percent // .usage_percent),
+              remainingPercent: ([0, (100 - pct_to_100(.used_percent // .usage_percent))] | max),
+              resetTime: (.reset_time // .resets_at // .resetTime // null),
+              isExhausted: (.is_exhausted // (.remaining == 0) // false)
+            }
+          elif (.remainingPercentage // .remaining_percent // null) != null then
+            (pct_to_100(.remainingPercentage // .remaining_percent)) as $rp |
+            {
+              label: (.label // .model // .name // "Unknown"),
+              usedPercent: ([0, (100 - $rp)] | max),
+              remainingPercent: $rp,
+              resetTime: (.reset_time // .resets_at // .resetTime // null),
+              isExhausted: (.is_exhausted // .isExhausted // ($rp <= 0) // false)
+            }
+          else
+            {
+              label: (.label // .model // .name // "Unknown"),
+              usedPercent: 0,
+              remainingPercent: 100,
+              resetTime: (.reset_time // .resets_at // .resetTime // null),
+              isExhausted: (.is_exhausted // .isExhausted // false)
+            }
+          end
+        )
+      )
+    ]
+  }
+') || fail_json "jq processing failed"
+
+# Write cache atomically
+TMPFILE=$(mktemp "${CACHE_DIR}/.antigravity.json.XXXXXX")
+echo "$RESULT" > "$TMPFILE"
+mv "$TMPFILE" "$CACHE_FILE"
+
+echo "$RESULT"

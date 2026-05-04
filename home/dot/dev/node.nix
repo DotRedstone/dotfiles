@@ -1,10 +1,13 @@
 # ---
 # Module: Node.js Ecosystem
-# Description: Global pnpm; versions managed via project flakes & direnv
+# Description: Node runtime and JS toolchain required by local script collectors
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {
   home.packages = with pkgs; [
+    nodejs
     pnpm
+    gh
   ];
 }

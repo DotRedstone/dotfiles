@@ -8,5 +8,6 @@
   imports = [
     ./config.nix
     ./links.nix
+    ./scripts.nix
   ];
 }

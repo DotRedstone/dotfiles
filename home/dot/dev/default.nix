@@ -1,6 +1,7 @@
 # ---
 # Module: Development Entry
 # Description: Aggregated development environments for Warden
+# Scope: Home Manager
 # ---
 
 {
@@ -9,5 +10,6 @@
     ./java.nix
     ./node.nix
     ./python.nix
+    ./scripts-runtime.nix
   ];
 }

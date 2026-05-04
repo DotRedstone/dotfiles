@@ -1,0 +1,113 @@
+{
+  "general": {
+    "settings_title": "Model Usage Settings",
+    "section_general": "General",
+    "bar_display_mode": "Bar display mode",
+    "bar_display_mode_desc": "Show active provider or cycle between enabled providers",
+    "bar_display_mode_active": "Active provider",
+    "bar_display_mode_cycle": "Cycle providers",
+    "cycle_interval": "Cycle interval (seconds)",
+    "bar_metric": "Bar metric",
+    "bar_metric_desc": "What number to show in the bar capsule",
+    "bar_metric_prompts": "Prompts",
+    "bar_metric_tokens": "Tokens",
+    "bar_metric_usage": "Usage %",
+    "usage_display_mode": "Percentage display mode",
+    "usage_display_mode_desc": "Show used percentage or remaining percentage",
+    "usage_display_mode_usage": "Show used (Used)",
+    "usage_display_mode_remaining": "Show remaining (Remaining)",
+    "refresh_interval": "Refresh interval (seconds)",
+    "refresh_interval_desc": "Fallback polling interval when file watch misses changes",
+    "section_providers": "Providers",
+    "auth_local": "Local files",
+    "auth_github": "GitHub auth",
+    "auth_apikey": "API key",
+    "auth_cli": "CLI wrapper",
+    "reset_button": "Reset"
+  },
+  "panel": {
+    "no_providers": "No providers enabled. Enable providers in Settings.",
+    "waiting_data": " — waiting for data...",
+    "usage_suffix": " Usage",
+    "rate_limit_title": "Rate Limit Usage",
+    "resets_in": "Resets in {time}",
+    "today_title": "Today",
+    "prompts": "prompts",
+    "sessions": "sessions",
+    "tokens": "tokens",
+    "last_7_days": "Last 7 Days",
+    "all_time": "All-Time",
+    "messages": "messages",
+    "input": "Input",
+    "output": "Output",
+    "cache_read": "Cache Read",
+    "cache_write": "Cache Write"
+  },
+  "bar": {
+    "tooltip_today": " — Today: ",
+    "tooltip_prompts": " prompts, ",
+    "tooltip_sessions": " sessions, ",
+    "tooltip_tokens": " tokens",
+    "context_refresh": "Refresh",
+    "context_settings": "Widget Settings"
+  },
+  "providers": {
+    "claude_name": "Claude Code",
+    "codex_name": "Codex",
+    "copilot_name": "Copilot",
+    "openrouter_name": "OpenRouter",
+    "zen_name": "Zen (opencode.ai)",
+    "antigravity_name": "Antigravity",
+    "claude": {
+      "weekly_label": "Weekly (7-day)",
+      "session_label": "Session (5-hour)",
+      "auth_help": "Run `claude auth login` to restore authoritative usage.",
+      "waiting_auth": "Waiting for auth",
+      "token_expired": "Token expired"
+    },
+    "codex": {
+      "5h_window": "5h window",
+      "7d_window": "7d window",
+      "h_window": "h window",
+      "auth_help": "Run `codex` to authenticate."
+    },
+    "antigravity": {
+      "credits_label": "Prompt Credits",
+      "auth_help": "Data from antigravity-usage-json"
+    },
+    "zen": {
+      "auth_help": "Check your Zen API key.",
+      "key_required": "API key required",
+      "key_invalid": "Invalid API key",
+      "key_valid": "API key valid",
+      "key_checking": "Checking API key...",
+      "usage_unavailable": "Usage API unavailable"
+    },
+    "openrouter": {
+      "spending_limit": "Spending limit",
+      "auth_help": "Check your OpenRouter API key.",
+      "spending_label": "Spending (${spent} / ${limit})",
+      "budget_label": "Budget (${spent} / ${budget})",
+      "no_limit": "No spending limit",
+      "free": "Free",
+      "paid": "Paid"
+    },
+    "copilot": {
+      "auth_help": "Run `gh auth login` to re-authenticate.",
+      "gh_missing": "gh CLI not found",
+      "no_token": "No token",
+      "not_auth": "Not authenticated",
+      "token_invalid": "Token invalid"
+    },
+    "common": {
+      "now": "now",
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    }
+  }
+}

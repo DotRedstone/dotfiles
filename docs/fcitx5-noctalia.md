@@ -13,6 +13,16 @@
 
 Noctalia 使用 `user templates` 功能来监听系统调色盘的变化。当壁纸或配色方案改变时，Noctalia 会重新渲染位于 `~/.local/share/fcitx5/themes` 下的主题文件。
 
+## 热重载机制
+
+传统的 Fcitx5 主题同步通常需要重启输入法（`fcitx5 -r`），这会导致正在输入的内容（Preedit）被强制提交或清空。
+
+本系统通过 D-Bus 接口调用 `ReloadAddonConfig` 来实现热重载：
+```bash
+busctl --user call org.fcitx.Fcitx5 /controller org.fcitx.Fcitx.Controller1 ReloadAddonConfig s classicui
+```
+这种方式仅重载界面插件（`classicui`），能够在不重启进程的情况下更新主题颜色，且**不会打断正在进行的中文输入**。
+
 ## 主题类型
 
 系统预设了四种主要的 Noctalia Fcitx5 主题，分为两类定位：

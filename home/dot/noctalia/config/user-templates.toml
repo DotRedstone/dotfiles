@@ -65,7 +65,7 @@ output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-dark-sync/pa
 [templates.fcitx5_inflex_dark_highlight]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-dark-sync/highlight.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-dark-sync/highlight.svg"
-post_hook = "fcitx5 -r -d >/dev/null 2>&1 || systemctl --user restart fcitx5.service >/dev/null 2>&1 || true"
+post_hook = "busctl --user call org.fcitx.Fcitx5 /controller org.fcitx.Fcitx.Controller1 ReloadAddonConfig s classicui >/dev/null 2>&1 || true"
 
 [templates.chrome_theme_colors]
 input_path = "/home/dot/.dotfiles/home/dot/chrome/theme/colors.json.template"

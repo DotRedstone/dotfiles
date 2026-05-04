@@ -9,7 +9,7 @@ Noctalia 是系统的核心外壳 (Shell) 与视觉样式管理中心，基于 M
 ### 工作机制
 - **`input_path`**: 存放于 `.dotfiles` 仓库中的 `.template` 文件。
 - **`output_path`**: 渲染后的配置文件路径（通常位于 `~/.cache` 或应用配置目录）。
-- **`post_hook`**: 渲染完成后执行的命令（如 `fcitx5 -r -d`）。
+- **`post_hook`**: 渲染完成后执行的命令（如 `busctl ... ReloadAddonConfig`）。
 
 ### 受控应用列表
 | 应用 | 模板路径 | 输出路径 |

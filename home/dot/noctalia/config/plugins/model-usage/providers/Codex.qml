@@ -11,6 +11,7 @@ Item {
     property string providerIcon: "ai"
     property bool enabled: false
     property bool ready: false
+    property string usageStatusText: ""
 
     property real rateLimitPercent: -1
     property string rateLimitLabel: pluginApi?.tr("providers.codex.7d_window") ?? "Weekly (7-day)"
@@ -168,6 +169,7 @@ Item {
             const match = content.match(/model\s*=\s*"([^"]+)"/);
             if (match)
                 root.configModel = match[1];
+            root.ready = true;
         } catch (e) {
             Logger.e("model-usage/codex", "Failed to parse config.toml:", e);
         }
@@ -178,6 +180,7 @@ Item {
             const data = JSON.parse(content);
             if (data.auth_mode)
                 root.tierLabel = data.auth_mode;
+            root.ready = true;
         } catch (e) {
             Logger.e("model-usage/codex", "Failed to parse auth.json:", e);
         }
@@ -188,8 +191,13 @@ Item {
     }
 
     function parseSessionList(output) {
-        if (!output)
+        if (!output) {
+            root.sessionPaths = [];
+            root.sessionPathIndex = -1;
+            root.sessionSearchInProgress = false;
+            root.ready = true;
             return;
+        }
         const lines = output.trim().split("\n");
         const unique = {};
         for (let i = 0; i < lines.length; i++) {
@@ -204,6 +212,7 @@ Item {
             root.sessionPaths = [];
             root.sessionPathIndex = -1;
             root.sessionSearchInProgress = false;
+            root.ready = true;
             return;
         }
 
@@ -225,6 +234,7 @@ Item {
             root.latestSessionPath = root.sessionPaths[root.sessionPathIndex];
         } else {
             root.sessionSearchInProgress = false;
+            root.ready = true;
         }
     }
 
@@ -272,6 +282,8 @@ Item {
                     root.rateLimitLabel = pluginApi?.tr("providers.codex.5h_window") ?? "5h window";
                 else
                     root.rateLimitLabel = Math.round(rl.window_minutes / 60) + (pluginApi?.tr("providers.codex.h_window") ?? "h window");
+                
+                root.rateLimitResetAt = "";
                 if (rl.resets_at) {
                     const resetDate = new Date(rl.resets_at * 1000);
                     root.rateLimitResetAt = resetDate.toISOString();
@@ -292,6 +304,8 @@ Item {
                     root.secondaryRateLimitLabel = pluginApi?.tr("providers.codex.7d_window") ?? "Weekly (7-day)";
                 else
                     root.secondaryRateLimitLabel = Math.round(rl2.window_minutes / 60) + (pluginApi?.tr("providers.codex.h_window") ?? "h window");
+                
+                root.secondaryRateLimitResetAt = "";
                 if (rl2.resets_at) {
                     const resetDate2 = new Date(rl2.resets_at * 1000);
                     root.secondaryRateLimitResetAt = resetDate2.toISOString();
@@ -326,6 +340,7 @@ Item {
                 };
             }
 
+            root.ready = true;
             root.sessionSearchInProgress = false;
         } catch (e) {
             Logger.e("model-usage/codex", "Failed to parse session data:", e);

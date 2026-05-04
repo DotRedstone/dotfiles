@@ -3,13 +3,13 @@
     "todo_count_plural": "{count} 个待办事项",
     "todo_count_singular": "{count} 个待办事项"
   },
+  "actions": {
+    "widget_settings": "设置"
+  },
   "desktop_widget": {
     "empty_state": "暂无待办事项",
     "header_title": "待办事项列表",
     "items_count": "{active}/{total} 项"
-  },
-  "actions": {
-    "widget_settings": "设置"
   },
   "main": {
     "added_new_todo": "已添加新待办事项: ",
@@ -26,12 +26,12 @@
     "updated_todo_priority": "待办事项优先级已更新",
     "error": "错误",
     "error_text_empty": "待办事项内容不能为空",
-    "error_invalid_priority": "优先级必须是 high、medium 或 low",
-    "error_page_not_found": "未找到页面",
-    "error_todo_not_found": "未找到待办事项",
+    "error_invalid_priority": "优先级必须为高、中或低",
+    "error_page_not_found": "页面未找到",
+    "error_todo_not_found": "待办事项未找到",
     "error_create_failed": "创建待办事项失败",
     "error_update_failed": "更新待办事项失败",
-    "error_remove_failed": "移除待办事项失败",
+    "error_remove_failed": "删除待办事项失败",
     "error_rename_failed": "重命名页面失败",
     "error_delete_failed": "删除页面失败",
     "exported_todos": "已导出到 ",
@@ -46,6 +46,43 @@
     "priority_high": "高",
     "priority_medium": "中",
     "priority_low": "低"
+  },
+  "panel": {
+    "add_todo": {
+      "add_button": "添加",
+      "placeholder": "输入新的待办事项..."
+    },
+    "empty_state": {
+      "message": "暂无待办事项"
+    },
+    "header": {
+      "clear_completed_button": "清除已完成",
+      "export_button": "导出",
+      "title": "待办事项列表"
+    },
+    "todo_item": {
+      "delete_button_tooltip": "删除",
+      "edit_button_tooltip": "编辑",
+      "copy_button_tooltip": "复制",
+      "copied": "已复制到剪贴板"
+    },
+    "todo_details": {
+      "title": "待办事项详情",
+      "label_title": "标题：",
+      "label_status": "状态：",
+      "status_completed": "已完成",
+      "status_pending": "待处理",
+      "label_created": "创建时间：",
+      "label_priority": "优先级：",
+      "label_page": "页面：",
+      "label_details": "详情：",
+      "button_add_details": "添加",
+      "button_edit_details": "编辑",
+      "button_save": "保存",
+      "button_cancel": "取消",
+      "copy_details_button_tooltip": "复制",
+      "copied_details": "详情已复制到剪贴板"
+    }
   },
   "settings": {
     "background_color": {
@@ -63,7 +100,7 @@
     "export_path": {
       "label": "导出路径",
       "description": "导出待办事项文件的目录",
-      "placeholder": "例如 ~/Documents",
+      "placeholder": "例如：~/Documents",
       "select_folder": "选择文件夹"
     },
     "export_format": {
@@ -73,63 +110,30 @@
       "json": "JSON"
     },
     "export_empty_sections": {
-      "label": "显示空栏目",
-      "description": "导出时显示空的“进行中/已完成”栏目和页面"
-    },
-    "pages": {
-      "add_button": "添加页面",
-      "placeholder": "输入新页面名称",
-      "label": "管理页面",
-      "delete_button_tooltip": "删除",
-      "rename_button_tooltip": "重命名",
-      "confirm_delete_title": "确认删除",
-      "confirm_delete_message": "确定要删除页面 '{pageName}' 吗？\n\n该页面中的所有待办事项将转移到第一页。",
-      "cannot_delete_last": "无法删除最后一页",
-      "cannot_delete_default": "无法删除默认页面",
-      "name_exists": "页面名称已存在",
-      "empty_name": "页面名称不能为空",
-      "added_page": "已添加页面：",
-      "deleted_page": "页面已删除",
-      "renamed_page": "页面已重命名"
+      "label": "显示空分区",
+      "description": "导出时显示空的进行中/已完成分区和页面"
     },
     "priority_colors": {
       "label": "优先级颜色",
       "low_label": "低优先级：",
       "medium_label": "中优先级：",
       "high_label": "高优先级："
-    }
-  },
-  "panel": {
-    "add_todo": {
-      "add_button": "添加",
-      "placeholder": "输入新的待办事项..."
     },
-    "empty_state": {
-      "message": "暂无待办事项"
-    },
-    "header": {
-      "clear_completed_button": "清除已完成",
-      "export_button": "导出",
-      "title": "待办事项列表"
-    },
-    "todo_item": {
+    "pages": {
+      "label": "管理页面",
+      "placeholder": "输入新页面名称",
+      "add_button": "添加页面",
+      "empty_name": "页面名称不能为空",
+      "name_exists": "页面名称已存在",
+      "cannot_delete_default": "无法删除默认页面",
+      "cannot_delete_last": "无法删除最后一页",
+      "confirm_delete_title": "确认删除",
+      "confirm_delete_message": "确定要删除页面 '{pageName}' 吗？\n\n该页面中的所有待办事项将转移到第一页。",
+      "rename_button_tooltip": "重命名",
       "delete_button_tooltip": "删除",
-      "edit_button_tooltip": "编辑"
-    },
-    "todo_details": {
-      "title": "待办事项详情",
-      "label_title": "标题：",
-      "label_status": "状态：",
-      "status_completed": "已完成",
-      "status_pending": "待处理",
-      "label_created": "创建时间：",
-      "label_priority": "优先级：",
-      "label_page": "页面：",
-      "label_details": "详情：",
-      "button_add_details": "添加",
-      "button_edit_details": "编辑",
-      "button_save": "保存",
-      "button_cancel": "取消"
+      "added_page": "已添加页面：",
+      "deleted_page": "页面已删除",
+      "renamed_page": "页面已重命名"
     }
   }
 }

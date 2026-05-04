@@ -13,18 +13,18 @@
   },
   "main": {
     "added_new_todo": "Neues Todo hinzugefügt:",
-    "cleared_completed_todos": "Freigegeben",
-    "cleared_all_todos": "Alle Aufgaben erledigt",
+    "cleared_completed_todos": "Abgeschlossene Aufgaben gelöscht",
+    "cleared_all_todos": "Alle Aufgaben gelöscht",
     "completed_todos_suffix": "Erledigte Aufgaben",
     "not_found_suffix": "nicht gefunden",
-    "removed_todo": "Gelöschtes To-do-Element",
+    "removed_todo": "Aufgabe entfernt",
     "todo_completed": "abgeschlossen",
     "todo_marked_incomplete": "als unvollständig markiert",
     "todo_not_found": "Aufgabe mit ID",
     "todo_status_changed": "Aufgaben",
     "updated_todo": "Aufgabe aktualisiert",
     "updated_todo_priority": "Aufgabenpriorität aktualisiert",
-    "error": "Error",
+    "error": "Fehler",
     "error_text_empty": "Aufgabentext kann nicht leer sein",
     "error_invalid_priority": "Priorität muss Hoch, Mittel oder Niedrig sein",
     "error_page_not_found": "Seite nicht gefunden",
@@ -32,7 +32,7 @@
     "error_create_failed": "Aufgabe konnte nicht erstellt werden",
     "error_update_failed": "Aufgabe konnte nicht aktualisiert werden",
     "error_remove_failed": "Aufgabe konnte nicht entfernt werden",
-    "error_rename_failed": "Aufgabe konnte nicht umbenannt werden",
+    "error_rename_failed": "Seite konnte nicht umbenannt werden",
     "error_delete_failed": "Seite konnte nicht gelöscht werden",
     "exported_todos": "Exportiert nach ",
     "export_failed": "Aufgaben konnten nicht exportiert werden",
@@ -73,11 +73,15 @@
       "button_add_details": "Hinzufügen",
       "button_edit_details": "Bearbeiten",
       "button_save": "Speichern",
-      "button_cancel": "Abbrechen"
+      "button_cancel": "Abbrechen",
+      "copy_details_button_tooltip": "Kopieren",
+      "copied_details": "Details in Zwischenablage kopiert"
     },
     "todo_item": {
       "delete_button_tooltip": "Löschen",
-      "edit_button_tooltip": "Bearbeiten"
+      "edit_button_tooltip": "Bearbeiten",
+      "copy_button_tooltip": "Kopieren",
+      "copied": "In Zwischenablage kopiert"
     }
   },
   "settings": {
@@ -121,7 +125,7 @@
       "add_button": "Seite hinzufügen",
       "empty_name": "Name der Seite kann nicht leer sein",
       "name_exists": "Name der Seite existiert bereits",
-      "cannot_delete_default": "Standard Seite kann nicht gelöscht werden",
+      "cannot_delete_default": "Standardseite kann nicht gelöscht werden",
       "cannot_delete_last": "Letzte Seite kann nicht gelöscht werden",
       "confirm_delete_title": "Löschen bestätigen",
       "confirm_delete_message": "Möchtest du die Seite '{pageName}' wirklich löschen?\n\nAlle Aufgaben auf dieser Seite werden auf die erste Seite übertragen.",

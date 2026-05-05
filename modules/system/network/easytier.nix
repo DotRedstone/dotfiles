@@ -54,7 +54,7 @@ let
       ARGS+=("''${EXTRA[@]}")
     fi
 
-    echo "Starting EasyTier Core for network: $EASYTIER_NETWORK_NAME"
+    echo "Starting EasyTier Core"
     # Execute directly so it takes over the PID and receives signals
     exec ${pkgs.easytier}/bin/easytier-core "''${ARGS[@]}"
   '';
@@ -65,13 +65,13 @@ let
       exit 0
     fi
 
-    # Get peer count from easytier-cli
-    # We grep for lines starting with | and then count them, subtracting 3 for headers/separators
-    PEER_COUNT=$(${pkgs.easytier}/bin/easytier-cli peer 2>/dev/null | grep -c "^|" || echo 0)
-    
-    # If PEER_COUNT > 3, subtract 3 (header lines)
-    if [ "$PEER_COUNT" -gt 3 ]; then
-      PEER_COUNT=$((PEER_COUNT - 3))
+    # Basic status info
+    # Peer parsing is simplified to avoid multi-line output issues
+    RAW_COUNT=$(${pkgs.easytier}/bin/easytier-cli peer 2>/dev/null | grep -c "^|" || true)
+    if [ -z "$RAW_COUNT" ]; then RAW_COUNT=0; fi
+
+    if [ "$RAW_COUNT" -gt 3 ]; then
+      PEER_COUNT=$((RAW_COUNT - 3))
     else
       PEER_COUNT=0
     fi

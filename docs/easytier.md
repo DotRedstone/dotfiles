@@ -56,7 +56,11 @@ EASYTIER_EXTRA_ARGS="--hostname my-nixos --rpc-portal 127.0.0.1:15888"
 
 1. **敏感参数保护**: 所有网络名称、密钥、Peer 地址均存储在 `/persist` 分区，不进入 Nix Store。
 2. **权限隔离**: 服务使用 `CAP_NET_ADMIN` 和 `CAP_NET_RAW` 能力，无需以完整 root 权限运行所有逻辑（取决于 `easytier-core` 的实现细节，当前配置为 systemd 默认用户，通常为 root 以创建 TUN 设备）。
-3. **日志安全**: 启动脚本会打印组网名称，但不会打印组网密码。
+3. **日志安全**: 启动脚本仅打印启动信息，不会打印组网名称、密码、URI 或节点地址。
+4. **进程可见性**: 
+   - 由于当前采用命令行参数传递 `EASYTIER_URI` 或 `EASYTIER_NETWORK_SECRET`，本机有权限的用户（或通过 `ps` 命令）可能看到这些进程参数。
+   - 如果对隐私有极高要求，建议后续改为使用 `/persist/secrets/easytier.toml` 配置文件，并通过 `easytier-core -c` 方式启动。
+   - 在单用户可信机器上，当前环境变量方案是安全与便利的平衡点。
 
 ## 后续集成
 

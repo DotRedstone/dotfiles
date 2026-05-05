@@ -17,42 +17,46 @@ let
     fi
 
     # Validation
-    MISSING=""
-    if [ -z "$EASYTIER_NETWORK_NAME" ]; then MISSING="$MISSING EASYTIER_NETWORK_NAME"; fi
-    if [ -z "$EASYTIER_NETWORK_SECRET" ]; then MISSING="$MISSING EASYTIER_NETWORK_SECRET"; fi
+    ARGS=()
+    if [ -n "$EASYTIER_URI" ]; then
+      ARGS+=("-w" "$EASYTIER_URI")
+    else
+      MISSING=""
+      if [ -z "$EASYTIER_NETWORK_NAME" ]; then MISSING="$MISSING EASYTIER_NETWORK_NAME"; fi
+      if [ -z "$EASYTIER_NETWORK_SECRET" ]; then MISSING="$MISSING EASYTIER_NETWORK_SECRET"; fi
 
-    if [ -n "$MISSING" ]; then
-      echo "Error: Missing required environment variables:$MISSING" >&2
-      echo "Please configure them in /persist/secrets/easytier.env" >&2
-      exit 1
-    fi
+      if [ -n "$MISSING" ]; then
+        echo "Error: Missing required environment variables: please set EASYTIER_URI, or both EASYTIER_NETWORK_NAME and EASYTIER_NETWORK_SECRET" >&2
+        echo "Configure them in /persist/secrets/easytier.env" >&2
+        exit 1
+      fi
 
-    # Build arguments
-    ARGS=(
-      "--network-name" "$EASYTIER_NETWORK_NAME"
-      "--network-secret" "$EASYTIER_NETWORK_SECRET"
-    )
+      ARGS+=(
+        "--network-name" "$EASYTIER_NETWORK_NAME"
+        "--network-secret" "$EASYTIER_NETWORK_SECRET"
+      )
 
-    if [ -n "$EASYTIER_IPV4" ]; then
-      ARGS+=("--ipv4" "$EASYTIER_IPV4")
-    fi
+      if [ -n "$EASYTIER_IPV4" ]; then
+        ARGS+=("--ipv4" "$EASYTIER_IPV4")
+      fi
 
-    if [ -n "$EASYTIER_PEERS" ]; then
-      for peer in $EASYTIER_PEERS; do
-        ARGS+=("--peers" "$peer")
-      done
+      if [ -n "$EASYTIER_PEERS" ]; then
+        for peer in $EASYTIER_PEERS; do
+          ARGS+=("--peers" "$peer")
+        done
+      fi
     fi
 
     # Extra arguments from env
     if [ -n "$EASYTIER_EXTRA_ARGS" ]; then
       # Use read -ra to split by whitespace safely
       read -ra EXTRA <<< "$EASYTIER_EXTRA_ARGS"
-      ARGS+=("${EXTRA[@]}")
+      ARGS+=("''${EXTRA[@]}")
     fi
 
     echo "Starting EasyTier Core for network: $EASYTIER_NETWORK_NAME"
     # Execute directly so it takes over the PID and receives signals
-    exec ${pkgs.easytier}/bin/easytier-core "${ARGS[@]}"
+    exec ${pkgs.easytier}/bin/easytier-core "''${ARGS[@]}"
   '';
 
   easytier-status = pkgs.writeShellScriptBin "easytier-status" ''

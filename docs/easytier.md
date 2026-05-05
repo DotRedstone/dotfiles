@@ -9,6 +9,18 @@ EasyTier 服务会从以下路径读取参数：
 
 该文件由用户手动创建，内容示例如下：
 
+**方式一：使用快速连接 URI（推荐）**
+
+如果 Web 面板或控制台提供了一键连接的 `-w` 参数（例如 `easytier-core -w udp://[ip]:[port]/[network]`），你可以直接使用 URI：
+
+```bash
+EASYTIER_URI="udp://[ip]:[port]/[network]"
+# 可选：如果还需要附加参数，可以使用 EXTRA_ARGS
+# EASYTIER_EXTRA_ARGS="--hostname my-nixos"
+```
+
+**方式二：手动配置连接参数**
+
 ```bash
 # 组网名称 (必填)
 EASYTIER_NETWORK_NAME=your_network_name

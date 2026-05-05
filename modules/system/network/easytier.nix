@@ -1,7 +1,8 @@
 # ---
 # Module: Network - EasyTier
-# Description: Mesh VPN networking service using EasyTier Core
+# Description: Mesh VPN networking service (Manual Start Mode)
 # Scope: System
+# Notes: Auto-start is disabled by default. Start manually with 'easytier-restart'.
 # ---
 
 { pkgs, ... }:
@@ -95,7 +96,7 @@ in
   systemd.services.easytier = {
     description = "EasyTier Mesh VPN Service";
     after = [ "network.target" ];
-    wantedBy = [ "multi-user.target" ];
+    # wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
       Type = "simple";

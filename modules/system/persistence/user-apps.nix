@@ -24,6 +24,8 @@
       ".lmstudio"
       ".cache/lm-studio"
       ".config/rustdesk"
+      ".config/google-chrome"
+      ".local/share/zathura"
     ];
   };
 }

@@ -8,7 +8,7 @@
   programs.nixvim = {
     colorschemes.catppuccin.enable = true;
 
-    extraConfigLuaPost = ''
+    extraConfigLuaPre = ''
       local function read_noctalia_palette()
         local palette_path = vim.fn.expand("~/.cache/nvim_colors.lua")
         if vim.fn.filereadable(palette_path) == 1 then
@@ -44,7 +44,7 @@
         return true
       end
 
-      local function apply_noctalia_catppuccin()
+      _G.apply_noctalia_catppuccin = function()
         local custom_palette = read_noctalia_palette()
 
         require("catppuccin").setup({
@@ -130,10 +130,36 @@
         end
 
         vim.cmd.colorscheme(vim.o.background == "light" and "catppuccin-latte" or "catppuccin-mocha")
+
+        -- [Smear Cursor]
+        local smear_ok, smear_cursor = pcall(require, "smear-cursor")
+        if smear_ok then
+          smear_cursor.setup({
+            cursor_color = custom_palette.primary or "#ffffff",
+            normal_bg = custom_palette.base or "#000000",
+            stiffness = 0.72,
+            trailing_stiffness = 0.38,
+            trailing_exponent = 2,
+            distance_stop_animating = 0.08,
+            time_interval = 17,
+            delay_animation_start = 3,
+            max_length = 28,
+            color_levels = 16,
+            smear_between_buffers = true,
+            smear_between_neighbor_lines = true,
+            smear_to_cmd = true,
+            scroll_buffer_space = true,
+            hide_target_hack = true,
+            legacy_computing_symbols_support = false,
+            transparent_bg_fallback_color = "303030",
+          })
+        end
       end
 
-      apply_noctalia_catppuccin()
+      _G.apply_noctalia_catppuccin()
+    '';
 
+    extraConfigLuaPost = ''
       local noctalia_theme_group = vim.api.nvim_create_augroup("dot_noctalia_theme", { clear = true })
       vim.api.nvim_create_autocmd("BufWritePost", {
         group = noctalia_theme_group,
@@ -141,7 +167,7 @@
           vim.fn.expand("~/.cache/nvim_colors.lua"),
           vim.fn.expand("~/.local/state/quickshell/user/generated/colors.json"),
         },
-        callback = apply_noctalia_catppuccin,
+        callback = function() _G.apply_noctalia_catppuccin() end,
       })
     '';
   };

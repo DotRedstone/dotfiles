@@ -10,7 +10,7 @@
       enable = true;
       settings = {
         options = {
-          theme = "catppuccin";
+          theme = "auto";
           globalstatus = true;
           component_separators = { left = ""; right = ""; };
           section_separators = { left = ""; right = ""; };
@@ -65,25 +65,7 @@
 
     smear-cursor = {
       enable = true;
-      settings = {
-        smear_between_buffers = true;
-        smear_between_neighbor_lines = true;
-        smear_to_cmd = true;
-        scroll_buffer_space = true;
-        hide_target_hack = true;
-        legacy_computing_symbols_support = false;
-        stiffness = 0.72;
-        trailing_stiffness = 0.38;
-        trailing_exponent = 2;
-        distance_stop_animating = 0.08;
-        time_interval = 17;
-        delay_animation_start = 3;
-        max_length = 28;
-        color_levels = 16;
-        cursor_color.__raw = "nil";
-        normal_bg.__raw = "nil";
-        transparent_bg_fallback_color = "303030";
-      };
+      # Settings are managed dynamically in colorscheme.nix to sync with Noctalia colors
     };
 
     notify.enable = true;

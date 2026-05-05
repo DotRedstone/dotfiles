@@ -23,6 +23,7 @@
     treesitter-textobjects.enable = true;
     ts-autotag.enable = true;
     ts-comments.enable = true;
+    rainbow-delimiters.enable = true;
     render-markdown.enable = true;
     markdown-preview.enable = true;
   };

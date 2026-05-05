@@ -854,7 +854,7 @@
     },
     "wallpaper": {
         "automationEnabled": true,
-        "directory": "/home/dot/Pictures/GPT chara",
+        "directory": "/home/dot/Pictures",
         "enableMultiMonitorDirectories": false,
         "enabled": true,
         "favorites": [

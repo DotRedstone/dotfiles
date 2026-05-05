@@ -22,8 +22,9 @@ output "HDMI-A-1" {
 layout {
     gaps 14
     background-color "transparent"
-    center-focused-column "never"
+    center-focused-column "on-overflow"
     default-column-width { proportion 0.5; }
+
     focus-ring {
         width 3
         active-color "#b4befe"
@@ -39,98 +40,180 @@ blur {
 
 // [Keybindings]
 binds {
-    // Basic
-    Mod+Return { spawn "wezterm"; }
-    Mod+W { spawn "firefox"; }
-    Mod+E { spawn "nautilus"; }
-    Mod+Q { close-window; }
-    Mod+Shift+E { quit; }
+    // Noctalia
+    Mod+R hotkey-overlay-title="启动器" {
+        spawn "noctalia-shell" "ipc" "call" "launcher" "toggle";
+    }
 
-    // Mac-style Shortcuts (Super+Key → Ctrl+Key)
-    Mod+C repeat=false { spawn "niri-mac-shortcut" "copy"; }
-    Mod+V repeat=false { spawn "niri-mac-shortcut" "paste"; }
-    Mod+X repeat=false { spawn "niri-mac-shortcut" "cut"; }
-    Mod+Z repeat=false { spawn "niri-mac-shortcut" "undo"; }
-    Mod+Shift+Z repeat=false { spawn "niri-mac-shortcut" "redo"; }
-    Mod+A repeat=false { spawn "niri-mac-shortcut" "select-all"; }
-    Mod+S repeat=false { spawn "niri-mac-shortcut" "save"; }
-    Mod+Shift+V repeat=false { spawn "niri-mac-shortcut" "paste-plain"; }
+    Mod+N hotkey-overlay-title="通知" {
+        spawn "noctalia-shell" "ipc" "call" "notifications" "toggleHistory";
+    }
 
-    // Media & Fn Keys
-    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
-    XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-    XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-    XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+    Mod+B hotkey-overlay-title="剪贴板" {
+        spawn "noctalia-shell" "ipc" "call" "plugin:clipper" "toggle";
+    }
 
-    // Focus
-    Mod+L { focus-column-right; }
-    Mod+J { focus-window-down; }
-    Mod+K { focus-window-up; }
+    Mod+I hotkey-overlay-title="控制中心" {
+        spawn "noctalia-shell" "ipc" "call" "controlCenter" "toggle";
+    }
 
-    // Movement
-    Mod+Shift+L { move-column-right; }
-    Mod+Shift+J { move-window-down; }
-    Mod+Shift+K { move-window-up; }
+    Mod+P hotkey-overlay-title="电源" {
+        spawn "noctalia-shell" "ipc" "call" "sessionMenu" "toggle";
+    }
 
-    // Monitor Switching
-    Mod+Ctrl+H { move-column-to-monitor-left; }
-    Mod+Ctrl+L { move-column-to-monitor-right; }
+    Mod+Slash hotkey-overlay-title="快捷键" {
+        spawn "noctalia-shell" "ipc" "call" "plugin:keybind-cheatsheet" "toggle";
+    }
 
-    // Mouse & Scroll
-    Mod+WheelScrollDown      { focus-column-right; }
-    Mod+WheelScrollUp        { focus-column-left; }
-    Mod+Alt+WheelScrollDown  { focus-workspace-down; }
-    Mod+Alt+WheelScrollUp    { focus-workspace-up; }
+    // Applications
+    Mod+Return hotkey-overlay-title="终端" { spawn "wezterm"; }
+    Mod+W hotkey-overlay-title="Firefox" { spawn "firefox"; }
+    Mod+E hotkey-overlay-title="文件" { spawn "nautilus"; }
 
-    // Noctalia Integration
-    Mod+Shift+S { spawn "sh" "-c" "grim -g \"$(slurp)\" - | wl-copy"; }
-    Print { spawn "sh" "-c" "grim - | wl-copy"; }
-    Mod+R { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
-    Mod+N { spawn "noctalia-shell" "ipc" "call" "notifications" "toggle"; }
-    Mod+B { spawn "noctalia-shell" "ipc" "call" "plugin:clipper" "toggle"; }
-    Mod+I { spawn "noctalia-shell" "ipc" "call" "controlCenter" "toggle"; }
-    Mod+P { spawn "noctalia-shell" "ipc" "call" "power" "toggle"; }
+    // Mac-style Shortcuts
+    Mod+C repeat=false hotkey-overlay-title="复制" { spawn "niri-mac-shortcut" "copy"; }
+    Mod+V repeat=false hotkey-overlay-title="粘贴" { spawn "niri-mac-shortcut" "paste"; }
+    Mod+X repeat=false hotkey-overlay-title="剪切" { spawn "niri-mac-shortcut" "cut"; }
+    Mod+Z repeat=false hotkey-overlay-title="撤销" { spawn "niri-mac-shortcut" "undo"; }
+    Mod+Shift+Z repeat=false hotkey-overlay-title="重做" { spawn "niri-mac-shortcut" "redo"; }
+    Mod+A repeat=false hotkey-overlay-title="全选" { spawn "niri-mac-shortcut" "select-all"; }
+    Mod+S repeat=false hotkey-overlay-title="保存" { spawn "niri-mac-shortcut" "save"; }
+    Mod+Shift+V repeat=false hotkey-overlay-title="纯粘贴" { spawn "niri-mac-shortcut" "paste-plain"; }
+
+    // Window Focus
+    Mod+J hotkey-overlay-title="下窗口" { focus-window-down; }
+    Mod+K hotkey-overlay-title="上窗口" { focus-window-up; }
+
+    // Column Navigation
+    Mod+H hotkey-overlay-title="左列" { focus-column-left; }
+    Mod+L hotkey-overlay-title="右列" { focus-column-right; }
+    Mod+WheelScrollDown hotkey-overlay-title="右列" { focus-column-right; }
+    Mod+WheelScrollUp hotkey-overlay-title="左列" { focus-column-left; }
+
+    // Move Windows
+    Mod+Shift+J hotkey-overlay-title="窗口下移" { move-window-down; }
+    Mod+Shift+K hotkey-overlay-title="窗口上移" { move-window-up; }
+
+    // Move Columns
+    Mod+Shift+H hotkey-overlay-title="列左移" { move-column-left; }
+    Mod+Shift+L hotkey-overlay-title="列右移" { move-column-right; }
+    Mod+Ctrl+H hotkey-overlay-title="移到左屏" { move-column-to-monitor-left; }
+    Mod+Ctrl+L hotkey-overlay-title="移到右屏" { move-column-to-monitor-right; }
 
     // Window Management
-    Mod+F { maximize-column; }
-    Mod+Shift+F { fullscreen-window; }
-    Mod+Shift+C { center-column; }
-    Mod+Comma  { consume-window-into-column; }
-    Mod+Period { expel-window-from-column; }
+    Mod+Q hotkey-overlay-title="关闭" { close-window; }
+    Mod+F hotkey-overlay-title="最大化列" { maximize-column; }
+    Mod+Shift+F hotkey-overlay-title="全屏" { fullscreen-window; }
+    Mod+Comma hotkey-overlay-title="合并入列" { consume-window-into-column; }
+    Mod+Period hotkey-overlay-title="移出列" { expel-window-from-column; }
 
-    // Workspaces
-    Mod+1 { focus-workspace 1; }
-    Mod+2 { focus-workspace 2; }
-    Mod+3 { focus-workspace 3; }
-    Mod+4 { focus-workspace 4; }
-    Mod+5 { focus-workspace 5; }
-    Mod+6 { focus-workspace 6; }
-    Mod+7 { focus-workspace 7; }
-    Mod+8 { focus-workspace 8; }
-    Mod+9 { focus-workspace 9; }
-    Mod+0 { focus-workspace 10; }
+    // Other
+    Mod+Alt+F hotkey-overlay-title="居中" { center-column; }
+    Mod+Tab hotkey-overlay-title="总览" { toggle-overview; }
+    Mod+Shift+Space hotkey-overlay-title="浮动" { toggle-window-floating; }
+
+    // Workspace Navigation
+    Mod+Alt+WheelScrollDown hotkey-overlay-title="下工作区" { focus-workspace-down; }
+    Mod+Alt+WheelScrollUp hotkey-overlay-title="上工作区" { focus-workspace-up; }
+
+    Mod+1 hotkey-overlay-title="工作区 1" { focus-workspace 1; }
+    Mod+2 hotkey-overlay-title="工作区 2" { focus-workspace 2; }
+    Mod+3 hotkey-overlay-title="工作区 3" { focus-workspace 3; }
+    Mod+4 hotkey-overlay-title="工作区 4" { focus-workspace 4; }
+    Mod+5 hotkey-overlay-title="工作区 5" { focus-workspace 5; }
+    Mod+6 hotkey-overlay-title="工作区 6" { focus-workspace 6; }
+    Mod+7 hotkey-overlay-title="工作区 7" { focus-workspace 7; }
+    Mod+8 hotkey-overlay-title="工作区 8" { focus-workspace 8; }
+    Mod+9 hotkey-overlay-title="工作区 9" { focus-workspace 9; }
+    Mod+0 hotkey-overlay-title="工作区 10" { focus-workspace 10; }
 
     // Workspace Movement
-    Mod+Alt+1 { spawn "niri" "msg" "action" "move-column-to-workspace" "1" "--focus" "false"; }
-    Mod+Alt+2 { spawn "niri" "msg" "action" "move-column-to-workspace" "2" "--focus" "false"; }
-    Mod+Alt+3 { spawn "niri" "msg" "action" "move-column-to-workspace" "3" "--focus" "false"; }
-    Mod+Alt+4 { spawn "niri" "msg" "action" "move-column-to-workspace" "4" "--focus" "false"; }
-    Mod+Alt+5 { spawn "niri" "msg" "action" "move-column-to-workspace" "5" "--focus" "false"; }
-    Mod+Alt+6 { spawn "niri" "msg" "action" "move-column-to-workspace" "6" "--focus" "false"; }
-    Mod+Alt+7 { spawn "niri" "msg" "action" "move-column-to-workspace" "7" "--focus" "false"; }
-    Mod+Alt+8 { spawn "niri" "msg" "action" "move-column-to-workspace" "8" "--focus" "false"; }
-    Mod+Alt+9 { spawn "niri" "msg" "action" "move-column-to-workspace" "9" "--focus" "false"; }
-    Mod+Alt+0 { spawn "niri" "msg" "action" "move-column-to-workspace" "10" "--focus" "false"; }
+    // Hidden from cheatsheet to keep the panel compact.
+    Mod+Alt+1 hotkey-overlay-title=null {
+        spawn "niri" "msg" "action" "move-column-to-workspace" "1" "--focus" "false";
+    }
 
-    // Resizing
-    Mod+Minus { set-column-width "-10%"; }
-    Mod+Equal { set-column-width "+10%"; }
-    Mod+Shift+Minus { set-window-height "-10%"; }
-    Mod+Shift+Equal { set-window-height "+10%"; }
+    Mod+Alt+2 hotkey-overlay-title=null {
+        spawn "niri" "msg" "action" "move-column-to-workspace" "2" "--focus" "false";
+    }
+
+    Mod+Alt+3 hotkey-overlay-title=null {
+        spawn "niri" "msg" "action" "move-column-to-workspace" "3" "--focus" "false";
+    }
+
+    Mod+Alt+4 hotkey-overlay-title=null {
+        spawn "niri" "msg" "action" "move-column-to-workspace" "4" "--focus" "false";
+    }
+
+    Mod+Alt+5 hotkey-overlay-title=null {
+        spawn "niri" "msg" "action" "move-column-to-workspace" "5" "--focus" "false";
+    }
+
+    Mod+Alt+6 hotkey-overlay-title=null {
+        spawn "niri" "msg" "action" "move-column-to-workspace" "6" "--focus" "false";
+    }
+
+    Mod+Alt+7 hotkey-overlay-title=null {
+        spawn "niri" "msg" "action" "move-column-to-workspace" "7" "--focus" "false";
+    }
+
+    Mod+Alt+8 hotkey-overlay-title=null {
+        spawn "niri" "msg" "action" "move-column-to-workspace" "8" "--focus" "false";
+    }
+
+    Mod+Alt+9 hotkey-overlay-title=null {
+        spawn "niri" "msg" "action" "move-column-to-workspace" "9" "--focus" "false";
+    }
+
+    Mod+Alt+0 hotkey-overlay-title=null {
+        spawn "niri" "msg" "action" "move-column-to-workspace" "10" "--focus" "false";
+    }
+
+    // Column Width
+    Mod+Minus hotkey-overlay-title="列宽-" { set-column-width "-10%"; }
+    Mod+Equal hotkey-overlay-title="列宽+" { set-column-width "+10%"; }
+
+    // Window Height
+    Mod+Shift+Minus hotkey-overlay-title="窗口高-" { set-window-height "-10%"; }
+    Mod+Shift+Equal hotkey-overlay-title="窗口高+" { set-window-height "+10%"; }
+
+    // Screenshots
+    Mod+Shift+S hotkey-overlay-title="区域截图" {
+        spawn "sh" "-c" "grim -g \"$(slurp)\" - | wl-copy";
+    }
+
+    Print hotkey-overlay-title="全屏截图" {
+        spawn "sh" "-c" "grim - | wl-copy";
+    }
+
+    // Media & Fn Keys
+    XF86AudioRaiseVolume allow-when-locked=true hotkey-overlay-title="音量+" {
+        spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+";
+    }
+
+    XF86AudioLowerVolume allow-when-locked=true hotkey-overlay-title="音量-" {
+        spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-";
+    }
+
+    XF86AudioMute allow-when-locked=true hotkey-overlay-title="静音" {
+        spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle";
+    }
+
+    XF86AudioMicMute allow-when-locked=true hotkey-overlay-title="麦克风" {
+        spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle";
+    }
+
+    XF86MonBrightnessUp allow-when-locked=true hotkey-overlay-title="亮度+" {
+        spawn "brightnessctl" "set" "5%+";
+    }
+
+    XF86MonBrightnessDown allow-when-locked=true hotkey-overlay-title="亮度-" {
+        spawn "brightnessctl" "set" "5%-";
+    }
+
+    // System
+    Mod+Shift+E hotkey-overlay-title="退出 Niri" { quit; }
 }
-
 input {
     keyboard {
         numlock
@@ -153,6 +236,7 @@ window-rule {
     clip-to-geometry true
     draw-border-with-background false
     opacity 0.80
+
     background-effect {
         blur true
         xray true

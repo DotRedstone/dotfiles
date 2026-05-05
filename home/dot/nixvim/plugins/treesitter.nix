@@ -24,6 +24,10 @@
     ts-autotag.enable = true;
     ts-comments.enable = true;
     rainbow-delimiters.enable = true;
+    vim-matchup = {
+      enable = true;
+      settings.enable_surround = true;
+    };
     render-markdown.enable = true;
     markdown-preview.enable = true;
   };

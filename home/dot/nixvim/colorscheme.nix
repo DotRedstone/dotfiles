@@ -122,8 +122,29 @@
               peach = custom_palette.secondary,
               teal = custom_palette.secondary,
               lavender = custom_palette.primary,
+              on_primary = custom_palette.on_primary,
+              on_secondary = custom_palette.on_secondary,
+              on_tertiary = custom_palette.on_tertiary,
+              on_surface = custom_palette.on_surface,
+              primary_container = custom_palette.primary_container,
+              secondary_container = custom_palette.secondary_container,
+              tertiary_container = custom_palette.tertiary_container,
             },
           },
+          custom_highlights = function(colors)
+            return {
+              LineNr = { fg = colors.secondary_container },
+              CursorLineNr = { fg = colors.primary, style = { "bold" } },
+              Visual = { bg = colors.surface2, style = { "underline" } },
+              PmenuSel = { bg = colors.surface2, style = { "bold" } },
+              Pmenu = { fg = colors.text, bg = colors.surface0 },
+              MatchParen = { bg = colors.surface2, style = { "bold", "underline" } },
+              Comment = { fg = colors.subtext0, style = { "italic" } },
+              Search = { bg = colors.surface1 },
+              IncSearch = { bg = colors.surface2 },
+              UnexpectedDelimiters = { fg = colors.error },
+            }
+          end,
         })
 
         if not detect_system_theme() then

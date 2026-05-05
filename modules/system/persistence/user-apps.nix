@@ -21,6 +21,9 @@
       ".config/netease-cloud-music"
       ".config/obsidian"
       ".config/dconf"
+      ".lmstudio"
+      ".cache/lm-studio"
+      ".config/rustdesk"
     ];
   };
 }

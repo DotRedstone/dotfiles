@@ -11,7 +11,7 @@
 
     # Formatters and linters used by conform.nvim / nvim-lint.
     alejandra
-    nixfmt-rfc-style
+    nixfmt
     prettierd
     prettier
     stylua

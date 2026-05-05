@@ -6,7 +6,7 @@
 { inputs, pkgs, ... }:
 
 let
-  antigravity = inputs.antigravity-nix.packages.${pkgs.system}.google-antigravity-no-fhs;
+  antigravity = inputs.antigravity-nix.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-no-fhs;
 in
 {
   home.packages = [

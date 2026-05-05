@@ -42,15 +42,17 @@
 
     # [System - nrs]
     nixosConfigurations.warden = nixpkgs.lib.nixosSystem {
-      inherit system;
       specialArgs = { inherit inputs; };
-      modules = [ ./hosts/warden ];
+      modules = [ 
+        ./hosts/warden 
+        { nixpkgs.hostPlatform = system; }
+      ];
     };
 
     # [Home - hms]
     homeConfigurations."dot@warden" = home-manager.lib.homeManagerConfiguration {
       pkgs = import nixpkgs {
-        inherit system;
+        localSystem = system;
         config.allowUnfree = true;
       };
       extraSpecialArgs = { inherit inputs; };

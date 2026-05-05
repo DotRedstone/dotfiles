@@ -42,6 +42,8 @@
     ./office
     ./obsidian
     ./multimedia
+    ./lmstudio
+    ./rustdesk
 
     # --- Development ---
     ./nixvim

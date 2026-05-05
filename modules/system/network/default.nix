@@ -7,7 +7,7 @@
 { ... }: {
   imports = [
     ./networkmanager.nix
-    ./clash-verge.nix
+    ./flclash.nix
     ./firewall.nix
   ];
 }

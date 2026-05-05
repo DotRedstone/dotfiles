@@ -47,13 +47,13 @@
       mode = "n";
       key = "<leader>cc";
       action = "<cmd>CopilotChatToggle<cr>";
-      options = { desc = "Toggle Copilot Chat"; };
+      options = { desc = "开启/关闭 Copilot 聊天"; };
     }
     {
       mode = "v";
       key = "<leader>ce";
       action = "<cmd>CopilotChatExplain<cr>";
-      options = { desc = "Copilot Chat - Explain"; };
+      options = { desc = "Copilot 解释代码"; };
     }
   ];
 }

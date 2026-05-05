@@ -10,7 +10,7 @@
       mode = "i";
       key = "jk";
       action = "<Esc>";
-      options.desc = "Exit insert mode";
+      options.desc = "退出插入模式";
     }
 
     # Mac-style / Super shortcuts. The terminal must pass Super keys through.
@@ -18,37 +18,37 @@
       mode = [ "n" "v" ];
       key = "<D-c>";
       action = "\"+y";
-      options.desc = "Copy to system clipboard";
+      options.desc = "复制到剪贴板";
     }
     {
       mode = "i";
       key = "<D-c>";
       action = "<Esc>\"+ygi";
-      options.desc = "Copy to system clipboard";
+      options.desc = "复制到剪贴板";
     }
     {
       mode = [ "n" "v" ];
       key = "<D-v>";
       action = "\"+p";
-      options.desc = "Paste from system clipboard";
+      options.desc = "从剪贴板粘贴";
     }
     {
       mode = "i";
       key = "<D-v>";
       action = "<C-r>+";
-      options.desc = "Paste from system clipboard";
+      options.desc = "从剪贴板粘贴";
     }
     {
       mode = [ "n" "v" "i" ];
       key = "<D-s>";
       action = "<cmd>w<cr>";
-      options.desc = "Save file";
+      options.desc = "保存文件";
     }
     {
       mode = [ "n" "v" ];
       key = "<D-a>";
       action = "ggVG";
-      options.desc = "Select all";
+      options.desc = "全选";
     }
 
     # Window management
@@ -56,67 +56,67 @@
       mode = "n";
       key = "<C-h>";
       action = "<C-w>h";
-      options.desc = "Go to left window";
+      options.desc = "切换到左侧窗口";
     }
     {
       mode = "n";
       key = "<C-j>";
       action = "<C-w>j";
-      options.desc = "Go to lower window";
+      options.desc = "切换到下方窗口";
     }
     {
       mode = "n";
       key = "<C-k>";
       action = "<C-w>k";
-      options.desc = "Go to upper window";
+      options.desc = "切换到上方窗口";
     }
     {
       mode = "n";
       key = "<C-l>";
       action = "<C-w>l";
-      options.desc = "Go to right window";
+      options.desc = "切换到右侧窗口";
     }
     {
       mode = "n";
       key = "<C-Up>";
       action = "<cmd>resize +2<cr>";
-      options.desc = "Increase window height";
+      options.desc = "增加窗口高度";
     }
     {
       mode = "n";
       key = "<C-Down>";
       action = "<cmd>resize -2<cr>";
-      options.desc = "Decrease window height";
+      options.desc = "减少窗口高度";
     }
     {
       mode = "n";
       key = "<C-Left>";
       action = "<cmd>vertical resize -2<cr>";
-      options.desc = "Decrease window width";
+      options.desc = "减少窗口宽度";
     }
     {
       mode = "n";
       key = "<C-Right>";
       action = "<cmd>vertical resize +2<cr>";
-      options.desc = "Increase window width";
+      options.desc = "增加窗口宽度";
     }
     {
       mode = "n";
       key = "<leader>-";
       action = "<C-w>s";
-      options.desc = "Split window below";
+      options.desc = "水平拆分窗口";
     }
     {
       mode = "n";
       key = "<leader>|";
       action = "<C-w>v";
-      options.desc = "Split window right";
+      options.desc = "垂直拆分窗口";
     }
     {
       mode = "n";
       key = "<leader>wd";
       action = "<C-w>c";
-      options.desc = "Delete window";
+      options.desc = "关闭当前窗口";
     }
 
     # Buffers
@@ -124,13 +124,13 @@
       mode = "n";
       key = "<S-h>";
       action = "<cmd>bprevious<cr>";
-      options.desc = "Previous buffer";
+      options.desc = "上一个标签页";
     }
     {
       mode = "n";
       key = "<S-l>";
       action = "<cmd>bnext<cr>";
-      options.desc = "Next buffer";
+      options.desc = "下一个标签页";
     }
     {
       mode = "n";
@@ -148,13 +148,13 @@
       mode = "n";
       key = "<leader>bb";
       action = "<cmd>e #<cr>";
-      options.desc = "Switch to other buffer";
+      options.desc = "切换到最近缓冲区";
     }
     {
       mode = "n";
       key = "<leader>bd";
       action = "<cmd>lua Snacks.bufdelete()<cr>";
-      options.desc = "Delete buffer";
+      options.desc = "删除当前缓冲区";
     }
     {
       mode = "n";
@@ -168,43 +168,43 @@
       mode = "n";
       key = "<leader>w";
       action = "<cmd>w<cr>";
-      options.desc = "Save file";
+      options.desc = "保存当前文件";
     }
     {
       mode = "n";
       key = "<leader>q";
       action = "<cmd>q<cr>";
-      options.desc = "Quit";
+      options.desc = "关闭/退出";
     }
     {
       mode = "n";
       key = "<leader>qq";
       action = "<cmd>qa<cr>";
-      options.desc = "Quit all";
+      options.desc = "退出所有";
     }
     {
       mode = "n";
       key = "<leader>qQ";
       action = "<cmd>qa!<cr>";
-      options.desc = "Force quit all";
+      options.desc = "强制退出所有";
     }
     {
       mode = "n";
       key = "<leader>qs";
       action = "<cmd>lua require('persistence').load()<cr>";
-      options.desc = "Restore session";
+      options.desc = "恢复会话";
     }
     {
       mode = "n";
       key = "<leader>ql";
       action = "<cmd>lua require('persistence').load({ last = true })<cr>";
-      options.desc = "Restore last session";
+      options.desc = "恢复最后一次会话";
     }
     {
       mode = "n";
       key = "<leader>qd";
       action = "<cmd>lua require('persistence').stop()<cr>";
-      options.desc = "Do not save session";
+      options.desc = "本次不保存会话";
     }
 
     # Movement and editing
@@ -212,37 +212,37 @@
       mode = "n";
       key = "<A-j>";
       action = "<cmd>m .+1<cr>==";
-      options.desc = "Move line down";
+      options.desc = "下移当前行";
     }
     {
       mode = "n";
       key = "<A-k>";
       action = "<cmd>m .-2<cr>==";
-      options.desc = "Move line up";
+      options.desc = "上移当前行";
     }
     {
       mode = "i";
       key = "<A-j>";
       action = "<esc><cmd>m .+1<cr>==gi";
-      options.desc = "Move line down";
+      options.desc = "下移当前行";
     }
     {
       mode = "i";
       key = "<A-k>";
       action = "<esc><cmd>m .-2<cr>==gi";
-      options.desc = "Move line up";
+      options.desc = "上移当前行";
     }
     {
       mode = "v";
       key = "<A-j>";
       action = ":m '>+1<cr>gv=gv";
-      options.desc = "Move selection down";
+      options.desc = "下移选中行";
     }
     {
       mode = "v";
       key = "<A-k>";
       action = ":m '<-2<cr>gv=gv";
-      options.desc = "Move selection up";
+      options.desc = "上移选中行";
     }
     {
       mode = "v";
@@ -262,19 +262,19 @@
       mode = [ "i" "n" ];
       key = "<esc>";
       action = "<cmd>noh<cr><esc>";
-      options.desc = "Escape and clear hlsearch";
+      options.desc = "清除搜索高亮";
     }
     {
       mode = "n";
       key = "n";
       action = "nzzzv";
-      options.desc = "Next search result";
+      options.desc = "跳转到下一个搜索结果";
     }
     {
       mode = "n";
       key = "N";
       action = "Nzzzv";
-      options.desc = "Previous search result";
+      options.desc = "跳转到上一个搜索结果";
     }
   ];
 }

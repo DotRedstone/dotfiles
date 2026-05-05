@@ -93,31 +93,33 @@
 
   # Keymaps related to these plugins
   programs.nixvim.keymaps = [
-    { mode = "n"; key = "<leader>,"; action = "<cmd>lua Snacks.picker.buffers()<cr>"; options.desc = "Buffers"; }
-    { mode = "n"; key = "<leader>/"; action = "<cmd>lua Snacks.picker.grep()<cr>"; options.desc = "Grep"; }
-    { mode = "n"; key = "<leader>:"; action = "<cmd>lua Snacks.picker.command_history()<cr>"; options.desc = "Command history"; }
-    { mode = "n"; key = "<leader>e"; action = "<cmd>lua Snacks.explorer()<cr>"; options.desc = "Explorer"; }
-    { mode = "n"; key = "<leader>E"; action = "<cmd>Neotree reveal<cr>"; options.desc = "Explorer reveal"; }
-    { mode = "n"; key = "<leader>ff"; action = "<cmd>lua Snacks.picker.files()<cr>"; options.desc = "Find files"; }
-    { mode = "n"; key = "<leader>fg"; action = "<cmd>lua Snacks.picker.grep()<cr>"; options.desc = "Grep"; }
-    { mode = "n"; key = "<leader>fG"; action = "<cmd>lua Snacks.picker.git_files()<cr>"; options.desc = "Find git files"; }
-    { mode = "n"; key = "<leader>fr"; action = "<cmd>lua Snacks.picker.recent()<cr>"; options.desc = "Recent files"; }
-    { mode = "n"; key = "<leader>fb"; action = "<cmd>lua Snacks.picker.buffers()<cr>"; options.desc = "Buffers"; }
-    { mode = "n"; key = "<leader>fh"; action = "<cmd>lua Snacks.picker.help()<cr>"; options.desc = "Help pages"; }
-    { mode = "n"; key = "<leader>sg"; action = "<cmd>lua Snacks.picker.grep()<cr>"; options.desc = "Grep"; }
-    { mode = "n"; key = "<leader>sw"; action = "<cmd>lua Snacks.picker.grep_word()<cr>"; options.desc = "Word"; }
-    { mode = "n"; key = "<leader>sh"; action = "<cmd>lua Snacks.picker.help()<cr>"; options.desc = "Help pages"; }
-    { mode = "n"; key = "<leader>sk"; action = "<cmd>lua Snacks.picker.keymaps()<cr>"; options.desc = "Keymaps"; }
-    { mode = "n"; key = "<leader>ss"; action = "<cmd>lua Snacks.picker.lsp_symbols()<cr>"; options.desc = "LSP symbols"; }
-    { mode = "n"; key = "<leader>sS"; action = "<cmd>lua Snacks.picker.lsp_workspace_symbols()<cr>"; options.desc = "Workspace symbols"; }
-    { mode = "n"; key = "<leader>un"; action = "<cmd>lua Snacks.notifier.hide()<cr>"; options.desc = "Dismiss notifications"; }
-    { mode = "n"; key = "<leader>z"; action = "<cmd>lua Snacks.zen()<cr>"; options.desc = "Zen mode"; }
+    { mode = "n"; key = "<leader>,"; action = "<cmd>lua Snacks.picker.buffers()<cr>"; options.desc = "切换缓冲区"; }
+    { mode = "n"; key = "<leader>/"; action = "<cmd>lua Snacks.picker.grep()<cr>"; options.desc = "全局搜索 (Grep)"; }
+    { mode = "n"; key = "<leader>:"; action = "<cmd>lua Snacks.picker.command_history()<cr>"; options.desc = "命令历史"; }
+    { mode = "n"; key = "<leader>e"; action = "<cmd>lua Snacks.explorer()<cr>"; options.desc = "文件管理器"; }
+    { mode = "n"; key = "<leader>E"; action = "<cmd>Neotree reveal<cr>"; options.desc = "定位当前文件"; }
+    { mode = "n"; key = "<leader>ff"; action = "<cmd>lua Snacks.picker.files()<cr>"; options.desc = "查找文件"; }
+    { mode = "n"; key = "<leader>fg"; action = "<cmd>lua Snacks.picker.grep()<cr>"; options.desc = "全局搜索"; }
+    { mode = "n"; key = "<leader>fG"; action = "<cmd>lua Snacks.picker.git_files()<cr>"; options.desc = "查找 Git 文件"; }
+    { mode = "n"; key = "<leader>fr"; action = "<cmd>lua Snacks.picker.recent()<cr>"; options.desc = "最近文件"; }
+    { mode = "n"; key = "<leader>fb"; action = "<cmd>lua Snacks.picker.buffers()<cr>"; options.desc = "查找缓冲区"; }
+    { mode = "n"; key = "<leader>fh"; action = "<cmd>lua Snacks.picker.help()<cr>"; options.desc = "帮助文档"; }
+    { mode = "n"; key = "<leader>sg"; action = "<cmd>lua Snacks.picker.grep()<cr>"; options.desc = "全局搜索"; }
+    { mode = "n"; key = "<leader>sw"; action = "<cmd>lua Snacks.picker.grep_word()<cr>"; options.desc = "搜索当前单词"; }
+    { mode = "n"; key = "<leader>sh"; action = "<cmd>lua Snacks.picker.help()<cr>"; options.desc = "帮助文档"; }
+    { mode = "n"; key = "<leader>sk"; action = "<cmd>lua Snacks.picker.keymaps()<cr>"; options.desc = "查看快捷键"; }
+    { mode = "n"; key = "<leader>ss"; action = "<cmd>lua Snacks.picker.lsp_symbols()<cr>"; options.desc = "LSP 符号"; }
+    { mode = "n"; key = "<leader>sS"; action = "<cmd>lua Snacks.picker.lsp_workspace_symbols()<cr>"; options.desc = "工作区符号"; }
+    { mode = "n"; key = "<leader>un"; action = "<cmd>lua Snacks.notifier.hide()<cr>"; options.desc = "清除所有通知"; }
+    { mode = "n"; key = "<leader>z"; action = "<cmd>lua Snacks.zen()<cr>"; options.desc = "禅模式"; }
     { mode = "n"; key = "<leader>fF"; action = "<cmd>Telescope find_files<cr>"; options.desc = "Find files (Telescope)"; }
     { mode = "n"; key = "<leader>sG"; action = "<cmd>Telescope live_grep<cr>"; options.desc = "Grep (Telescope)"; }
-    { mode = "n"; key = "<leader>bp"; action = "<cmd>BufferLineTogglePin<cr>"; options.desc = "Toggle pin"; }
-    { mode = "n"; key = "<leader>bP"; action = "<cmd>BufferLineGroupClose ungrouped<cr>"; options.desc = "Delete non-pinned buffers"; }
-    { mode = "n"; key = "<leader>br"; action = "<cmd>BufferLineCloseRight<cr>"; options.desc = "Delete buffers to the right"; }
-    { mode = "n"; key = "<leader>bl"; action = "<cmd>BufferLineCloseLeft<cr>"; options.desc = "Delete buffers to the left"; }
-    { mode = "n"; key = "<leader>bo"; action = "<cmd>BufferLineCloseOthers<cr>"; options.desc = "Delete other buffers"; }
+    { mode = "n"; key = "<leader>bp"; action = "<cmd>BufferLineTogglePin<cr>"; options.desc = "固定标签页"; }
+    { mode = "n"; key = "<leader>bP"; action = "<cmd>BufferLineGroupClose ungrouped<cr>"; options.desc = "关闭所有未固定标签"; }
+    { mode = "n"; key = "<leader>br"; action = "<cmd>BufferLineCloseRight<cr>"; options.desc = "关闭右侧所有标签"; }
+    { mode = "n"; key = "<leader>bl"; action = "<cmd>BufferLineCloseLeft<cr>"; options.desc = "关闭左侧所有标签"; }
+    { mode = "n"; key = "<leader>bo"; action = "<cmd>BufferLineCloseOthers<cr>"; options.desc = "关闭其他所有标签"; }
+    { mode = [ "n" "t" ]; key = "<C-/>"; action = "<cmd>lua Snacks.terminal.toggle()<cr>"; options.desc = "切换终端"; }
+    { mode = [ "n" "t" ]; key = "<C-_>"; action = "<cmd>lua Snacks.terminal.toggle()<cr>"; options.desc = "切换终端"; }
   ];
 }

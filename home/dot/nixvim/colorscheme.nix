@@ -85,6 +85,7 @@
             neotree = true,
             noice = true,
             notify = true,
+            rainbow_delimiters = true,
             snacks = true,
             telescope = {
               enabled = true,

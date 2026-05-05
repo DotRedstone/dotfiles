@@ -1,19 +1,11 @@
 # ---
 # Module: NixVim - Completion Plugins
-# Description: Blink-cmp completion engine with Copilot and snippet support
+# Description: Completion engine with Copilot and snippet support
 # Scope: Home Manager
 # ---
 
 { ... }: {
   programs.nixvim.plugins = {
-    copilot-lua = {
-      enable = true;
-      settings = {
-        suggestion.enabled = false;
-        panel.enabled = false;
-      };
-    };
-
     blink-copilot.enable = true;
     blink-emoji.enable = true;
     blink-cmp = {

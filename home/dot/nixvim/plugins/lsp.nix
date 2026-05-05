@@ -5,6 +5,20 @@
 # ---
 
 { ... }: {
+  programs.nixvim.extraConfigLuaPre = ''
+    -- [LSP] Log level
+    vim.lsp.set_log_level("warn")
+
+    -- [UI] Silence specific noise
+    local original_notify = vim.notify
+    vim.notify = function(msg, level, opts)
+      if msg:find("/<default workspace root>") or msg:match("SQLite is an experimental feature") or msg:find("Policy watcher") then
+        return
+      end
+      original_notify(msg, level, opts)
+    end
+  '';
+
   programs.nixvim.plugins = {
     lsp = {
       enable = true;
@@ -34,9 +48,46 @@
             semanticTokens = "disable";
           };
         };
-        nil_ls.enable = true;
-        pyright.enable = true;
-        ruff.enable = true;
+        nil_ls = {
+          enable = true;
+          extraOptions = {
+            root_dir = {
+              __raw = ''
+                function(fname)
+                  return require('lspconfig.util').root_pattern('flake.nix', '.git', 'default.nix')(fname) or vim.fn.getcwd()
+                end
+              '';
+            };
+          };
+        };
+        pyright = {
+          enable = true;
+          extraOptions = {
+            root_dir = {
+              __raw = ''
+                function(fname)
+                  return require('lspconfig.util').root_pattern('pyproject.toml', 'setup.py', '.git')(fname) or vim.fn.getcwd()
+                end
+              '';
+            };
+          };
+        };
+        ruff = {
+          enable = true;
+          onAttach.function = ''
+            -- [Conflicts] Handled by Pyright
+            client.server_capabilities.hoverProvider = false
+          '';
+          extraOptions = {
+            root_dir = {
+              __raw = ''
+                function(fname)
+                  return require('lspconfig.util').root_pattern('pyproject.toml', 'ruff.toml', '.git', 'setup.py')(fname) or vim.fn.getcwd()
+                end
+              '';
+            };
+          };
+        };
         sqls.enable = true;
         tailwindcss.enable = true;
         taplo.enable = true;

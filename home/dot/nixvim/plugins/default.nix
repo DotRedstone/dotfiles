@@ -14,5 +14,6 @@
     ./git.nix
     ./completion.nix
     ./treesitter.nix
+    ./copilot.nix
   ];
 }

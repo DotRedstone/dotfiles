@@ -6,9 +6,9 @@
 
 { ... }: {
   # [Proxy Client - Clash Verge Rev]
-  # NixOS official module handles TUN privileges automatically
+  # Kept as disabled fallback only; active proxy client is FlClash.
   programs.clash-verge = {
-    enable = true;
+    enable = false;
     tunMode = true;
     autoStart = false;
   };

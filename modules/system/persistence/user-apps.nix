@@ -9,7 +9,8 @@
     directories = [
       ".mozilla"
       ".config/mozilla"
-      ".config/clash-verge-rev"
+      ".config/com.follow.clash"
+      ".local/share/com.follow.clash"
       ".xwechat"
       "xwechat_files"
       ".local/share/AyuGramDesktop"

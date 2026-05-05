@@ -9,5 +9,6 @@
     ./networkmanager.nix
     ./flclash.nix
     ./firewall.nix
+    ./easytier.nix
   ];
 }

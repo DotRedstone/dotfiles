@@ -5,20 +5,27 @@ return {
   crust = "{{colors.surface_container_low.default.hex}}",
 
   surface0 = "{{colors.surface_container_low.default.hex}}",
-  surface1 = "{{colors.surface_container.default.hex}}",
-  surface2 = "{{colors.surface_container_high.default.hex}}",
+  surface1 = "{{colors.outline.default.hex}}",
+  surface2 = "{{colors.surface_variant.default.hex}}",
 
-  overlay0 = "{{colors.outline_variant.default.hex}}",
+  overlay0 = "{{colors.on_surface_variant.default.hex}}",
   overlay1 = "{{colors.outline.default.hex}}",
-  overlay2 = "{{colors.on_surface_variant.default.hex}}",
+  overlay2 = "{{colors.outline_variant.default.hex}}",
 
   text = "{{colors.on_surface.default.hex}}",
   subtext0 = "{{colors.on_surface_variant.default.hex}}",
   subtext1 = "{{colors.on_surface.default.hex}}",
 
   primary = "{{colors.primary.default.hex}}",
+  on_primary = "{{colors.on_primary.default.hex}}",
+  primary_container = "{{colors.primary_container.default.hex}}",
   secondary = "{{colors.secondary.default.hex}}",
+  on_secondary = "{{colors.on_secondary.default.hex}}",
+  secondary_container = "{{colors.secondary_container.default.hex}}",
   tertiary = "{{colors.tertiary.default.hex}}",
+  on_tertiary = "{{colors.on_tertiary.default.hex}}",
+  tertiary_container = "{{colors.tertiary_container.default.hex}}",
+  on_surface = "{{colors.on_surface.default.hex}}",
   error = "{{colors.error.default.hex}}",
 
   blue = "{{colors.primary.default.hex}}",

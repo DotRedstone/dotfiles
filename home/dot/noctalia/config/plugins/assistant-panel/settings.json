@@ -21,7 +21,7 @@
   "translator": {
     "backend": "google",
     "sourceLanguage": "auto",
-    "targetLanguage": "en",
+    "targetLanguage": "zh",
     "realTimeTranslation": true,
     "deeplApiKey": ""
   },

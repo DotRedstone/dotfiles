@@ -43,19 +43,6 @@
       };
     };
 
-    neo-tree = {
-      enable = true;
-      settings = {
-        close_if_last_window = true;
-        enable_git_status = true;
-        enable_diagnostics = true;
-        popup_border_style = "rounded";
-        filesystem = {
-          follow_current_file.enabled = true;
-          filtered_items = { visible = true; hide_dotfiles = false; hide_gitignored = false; };
-        };
-      };
-    };
 
     mini = {
       enable = true;
@@ -97,7 +84,6 @@
     { mode = "n"; key = "<leader>/"; action = "<cmd>lua Snacks.picker.grep()<cr>"; options.desc = "全局搜索 (Grep)"; }
     { mode = "n"; key = "<leader>:"; action = "<cmd>lua Snacks.picker.command_history()<cr>"; options.desc = "命令历史"; }
     { mode = "n"; key = "<leader>e"; action = "<cmd>lua Snacks.explorer()<cr>"; options.desc = "文件管理器"; }
-    { mode = "n"; key = "<leader>E"; action = "<cmd>Neotree reveal<cr>"; options.desc = "定位当前文件"; }
     { mode = "n"; key = "<leader>ff"; action = "<cmd>lua Snacks.picker.files()<cr>"; options.desc = "查找文件"; }
     { mode = "n"; key = "<leader>fg"; action = "<cmd>lua Snacks.picker.grep()<cr>"; options.desc = "全局搜索"; }
     { mode = "n"; key = "<leader>fG"; action = "<cmd>lua Snacks.picker.git_files()<cr>"; options.desc = "查找 Git 文件"; }

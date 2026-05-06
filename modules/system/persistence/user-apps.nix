@@ -13,7 +13,7 @@
       ".local/share/com.follow.clash"
       ".xwechat"
       "xwechat_files"
-      ".local/share/AyuGramDesktop"
+      ".local/share/TelegramDesktop"
       ".local/share/fcitx5"
       ".config/fcitx5"
       ".config/QQ"

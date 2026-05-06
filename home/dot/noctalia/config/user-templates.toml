@@ -71,3 +71,11 @@ post_hook = "busctl --user call org.fcitx.Fcitx5 /controller org.fcitx.Fcitx.Con
 input_path = "/home/dot/.dotfiles/home/dot/chrome/theme/colors.json.template"
 output_path = "/home/dot/.cache/chrome-noctalia-theme/colors.json"
 post_hook = "/home/dot/.nix-profile/bin/chrome-theme-injector >/dev/null 2>&1; pywalfox update >/dev/null 2>&1 || true"
+
+[templates.opencode_theme]
+input_path = "/home/dot/.dotfiles/home/dot/cli-tools/opencode-theme.json.template"
+output_path = "/home/dot/.config/opencode/themes/noctalia.json"
+
+[templates.opencode_tui]
+input_path = "/home/dot/.dotfiles/home/dot/cli-tools/opencode-tui.json.template"
+output_path = "/home/dot/.config/opencode/tui.json"

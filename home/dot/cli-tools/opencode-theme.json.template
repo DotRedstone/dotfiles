@@ -1,0 +1,32 @@
+{
+  "$schema": "https://opencode.ai/theme.json",
+  "defs": {
+    "primary": "{{colors.primary.default.hex}}",
+    "secondary": "{{colors.secondary.default.hex}}",
+    "tertiary": "{{colors.tertiary.default.hex}}",
+    "error": "{{colors.error.default.hex}}",
+    "outline": "{{colors.outline.default.hex}}",
+    "surface": "{{colors.surface.default.hex}}",
+    "on_surface": "{{colors.on_surface.default.hex}}",
+    "on_surface_variant": "{{colors.on_surface_variant.default.hex}}",
+    "surface_variant": "{{colors.surface_variant.default.hex}}"
+  },
+  "theme": {
+    "primary": "primary",
+    "secondary": "secondary",
+    "accent": "tertiary",
+    "text": "on_surface",
+    "textMuted": "on_surface_variant",
+    "background": "surface",
+    "backgroundPanel": "surface_variant",
+    "backgroundElement": "surface_variant",
+    "border": "outline",
+    "borderActive": "primary",
+    "error": "error",
+    "syntaxComment": "outline",
+    "syntaxKeyword": "tertiary",
+    "syntaxFunction": "primary",
+    "syntaxString": "secondary",
+    "syntaxNumber": "tertiary"
+  }
+}

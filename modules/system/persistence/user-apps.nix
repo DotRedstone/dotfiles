@@ -30,6 +30,9 @@
       # [AI Agent]
       ".config/opencode"
       ".local/share/opencode"
+
+      # [Image Hosting]
+      ".config/piclist"
     ];
   };
 }

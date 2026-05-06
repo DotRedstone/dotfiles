@@ -42,6 +42,7 @@
     ./office
     ./obsidian
     ./multimedia
+    ./piclist
     ./lmstudio
     ./rustdesk
 

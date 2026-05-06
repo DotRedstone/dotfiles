@@ -1,11 +1,11 @@
 # ---
 # Module: Telegram
-# Description: AyuGram Desktop client with Wayland and QT input optimizations
+# Description: Official Telegram Desktop client with Wayland and QT input optimizations
 # ---
 
 { pkgs, ... }: {
   # [Packages]
-  home.packages = [ pkgs.ayugram-desktop ];
+  home.packages = [ pkgs.telegram-desktop ];
 
   # [Environment Variables]
   # Optimized for Wayland/Niri and Fcitx5 Chinese input

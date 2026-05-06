@@ -134,10 +134,15 @@ let
   codex-usage-json = pkgs.writeShellScriptBin "codex-usage-json" ''
     exec ${pkgs.nodejs}/bin/node ${./scripts/codex-usage-json} "$@"
   '';
+
+  screen-time-json = pkgs.writeShellScriptBin "screen-time-json" ''
+    exec ${pkgs.nodejs}/bin/node ${./scripts/screen-time-json} "$@"
+  '';
 in
 {
   home.packages = [
     antigravity-usage-json
     codex-usage-json
+    screen-time-json
   ];
 }

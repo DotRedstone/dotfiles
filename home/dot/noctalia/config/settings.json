@@ -343,6 +343,15 @@
                 },
                 {
                     "defaultSettings": {
+                        "barDisplayMode": "duration",
+                        "refreshIntervalSec": 60,
+                        "showCurrentApp": true,
+                        "topAppLimit": 5
+                    },
+                    "id": "plugin:screen-time"
+                },
+                {
+                    "defaultSettings": {
                         "barCycleIntervalSec": 5,
                         "barDisplayMode": "active",
                         "barMetric": "prompts",

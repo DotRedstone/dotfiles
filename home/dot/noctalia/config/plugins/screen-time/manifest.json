@@ -1,0 +1,31 @@
+{
+  "id": "screen-time",
+  "name": "Screen Time",
+  "version": "0.1.0",
+  "minNoctaliaVersion": "3.6.0",
+  "author": "dotfiles",
+  "license": "MIT",
+  "description": "Shows local ActivityWatch screen-time summaries without exposing window titles or URLs.",
+  "tags": [
+    "Bar",
+    "Productivity",
+    "Privacy"
+  ],
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml",
+    "panel": "Panel.qml",
+    "settings": "Settings.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "defaultSettings": {
+      "refreshIntervalSec": 60,
+      "topAppLimit": 5,
+      "showCurrentApp": true,
+      "barDisplayMode": "duration"
+    }
+  }
+}

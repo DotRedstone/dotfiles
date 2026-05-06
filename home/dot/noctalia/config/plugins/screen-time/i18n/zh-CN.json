@@ -1,0 +1,51 @@
+{
+  "general": {
+    "never": "从未",
+    "unknown": "未知",
+    "none": "无"
+  },
+  "status": {
+    "waiting": "等待 ActivityWatch",
+    "connected": "ActivityWatch 已连接",
+    "unavailable": "ActivityWatch 不可用",
+    "no_cache": "暂无屏幕时间摘要",
+    "helper_failed": "屏幕时间 helper 运行失败",
+    "parse_failed": "屏幕时间摘要解析失败"
+  },
+  "bar": {
+    "waiting": "等待 ActivityWatch",
+    "today": "今日",
+    "current": "当前"
+  },
+  "menu": {
+    "refresh": "刷新",
+    "settings": "组件设置"
+  },
+  "panel": {
+    "title": "屏幕时间",
+    "today_total": "今日总时长",
+    "current_app": "当前应用",
+    "afk": "离开时间",
+    "updated": "更新时间",
+    "top_apps": "Top 应用",
+    "app_level": "应用级",
+    "today": "今日",
+    "week": "本周",
+    "month": "本月",
+    "afk_short": "离开",
+    "last_7_days": "近 7 天",
+    "empty": "暂无活动摘要。"
+  },
+  "settings": {
+    "title": "屏幕时间设置",
+    "refresh_interval": "刷新间隔（秒）",
+    "refresh_interval_desc": "helper 刷新本地摘要缓存的频率。",
+    "top_limit": "Top 应用数量",
+    "top_limit_desc": "面板中显示的应用级行数。",
+    "show_current_app": "显示当前应用",
+    "show_current_app_desc": "允许 Bar 和面板显示当前 app id/name。",
+    "bar_mode": "Bar 显示内容",
+    "bar_mode_duration": "今日时长",
+    "bar_mode_current": "当前应用"
+  }
+}

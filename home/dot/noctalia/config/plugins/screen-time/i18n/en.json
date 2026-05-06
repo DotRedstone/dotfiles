@@ -1,0 +1,51 @@
+{
+  "general": {
+    "never": "Never",
+    "unknown": "Unknown",
+    "none": "None"
+  },
+  "status": {
+    "waiting": "Waiting for ActivityWatch",
+    "connected": "ActivityWatch connected",
+    "unavailable": "ActivityWatch unavailable",
+    "no_cache": "No screen-time summary yet",
+    "helper_failed": "Screen-time helper failed",
+    "parse_failed": "Screen-time summary parse failed"
+  },
+  "bar": {
+    "waiting": "Waiting for ActivityWatch",
+    "today": "Today",
+    "current": "Current"
+  },
+  "menu": {
+    "refresh": "Refresh",
+    "settings": "Widget Settings"
+  },
+  "panel": {
+    "title": "Screen Time",
+    "today_total": "Today",
+    "current_app": "Current app",
+    "afk": "AFK",
+    "updated": "Updated",
+    "top_apps": "Top Apps",
+    "app_level": "App level",
+    "today": "Today",
+    "week": "Week",
+    "month": "Month",
+    "afk_short": "AFK",
+    "last_7_days": "Last 7 Days",
+    "empty": "No activity summary yet."
+  },
+  "settings": {
+    "title": "Screen Time Settings",
+    "refresh_interval": "Refresh interval (seconds)",
+    "refresh_interval_desc": "How often the helper refreshes the local summary cache.",
+    "top_limit": "Top app count",
+    "top_limit_desc": "Number of app-level rows to show in the panel.",
+    "show_current_app": "Show current app",
+    "show_current_app_desc": "Allow the bar and panel to show the current app id/name.",
+    "bar_mode": "Bar display",
+    "bar_mode_duration": "Today duration",
+    "bar_mode_current": "Current app"
+  }
+}

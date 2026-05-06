@@ -1,0 +1,394 @@
+#!/usr/bin/env node
+// screen-time-json
+// Summarize local ActivityWatch data for the Noctalia screen-time plugin.
+
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+
+const home = process.env.HOME || "/home/dot";
+const cacheDir = path.join(home, ".cache", "noctalia", "screen-time");
+const cacheFile = path.join(cacheDir, "summary.json");
+const baseUrl = process.env.ACTIVITYWATCH_URL || "http://127.0.0.1:5600";
+const maxTopApps = Number(process.env.SCREEN_TIME_TOP_APPS || 20);
+const friendlyAppNames = new Map([
+  ["code", "VS Code"],
+  ["codium", "VSCodium"],
+  ["code-url-handler", "VS Code"],
+  ["org.wezfurlong.wezterm", "WezTerm"],
+  ["wezterm", "WezTerm"],
+  ["com.mitchellh.ghostty", "Ghostty"],
+  ["ghostty", "Ghostty"],
+  ["kitty", "Kitty"],
+  ["org.gnome.nautilus", "Files"],
+  ["nautilus", "Files"],
+  ["firefox", "Firefox"],
+  ["librewolf", "LibreWolf"],
+  ["google-chrome", "Chrome"],
+  ["chromium", "Chromium"],
+  ["obsidian", "Obsidian"],
+  ["telegram-desktop", "Telegram"],
+  ["org.telegram.desktop", "Telegram"],
+  ["qq", "QQ"],
+  ["wechat", "WeChat"],
+  ["xwechat", "WeChat"],
+  ["nvim", "Neovim"],
+  ["neovide", "Neovide"],
+  ["zathura", "Zathura"],
+  ["org.pwmt.zathura", "Zathura"],
+  ["steam", "Steam"],
+  ["rustdesk", "RustDesk"],
+  ["lm-studio", "LM Studio"],
+  ["dev.zed.zed", "Zed"],
+  ["zed", "Zed"]
+]);
+
+function localIso(date) {
+  const pad = n => String(Math.trunc(Math.abs(n))).padStart(2, "0");
+  const offsetMin = -date.getTimezoneOffset();
+  const sign = offsetMin >= 0 ? "+" : "-";
+  const hh = pad(offsetMin / 60);
+  const mm = pad(offsetMin % 60);
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}${sign}${hh}:${mm}`;
+}
+
+function dayKey(date) {
+  const d = date instanceof Date ? date : new Date(date || Date.now());
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function startOfDay(date) {
+  const d = new Date(date.getTime());
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function addDays(date, days) {
+  const d = new Date(date.getTime());
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function startOfWeek(date) {
+  const d = startOfDay(date);
+  const day = d.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  return addDays(d, mondayOffset);
+}
+
+function startOfMonth(date) {
+  const d = startOfDay(date);
+  d.setDate(1);
+  return d;
+}
+
+function makeRanges(now = new Date()) {
+  const todayStart = startOfDay(now);
+  const todayEnd = addDays(todayStart, 1);
+  const weekStart = startOfWeek(now);
+  const monthStart = startOfMonth(now);
+  const queryStart = new Date(Math.min(todayStart.getTime(), weekStart.getTime(), monthStart.getTime()));
+  const queryEnd = todayEnd;
+  const dailyTotals = [];
+  for (let i = 6; i >= 0; i--) {
+    const start = addDays(todayStart, -i);
+    dailyTotals.push({
+      date: dayKey(start),
+      label: String(start.getDate()),
+      start,
+      end: addDays(start, 1),
+      seconds: 0
+    });
+  }
+  return {
+    today: { start: todayStart, end: todayEnd, seconds: 0, afkSeconds: 0, appSeconds: {} },
+    week: { start: weekStart, end: todayEnd, seconds: 0, afkSeconds: 0, appSeconds: {} },
+    month: { start: monthStart, end: todayEnd, seconds: 0, afkSeconds: 0, appSeconds: {} },
+    query: { start: queryStart, end: queryEnd },
+    dailyTotals
+  };
+}
+
+function safeError(message) {
+  const ranges = makeRanges();
+  return {
+    ok: false,
+    source: "activitywatch",
+    watcher: "awatcher",
+    fetchedAt: localIso(new Date()),
+    error: message || "ActivityWatch summary unavailable",
+    range: null,
+    periods: safePeriodRanges(ranges),
+    todayTotalSeconds: 0,
+    weekTotalSeconds: 0,
+    monthTotalSeconds: 0,
+    afkSeconds: 0,
+    weekAfkSeconds: 0,
+    monthAfkSeconds: 0,
+    dailyTotals: ranges.dailyTotals.map(d => ({ date: d.date, label: d.label, seconds: 0 })),
+    currentApp: "",
+    topApps: []
+  };
+}
+
+function safePeriodRanges(ranges) {
+  return {
+    today: { start: localIso(ranges.today.start), end: localIso(ranges.today.end) },
+    week: { start: localIso(ranges.week.start), end: localIso(ranges.week.end) },
+    month: { start: localIso(ranges.month.start), end: localIso(ranges.month.end) }
+  };
+}
+
+function emit(result) {
+  try {
+    fs.mkdirSync(cacheDir, { recursive: true });
+    const tmp = path.join(cacheDir, `.summary.json.${process.pid}.${Date.now()}`);
+    fs.writeFileSync(tmp, JSON.stringify(result, null, 2));
+    fs.renameSync(tmp, cacheFile);
+  } catch (_) {
+    // Cache failures should not leak internals or break stdout diagnostics.
+  }
+  process.stdout.write(JSON.stringify(result) + "\n");
+}
+
+function sanitizeApp(value) {
+  if (value === undefined || value === null)
+    return "unknown";
+  let app = String(value).trim();
+  if (!app)
+    return "unknown";
+  if (app.includes("/") || app.includes("\\"))
+    app = app.split(/[\\/]/).filter(Boolean).pop() || "unknown";
+  app = app.replace(/[\r\n\t]/g, " ").replace(/\s+/g, " ").trim();
+  app = app.replace(/[^A-Za-z0-9._: -]/g, "");
+  if (!app)
+    return "unknown";
+  return friendlyAppName(app.slice(0, 80));
+}
+
+function titleCaseApp(value) {
+  return value
+    .split(/[-_. ]+/)
+    .filter(Boolean)
+    .map(part => {
+      const lower = part.toLowerCase();
+      if (lower.length <= 2)
+        return lower.toUpperCase();
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    })
+    .join(" ");
+}
+
+function friendlyAppName(value) {
+  const raw = String(value || "").trim();
+  const key = raw.toLowerCase();
+  if (friendlyAppNames.has(key))
+    return friendlyAppNames.get(key);
+
+  if (key.startsWith("org.") || key.startsWith("com.") || key.startsWith("io.") || key.startsWith("dev.")) {
+    const parts = raw.split(".").filter(Boolean);
+    const tail = parts[parts.length - 1] || raw;
+    if (friendlyAppNames.has(tail.toLowerCase()))
+      return friendlyAppNames.get(tail.toLowerCase());
+    return titleCaseApp(tail).slice(0, 80);
+  }
+
+  return titleCaseApp(raw).slice(0, 80);
+}
+
+async function getJson(url) {
+  const response = await fetch(url, { headers: { "Accept": "application/json" } });
+  if (!response.ok)
+    throw new Error("request failed");
+  return await response.json();
+}
+
+function pickBucket(buckets, kind) {
+  const host = os.hostname();
+  const entries = Object.entries(buckets || {});
+  const candidates = entries.filter(([id, meta]) => {
+    const type = String(meta?.type || "");
+    if (kind === "window")
+      return id.startsWith("aw-watcher-window_") || type === "currentwindow";
+    return id.startsWith("aw-watcher-afk_") || type === "afkstatus";
+  });
+  if (candidates.length === 0)
+    return "";
+  const exact = candidates.find(([id]) => id.endsWith(`_${host}`));
+  return (exact || candidates[0])[0];
+}
+
+function eventStart(event) {
+  const ts = new Date(event?.timestamp || 0);
+  return Number.isNaN(ts.getTime()) ? null : ts;
+}
+
+function eventDuration(event) {
+  const duration = Number(event?.duration || 0);
+  return Number.isFinite(duration) && duration > 0 ? duration : 0;
+}
+
+function clippedInterval(event, rangeStart, rangeEnd) {
+  const start = eventStart(event);
+  if (!start)
+    return null;
+  const end = new Date(start.getTime() + eventDuration(event) * 1000);
+  const clippedStart = new Date(Math.max(start.getTime(), rangeStart.getTime()));
+  const clippedEnd = new Date(Math.min(end.getTime(), rangeEnd.getTime()));
+  if (clippedEnd <= clippedStart)
+    return null;
+  return { start: clippedStart, end: clippedEnd };
+}
+
+function overlapSeconds(a, b) {
+  const start = Math.max(a.start.getTime(), b.start.getTime());
+  const end = Math.min(a.end.getTime(), b.end.getTime());
+  return Math.max(0, (end - start) / 1000);
+}
+
+function activeOverlapSeconds(interval, targetInterval, notAfkIntervals) {
+  const targetOverlap = overlapSeconds(interval, targetInterval);
+  if (targetOverlap <= 0)
+    return 0;
+  if (notAfkIntervals.length === 0)
+    return targetOverlap;
+  let total = 0;
+  const clipped = {
+    start: new Date(Math.max(interval.start.getTime(), targetInterval.start.getTime())),
+    end: new Date(Math.min(interval.end.getTime(), targetInterval.end.getTime()))
+  };
+  for (const active of notAfkIntervals)
+    total += overlapSeconds(clipped, active);
+  return total;
+}
+
+function eventApp(event) {
+  const data = event?.data || {};
+  return sanitizeApp(data.app || data.app_id || data.name || "unknown");
+}
+
+function addAppSeconds(target, app, seconds) {
+  if (seconds <= 0)
+    return;
+  target[app] = (target[app] || 0) + seconds;
+}
+
+function sortedTopApps(secondsByApp) {
+  return Object.entries(secondsByApp)
+    .map(([app, seconds]) => ({ app, seconds: Math.round(seconds) }))
+    .filter(item => item.seconds > 0)
+    .sort((a, b) => b.seconds - a.seconds || a.app.localeCompare(b.app))
+    .slice(0, Math.max(1, maxTopApps));
+}
+
+function publicDailyTotals(ranges) {
+  return ranges.dailyTotals.map(day => ({
+    date: day.date,
+    label: day.label,
+    seconds: Math.round(day.seconds)
+  }));
+}
+
+async function main() {
+  const ranges = makeRanges();
+  let buckets;
+  try {
+    buckets = await getJson(`${baseUrl}/api/0/buckets/`);
+  } catch (_) {
+    emit(safeError("ActivityWatch server unavailable"));
+    return;
+  }
+
+  const windowBucket = pickBucket(buckets, "window");
+  const afkBucket = pickBucket(buckets, "afk");
+  if (!windowBucket || !afkBucket) {
+    emit(safeError("ActivityWatch window or AFK bucket missing"));
+    return;
+  }
+
+  const query = `start=${encodeURIComponent(ranges.query.start.toISOString())}&end=${encodeURIComponent(ranges.query.end.toISOString())}`;
+  let windowEvents = [];
+  let afkEvents = [];
+  try {
+    windowEvents = await getJson(`${baseUrl}/api/0/buckets/${encodeURIComponent(windowBucket)}/events?${query}`);
+    afkEvents = await getJson(`${baseUrl}/api/0/buckets/${encodeURIComponent(afkBucket)}/events?${query}`);
+  } catch (_) {
+    emit(safeError("ActivityWatch event query failed"));
+    return;
+  }
+
+  const afkIntervals = [];
+  const notAfkIntervals = [];
+  for (const event of Array.isArray(afkEvents) ? afkEvents : []) {
+    const interval = clippedInterval(event, ranges.query.start, ranges.query.end);
+    if (!interval)
+      continue;
+    const status = String(event?.data?.status || "").toLowerCase();
+    if (status === "afk")
+      afkIntervals.push(interval);
+    else if (status === "not-afk")
+      notAfkIntervals.push(interval);
+  }
+
+  for (const afk of afkIntervals) {
+    ranges.today.afkSeconds += overlapSeconds(afk, ranges.today);
+    ranges.week.afkSeconds += overlapSeconds(afk, ranges.week);
+    ranges.month.afkSeconds += overlapSeconds(afk, ranges.month);
+  }
+
+  let latestWindow = null;
+  let latestWindowTime = 0;
+  for (const event of Array.isArray(windowEvents) ? windowEvents : []) {
+    const interval = clippedInterval(event, ranges.query.start, ranges.query.end);
+    if (!interval)
+      continue;
+
+    const ts = eventStart(event)?.getTime() || 0;
+    if (ts >= latestWindowTime) {
+      latestWindow = event;
+      latestWindowTime = ts;
+    }
+
+    const app = eventApp(event);
+    for (const period of [ranges.today, ranges.week, ranges.month]) {
+      const seconds = activeOverlapSeconds(interval, period, notAfkIntervals);
+      if (seconds <= 0)
+        continue;
+      period.seconds += seconds;
+      addAppSeconds(period.appSeconds, app, seconds);
+    }
+
+    for (const day of ranges.dailyTotals) {
+      const seconds = activeOverlapSeconds(interval, day, notAfkIntervals);
+      if (seconds > 0)
+        day.seconds += seconds;
+    }
+  }
+
+  const result = {
+    ok: true,
+    source: "activitywatch",
+    watcher: "awatcher",
+    fetchedAt: localIso(new Date()),
+    range: {
+      start: localIso(ranges.today.start),
+      end: localIso(ranges.today.end)
+    },
+    periods: safePeriodRanges(ranges),
+    todayTotalSeconds: Math.round(ranges.today.seconds),
+    weekTotalSeconds: Math.round(ranges.week.seconds),
+    monthTotalSeconds: Math.round(ranges.month.seconds),
+    afkSeconds: Math.round(ranges.today.afkSeconds),
+    weekAfkSeconds: Math.round(ranges.week.afkSeconds),
+    monthAfkSeconds: Math.round(ranges.month.afkSeconds),
+    dailyTotals: publicDailyTotals(ranges),
+    currentApp: latestWindow ? eventApp(latestWindow) : "",
+    topApps: sortedTopApps(ranges.today.appSeconds),
+    weekTopApps: sortedTopApps(ranges.week.appSeconds),
+    monthTopApps: sortedTopApps(ranges.month.appSeconds)
+  };
+
+  emit(result);
+}
+
+main().catch(() => emit(safeError("ActivityWatch summary failed")));

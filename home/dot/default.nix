@@ -20,6 +20,7 @@
     # --- Desktop & System UI ---
     ./niri
     ./noctalia
+    ./activitywatch
     ./theme
     ./fcitx5
     ./cli-tools

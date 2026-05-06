@@ -26,6 +26,10 @@
       ".config/rustdesk"
       ".config/google-chrome"
       ".local/share/zathura"
+
+      # [AI Agent]
+      ".config/opencode"
+      ".local/share/opencode"
     ];
   };
 }

@@ -15,6 +15,14 @@
     cbonsai
     cmatrix
     pipes-rs
+
+    # [AI Agent]
+    opencode    # Open source terminal-based AI coding agent
+    # Note: 
+    # - Auth: ~/.local/share/opencode/auth.json
+    # - Config: ~/.config/opencode/opencode.json
+    # - To use OpenAI-compatible provider, edit opencode.json:
+    #   { "provider": "openai", "openai": { "baseURL": "https://api.example.com/v1", "apiKey": "YOUR_KEY" } }
   ];
 
   # [Modern Coreutils]

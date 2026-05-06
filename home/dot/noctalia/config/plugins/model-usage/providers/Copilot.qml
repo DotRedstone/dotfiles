@@ -28,6 +28,7 @@ Item {
     property int totalPrompts: 0
     property int totalSessions: 0
     property var modelUsage: ({})
+    property var quotas: []
 
     property string tierLabel: ""
     property string authHelpText: pluginApi?.tr("providers.copilot.auth_help") ?? "Run `gh auth login` to re-authenticate."
@@ -199,22 +200,28 @@ Item {
         // Paid tier: quota_snapshots
         const snapshots = data.quota_snapshots;
         if (snapshots) {
+            const rows = [];
             const premium = snapshots.premium_interactions ?? snapshots.premium_requests;
             const premiumUsedNorm = usageNormFromSnapshot(premium);
             if (premiumUsedNorm >= 0) {
-                root.rateLimitPercent = premiumUsedNorm;
-                root.rateLimitLabel = "Premium";
-                root.rateLimitResetAt = normalizeResetAt(resetDate);
+                rows.push({
+                    percent: premiumUsedNorm,
+                    label: "Completions / Premium",
+                    resetAt: normalizeResetAt(resetDate)
+                });
             }
 
             const chat = snapshots.chat;
             const chatUsedNorm = usageNormFromSnapshot(chat);
             if (chatUsedNorm >= 0) {
                 const chatUsedPct = Math.round(chatUsedNorm * 100);
-                root.secondaryRateLimitPercent = chatUsedNorm;
-                root.secondaryRateLimitLabel = "Chat (" + chatUsedPct + "%)";
-                root.secondaryRateLimitResetAt = normalizeResetAt(resetDate);
+                rows.push({
+                    percent: chatUsedNorm,
+                    label: "Chat (" + chatUsedPct + "%)",
+                    resetAt: normalizeResetAt(resetDate)
+                });
             }
+            root.applyQuotaRows(rows);
         }
 
         // Free tier: limited_user_quotas
@@ -222,23 +229,48 @@ Item {
             const lq = data.limited_user_quotas;
             const mq = data.monthly_quotas;
             const freeReset = data.limited_user_reset_date ?? "";
+            let chatRow = null;
+            let completionsRow = null;
 
             if (typeof lq.chat === "number" && typeof mq.chat === "number" && mq.chat > 0) {
                 const used = mq.chat - lq.chat;
                 const usedPct = Math.min(100, Math.max(0, Math.round((used / mq.chat) * 100)));
-                root.rateLimitPercent = usedPct / 100;
-                root.rateLimitLabel = "Chat (" + used + "/" + mq.chat + ")";
-                root.rateLimitResetAt = normalizeResetAt(freeReset);
+                chatRow = {
+                    percent: usedPct / 100,
+                    label: "Chat (" + used + "/" + mq.chat + ")",
+                    resetAt: normalizeResetAt(freeReset)
+                };
             }
 
             if (typeof lq.completions === "number" && typeof mq.completions === "number" && mq.completions > 0) {
                 const used = mq.completions - lq.completions;
                 const usedPct = Math.min(100, Math.max(0, Math.round((used / mq.completions) * 100)));
-                root.secondaryRateLimitPercent = usedPct / 100;
-                root.secondaryRateLimitLabel = "Completions (" + used + "/" + mq.completions + ")";
-                root.secondaryRateLimitResetAt = normalizeResetAt(freeReset);
+                completionsRow = {
+                    percent: usedPct / 100,
+                    label: "Completions (" + used + "/" + mq.completions + ")",
+                    resetAt: normalizeResetAt(freeReset)
+                };
             }
+
+            const rows = [];
+            if (completionsRow)
+                rows.push(completionsRow);
+            if (chatRow)
+                rows.push(chatRow);
+            root.applyQuotaRows(rows);
         }
+    }
+
+    function applyQuotaRows(rows) {
+        root.quotas = rows;
+        const first = rows[0] ?? null;
+        const second = rows[1] ?? null;
+        root.rateLimitPercent = first ? first.percent : -1;
+        root.rateLimitLabel = first ? first.label : "Completions";
+        root.rateLimitResetAt = first ? first.resetAt : "";
+        root.secondaryRateLimitPercent = second ? second.percent : -1;
+        root.secondaryRateLimitLabel = second ? second.label : "Chat";
+        root.secondaryRateLimitResetAt = second ? second.resetAt : "";
     }
 
     function formatPlan(plan) {
@@ -288,6 +320,7 @@ Item {
         root.secondaryRateLimitPercent = -1;
         root.secondaryRateLimitLabel = "Chat";
         root.secondaryRateLimitResetAt = "";
+        root.quotas = [];
     }
 
     function normalizeResetAt(value) {

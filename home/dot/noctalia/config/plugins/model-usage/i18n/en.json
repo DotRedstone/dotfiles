@@ -56,7 +56,9 @@
     "codex_name": "Codex",
     "copilot_name": "Copilot",
     "openrouter_name": "OpenRouter",
+    "openrouter_placeholder": "OPENROUTER_API_KEY env var or enter key here",
     "zen_name": "Zen (opencode.ai)",
+    "zen_placeholder": "OPENCODE_ZEN_API_KEY / OPENCODE_API_KEY env var or enter key here",
     "antigravity_name": "Antigravity",
     "claude": {
       "weekly_label": "Weekly (7-day)",

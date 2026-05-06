@@ -1,0 +1,284 @@
+#!/usr/bin/env node
+// codex-usage-json
+// Normalize local Codex session usage for the Noctalia model-usage plugin.
+
+const fs = require("fs");
+const path = require("path");
+
+const home = process.env.HOME || "/home/dot";
+const sessionsDir = path.join(home, ".codex", "sessions");
+const cacheDir = path.join(home, ".cache", "noctalia", "model-usage");
+const cacheFile = path.join(cacheDir, "codex.json");
+
+function failJson(message) {
+  const result = { ok: false, provider: "codex", error: message || "unknown error" };
+  process.stdout.write(JSON.stringify(result) + "\n");
+  process.exit(0);
+}
+
+function walkJsonlFiles(dir, out = []) {
+  let entries;
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (_) {
+    return out;
+  }
+
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walkJsonlFiles(full, out);
+    } else if (entry.isFile() && entry.name.endsWith(".jsonl")) {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
+function localDateKey(value) {
+  const d = value instanceof Date ? value : new Date(value || Date.now());
+  if (Number.isNaN(d.getTime()))
+    return null;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function sessionIdFromPath(file) {
+  return path.basename(file, ".jsonl").replace(/^rollout-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-/, "");
+}
+
+function tokenCandidate(entry) {
+  if (entry?.type === "event_msg" && entry.payload?.type === "token_count")
+    return entry.payload;
+  if (entry?.type === "token_count")
+    return entry;
+  if (entry?.type === "response_item" && entry.payload?.type === "event_msg" && entry.payload?.payload?.type === "token_count")
+    return entry.payload.payload;
+  return null;
+}
+
+function addUsage(target, model, usage) {
+  if (!usage)
+    return 0;
+
+  const input = Number(usage.input_tokens || 0);
+  const output = Number(usage.output_tokens || 0);
+  const reasoning = Number(usage.reasoning_output_tokens || 0);
+  const cached = Number(usage.cached_input_tokens || 0);
+  const cacheWrite = Number(usage.cache_creation_input_tokens || usage.cache_write_input_tokens || 0);
+  const total = Number(usage.total_tokens || 0) || (input + output);
+
+  if (total <= 0 && input <= 0 && output <= 0 && reasoning <= 0 && cached <= 0 && cacheWrite <= 0)
+    return 0;
+
+  if (!target[model]) {
+    target[model] = {
+      inputTokens: 0,
+      outputTokens: 0,
+      cacheReadInputTokens: 0,
+      cacheCreationInputTokens: 0
+    };
+  }
+
+  target[model].inputTokens += input;
+  target[model].outputTokens += output + reasoning;
+  target[model].cacheReadInputTokens += cached;
+  target[model].cacheCreationInputTokens += cacheWrite;
+  return total;
+}
+
+function normalizeRateLimit(rl) {
+  if (!rl)
+    return null;
+  const percent = Number(rl.used_percent ?? rl.usedPercent ?? 0) / 100;
+  let label = "";
+  const minutes = Number(rl.window_minutes ?? rl.windowMinutes ?? 0);
+  if (minutes === 10080)
+    label = "7d window";
+  else if (minutes === 300)
+    label = "5h window";
+  else if (minutes > 0)
+    label = `${Math.round(minutes / 60)}h window`;
+  else
+    label = "Rate limit";
+
+  return {
+    label,
+    percent: Math.min(1, Math.max(0, percent)),
+    resetAt: rl.resets_at ? new Date(Number(rl.resets_at) * 1000).toISOString() : ""
+  };
+}
+
+function usageTotal(usage) {
+  if (!usage)
+    return 0;
+  return Number(usage.inputTokens || 0)
+    + Number(usage.outputTokens || 0)
+    + Number(usage.cacheReadInputTokens || 0)
+    + Number(usage.cacheCreationInputTokens || 0);
+}
+
+function sortByUsageObject(obj) {
+  return Object.fromEntries(Object.entries(obj).sort((a, b) => {
+    const diff = usageTotal(b[1]) - usageTotal(a[1]);
+    if (diff !== 0)
+      return diff;
+    return a[0].localeCompare(b[0]);
+  }));
+}
+
+function sortTokenObject(obj) {
+  return Object.fromEntries(Object.entries(obj).sort((a, b) => {
+    const diff = Number(b[1] || 0) - Number(a[1] || 0);
+    if (diff !== 0)
+      return diff;
+    return a[0].localeCompare(b[0]);
+  }));
+}
+
+try {
+  fs.mkdirSync(cacheDir, { recursive: true });
+} catch (e) {
+  failJson(`cache unavailable: ${e.message}`);
+}
+
+const files = walkJsonlFiles(sessionsDir).sort();
+const today = localDateKey(new Date());
+const usageByModel = {};
+const todayUsageByModel = {};
+const dayCounts = {};
+const todaySessionIds = new Set();
+const allSessionIds = new Set();
+
+let totalPrompts = 0;
+let todayPrompts = 0;
+let todayTotalTokens = 0;
+let latestToken = null;
+let latestTokenTime = 0;
+
+for (const file of files) {
+  const sessionId = sessionIdFromPath(file);
+  allSessionIds.add(sessionId);
+
+  let currentModel = "codex";
+  let content = "";
+  try {
+    content = fs.readFileSync(file, "utf8");
+  } catch (_) {
+    continue;
+  }
+
+  const lines = content.split("\n");
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line)
+      continue;
+
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch (_) {
+      continue;
+    }
+
+    const ts = entry.timestamp || entry.ts || null;
+    const dateKey = localDateKey(ts);
+
+    if (entry.type === "turn_context") {
+      const model = entry.payload?.model || entry.model || entry.payload?.model_slug;
+      if (model)
+        currentModel = model;
+    }
+
+    if (entry.type === "session_meta") {
+      const model = entry.payload?.model || entry.model || entry.payload?.model_slug;
+      if (model)
+        currentModel = model;
+    }
+
+    if (entry.type === "event_msg" && entry.payload?.type === "user_message") {
+      totalPrompts += 1;
+      if (dateKey) {
+        dayCounts[dateKey] = (dayCounts[dateKey] || 0) + 1;
+        if (dateKey === today) {
+          todayPrompts += 1;
+          todaySessionIds.add(sessionId);
+        }
+      }
+    }
+
+    const candidate = tokenCandidate(entry);
+    if (!candidate)
+      continue;
+
+    const candidateModel = candidate.model || candidate.model_slug || entry.model || entry.payload?.model || currentModel || "codex";
+    const lastUsage = candidate.info?.last_token_usage || candidate.last_token_usage || null;
+    const added = addUsage(usageByModel, candidateModel, lastUsage);
+    if (dateKey === today) {
+      const todayAdded = addUsage(todayUsageByModel, candidateModel, lastUsage);
+      todayTotalTokens += todayAdded;
+    }
+
+    const time = ts ? new Date(ts).getTime() : 0;
+    if (added >= 0 && time >= latestTokenTime) {
+      latestToken = candidate;
+      latestTokenTime = time;
+    }
+  }
+}
+
+const recentDays = [];
+for (let i = 6; i >= 0; i--) {
+  const d = new Date();
+  d.setDate(d.getDate() - i);
+  const key = localDateKey(d);
+  recentDays.push({ date: key, messageCount: dayCounts[key] || 0 });
+}
+
+const quotas = [];
+const primary = normalizeRateLimit(latestToken?.rate_limits?.primary);
+const secondary = normalizeRateLimit(latestToken?.rate_limits?.secondary);
+if (primary)
+  quotas.push(primary);
+if (secondary)
+  quotas.push(secondary);
+quotas.sort((a, b) => {
+  const rank = label => label === "7d window" ? 0 : label === "5h window" ? 1 : 2;
+  const diff = rank(a.label) - rank(b.label);
+  if (diff !== 0)
+    return diff;
+  return a.label.localeCompare(b.label);
+});
+const topQuota = quotas[0] || null;
+const secondQuota = quotas[1] || null;
+
+const result = {
+  ok: true,
+  provider: "codex",
+  fetchedAt: new Date().toISOString(),
+  todayPrompts,
+  todaySessions: todaySessionIds.size,
+  todayTotalTokens,
+  todayTokensByModel: sortTokenObject(Object.fromEntries(Object.entries(todayUsageByModel).map(([model, usage]) => [
+    model,
+    usage.inputTokens + usage.outputTokens
+  ]))),
+  recentDays,
+  totalPrompts,
+  totalSessions: allSessionIds.size,
+  modelUsage: sortByUsageObject(usageByModel),
+  quotas,
+  rateLimitPercent: topQuota ? topQuota.percent : -1,
+  rateLimitLabel: topQuota ? topQuota.label : "7d window",
+  rateLimitResetAt: topQuota ? topQuota.resetAt : "",
+  secondaryRateLimitPercent: secondQuota ? secondQuota.percent : -1,
+  secondaryRateLimitLabel: secondQuota ? secondQuota.label : "",
+  secondaryRateLimitResetAt: secondQuota ? secondQuota.resetAt : ""
+};
+
+const tmp = path.join(cacheDir, `.codex.json.${process.pid}.${Date.now()}`);
+fs.writeFileSync(tmp, JSON.stringify(result, null, 2));
+fs.renameSync(tmp, cacheFile);
+process.stdout.write(JSON.stringify(result) + "\n");

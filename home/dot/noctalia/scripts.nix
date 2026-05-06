@@ -112,8 +112,8 @@ let
               else
                 {
                   label: (.label // .model // .name // "Unknown"),
-                  usedPercent: 0,
-                  remainingPercent: 100,
+                  usedPercent: 100,
+                  remainingPercent: 0,
                   resetTime: (.reset_time // .resets_at // .resetTime // null),
                   isExhausted: (.is_exhausted // .isExhausted // false)
                 }
@@ -130,7 +130,14 @@ let
 
     echo "$RESULT"
   '';
+
+  codex-usage-json = pkgs.writeShellScriptBin "codex-usage-json" ''
+    exec ${pkgs.nodejs}/bin/node ${./scripts/codex-usage-json} "$@"
+  '';
 in
 {
-  home.packages = [ antigravity-usage-json ];
+  home.packages = [
+    antigravity-usage-json
+    codex-usage-json
+  ];
 }

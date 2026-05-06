@@ -99,43 +99,41 @@ Item {
 
             const quotas = [];
 
-            // [Prompt credits → primary rate limit]
-            if (data.promptCredits) {
-                const pc = data.promptCredits;
-                const used = Number(pc.usedPercent ?? 0);
-                const usedPct = used <= 1 ? used * 100 : used;
-                root.rateLimitPercent = Math.min(1, Math.max(0, usedPct / 100));
-                root.rateLimitLabel = pluginApi?.tr("providers.antigravity.credits_label") ?? "Prompt Credits";
-                root.rateLimitResetAt = "";
-
-                quotas.push({
-                    label: root.rateLimitLabel,
-                    percent: root.rateLimitPercent,
-                    resetAt: ""
-                });
-            }
+            // Prompt credits from current antigravity-usage output do not match
+            // the app's "Available AI Credits" semantics. Hide this summary until
+            // upstream exposes authoritative AI credits fields.
+            root.rateLimitPercent = -1;
+            root.rateLimitLabel = pluginApi?.tr("providers.antigravity.credits_label") ?? "Prompt Credits";
+            root.rateLimitResetAt = "";
 
             // [Models → secondary rate limit (first exhausted or highest usage)]
             const models = data.models ?? [];
+            const sortedModels = models.slice().sort((a, b) => modelSortRank(a?.label ?? "") - modelSortRank(b?.label ?? ""));
             if (models.length > 0) {
-                let worst = models[0];
-                for (let i = 1; i < models.length; i++) {
-                    if ((models[i].usedPercent ?? 0) > (worst.usedPercent ?? 0))
-                        worst = models[i];
-                }
-                const secondaryUsed = Number(worst.usedPercent ?? 0);
-                const secondaryUsedPct = secondaryUsed <= 1 ? secondaryUsed * 100 : secondaryUsed;
-                root.secondaryRateLimitPercent = Math.min(1, Math.max(0, secondaryUsedPct / 100));
-                root.secondaryRateLimitLabel = worst.label ?? "Model";
-                root.secondaryRateLimitResetAt = worst.resetTime ?? "";
-
+                let worst = null;
+                let worstUsed = -1;
                 for (let i = 0; i < models.length; i++) {
-                    const m = models[i];
-                    const up = Number(m.usedPercent ?? 0);
-                    const upPct = up <= 1 ? up * 100 : up;
+                    const used = normalizeModelPercent(models[i].usedPercent);
+                    if (used >= 0 && used > worstUsed) {
+                        worst = models[i];
+                        worstUsed = used;
+                    }
+                }
+                if (worst) {
+                    root.rateLimitPercent = worstUsed;
+                    root.rateLimitLabel = worst.label ?? "Model";
+                    root.rateLimitResetAt = worst.resetTime ?? "";
+                    root.secondaryRateLimitPercent = worstUsed;
+                    root.secondaryRateLimitLabel = worst.label ?? "Model";
+                    root.secondaryRateLimitResetAt = worst.resetTime ?? "";
+                }
+
+                for (let i = 0; i < sortedModels.length; i++) {
+                    const m = sortedModels[i];
+                    const up = normalizeModelPercent(m.usedPercent);
                     quotas.push({
                         label: m.label ?? "Model",
-                        percent: Math.min(1, Math.max(0, upPct / 100)),
+                        percent: up,
                         resetAt: m.resetTime ?? ""
                     });
                 }
@@ -143,20 +141,9 @@ Item {
 
             root.quotas = quotas;
 
-            // [Model breakdown → modelUsage for detail section]
-            if (models.length > 0) {
-                const usage = {};
-                for (let i = 0; i < models.length; i++) {
-                    const m = models[i];
-                    usage[m.label ?? ("model_" + i)] = {
-                        inputTokens: m.usedPercent ?? 0,
-                        outputTokens: m.remainingPercent ?? 0,
-                        cacheReadInputTokens: 0,
-                        cacheCreationInputTokens: 0
-                    };
-                }
-                root.modelUsage = usage;
-            }
+            // antigravity-usage currently exposes quota percentages, not true token
+            // counters. Keep token breakdown empty to avoid misleading values.
+            root.modelUsage = {};
 
             root.ready = true;
             root.hasCachedUsage = true;
@@ -185,5 +172,31 @@ Item {
         if (hours > 0)
             return hours + "h " + mins + "m";
         return mins + "m";
+    }
+
+    function normalizeModelPercent(value) {
+        if (value === null || value === undefined)
+            return -1;
+        const n = Number(value);
+        if (!(n >= 0))
+            return -1;
+        return Math.min(1, Math.max(0, n <= 1 ? n : n / 100));
+    }
+
+    function modelSortRank(label) {
+        const t = String(label).toLowerCase();
+        if (t.indexOf("gemini 3 flash") !== -1)
+            return 10;
+        if (t.indexOf("gemini 3.1 pro (low)") !== -1)
+            return 20;
+        if (t.indexOf("gemini 3.1 pro (high)") !== -1)
+            return 30;
+        if (t.indexOf("claude opus") !== -1)
+            return 40;
+        if (t.indexOf("claude sonnet") !== -1)
+            return 50;
+        if (t.indexOf("gpt-oss") !== -1)
+            return 60;
+        return 999;
     }
 }

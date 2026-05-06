@@ -182,7 +182,9 @@ Item {
                     }
 
                     Rectangle {
-                        visible: (root.selectedProvider?.rateLimitPercent ?? -1) >= 0
+                        visible: ((root.selectedProvider?.quotas ?? []).length > 0)
+                            || (root.selectedProvider?.rateLimitPercent ?? -1) >= 0
+                            || (root.selectedProvider?.secondaryRateLimitPercent ?? -1) >= 0
                         Layout.fillWidth: true
                         color: root.sectionBackgroundColor
                         radius: Style.radiusS
@@ -241,7 +243,8 @@ Item {
                                             pointSize: Style.fontSizeS
                                             font.weight: Style.fontWeightBold
                                             color: {
-                                                const u = modelData.percent ?? 0;
+                                                const u = modelData.percent ?? -1;
+                                                if (u < 0) return Color.mOnSurfaceVariant;
                                                 if (u >= 0.9) return Color.mError;
                                                 if (u >= 0.7) return root.usageWarnColor;
                                                 return Color.mOnSurface;
@@ -263,13 +266,16 @@ Item {
                                             }
                                             radius: Style.radiusXXS
                                             color: {
-                                                const u = modelData.percent ?? 0;
+                                                const u = modelData.percent ?? -1;
+                                                if (u < 0) return Color.mOutline;
                                                 if (u >= 0.9) return Color.mError;
                                                 if (u >= 0.7) return root.usageWarnColor;
                                                 return Color.mPrimary;
                                             }
                                             width: {
-                                                const u = modelData.percent ?? 0;
+                                                const u = modelData.percent ?? -1;
+                                                if (u < 0)
+                                                    return 0;
                                                 const mode = mainInstance?.usageDisplayMode ?? "usage";
                                                 const val = mode === "remaining" ? (1.0 - u) : u;
                                                 return parent.width * Math.min(1.0, Math.max(0, val));
@@ -286,7 +292,14 @@ Item {
 
                                     NText {
                                         visible: (modelData.resetAt ?? "") !== ""
-                                        text: (pluginApi?.tr("panel.resets_in") ?? "Resets in {time}").replace("{time}", (root.selectedProvider?.formatResetTime(modelData.resetAt ?? "") ?? ""))
+                                        text: {
+                                            if ((root.selectedProvider?.providerId ?? "") === "codex") {
+                                                const resetText = root.selectedProvider?.formatQuotaResetText(modelData) ?? "";
+                                                if (resetText !== "")
+                                                    return resetText;
+                                            }
+                                            return (pluginApi?.tr("panel.resets_in") ?? "Resets in {time}").replace("{time}", (root.selectedProvider?.formatResetTime(modelData.resetAt ?? "") ?? ""));
+                                        }
                                         pointSize: Style.fontSizeXS
                                         color: Color.mOnSurfaceVariant
                                     }
@@ -491,7 +504,7 @@ Item {
                             spacing: Style.marginM
 
                             NText {
-                                text: pluginApi?.tr("panel.today") ?? "Today"
+                                text: pluginApi?.tr("panel.today_title") ?? "Today"
                                 pointSize: Style.fontSizeL
                                 font.weight: Style.fontWeightSemiBold
                                 color: Color.mPrimary

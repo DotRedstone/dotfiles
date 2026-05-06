@@ -112,8 +112,8 @@ RESULT=$(echo "$RAW" | jq '
           else
             {
               label: (.label // .model // .name // "Unknown"),
-              usedPercent: 0,
-              remainingPercent: 100,
+              usedPercent: 100,
+              remainingPercent: 0,
               resetTime: (.reset_time // .resets_at // .resetTime // null),
               isExhausted: (.is_exhausted // .isExhausted // false)
             }

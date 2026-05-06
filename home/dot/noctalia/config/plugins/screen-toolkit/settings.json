@@ -25,7 +25,7 @@
   "detectedRecorder": "",
   "detectedCompositor": "niri",
   "stateIsRunning": false,
-  "stateActiveTool": "palette",
+  "stateActiveTool": "",
   "stateMirrorVisible": false,
   "resultHex": "#281E22",
   "resultRgb": "rgb(40, 30, 34)",

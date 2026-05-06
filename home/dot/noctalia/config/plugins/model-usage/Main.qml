@@ -150,6 +150,16 @@ Item {
     function friendlyModelName(id) {
         if (!id)
             return "Unknown";
+        if (id === "gpt-5.3-codex")
+            return "GPT 5.3 Codex";
+        if (id === "gpt-5.5")
+            return "GPT 5.5";
+        if (id === "codex-auto-review")
+            return "Codex Auto Review";
+        if (id.startsWith("gpt-")) {
+            const suffix = id.substring(4).replace(/-/g, " ");
+            return "GPT " + suffix.replace(/\b\w/g, c => c.toUpperCase());
+        }
         let name = id.replace(/^claude-/, "");
         name = name.replace(/-\d{8}$/, "");
         const parts = name.split("-");

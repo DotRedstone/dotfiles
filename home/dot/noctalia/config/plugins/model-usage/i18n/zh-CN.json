@@ -56,7 +56,9 @@
     "codex_name": "Codex",
     "copilot_name": "Copilot",
     "openrouter_name": "OpenRouter",
+    "openrouter_placeholder": "使用 OPENROUTER_API_KEY 环境变量，或在此输入 Key",
     "zen_name": "Zen (opencode.ai)",
+    "zen_placeholder": "使用 OPENCODE_ZEN_API_KEY / OPENCODE_API_KEY 环境变量，或在此输入 Key",
     "antigravity_name": "Antigravity",
     "claude": {
       "weekly_label": "每周限额 (7天)",

@@ -13,4 +13,5 @@
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.cache/zellij.kdl";
 
   xdg.configFile."zellij/layouts/vibe.kdl".source = ./layouts/vibe.kdl;
+  xdg.configFile."zellij/layouts/blog.kdl".source = ./layouts/blog.kdl;
 }

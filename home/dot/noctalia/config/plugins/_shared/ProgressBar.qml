@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
 
-Rectangle {
+NBox {
     id: root
 
     property real value: 0
@@ -17,7 +17,7 @@ Rectangle {
     color: trackColor
     clip: true
 
-    Rectangle {
+    NBox {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom

@@ -36,8 +36,9 @@ Item {
 
             ColumnLayout {
                 id: contentLayout
-                width: parent.width
-                anchors.margins: Style.marginL
+                x: Style.marginL
+                y: Style.marginL
+                width: parent.width - Style.marginL * 2
                 spacing: Style.marginL
 
                 Shared.SegmentedControl {
@@ -51,8 +52,6 @@ Item {
                 }
 
                 Shared.PluginCard {
-                    bordered: true
-                    cardBorderColor: Qt.alpha(Color.mPrimary, 0.20)
                     padding: Style.marginL
 
                     RowLayout {
@@ -91,32 +90,19 @@ Item {
                         }
                     }
 
-                    ColumnLayout {
+                    Shared.SectionHeader {
+                        title: mainInstance?.title ?? "屏幕使用时长"
+                        subtitle: mainInstance?.comparisonLabel ?? ""
+                        icon: "clock-hour-4"
+                        meta: mainInstance?.formatTimestamp(mainInstance.lastUpdated) ?? ""
+                    }
+
+                    NText {
+                        text: mainInstance?.primaryLabel ?? "0分钟"
+                        pointSize: Style.fontSizeXXXL
+                        font.weight: Style.fontWeightBold
+                        color: Color.mOnSurface
                         Layout.fillWidth: true
-                        spacing: Style.marginXS
-
-                        NText {
-                            text: mainInstance?.title ?? "屏幕使用时长"
-                            pointSize: Style.fontSizeS
-                            color: Color.mOnSurfaceVariant
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                        }
-
-                        NText {
-                            text: mainInstance?.primaryLabel ?? "0分钟"
-                            pointSize: Style.fontSizeXXXL
-                            font.weight: Style.fontWeightBold
-                            color: Color.mOnSurface
-                            Layout.fillWidth: true
-                        }
-
-                        NText {
-                            text: mainInstance?.comparisonLabel ?? ""
-                            pointSize: Style.fontSizeS
-                            color: Color.mPrimary
-                            Layout.fillWidth: true
-                        }
                     }
 
                     RowLayout {

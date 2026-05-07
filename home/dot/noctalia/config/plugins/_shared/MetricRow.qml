@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
 
-Rectangle {
+NBox {
     id: root
 
     property string label: ""
@@ -19,6 +19,8 @@ Rectangle {
     Layout.fillWidth: true
     radius: Style.radiusS
     color: showBackground ? rowColor : "transparent"
+    border.color: showBackground ? Style.capsuleBorderColor : "transparent"
+    border.width: showBackground ? (Style.capsuleBorderWidth || 1) : 0
     implicitHeight: rowColumn.implicitHeight + (showBackground ? Style.marginM * 2 : 0)
 
     ColumnLayout {
@@ -35,7 +37,7 @@ Rectangle {
             Layout.fillWidth: true
             spacing: Style.marginM
 
-            Rectangle {
+            NBox {
                 visible: root.icon !== "" || root.leadingText !== ""
                 width: 34 * Style.uiScaleRatio
                 height: width

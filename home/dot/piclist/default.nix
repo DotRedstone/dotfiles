@@ -58,6 +58,7 @@ in
         libxcb
         libxkbcommon
         mesa
+        musl
         nspr
         nss
         pango
@@ -65,8 +66,6 @@ in
       ];
 
       unpackPhase = "dpkg-deb -x $src .";
-
-      autoPatchelfIgnoreMissingDeps = [ "libc.musl-x86_64.so.1" ];
 
       installPhase = ''
         runHook preInstall
@@ -125,6 +124,7 @@ in
             libxcb
             libxkbcommon
             mesa
+            musl
             nspr
             nss
             pango

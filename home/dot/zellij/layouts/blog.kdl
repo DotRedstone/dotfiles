@@ -13,16 +13,16 @@ layout {
         pane split_direction="vertical" {
             pane split_direction="horizontal" size="34%" {
                 pane name="Terminal" size="45%" command="fish" {
-                    args "-lc" "cd /home/dot/Project/fuwari && exec fish"
+                    args "-lc" "cd /home/dot/Projects/fuwari && exec fish"
                 }
 
                 pane name="Agent" size="55%" command="fish" {
-                    args "-lc" "cd /home/dot/Project/fuwari && exec opencode"
+                    args "-lc" "cd /home/dot/Projects/fuwari && exec opencode"
                 }
             }
 
             pane name="Editor" size="66%" command="nvim" {
-                args "/home/dot/Project/fuwari"
+                args "/home/dot/Projects/fuwari"
             }
         }
     }

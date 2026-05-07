@@ -105,9 +105,11 @@ Item {
                         Layout.fillWidth: true
                     }
 
-                    RowLayout {
+                    GridLayout {
                         Layout.fillWidth: true
-                        spacing: Style.marginM
+                        columns: width >= 520 * Style.uiScaleRatio ? 2 : 1
+                        columnSpacing: Style.marginM
+                        rowSpacing: Style.marginS
 
                         Shared.MetricRow {
                             Layout.fillWidth: true
@@ -145,6 +147,7 @@ Item {
 
                     Shared.BarChart {
                         model: root.chartModelForDisplay()
+                        maxValue: root.chartMaxValueForDisplay()
                         compact: (mainInstance?.mode ?? "day") === "month"
                     }
                 }
@@ -197,9 +200,24 @@ Item {
         for (let i = 0; i < chart.length; i++) {
             result.push({
                 label: root.shouldShowChartLabel(i) ? (chart[i].label ?? "") : "",
-                value: chart[i].seconds ?? chart[i].value ?? 0
+                value: chart[i].seconds ?? chart[i].value ?? 0,
+                tooltip: root.chartTooltip(chart[i], i)
             });
         }
         return result;
+    }
+
+    function chartMaxValueForDisplay() {
+        const mode = mainInstance?.mode ?? "day";
+        if (mode === "day")
+            return 3600;
+        return 0;
+    }
+
+    function chartTooltip(item, index) {
+        const label = item?.label ?? "";
+        const seconds = item?.seconds ?? item?.value ?? 0;
+        const duration = mainInstance?.formatDuration(seconds) ?? (String(seconds) + "s");
+        return label !== "" ? (label + " · " + duration) : duration;
     }
 }

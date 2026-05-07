@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
 
-Rectangle {
+NBox {
     id: root
 
     default property alias content: contentLayout.data

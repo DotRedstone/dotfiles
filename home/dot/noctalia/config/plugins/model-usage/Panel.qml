@@ -349,6 +349,8 @@ Item {
                                 }
 
                                 Shared.ProgressBar {
+                                    semanticThresholds: false
+                                    barColor: Color.mPrimary
                                     value: {
                                         const maxCount = root.maxRecentMessageCount();
                                         const count = modelData?.messageCount ?? 0;

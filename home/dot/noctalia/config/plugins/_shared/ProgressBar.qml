@@ -7,12 +7,16 @@ Item {
     id: root
 
     property real value: 0
-    property color color: root.autoColor()
+    property bool semanticThresholds: true
+    property color barColor: Color.mPrimary
+    property color warningColor: Qt.alpha(Color.mError, 0.72)
+    property color dangerColor: Color.mError
+    property real warningThreshold: 0.7
+    property real dangerThreshold: 0.9
+    property color color: root.effectiveBarColor()
     property color trackColor: Qt.alpha(Color.mOutline, 0.22)
     property real barHeight: 7 * Style.uiScaleRatio
     property bool animated: true
-    property real warningThreshold: 0.7
-    property real dangerThreshold: 0.9
     property color fillColor: color
 
     Layout.fillWidth: true
@@ -22,22 +26,21 @@ Item {
         return Math.max(0, Math.min(1, value));
     }
 
-    function autoColor() {
+    function effectiveBarColor() {
+        if (!semanticThresholds)
+            return barColor;
+
         const v = clampedValue();
         if (v >= dangerThreshold)
-            return Color.mError;
+            return dangerColor;
         if (v >= warningThreshold)
-            return Qt.alpha(Color.mError, 0.72);
-        return Color.mPrimary;
-    }
-
-    function effectiveHeight() {
-        return height > 0 ? height : implicitHeight;
+            return warningColor;
+        return barColor;
     }
 
     NBox {
         anchors.fill: parent
-        radius: root.effectiveHeight() / 2
+        radius: root.barHeight / 2
         color: root.trackColor
         clip: true
 

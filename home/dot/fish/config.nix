@@ -125,6 +125,8 @@
       zl  = "zellij list-sessions";
       zk  = "zellij kill-session";
       zka = "zellij kill-all-sessions";
+      zd  = "zellij delete-session";
+      zda = "zellij delete-all-sessions";
 
       # --- Btrfs Maintenance ---
       bmt = "sudo mount /dev/nvme0n1p5 /mnt -o subvolid=5";

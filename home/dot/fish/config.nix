@@ -119,6 +119,13 @@
       hml = "home-manager generations";
       hme = "home-manager expire-generations \"-0 days\"";
 
+      # --- Zellij ---
+      zn  = "zellij --new-session-with-layout";
+      za  = "zellij attach";
+      zl  = "zellij list-sessions";
+      zk  = "zellij kill-session";
+      zka = "zellij kill-all-sessions";
+
       # --- Btrfs Maintenance ---
       bmt = "sudo mount /dev/nvme0n1p5 /mnt -o subvolid=5";
       bsl = "sudo btrfs subvolume list /";

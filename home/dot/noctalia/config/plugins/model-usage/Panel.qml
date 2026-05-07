@@ -184,34 +184,11 @@ Item {
                         }
                     }
 
-                    Shared.PluginCard {
+                    Shared.WarningBanner {
                         visible: !!root.selectedProvider && (root.selectedProvider?.usageStatusText ?? "") !== ""
-                        cardColor: Qt.alpha(Color.mError, 0.12)
-
-                        Shared.StatusBadge {
-                            label: pluginApi?.tr("panel.auth_warning") ?? "Status"
-                            icon: "alert-circle"
-                            accentColor: Color.mError
-                            textColor: Color.mError
-                        }
-
-                        NText {
-                            text: root.selectedProvider?.usageStatusText ?? ""
-                            pointSize: Style.fontSizeM
-                            font.weight: Style.fontWeightSemiBold
-                            color: Color.mError
-                            wrapMode: Text.WordWrap
-                            Layout.fillWidth: true
-                        }
-
-                        NText {
-                            text: root.selectedProvider?.authHelpText ?? ""
-                            pointSize: Style.fontSizeXS
-                            color: Color.mOnSurfaceVariant
-                            wrapMode: Text.WordWrap
-                            Layout.fillWidth: true
-                            visible: (root.selectedProvider?.authHelpText ?? "") !== ""
-                        }
+                        variant: "error"
+                        title: root.selectedProvider?.usageStatusText ?? ""
+                        message: root.selectedProvider?.authHelpText ?? ""
                     }
 
                     Shared.PluginCard {
@@ -296,20 +273,18 @@ Item {
                             Layout.fillWidth: true
                             spacing: Style.marginM
 
-                            Shared.MetricRow {
+                            Shared.MetricCard {
                                 Layout.fillWidth: true
                                 icon: "message-circle"
                                 label: pluginApi?.tr("panel.prompts") ?? "prompts"
                                 value: String(root.selectedProvider?.todayPrompts ?? 0)
-                                showBackground: true
                             }
 
-                            Shared.MetricRow {
+                            Shared.MetricCard {
                                 Layout.fillWidth: true
                                 icon: "clock-hour-4"
                                 label: pluginApi?.tr("panel.sessions") ?? "sessions"
                                 value: String(root.selectedProvider?.todaySessions ?? 0)
-                                showBackground: true
                             }
                         }
 
@@ -399,14 +374,14 @@ Item {
                             Layout.fillWidth: true
                             spacing: Style.marginM
 
-                            Shared.MetricRow {
+                            Shared.MetricCard {
                                 Layout.fillWidth: true
                                 icon: "message-2"
                                 label: pluginApi?.tr("panel.messages") ?? "messages"
                                 value: mainInstance?.formatTokenCount(root.selectedProvider?.totalPrompts ?? 0) ?? "0"
                             }
 
-                            Shared.MetricRow {
+                            Shared.MetricCard {
                                 Layout.fillWidth: true
                                 icon: "clock-hour-4"
                                 label: pluginApi?.tr("panel.sessions") ?? "sessions"

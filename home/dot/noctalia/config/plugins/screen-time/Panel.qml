@@ -143,45 +143,9 @@ Item {
                         meta: mainInstance?.formatTimestamp(mainInstance.lastUpdated) ?? ""
                     }
 
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 124 * Style.uiScaleRatio
-                        spacing: (mainInstance?.mode ?? "day") === "month" ? Style.marginXXS : Style.marginS
-
-                        Repeater {
-                            model: mainInstance?.chart ?? []
-
-                            ColumnLayout {
-                                required property var modelData
-                                required property int index
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                spacing: Style.marginXS
-
-                                Item {
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-
-                                    Rectangle {
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        anchors.bottom: parent.bottom
-                                        width: Math.max(4 * Style.uiScaleRatio, Math.min(18 * Style.uiScaleRatio, parent.width * 0.68))
-                                        height: Math.max(7 * Style.uiScaleRatio, parent.height * (mainInstance?.chartShare(modelData.seconds ?? 0) ?? 0))
-                                        radius: width / 2
-                                        color: (modelData.seconds ?? 0) > 0 ? Color.mPrimary : root.outlineWash
-                                    }
-                                }
-
-                                NText {
-                                    text: root.shouldShowChartLabel(index) ? (modelData.label ?? "") : ""
-                                    pointSize: Style.fontSizeXXS
-                                    color: Color.mOnSurfaceVariant
-                                    horizontalAlignment: Text.AlignHCenter
-                                    elide: Text.ElideRight
-                                    Layout.fillWidth: true
-                                }
-                            }
-                        }
+                    Shared.BarChart {
+                        model: root.chartModelForDisplay()
+                        compact: (mainInstance?.mode ?? "day") === "month"
                     }
                 }
 
@@ -225,5 +189,17 @@ Item {
             return index % 4 === 0;
         const chartLength = (mainInstance?.chart ?? []).length;
         return index === 0 || index === chartLength - 1 || index % 5 === 0;
+    }
+
+    function chartModelForDisplay() {
+        const chart = mainInstance?.chart ?? [];
+        const result = [];
+        for (let i = 0; i < chart.length; i++) {
+            result.push({
+                label: root.shouldShowChartLabel(i) ? (chart[i].label ?? "") : "",
+                value: chart[i].seconds ?? chart[i].value ?? 0
+            });
+        }
+        return result;
     }
 }

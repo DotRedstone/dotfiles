@@ -34,7 +34,8 @@
     "month": "Month",
     "afk_short": "AFK",
     "last_7_days": "Last 7 Days",
-    "empty": "No activity summary yet."
+    "empty": "No activity summary yet.",
+    "chart": "Chart"
   },
   "settings": {
     "title": "Screen Time Settings",
@@ -47,5 +48,34 @@
     "bar_mode": "Bar display",
     "bar_mode_duration": "Today duration",
     "bar_mode_current": "Current app"
+  },
+  "mode": {
+    "day": "Day",
+    "week": "Week",
+    "month": "Month"
+  },
+  "range": {
+    "today": "Today",
+    "last24": "Last 24 Hours",
+    "thisWeek": "This Week",
+    "last7": "Last 7 Days",
+    "thisMonth": "This Month",
+    "last30": "Last 30 Days"
+  },
+  "title": {
+    "day_calendar": "Today screen time",
+    "day_rolling": "Last 24 hours screen time",
+    "week_calendar": "This week screen time",
+    "week_rolling": "Last 7 days screen time",
+    "month_calendar": "This month screen time",
+    "month_rolling": "Last 30 days screen time"
+  },
+  "apps": {
+    "day_calendar": "Today app usage",
+    "day_rolling": "Last 24 hours app usage",
+    "week_calendar": "This week app usage",
+    "week_rolling": "Last 7 days app usage",
+    "month_calendar": "This month app usage",
+    "month_rolling": "Last 30 days app usage"
   }
 }

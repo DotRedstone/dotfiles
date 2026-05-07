@@ -34,7 +34,8 @@
     "month": "本月",
     "afk_short": "离开",
     "last_7_days": "近 7 天",
-    "empty": "暂无活动摘要。"
+    "empty": "暂无活动摘要。",
+    "chart": "统计图表"
   },
   "settings": {
     "title": "屏幕时间设置",
@@ -47,5 +48,34 @@
     "bar_mode": "Bar 显示内容",
     "bar_mode_duration": "今日时长",
     "bar_mode_current": "当前应用"
+  },
+  "mode": {
+    "day": "日",
+    "week": "周",
+    "month": "月"
+  },
+  "range": {
+    "today": "今日",
+    "last24": "近24小时",
+    "thisWeek": "本周",
+    "last7": "近7天",
+    "thisMonth": "本月",
+    "last30": "近30天"
+  },
+  "title": {
+    "day_calendar": "今日屏幕使用时长",
+    "day_rolling": "近24小时屏幕使用时长",
+    "week_calendar": "本周屏幕使用时长",
+    "week_rolling": "近7天屏幕使用时长",
+    "month_calendar": "本月屏幕使用时长",
+    "month_rolling": "近30天屏幕使用时长"
+  },
+  "apps": {
+    "day_calendar": "今日应用使用情况",
+    "day_rolling": "近24小时应用使用情况",
+    "week_calendar": "本周应用使用情况",
+    "week_rolling": "近7天应用使用情况",
+    "month_calendar": "本月应用使用情况",
+    "month_rolling": "近30天应用使用情况"
   }
 }

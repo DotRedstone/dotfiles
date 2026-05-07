@@ -1,154 +1,175 @@
-# Noctalia 插件 UI 规范草案
+# Noctalia 插件 UI 规范
 
-## 背景
+## 总原则
 
-Noctalia 已经提供了可复用的基础组件和主题入口，例如 `qs.Commons`、`qs.Widgets`、`Style`、`Color`、`NText`、`NIcon`、`NIconButton`、`NTabBar`、`NBox` 等。插件应优先基于这些组件和 MD3 语义 token 组合界面。
+Noctalia 插件 UI 应优先使用官方基础组件：`qs.Commons`、`qs.Widgets`、`Style`、`Color`、`NText`、`NIcon`、`NIconButton`、`NBox`、`NTabBar`、`NTabButton`。本仓库的 `home/dot/noctalia/config/plugins/_shared/` 只补足官方组件体系里缺少的业务级通用组件。
 
-本次调研发现，当前插件虽然普遍使用了 `NText`、`NIcon`、`Style`、`Color`，但卡片、进度条、列表行、状态徽标、分段按钮仍大量手写 `Rectangle`。随着插件增多，这会导致圆角、边距、背景透明度、状态色和列表密度不一致。
+插件 Panel 只做展示和轻量状态组合，复杂业务逻辑放在 helper、provider 或 `Main.qml`。常规插件面板应由 Card、Section、Metric、List、Empty、Warning 组合，不在每个插件里重复手写 `Rectangle` 卡片、进度条、状态胶囊和空状态。
 
-第一阶段新增插件共享组件目录：
+共享组件不得读取插件 settings、不得调用 helper、不得读写 cache，不依赖某个插件的 `mainInstance`。
 
-```text
-home/dot/noctalia/config/plugins/_shared/
-```
-
-这些组件只服务于用户插件层，不修改官方 Noctalia 核心组件。
-
-## 共享组件
+## 组件使用规范
 
 ### PluginCard
 
-用于插件面板中的普通内容卡片。
+统一插件面板里的卡片容器。
 
-规则：
+```qml
+Shared.PluginCard {
+    variant: "surfaceVariant"
+    outlined: true
 
-- 默认使用 `Color.mSurfaceVariant` 作为卡片背景。
-- 默认圆角使用 `Style.radiusS`。
-- 默认内边距使用 `Style.marginL`。
-- 需要强调边界时使用 `bordered: true`，边框色使用语义色加透明度，不手写大面积颜色。
+    Shared.SectionHeader {
+        icon: "chart-bar"
+        title: "Today"
+    }
+}
+```
 
 ### SectionHeader
 
-用于卡片内 section 标题。
+统一 section 标题行，支持右侧动作。
 
-规则：
+```qml
+Shared.SectionHeader {
+    icon: "history"
+    title: "Last 7 Days"
+    subtitle: "Local summary"
+    actionIcon: "refresh"
+    onActionClicked: mainInstance.refresh()
+}
+```
 
-- 标题使用 `NText`、`Style.fontSizeL`、`Style.fontWeightBold`。
-- 图标使用 `NIcon` 和 `Color.mPrimary`。
-- 右侧元信息使用 `Color.mOnSurfaceVariant`。
-- 不在每个插件里重复手写标题行。
+### MetricCard
+
+统一小统计卡片，用于 prompts、sessions、AFK、当前应用等。
+
+```qml
+Shared.MetricCard {
+    icon: "message-circle"
+    label: "Prompts"
+    value: "16"
+    subtext: "Today"
+}
+```
 
 ### MetricRow
 
-用于应用列表、指标列表、简短数据行。
+统一左侧 label、右侧 value、可选 subtext 的列表行。
 
-规则：
-
-- 行背景默认使用 `Color.mSurface` 的低透明叠层。
-- 图标或首字母标识使用同一尺寸和圆角。
-- 主标签、辅助文本、数值位置固定。
-- 有占比时使用内置 `ProgressBar`，不要每个插件重复写进度条。
+```qml
+Shared.MetricRow {
+    label: "GPT 5.5"
+    value: "27.2M Tokens"
+    subtext: "Cache read included"
+}
+```
 
 ### ProgressBar
 
-用于水平占比条。
+统一进度条。`value` 范围为 `0.0-1.0`，默认超过 `0.7` 使用 warning 色，超过 `0.9` 使用 error 色。
 
-规则：
-
-- 轨道默认使用 `Color.mOutline` 的低透明叠层。
-- 填充默认使用 `Color.mPrimary`。
-- 高度默认跟随 `Style.uiScaleRatio`。
-- 不直接硬编码十六进制颜色。
+```qml
+Shared.ProgressBar {
+    value: 0.71
+    animated: true
+}
+```
 
 ### StatusBadge
 
-用于连接状态、类别标签、轻量状态提示。
+统一状态胶囊，用于 source status、tier label、API 状态。
 
-规则：
-
-- 默认使用胶囊式低透明背景。
-- 成功/普通状态优先用 `Color.mPrimary`。
-- 错误状态用 `Color.mError`。
-- 不把长错误详情或原始 JSON 放进 badge。
+```qml
+Shared.StatusBadge {
+    text: "Connected"
+    icon: "circle-check"
+    variant: "success"
+}
+```
 
 ### SegmentedControl
 
-用于插件内部的短组选项，例如 `日 / 周 / 月`。
+统一分段切换按钮，用于短选项。
 
-规则：
-
-- 容器使用 `Color.mSurfaceVariant`。
-- 选中项使用 `Color.mPrimary` 和 `Color.mOnPrimary`。
-- 未选中项使用 `Color.mOnSurfaceVariant`。
-- 选项数量应保持较少，避免替代完整 tab bar。
+```qml
+Shared.SegmentedControl {
+    model: ["日", "周", "月"]
+    currentIndex: 0
+    onClicked: index => root.modeIndex = index
+}
+```
 
 ### EmptyState
 
-用于空列表、无数据、安全错误的泛化提示。
+统一空状态。
 
-规则：
+```qml
+Shared.EmptyState {
+    icon: "inbox"
+    title: "No data"
+    description: "Waiting for local summary."
+}
+```
 
-- 使用 `NIcon` 和 `NText`。
-- 只显示泛化错误，不展示 token、session、URL、窗口标题、原始响应或完整事件。
-- 描述文本保持简短，可引导用户检查服务状态。
+### WarningBanner
 
-## 间距与圆角
+统一警告和错误提示条。
 
-推荐规则：
+```qml
+Shared.WarningBanner {
+    variant: "error"
+    title: "Provider unavailable"
+    message: "Check local auth status."
+}
+```
 
-- 面板外边距使用 `Style.marginL`。
-- 卡片内边距使用 `Style.marginL`。
-- section 间距使用 `Style.marginL`。
-- 卡片内控件间距使用 `Style.marginM`。
-- 紧凑文本间距使用 `Style.marginXS` 或 `Style.marginXXS`。
-- 普通卡片和行项目圆角使用 `Style.radiusS`。
-- 浮层、工具面板、截图工具等特殊界面可使用 `Style.radiusM` 或 `Style.radiusL`，但应在插件内说明原因。
+### BarChart
 
-## 当前调研结论
+统一简单柱状图，不承担复杂图表逻辑。
 
-### screen-time
+```qml
+Shared.BarChart {
+    model: [
+        { label: "Mon", value: 120 },
+        { label: "Tue", value: 80 }
+    ]
+}
+```
 
-- 已使用 `NText`、`NIconButton`、`Style`、`Color`。
-- 原先手写了 tab segment、主卡片、图表卡片、应用卡片、应用行、进度条、状态 chip。
-- 本次已将 `Panel.qml` 迁移到 `_shared` 的 `PluginCard`、`SectionHeader`、`MetricRow`、`ProgressBar`、`StatusBadge`、`SegmentedControl`、`EmptyState`。
-- 图表柱形仍保留在插件内，因为它属于 screen-time 的业务视图。
+## 颜色规范
 
-### model-usage
+背景使用 `Color.mSurface` 和 `Color.mSurfaceVariant`。主强调使用 `Color.mPrimary`。正文使用 `Color.mOnSurface`，次级文本使用 `Color.mOnSurfaceVariant`。边框使用 `Color.mOutline` 或 `Qt.alpha(Color.mOutline, 0.2)`。错误使用 `Color.mError`。
 
-- 使用了 `NTabBar`、`NTabButton`、`NText`、`NIcon`、`NIconButton`、`Style`、`Color`。
-- 仍手写 provider header、tier badge、错误卡片、rate limit card、quota row、progress bar。
-- 本次只记录，不迁移。
+插件 QML 中禁止新增大面积硬编码 `#xxxxxx` 颜色。允许少量通过 `Qt.alpha(Color.*, value)` 派生透明度。
 
-### clipper
+## 间距和圆角规范
 
-- 使用了 `NText`、`NIconButton`、`Style`、`Color`。
-- 存在大量自定义 card、filter button、badge、fallback hex color。
-- 剪贴板内容展示有较强业务特性，建议在 model-usage 之后迁移通用筛选和 badge 部分。
+页面外边距使用 `Style.marginL`。卡片内边距使用 `Style.marginL`。section 间距使用 `Style.marginL`。行内间距使用 `Style.marginS` 或 `Style.marginM`。卡片圆角使用 `Style.radiusS` 或 Noctalia 已有常用 radius。小胶囊使用 `height / 2`。不要在单个插件里重新定义一套圆角体系。
 
-### keybind-cheatsheet
+## 字体规范
 
-- Settings 中已有 `NBox` 等基础组件使用。
-- Panel 中仍手写 key cap、分类卡片、搜索结果行。
-- 结构较简单，适合作为第二批迁移对象。
+大数字使用 `Style.fontSizeXXXL` 或 `Style.fontSizeXXL`，加粗。section title 使用 `Style.fontSizeL` 和 semi/bold。正文使用 `Style.fontSizeM`。次级文本使用 `Style.fontSizeS` 或 `Style.fontSizeXS`，颜色为 `Color.mOnSurfaceVariant`。插件中不直接写裸 pixel 字号。
 
-### screen-toolkit
+## 状态规范
 
-- 使用了 `NIconButtonHot`、`NText`、`NIcon`、`Style`、`Color`。
-- 截图、录屏、钉图等 overlay 场景存在硬编码透明遮罩、红色录制边框、白色提示文字。
-- 这些属于工具态视觉，不建议第一阶段套普通插件卡片组件；应最后单独梳理 overlay token。
+正常状态使用 `primary` 或 `neutral`。警告使用 warning 风格或 error alpha 背景。错误使用 `WarningBanner` 的 `error`。空状态使用 `EmptyState`。加载中应显示泛化 waiting/source 状态，不展示原始响应。
+
+## 隐私规范
+
+UI 不展示 token、API key、session、cookie。`screen-time` 不展示 title、URL、windowTitle、fileName、raw events。`model-usage` 不展示 email、token、raw JSON。错误信息应泛化，不打印原始响应。
+
+## 新插件 Checklist
+
+- 是否使用 `_shared` 组件组织 Card、Section、Metric、List、Empty、Warning。
+- 是否避免新增大面积硬编码颜色。
+- 是否避免把复杂业务逻辑塞进 `Panel.qml`。
+- 是否提供 `EmptyState`。
+- 是否提供错误或 warning 状态。
+- 是否使用 `Style.*` 和 `Style.uiScaleRatio` 保持缩放。
+- 是否 `home-manager build --flake .#dot@warden` 通过。
+- 是否没有 cache、secret、token、session、原始 usage 或 ActivityWatch 数据进入 git。
 
 ## 迁移顺序建议
 
-1. `screen-time`：作为共享组件试点，已完成第一阶段迁移。
-2. `model-usage`：卡片、quota row、progress bar 与 shared 组件高度匹配。
-3. `keybind-cheatsheet`：key row 和 section card 可低风险统一。
-4. `clipper`：先迁移筛选 badge 和空状态，再评估内容卡片。
-5. `screen-toolkit`：最后单独处理 overlay/工具态视觉，不直接套普通面板规范。
-
-## 隐私与安全
-
-插件 UI 组件只负责展示结构，不应读取或保存运行时敏感数据。具体插件仍需遵守各自数据边界：
-
-- 不展示 token、session、cache 路径或原始日志。
-- 不展示 ActivityWatch 原始事件、窗口标题、URL、文件名或完整时间线。
-- 不把运行时 cache、summary JSON、数据库加入仓库或 persistence。
+已迁移第一批：`screen-time`、`model-usage`。后续建议顺序为 `keybind-cheatsheet`、`privacy-indicator`、`clipper`、`todo`、`screen-toolkit`。其中 `screen-toolkit` 有截图和 overlay 场景，应最后单独整理工具态视觉。

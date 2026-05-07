@@ -10,6 +10,9 @@ RowLayout {
     property string subtitle: ""
     property string icon: ""
     property string meta: ""
+    property string actionText: ""
+    property string actionIcon: ""
+    signal actionClicked()
 
     Layout.fillWidth: true
     spacing: Style.marginM
@@ -45,10 +48,23 @@ RowLayout {
     }
 
     NText {
-        visible: root.meta !== ""
+        visible: root.meta !== "" && root.actionText === "" && root.actionIcon === ""
         text: root.meta
         pointSize: Style.fontSizeXS
         color: Color.mOnSurfaceVariant
         elide: Text.ElideRight
+    }
+
+    NButton {
+        visible: root.actionText !== ""
+        text: root.actionText
+        onClicked: root.actionClicked()
+    }
+
+    NIconButton {
+        visible: root.actionText === "" && root.actionIcon !== ""
+        icon: root.actionIcon
+        baseSize: Style.baseWidgetSize * 0.78
+        onClicked: root.actionClicked()
     }
 }

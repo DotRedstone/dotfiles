@@ -9,12 +9,15 @@ NBox {
     property string label: ""
     property string value: ""
     property string subtitle: ""
+    property string subtext: ""
     property string icon: ""
     property string leadingText: ""
     property real progress: -1
     property color accentColor: Color.mPrimary
+    property color valueColor: Color.mOnSurface
     property color rowColor: Qt.alpha(Color.mSurface, 0.58)
     property bool showBackground: true
+    property bool warning: false
 
     Layout.fillWidth: true
     radius: Style.radiusS
@@ -76,8 +79,8 @@ NBox {
                 }
 
                 NText {
-                    visible: root.subtitle !== ""
-                    text: root.subtitle
+                    visible: (root.subtitle !== "" || root.subtext !== "")
+                    text: root.subtitle !== "" ? root.subtitle : root.subtext
                     pointSize: Style.fontSizeXS
                     color: Color.mOnSurfaceVariant
                     elide: Text.ElideRight
@@ -89,7 +92,7 @@ NBox {
                 text: root.value
                 pointSize: Style.fontSizeM
                 font.weight: Style.fontWeightBold
-                color: Color.mOnSurface
+                color: root.warning ? Color.mError : root.valueColor
                 elide: Text.ElideRight
             }
         }

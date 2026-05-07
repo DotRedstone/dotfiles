@@ -9,6 +9,8 @@ ColumnLayout {
     property string icon: "inbox"
     property string title: ""
     property string description: ""
+    property string actionText: ""
+    signal actionClicked()
 
     Layout.fillWidth: true
     spacing: Style.marginS
@@ -39,5 +41,12 @@ ColumnLayout {
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
         visible: root.description !== ""
+    }
+
+    NButton {
+        visible: root.actionText !== ""
+        text: root.actionText
+        Layout.alignment: Qt.AlignHCenter
+        onClicked: root.actionClicked()
     }
 }

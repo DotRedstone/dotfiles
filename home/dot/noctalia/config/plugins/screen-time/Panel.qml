@@ -14,7 +14,7 @@ Item {
     property real contentPreferredWidth: 440 * Style.uiScaleRatio
     property real contentPreferredHeight: 680 * Style.uiScaleRatio
     readonly property color cardColor: Color.mSurfaceVariant
-    readonly property color primaryWash: Qt.alpha(Color.mPrimary, 0.14)
+    readonly property color hoverColor: Qt.alpha(Color.mPrimary, 0.10)
     readonly property color outlineWash: Qt.alpha(Color.mOutline, 0.22)
 
     anchors.fill: parent
@@ -45,8 +45,45 @@ Item {
                     Layout.fillWidth: true
                     radius: Style.radiusS
                     color: root.cardColor
+                    implicitHeight: tabsRow.implicitHeight + Style.marginM * 2
+
+                    RowLayout {
+                        id: tabsRow
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                            margins: Style.marginM
+                        }
+                        spacing: Style.marginS
+
+                        SegmentButton {
+                            Layout.fillWidth: true
+                            label: mainInstance?.modeLabel("day") ?? "日"
+                            checked: (mainInstance?.mode ?? "day") === "day"
+                            onClicked: mainInstance?.setMode("day")
+                        }
+                        SegmentButton {
+                            Layout.fillWidth: true
+                            label: mainInstance?.modeLabel("week") ?? "周"
+                            checked: (mainInstance?.mode ?? "day") === "week"
+                            onClicked: mainInstance?.setMode("week")
+                        }
+                        SegmentButton {
+                            Layout.fillWidth: true
+                            label: mainInstance?.modeLabel("month") ?? "月"
+                            checked: (mainInstance?.mode ?? "day") === "month"
+                            onClicked: mainInstance?.setMode("month")
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    radius: Style.radiusS
+                    color: root.cardColor
                     implicitHeight: heroContent.implicitHeight + Style.marginXL * 2
-                    border.color: Qt.alpha(Color.mPrimary, 0.26)
+                    border.color: Qt.alpha(Color.mPrimary, 0.20)
                     border.width: 1
 
                     ColumnLayout {
@@ -63,38 +100,11 @@ Item {
                             Layout.fillWidth: true
                             spacing: Style.marginM
 
-                            Rectangle {
-                                width: 50 * Style.uiScaleRatio
-                                height: width
-                                radius: width / 2
-                                color: root.primaryWash
-
-                                NIcon {
-                                    anchors.centerIn: parent
-                                    icon: "chart-pie"
-                                    pointSize: Style.fontSizeXXL
-                                    color: Color.mPrimary
-                                }
-                            }
-
-                            ColumnLayout {
+                            RangePill {
                                 Layout.fillWidth: true
-                                spacing: Style.marginXXS
-
-                                NText {
-                                    text: pluginApi?.tr("panel.title") ?? "Screen Time"
-                                    pointSize: Style.fontSizeL
-                                    font.weight: Style.fontWeightBold
-                                    color: Color.mOnSurface
-                                }
-
-                                NText {
-                                    text: mainInstance?.sourceStatusText ?? (pluginApi?.tr("status.waiting") ?? "Waiting for ActivityWatch")
-                                    pointSize: Style.fontSizeS
-                                    color: mainInstance?.ok ? Color.mPrimary : Color.mOnSurfaceVariant
-                                    elide: Text.ElideRight
-                                    Layout.fillWidth: true
-                                }
+                                label: mainInstance?.rangeLabel(mainInstance?.range ?? "calendar") ?? "今日"
+                                onPrevious: mainInstance?.toggleRange()
+                                onNext: mainInstance?.toggleRange()
                             }
 
                             NIconButton {
@@ -104,54 +114,31 @@ Item {
                             }
                         }
 
-                        RowLayout {
+                        ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: Style.marginL
+                            spacing: Style.marginXS
 
-                            ColumnLayout {
+                            NText {
+                                text: mainInstance?.title ?? "屏幕使用时长"
+                                pointSize: Style.fontSizeS
+                                color: Color.mOnSurfaceVariant
                                 Layout.fillWidth: true
-                                spacing: Style.marginXS
-
-                                NText {
-                                    text: pluginApi?.tr("panel.today_total") ?? "Today"
-                                    pointSize: Style.fontSizeS
-                                    color: Color.mOnSurfaceVariant
-                                }
-
-                                NText {
-                                    text: mainInstance?.formatDuration(mainInstance.todayTotalSeconds) ?? "0m"
-                                    pointSize: Style.fontSizeXXXL
-                                    font.weight: Style.fontWeightBold
-                                    color: Color.mOnSurface
-                                }
+                                elide: Text.ElideRight
                             }
 
-                            Rectangle {
-                                visible: (mainInstance?.currentApp ?? "") !== ""
-                                radius: Style.radiusS
-                                color: Qt.alpha(Color.mPrimary, 0.12)
-                                implicitWidth: currentPill.implicitWidth + Style.marginL * 2
-                                implicitHeight: currentPill.implicitHeight + Style.marginM
+                            NText {
+                                text: mainInstance?.primaryLabel ?? "0分钟"
+                                pointSize: Style.fontSizeXXXL
+                                font.weight: Style.fontWeightBold
+                                color: Color.mOnSurface
+                                Layout.fillWidth: true
+                            }
 
-                                RowLayout {
-                                    id: currentPill
-                                    anchors.centerIn: parent
-                                    spacing: Style.marginS
-
-                                    Rectangle {
-                                        width: 8 * Style.uiScaleRatio
-                                        height: width
-                                        radius: width / 2
-                                        color: Color.mPrimary
-                                    }
-
-                                    NText {
-                                        text: mainInstance?.shortAppName(mainInstance.currentApp, 14) ?? ""
-                                        pointSize: Style.fontSizeS
-                                        font.weight: Style.fontWeightSemiBold
-                                        color: Color.mPrimary
-                                    }
-                                }
+                            NText {
+                                text: mainInstance?.comparisonLabel ?? ""
+                                pointSize: Style.fontSizeS
+                                color: Color.mPrimary
+                                Layout.fillWidth: true
                             }
                         }
 
@@ -159,19 +146,17 @@ Item {
                             Layout.fillWidth: true
                             spacing: Style.marginM
 
-                            StatCard {
+                            InfoChip {
                                 Layout.fillWidth: true
-                                label: pluginApi?.tr("panel.week") ?? "Week"
-                                value: mainInstance?.formatDuration(mainInstance.weekTotalSeconds) ?? "0m"
-                                subtext: (pluginApi?.tr("panel.afk_short") ?? "AFK") + " " + (mainInstance?.formatDuration(mainInstance.weekAfkSeconds) ?? "0m")
+                                label: pluginApi?.tr("panel.current_app") ?? "Current app"
+                                value: (mainInstance?.currentApp ?? "") !== "" ? mainInstance.currentApp : (pluginApi?.tr("general.none") ?? "None")
                                 accent: Color.mPrimary
                             }
 
-                            StatCard {
+                            InfoChip {
                                 Layout.fillWidth: true
-                                label: pluginApi?.tr("panel.month") ?? "Month"
-                                value: mainInstance?.formatDuration(mainInstance.monthTotalSeconds) ?? "0m"
-                                subtext: (pluginApi?.tr("panel.afk_short") ?? "AFK") + " " + (mainInstance?.formatDuration(mainInstance.monthAfkSeconds) ?? "0m")
+                                label: pluginApi?.tr("panel.afk") ?? "AFK"
+                                value: mainInstance?.formatDuration(mainInstance.afkSeconds) ?? "0m"
                                 accent: Color.mOnSurfaceVariant
                             }
                         }
@@ -182,10 +167,10 @@ Item {
                     Layout.fillWidth: true
                     radius: Style.radiusS
                     color: root.cardColor
-                    implicitHeight: weekContent.implicitHeight + Style.marginXL
+                    implicitHeight: chartContent.implicitHeight + Style.marginXL
 
                     ColumnLayout {
-                        id: weekContent
+                        id: chartContent
                         anchors {
                             left: parent.left
                             right: parent.right
@@ -196,15 +181,17 @@ Item {
 
                         RowLayout {
                             Layout.fillWidth: true
+
                             NText {
-                                text: pluginApi?.tr("panel.last_7_days") ?? "Last 7 Days"
+                                text: pluginApi?.tr("panel.chart") ?? "统计图表"
                                 pointSize: Style.fontSizeL
                                 font.weight: Style.fontWeightBold
                                 color: Color.mOnSurface
                                 Layout.fillWidth: true
                             }
+
                             NText {
-                                text: mainInstance?.formatTimestamp(mainInstance.fetchedAt) ?? ""
+                                text: mainInstance?.formatTimestamp(mainInstance.lastUpdated) ?? ""
                                 pointSize: Style.fontSizeXS
                                 color: Color.mOnSurfaceVariant
                             }
@@ -212,14 +199,15 @@ Item {
 
                         RowLayout {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 104 * Style.uiScaleRatio
-                            spacing: Style.marginS
+                            Layout.preferredHeight: 124 * Style.uiScaleRatio
+                            spacing: (mainInstance?.mode ?? "day") === "month" ? Style.marginXXS : Style.marginS
 
                             Repeater {
-                                model: mainInstance?.dailyTotals ?? []
+                                model: mainInstance?.chart ?? []
 
                                 ColumnLayout {
                                     required property var modelData
+                                    required property int index
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     spacing: Style.marginXS
@@ -231,18 +219,19 @@ Item {
                                         Rectangle {
                                             anchors.horizontalCenter: parent.horizontalCenter
                                             anchors.bottom: parent.bottom
-                                            width: 18 * Style.uiScaleRatio
-                                            height: Math.max(8 * Style.uiScaleRatio, parent.height * (mainInstance?.dailyShare(modelData.seconds ?? 0) ?? 0))
+                                            width: Math.max(4 * Style.uiScaleRatio, Math.min(18 * Style.uiScaleRatio, parent.width * 0.68))
+                                            height: Math.max(7 * Style.uiScaleRatio, parent.height * (mainInstance?.chartShare(modelData.seconds ?? 0) ?? 0))
                                             radius: width / 2
                                             color: (modelData.seconds ?? 0) > 0 ? Color.mPrimary : root.outlineWash
                                         }
                                     }
 
                                     NText {
-                                        text: modelData.label ?? ""
-                                        pointSize: Style.fontSizeXS
+                                        text: root.shouldShowChartLabel(index) ? (modelData.label ?? "") : ""
+                                        pointSize: Style.fontSizeXXS
                                         color: Color.mOnSurfaceVariant
                                         horizontalAlignment: Text.AlignHCenter
+                                        elide: Text.ElideRight
                                         Layout.fillWidth: true
                                     }
                                 }
@@ -267,39 +256,29 @@ Item {
                         }
                         spacing: Style.marginM
 
-                        RowLayout {
+                        NText {
+                            text: mainInstance?.appListTitle ?? "应用使用情况"
+                            pointSize: Style.fontSizeL
+                            font.weight: Style.fontWeightBold
+                            color: Color.mOnSurface
                             Layout.fillWidth: true
-
-                            NText {
-                                text: pluginApi?.tr("panel.top_apps") ?? "Top Apps"
-                                pointSize: Style.fontSizeL
-                                font.weight: Style.fontWeightBold
-                                color: Color.mOnSurface
-                                Layout.fillWidth: true
-                            }
-
-                            NText {
-                                text: pluginApi?.tr("panel.today") ?? "Today"
-                                pointSize: Style.fontSizeXS
-                                color: Color.mOnSurfaceVariant
-                            }
                         }
 
                         Repeater {
-                            model: mainInstance?.visibleTopApps() ?? []
+                            model: mainInstance?.visibleApps() ?? []
 
                             AppRow {
                                 required property var modelData
                                 Layout.fillWidth: true
-                                appName: modelData.app ?? "Unknown"
+                                appName: modelData.displayName ?? modelData.app ?? "Unknown"
                                 seconds: modelData.seconds ?? 0
-                                share: mainInstance?.topAppShare(modelData.seconds ?? 0) ?? 0
-                                initial: mainInstance?.appInitial(modelData.app) ?? "?"
+                                share: mainInstance?.appShare(modelData.seconds ?? 0) ?? 0
+                                initial: mainInstance?.appInitial(modelData.displayName ?? modelData.app) ?? "?"
                             }
                         }
 
                         NText {
-                            visible: (mainInstance?.visibleTopApps() ?? []).length === 0
+                            visible: (mainInstance?.visibleApps() ?? []).length === 0
                             text: pluginApi?.tr("panel.empty") ?? "No activity summary yet."
                             pointSize: Style.fontSizeM
                             color: Color.mOnSurfaceVariant
@@ -313,18 +292,88 @@ Item {
         }
     }
 
-    component StatCard: Rectangle {
+    function shouldShowChartLabel(index) {
+        const mode = mainInstance?.mode ?? "day";
+        if (mode === "week")
+            return true;
+        if (mode === "day")
+            return index % 4 === 0;
+        const chartLength = (mainInstance?.chart ?? []).length;
+        return index === 0 || index === chartLength - 1 || index % 5 === 0;
+    }
+
+    component SegmentButton: Rectangle {
+        property string label: ""
+        property bool checked: false
+        signal clicked()
+
+        radius: Style.radiusS
+        color: checked ? Color.mPrimary : "transparent"
+        implicitHeight: tabText.implicitHeight + Style.marginM
+
+        NText {
+            id: tabText
+            anchors.centerIn: parent
+            text: label
+            pointSize: Style.fontSizeM
+            font.weight: Style.fontWeightSemiBold
+            color: checked ? Color.mOnPrimary : Color.mOnSurfaceVariant
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: parent.clicked()
+        }
+    }
+
+    component RangePill: Rectangle {
+        property string label: ""
+        signal previous()
+        signal next()
+
+        radius: Style.radiusS
+        color: Qt.alpha(Color.mPrimary, 0.12)
+        implicitHeight: pillRow.implicitHeight + Style.marginM
+
+        RowLayout {
+            id: pillRow
+            anchors.centerIn: parent
+            spacing: Style.marginM
+
+            NIconButton {
+                icon: "chevron-left"
+                baseSize: Style.baseWidgetSize * 0.68
+                onClicked: previous()
+            }
+
+            NText {
+                text: label
+                pointSize: Style.fontSizeM
+                font.weight: Style.fontWeightBold
+                color: Color.mPrimary
+            }
+
+            NIconButton {
+                icon: "chevron-right"
+                baseSize: Style.baseWidgetSize * 0.68
+                onClicked: next()
+            }
+        }
+    }
+
+    component InfoChip: Rectangle {
         property string label: ""
         property string value: ""
-        property string subtext: ""
         property color accent: Color.mPrimary
 
         radius: Style.radiusS
         color: Qt.alpha(accent, 0.10)
-        implicitHeight: statColumn.implicitHeight + Style.marginM * 2
+        implicitHeight: chipColumn.implicitHeight + Style.marginM * 2
 
         ColumnLayout {
-            id: statColumn
+            id: chipColumn
             anchors {
                 left: parent.left
                 right: parent.right
@@ -342,16 +391,10 @@ Item {
 
             NText {
                 text: value
-                pointSize: Style.fontSizeM
+                pointSize: Style.fontSizeS
                 font.weight: Style.fontWeightBold
                 color: Color.mOnSurface
-                Layout.fillWidth: true
-            }
-
-            NText {
-                text: subtext
-                pointSize: Style.fontSizeXS
-                color: Color.mOnSurfaceVariant
+                elide: Text.ElideRight
                 Layout.fillWidth: true
             }
         }
@@ -428,5 +471,4 @@ Item {
             }
         }
     }
-
 }

@@ -114,9 +114,87 @@
     }
     {
       mode = "n";
+      key = "<leader>wh";
+      action = "<C-w>h";
+      options.desc = "切到左窗口";
+    }
+    {
+      mode = "n";
+      key = "<leader>wj";
+      action = "<C-w>j";
+      options.desc = "切到下窗口";
+    }
+    {
+      mode = "n";
+      key = "<leader>wk";
+      action = "<C-w>k";
+      options.desc = "切到上窗口";
+    }
+    {
+      mode = "n";
+      key = "<leader>wl";
+      action = "<C-w>l";
+      options.desc = "切到右窗口";
+    }
+    {
+      mode = "n";
+      key = "<leader>wv";
+      action = "<C-w>v";
+      options.desc = "垂直分屏";
+    }
+    {
+      mode = "n";
+      key = "<leader>ws";
+      action = "<C-w>s";
+      options.desc = "水平分屏";
+    }
+    {
+      mode = "n";
+      key = "<leader>wc";
+      action = "<C-w>c";
+      options.desc = "关闭窗口";
+    }
+    {
+      mode = "n";
       key = "<leader>wd";
       action = "<C-w>c";
       options.desc = "关闭当前窗口";
+    }
+    {
+      mode = "n";
+      key = "<leader>wo";
+      action = "<C-w>o";
+      options.desc = "只保留当前窗口";
+    }
+    {
+      mode = "n";
+      key = "<leader>w=";
+      action = "<C-w>=";
+      options.desc = "等分窗口";
+    }
+    {
+      mode = "n";
+      key = "<leader>wH";
+      action = "<C-w>H";
+      options.desc = "窗口移到左侧";
+    }
+    {
+      mode = "n";
+      key = "<leader>wJ";
+      action = "<C-w>J";
+      options.desc = "窗口移到底部";
+    }
+    {
+      mode = "n";
+      key = "<leader>wK";
+      action = "<C-w>K";
+      options.desc = "窗口移到顶部";
+    }
+    {
+      mode = "n";
+      key = "<leader>wL";
+      action = "<C-w>L";
+      options.desc = "窗口移到右侧";
     }
 
     # Buffers

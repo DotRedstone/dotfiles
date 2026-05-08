@@ -154,16 +154,15 @@ Item {
                     }
 
                     NText {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                        anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
                         height: root.labelHeight
+                        width: Math.max(parent.width, implicitWidth)
                         text: modelData.label ?? ""
                         pointSize: Style.fontSizeXXS
                         color: Color.mOnSurfaceVariant
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
                     }
                 }
             }

@@ -184,13 +184,11 @@ Item {
         }
     }
 
-    function shouldShowChartLabel(index) {
-        const mode = mainInstance?.mode ?? "day";
-        if (mode === "week")
+    function shouldShowChartLabel(index, chartLength) {
+        if (chartLength <= 7)
             return true;
-        if (mode === "day")
+        if (chartLength <= 24)
             return index % 4 === 0;
-        const chartLength = (mainInstance?.chart ?? []).length;
         return index === 0 || index === chartLength - 1 || index % 5 === 0;
     }
 
@@ -199,7 +197,7 @@ Item {
         const result = [];
         for (let i = 0; i < chart.length; i++) {
             result.push({
-                label: root.shouldShowChartLabel(i) ? (chart[i].label ?? "") : "",
+                label: root.shouldShowChartLabel(i, chart.length) ? (chart[i].label ?? "") : "",
                 value: chart[i].seconds ?? chart[i].value ?? 0,
                 tooltip: root.chartTooltip(chart[i], i)
             });

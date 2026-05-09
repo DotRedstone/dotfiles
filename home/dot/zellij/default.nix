@@ -14,4 +14,5 @@
 
   xdg.configFile."zellij/layouts/vibe.kdl".source = ./layouts/vibe.kdl;
   xdg.configFile."zellij/layouts/blog.kdl".source = ./layouts/blog.kdl;
+  xdg.configFile."zellij/layouts/java-test.kdl".source = ./layouts/java-test.kdl;
 }

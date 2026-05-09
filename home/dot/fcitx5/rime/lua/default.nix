@@ -1,6 +1,7 @@
 # ---
 # Module: Rime Lua Entry
 # Description: Entry point for Rime Lua scripts (rime.lua)
+# Scope: Home Manager
 # ---
 
 { ... }: {

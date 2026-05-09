@@ -1,6 +1,7 @@
 # ---
 # Module: SSH Client
 # Description: Self-contained SSH module with Sops-encrypted hostnames
+# Scope: Home Manager
 # ---
 
 { config, inputs, ... }: {

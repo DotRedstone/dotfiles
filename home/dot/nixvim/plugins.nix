@@ -1,6 +1,7 @@
 # ---
 # Module: Nixvim Plugins
 # Description: Comprehensive plugin set mirroring the full LazyVim experience
+# Scope: Home Manager
 # ---
 
 { ... }: {

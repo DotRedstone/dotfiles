@@ -1,6 +1,7 @@
 # ---
 # Module: Fcitx5 Global Config
 # Description: Hotkeys and behavior settings
+# Scope: Home Manager
 # ---
 
 # ---

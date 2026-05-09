@@ -1,6 +1,7 @@
 # ---
 # Module: MPV
 # Description: High-performance video player with modern UI (uosc)
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

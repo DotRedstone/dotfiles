@@ -1,6 +1,7 @@
 # ---
 # Module: Google Antigravity AI Agent
 # Description: AI-powered coding assistant from Google, integrated via flake package
+# Scope: Home Manager
 # ---
 
 { inputs, pkgs, ... }:

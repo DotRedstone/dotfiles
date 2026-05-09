@@ -1,6 +1,7 @@
 # ---
 # Module: Fcitx5 Theming
 # Description: Classic UI configuration with Mellow & Inflex Themes
+# Scope: Home Manager
 # ---
 
 { lib, ... }:

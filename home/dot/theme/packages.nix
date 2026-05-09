@@ -1,6 +1,7 @@
 # ---
 # Module: Theme Assets
 # Description: Icon sets, cursor packages, and theming engines
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }:

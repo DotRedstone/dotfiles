@@ -1,6 +1,7 @@
 # ---
 # Module: Starship Layout
 # Description: Minimalist "Warden" Capsule Prompt (Nerd Fonts only, No Emojis)
+# Scope: Home Manager
 # ---
 
 { ... }: {

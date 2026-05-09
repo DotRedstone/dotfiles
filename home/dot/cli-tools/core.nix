@@ -1,6 +1,7 @@
 # ---
 # Module: Core CLI Tools
 # Description: Essential POSIX utilities and archiving tools
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

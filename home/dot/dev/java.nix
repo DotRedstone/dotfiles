@@ -1,6 +1,7 @@
 # ---
 # Module: Java Development
 # Description: JDK and build automation tools for the JVM ecosystem
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

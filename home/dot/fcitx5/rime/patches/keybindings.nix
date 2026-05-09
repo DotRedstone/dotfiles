@@ -1,6 +1,7 @@
 # ---
 # Module: Rime Patch - Keybindings
 # Description: Custom key bindings for candidate selection and menu navigation
+# Scope: Home Manager
 # ---
 
 {

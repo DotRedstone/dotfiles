@@ -1,6 +1,7 @@
 # ---
 # Module: Zathura
 # Description: Highly customizable document viewer with Vim-like bindings
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

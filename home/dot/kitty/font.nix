@@ -1,6 +1,7 @@
 # ---
 # Module: Kitty Typography
 # Description: Font features and stylistic sets for Maple Mono NF
+# Scope: Home Manager
 # ---
 
 { ... }: {

@@ -1,6 +1,7 @@
 # ---
 # Module: Nautilus Settings
 # Description: Dconf overrides for GTK interface and file manager behavior
+# Scope: Home Manager
 # ---
 
 { config, lib, ... }: {

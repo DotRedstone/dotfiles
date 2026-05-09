@@ -1,6 +1,7 @@
 # ---
 # Module: MangoHud
 # Description: Vulkan/OpenGL overlay for monitoring FPS and hardware state
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

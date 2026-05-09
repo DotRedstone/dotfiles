@@ -1,6 +1,7 @@
 # ---
 # Module: Rime Lua Select Character
 # Description: Custom Lua function for candidate selection using [ and ]
+# Scope: Home Manager
 # ---
 
 { ... }: {

@@ -1,6 +1,7 @@
 # ---
 # Module: Nautilus Packages
 # Description: Core binary and essential desktop integration tools
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

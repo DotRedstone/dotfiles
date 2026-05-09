@@ -1,6 +1,7 @@
 # ---
 # Module: GTK Configuration
 # Description: Standardizes GTK3/4 behavior and links to Noctalia-generated CSS
+# Scope: Home Manager
 # ---
 
 { config, pkgs, lib, customPapirus, ... }: {

@@ -1,6 +1,7 @@
 # ---
 # Module: Nixvim Theme
 # Description: Catppuccin with automatic light/dark detection
+# Scope: Home Manager
 # ---
 
 { ... }: {

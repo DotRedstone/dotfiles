@@ -216,14 +216,16 @@ impl Bridge {
             return Ok(None);
         };
 
-        let session_db = self.copy_db(&account, "db_storage/session/session.db", "session.db")?;
-        let session_key = self.ensure_key("session", &session_db)?;
+        let session = self
+            .copy_db(&account, "db_storage/session/session.db", "session.db")
+            .and_then(|db| self.ensure_key("session", &db).map(|key| (db, key)))
+            .ok();
         let sender_user = id_to_user.get(&row.real_sender_id).cloned().unwrap_or_default();
         let line = format_message(
             &contact_db,
             &contact_key,
-            &session_db,
-            &session_key,
+            session.as_ref().map(|(db, _)| db.as_path()),
+            session.as_ref().map(|(_, key)| key.as_str()),
             &row.chat,
             &sender_user,
             row.local_type,
@@ -251,8 +253,11 @@ impl Bridge {
     }
 
     fn ensure_key(&mut self, label: &str, db: &Path) -> Result<String> {
-        if let Some(key) = self.keys.get(label) {
-            return Ok(key.clone());
+        if let Some(key) = self.keys.get(label).cloned() {
+            if validate_key(db, &key) {
+                return Ok(key);
+            }
+            self.keys.remove(label);
         }
 
         if let Some(key) = self.cache.get(label).cloned() {
@@ -260,6 +265,8 @@ impl Bridge {
                 self.keys.insert(label.to_string(), key.clone());
                 return Ok(key);
             }
+            self.cache.remove(label);
+            let _ = save_key_cache(&self.cache_path, &self.cache);
         }
 
         let mut candidates = Vec::new();
@@ -269,10 +276,9 @@ impl Bridge {
             }
         }
 
-        let needs_rescan = self.memory_key_candidates.is_empty()
-            && self
-                .last_memory_scan
-                .map_or(true, |last| last.elapsed() >= self.memory_scan_cooldown);
+        let needs_rescan = self
+            .last_memory_scan
+            .map_or(true, |last| last.elapsed() >= self.memory_scan_cooldown);
 
         if !self.scanned_memory || needs_rescan {
             let found = memory_candidates();
@@ -666,8 +672,8 @@ fn query_next_message(
 fn format_message(
     contact_db: &Path,
     contact_key: &str,
-    session_db: &Path,
-    session_key: &str,
+    session_db: Option<&Path>,
+    session_key: Option<&str>,
     chat: &str,
     sender_user: &str,
     local_type: i64,
@@ -686,7 +692,9 @@ fn format_message(
     let summary = message_summary(local_type, &body)?;
     let sender_display = display_name(contact_db, contact_key, &sender_user)
         .unwrap_or_else(|| sender_user.clone());
-    let chat_display = session_display_name(session_db, session_key, chat)
+    let chat_display = session_db
+        .zip(session_key)
+        .and_then(|(db, key)| session_display_name(db, key, chat))
         .or_else(|| display_name(contact_db, contact_key, chat))
         .unwrap_or_else(|| chat.to_string());
 

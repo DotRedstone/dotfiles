@@ -22,8 +22,6 @@
     # Note: 
     # - Auth: ~/.local/share/opencode/auth.json
     # - Config: ~/.config/opencode/opencode.json
-    # - To use OpenAI-compatible provider, edit opencode.json:
-    #   { "provider": "openai", "openai": { "baseURL": "https://api.example.com/v1", "apiKey": "YOUR_KEY" } }
   ];
 
   # [Modern Coreutils]
@@ -107,6 +105,9 @@
 
   # [Fastfetch Config]
   xdg.configFile."fastfetch/config.jsonc".source = ./fastfetch.json;
+
+  # [OpenCode Config]
+  xdg.configFile."opencode/opencode.json".source = ./opencode.json;
 
   # Shell aliases to map classic commands to modern ones
   home.shellAliases = {

@@ -1,6 +1,7 @@
 # ---
 # Module: Yazi
 # Description: Blazing fast terminal file manager with Fish integration
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

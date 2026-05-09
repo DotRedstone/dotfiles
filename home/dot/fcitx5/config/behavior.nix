@@ -1,6 +1,7 @@
 # ---
 # Module: Fcitx5 Behavior
 # Description: General behavior settings like ShareInputState and CapsLock behavior
+# Scope: Home Manager
 # ---
 
 { ... }: {

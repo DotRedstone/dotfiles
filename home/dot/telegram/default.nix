@@ -1,6 +1,7 @@
 # ---
 # Module: Telegram
 # Description: Official Telegram Desktop client with Wayland and QT input optimizations
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

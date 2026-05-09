@@ -1,6 +1,7 @@
 # ---
 # Module: Cursor Theme
 # Description: Pointer configuration for X11, GTK, and Wayland sessions
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

@@ -1,6 +1,7 @@
 # ---
 # Module: Netease Cloud Music
 # Description: Netease Cloud Music GTK client (Rust/GTK4)
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

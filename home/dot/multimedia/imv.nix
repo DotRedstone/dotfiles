@@ -1,6 +1,7 @@
 # ---
 # Module: IMV
 # Description: Lightweight image viewer for Wayland
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

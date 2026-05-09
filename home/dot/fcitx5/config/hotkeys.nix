@@ -1,6 +1,7 @@
 # ---
 # Module: Fcitx5 Hotkeys
 # Description: Key bindings and trigger configuration
+# Scope: Home Manager
 # ---
 
 { ... }: {

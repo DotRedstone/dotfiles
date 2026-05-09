@@ -1,6 +1,7 @@
 # ---
 # Module: Rime Data
 # Description: Symlinking external Rime data (like rime-ice lua scripts)
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

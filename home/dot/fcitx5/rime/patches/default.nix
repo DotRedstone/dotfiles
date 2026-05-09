@@ -1,6 +1,7 @@
 # ---
 # Module: Rime Patches Entry
 # Description: Collection and merging of all Rime configuration patches
+# Scope: Home Manager
 # ---
 
 { lib, ... }:

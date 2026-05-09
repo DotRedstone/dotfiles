@@ -1,6 +1,7 @@
 # ---
 # Module: Kitty Theming
 # Description: Transparency, window decorations, and Noctalia integration
+# Scope: Home Manager
 # ---
 
 { ... }: {

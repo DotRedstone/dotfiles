@@ -1,6 +1,7 @@
 # ---
 # Module: Python Development
 # Description: Minimal Python interpreter and modern Rust-based tooling
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

@@ -1,6 +1,7 @@
 # ---
 # Module: Network Tools
 # Description: Network diagnostics and data processing
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

@@ -1,6 +1,7 @@
 # ---
 # Module: Peaclock
 # Description: Minimalist binary clock and timer
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

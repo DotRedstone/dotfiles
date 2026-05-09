@@ -1,6 +1,7 @@
 # ---
 # Module: Secrets (Vault)
 # Description: Redstone-grade encryption management
+# Scope: Home Manager
 # ---
 
 { inputs, config, pkgs, ... }: {

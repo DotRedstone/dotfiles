@@ -1,6 +1,7 @@
 # ---
 # Module: Rime Entry
 # Description: Main entry point for Rime input method and schema management
+# Scope: Home Manager
 # ---
 
 { lib, pkgs, ... }: {

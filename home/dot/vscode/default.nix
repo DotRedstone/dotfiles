@@ -1,6 +1,7 @@
 # ---
 # Module: VS Code
 # Description: Minimalist VS Code setup; configuration managed via GUI
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

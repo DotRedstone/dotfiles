@@ -1,6 +1,7 @@
 # ---
 # Module: Rime Patch - ASCII Composer
 # Description: Configuration for CapsLock and Shift key behaviors
+# Scope: Home Manager
 # ---
 
 {

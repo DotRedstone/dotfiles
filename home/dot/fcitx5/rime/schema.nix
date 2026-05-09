@@ -1,6 +1,7 @@
 # ---
 # Module: Rime Schema
 # Description: Global Rime settings and schema selection (default.custom.yaml)
+# Scope: Home Manager
 # ---
 
 { pkgs, ... }: {

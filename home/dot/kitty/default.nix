@@ -1,6 +1,7 @@
 # ---
 # Module: Kitty Terminal
 # Description: Primary terminal emulator with Niri-optimized visuals
+# Scope: Home Manager
 # ---
 
 {

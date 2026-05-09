@@ -1,6 +1,7 @@
 # ---
 # Module: Modern CLI & TUI Tools
 # Description: Next-generation terminal utilities and file managers
+# Scope: Home Manager
 # ---
 
 { config, lib, pkgs, ... }: {

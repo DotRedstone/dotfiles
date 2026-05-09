@@ -6,6 +6,6 @@
 
 { ... }: {
   # [Firewall]
-  # Trust the TUN interface created by Clash Verge
-  networking.firewall.trustedInterfaces = [ "tun0" "Meta" ];
+  # Trust TUN interfaces created by local Clash-compatible proxy clients.
+  networking.firewall.trustedInterfaces = [ "FlClash" "tun0" "Meta" ];
 }

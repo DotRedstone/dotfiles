@@ -33,6 +33,10 @@
     "browser.download.dir" = "/home/dot/Downloads";
     "browser.download.folderList" = 2;
 
+    # [Wayland / Mixed DPI]
+    # Avoid toolbar popup offset and jumpiness on mixed-scale Niri outputs.
+    "widget.wayland.fractional-scale.enabled" = false;
+
     # [Privacy & Behavior]
     "general.autoScroll" = true;
     "signon.rememberSignons" = false; # Use a password manager instead

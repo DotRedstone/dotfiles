@@ -232,6 +232,16 @@ input {
 include "./noctalia.kdl"
 
 window-rule {
+    match app-id="^java-awt-demo$"
+    match app-id=r#"^com-sun-tools-javac-launcher-.*"#
+    open-floating true
+    default-column-width { fixed 620; }
+    default-window-height { fixed 420; }
+    default-floating-position x=96 y=128 relative-to="top-left"
+    opacity 1.0
+}
+
+window-rule {
     geometry-corner-radius 20
     clip-to-geometry true
     draw-border-with-background false

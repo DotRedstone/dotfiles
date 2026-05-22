@@ -527,7 +527,7 @@
         "animationDisabled": false,
         "animationSpeed": 1,
         "autoStartAuth": false,
-        "avatarImage": "/home/dot/Pictures/.face.png",
+        "avatarImage": "/home/dot/Pictures/face/face_blog.png",
         "boxRadiusRatio": 1,
         "clockFormat": "hh\\nmm",
         "clockStyle": "custom",
@@ -863,15 +863,29 @@
     },
     "wallpaper": {
         "automationEnabled": true,
-        "directory": "/home/dot/Pictures/Wallpapers/GPT chara 4K",
+        "directory": "/home/dot/Pictures/Wallpapers",
         "enableMultiMonitorDirectories": false,
         "enabled": true,
         "favorites": [
+            {
+                "appearance": "dark",
+                "colorScheme": "Catppuccin",
+                "darkMode": true,
+                "generationMethod": "tonal-spot",
+                "paletteColors": [
+                    "#ffba4b",
+                    "#ddc2a1",
+                    "#b7cea2",
+                    "#ffb4ab"
+                ],
+                "path": "/home/dot/Pictures/Wallpapers/GPT chara 4K/upscayl_png_upscayl-standard-4x_4x/ChatGPT Image 2026年5月2日 02_41_44.png",
+                "useWallpaperColors": true
+            }
         ],
         "fillColor": "#000000",
         "fillMode": "crop",
         "hideWallpaperFilenames": false,
-        "linkLightAndDarkWallpapers": true,
+        "linkLightAndDarkWallpapers": false,
         "monitorDirectories": [
         ],
         "overviewBlur": 0.4,

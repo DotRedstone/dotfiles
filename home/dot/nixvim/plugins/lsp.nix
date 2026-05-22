@@ -20,6 +20,8 @@
     end
   '';
 
+  programs.nixvim.extraPlugins = [ pkgs.vimPlugins.nvim-jdtls ];
+
   programs.nixvim.plugins = {
     lsp = {
       enable = true;

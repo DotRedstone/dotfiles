@@ -54,6 +54,40 @@
       pkgs = import nixpkgs {
         localSystem = system;
         config.allowUnfree = true;
+        overlays = [
+          (final: prev: {
+            python3 = prev.python3.override {
+              packageOverrides = pyFinal: pyPrev: {
+                "jedi-language-server" = pyPrev."jedi-language-server".overridePythonAttrs (old: {
+                  pythonRelaxDeps = (old.pythonRelaxDeps or [ ]) ++ [ "jedi" ];
+                });
+              };
+            };
+          })
+          (final: prev: let
+            activitywatchPackages = final.qt6Packages.callPackage (prev.path + "/pkgs/applications/office/activitywatch") {
+              buildNpmPackage = args: prev.buildNpmPackage (args // final.lib.optionalAttrs ((args.pname or "") == "aw-webui") {
+                doCheck = false;
+              });
+            };
+          in {
+            inherit (activitywatchPackages)
+              aw-qt
+              aw-notify
+              aw-server-rust
+              aw-watcher-afk
+              aw-watcher-window;
+
+            activitywatch = prev.activitywatch.override {
+              inherit (activitywatchPackages)
+                aw-qt
+                aw-notify
+                aw-server-rust
+                aw-watcher-afk
+                aw-watcher-window;
+            };
+          })
+        ];
       };
       extraSpecialArgs = { inherit inputs; };
       modules = [ 

@@ -46,13 +46,8 @@
     enable = true;
     enableDefaultConfig = false;
 
-    # [Compatibility Layer]
-    matchBlocks = {
-      "*" = {
-        extraOptions = {
-          "ServerAliveInterval" = "60";
-        };
-      };
+    settings."*" = {
+      ServerAliveInterval = 60;
     };
 
     # [Redstone Link]

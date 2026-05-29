@@ -6,6 +6,7 @@
 
 { ... }: {
   time.timeZone = "Asia/Shanghai";
+  time.hardwareClockInLocalTime = true;
   i18n.defaultLocale = "zh_CN.UTF-8";
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "zh_CN.UTF-8";

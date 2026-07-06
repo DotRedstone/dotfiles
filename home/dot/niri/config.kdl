@@ -4,7 +4,7 @@
 
 spawn-at-startup "xwayland-satellite"
 spawn-at-startup "dbus-update-activation-environment" "--systemd" "--all"
-spawn-at-startup "noctalia-shell"
+spawn-at-startup "noctalia"
 spawn-at-startup "sh" "-c" "sleep 1 && fcitx5 -d --replace"
 
 // [Monitor Settings]
@@ -42,27 +42,27 @@ blur {
 binds {
     // Noctalia
     Mod+R hotkey-overlay-title="启动器" {
-        spawn "noctalia-shell" "ipc" "call" "launcher" "toggle";
+        spawn "noctalia" "msg" "panel-toggle" "launcher";
     }
 
     Mod+N hotkey-overlay-title="通知" {
-        spawn "noctalia-shell" "ipc" "call" "notifications" "toggleHistory";
+        spawn "noctalia" "msg" "panel-toggle" "control-center" "notifications";
     }
 
     Mod+B hotkey-overlay-title="剪贴板" {
-        spawn "noctalia-shell" "ipc" "call" "plugin:clipper" "toggle";
+        spawn "noctalia" "msg" "panel-toggle" "clipboard";
     }
 
     Mod+I hotkey-overlay-title="控制中心" {
-        spawn "noctalia-shell" "ipc" "call" "controlCenter" "toggle";
+        spawn "noctalia" "msg" "panel-toggle" "control-center";
     }
 
     Mod+P hotkey-overlay-title="电源" {
-        spawn "noctalia-shell" "ipc" "call" "sessionMenu" "toggle";
+        spawn "noctalia" "msg" "panel-toggle" "session";
     }
 
     Mod+Slash hotkey-overlay-title="快捷键" {
-        spawn "noctalia-shell" "ipc" "call" "plugin:keybind-cheatsheet" "toggle";
+        show-hotkey-overlay;
     }
 
     // Applications

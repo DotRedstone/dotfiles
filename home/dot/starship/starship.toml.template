@@ -3,7 +3,13 @@ add_newline = false
 
 format = """${custom.user_host_noenv}${custom.user_host_env} 󰜥 $directory $git_branch$cmd_duration\n$direnv${custom.venv}$nodejs$rust$golang$c${custom.status_dot}$character"""
 
-
+# >>> NOCTALIA STARSHIP PALETTE >>>
+[palettes.noctalia]
+primary = "{{colors.primary.default.hex}}"
+secondary = "{{colors.secondary.default.hex}}"
+tertiary = "{{colors.tertiary.default.hex}}"
+error = "{{colors.error.default.hex}}"
+# <<< NOCTALIA STARSHIP PALETTE <<<
 
 [custom.user_host_noenv]
 when = 'test -z "$VIRTUAL_ENV" && test -z "$DIRENV_DIR" && test ! -f package.json && test ! -f Cargo.toml && test ! -f go.mod'

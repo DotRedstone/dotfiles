@@ -1,6 +1,6 @@
 [theme.templates.user.starship]
 input_path = "/home/dot/.dotfiles/home/dot/starship/starship.toml.template"
-output_path = "/home/dot/.cache/starship.toml"
+output_path = "/home/dot/.config/starship.toml"
 
 [theme.templates.user.zellij]
 input_path = "/home/dot/.dotfiles/home/dot/zellij/config.kdl.template"

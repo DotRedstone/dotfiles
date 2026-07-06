@@ -4,16 +4,14 @@
 # Scope: System
 # ---
 
-{ pkgs, ... }: {
+{ ... }:
+{
   services.kmscon = {
     enable = true;
-    hwRender = true;
-    fonts = [
-      {
-        name = "Maple Mono NF";
-        package = pkgs.maple-mono.NF;
-      }
-    ];
-    extraConfig = "font-size=12";
+    config = {
+      hwaccel = true;
+      "font-name" = "Maple Mono NF";
+      "font-size" = "12";
+    };
   };
 }

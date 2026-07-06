@@ -138,18 +138,22 @@
 
     jdtls = {
       enable = true;
-      package = pkgs.jdt-language-server;
-      cmd = [ "${pkgs.jdt-language-server}/bin/jdtls" ];
-      rootMarkers = [
-        "pom.xml"
-        "build.gradle"
-        "build.gradle.kts"
-        "settings.gradle"
-        "settings.gradle.kts"
-        "mvnw"
-        "gradlew"
-        ".git"
-      ];
+      jdtLanguageServerPackage = pkgs.jdt-language-server;
+      settings = {
+        cmd = [ "${pkgs.jdt-language-server}/bin/jdtls" ];
+        root_dir.__raw = ''
+          require('jdtls.setup').find_root({
+            'pom.xml',
+            'build.gradle',
+            'build.gradle.kts',
+            'settings.gradle',
+            'settings.gradle.kts',
+            'mvnw',
+            'gradlew',
+            '.git',
+          })
+        '';
+      };
     };
 
     venv-selector.enable = true;

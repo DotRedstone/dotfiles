@@ -4,13 +4,14 @@
 # Scope: Home Manager
 # ---
 
-{ ... }: {
+{ ... }:
+{
   programs.nixvim.plugins = {
     # [Service]
     copilot-lua = {
       enable = true;
-      copilotNodeCommand = "node --no-warnings";
       settings = {
+        copilot_node_command = "node --no-warnings";
         suggestion.enabled = false;
         panel.enabled = false;
         filetypes = {
@@ -47,13 +48,17 @@
       mode = "n";
       key = "<leader>cc";
       action = "<cmd>CopilotChatToggle<cr>";
-      options = { desc = "开启/关闭 Copilot 聊天"; };
+      options = {
+        desc = "开启/关闭 Copilot 聊天";
+      };
     }
     {
       mode = "v";
       key = "<leader>ce";
       action = "<cmd>CopilotChatExplain<cr>";
-      options = { desc = "Copilot 解释代码"; };
+      options = {
+        desc = "Copilot 解释代码";
+      };
     }
   ];
 }

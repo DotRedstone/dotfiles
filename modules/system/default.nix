@@ -19,6 +19,7 @@
     ./fonts.nix         # Typography
     ./virtualization.nix# Docker & KVM
     ./gaming            # Steam & Gaming platforms
+    ./dev.nix           # Development tools
     ./keyd.nix          # Key Remapping
   ];
 }

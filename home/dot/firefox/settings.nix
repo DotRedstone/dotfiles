@@ -19,13 +19,13 @@
 
     # [Typography]
     # Matching Warden's system-wide fonts
-    "font.name.sans-serif.zh-CN" = "LXGW Neo XiHei";
-    "font.name.serif.zh-CN" = "LXGW WenKai";
+    "font.name.sans-serif.zh-CN" = "FZYJHK B";
+    "font.name.serif.zh-CN" = "FZYJHK B";
     "font.name.monospace.zh-CN" = "Maple Mono NF";
     "font.default.zh-CN" = "sans-serif";
 
     "font.name.sans-serif.x-western" = "Inter";
-    "font.name.serif.x-western" = "LXGW WenKai";
+    "font.name.serif.x-western" = "FZYJHK B";
     "font.name.monospace.x-western" = "Maple Mono NF";
     "font.default.x-western" = "sans-serif";
 

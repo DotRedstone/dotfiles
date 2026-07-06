@@ -78,18 +78,33 @@ in
       printf '%s\n' \
         'Vertical Candidate List=False' \
         'Theme=noctalia-inflex-dark-sync' \
-        'Font="Maple Mono NF 13"' \
-        'MenuFont="Maple Mono NF 13"' \
-        'TrayFont="Maple Mono NF 10"' \
+        'Font="FZYJHK B 14"' \
+        'MenuFont="FZYJHK B 14"' \
+        'TrayFont="FZYJHK B 11"' \
         > "$conf"
     fi
 
-    # Ensure required keys exist without overwriting user-modified values
+    # Ensure required keys exist and migrate to new font
     grep -q '^Vertical Candidate List=' "$conf" || printf '%s\n' 'Vertical Candidate List=False' >> "$conf"
     grep -q '^Theme=' "$conf" || printf '%s\n' 'Theme=noctalia-inflex-dark-sync' >> "$conf"
-    grep -q '^Font=' "$conf" || printf '%s\n' 'Font="Maple Mono NF 13"' >> "$conf"
-    grep -q '^MenuFont=' "$conf" || printf '%s\n' 'MenuFont="Maple Mono NF 13"' >> "$conf"
-    grep -q '^TrayFont=' "$conf" || printf '%s\n' 'TrayFont="Maple Mono NF 10"' >> "$conf"
+    
+    if grep -q '^Font=' "$conf"; then
+      sed -i 's/^Font=.*/Font="FZYJHK B 14"/' "$conf"
+    else
+      printf '%s\n' 'Font="FZYJHK B 14"' >> "$conf"
+    fi
+    
+    if grep -q '^MenuFont=' "$conf"; then
+      sed -i 's/^MenuFont=.*/MenuFont="FZYJHK B 14"/' "$conf"
+    else
+      printf '%s\n' 'MenuFont="FZYJHK B 14"' >> "$conf"
+    fi
+    
+    if grep -q '^TrayFont=' "$conf"; then
+      sed -i 's/^TrayFont=.*/TrayFont="FZYJHK B 11"/' "$conf"
+    else
+      printf '%s\n' 'TrayFont="FZYJHK B 11"' >> "$conf"
+    fi
   '';
 
   home.file = {

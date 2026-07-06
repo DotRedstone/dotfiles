@@ -4,9 +4,27 @@
 # Scope: System
 # ---
 
-{ ... }: {
+{ pkgs, ... }: {
   time.timeZone = "Asia/Shanghai";
   time.hardwareClockInLocalTime = true;
+  networking.timeServers = [
+    "ntp.aliyun.com"
+    "ntp.tencent.com"
+    "cn.pool.ntp.org"
+    "time.cloudflare.com"
+  ];
+
+  systemd.services.local-rtc-to-system-clock = {
+    description = "Set system clock from local-time hardware clock";
+    wantedBy = [ "sysinit.target" ];
+    before = [ "systemd-timesyncd.service" "time-sync.target" ];
+    unitConfig.DefaultDependencies = false;
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.util-linux}/bin/hwclock --hctosys --localtime";
+    };
+  };
+
   i18n.defaultLocale = "zh_CN.UTF-8";
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "zh_CN.UTF-8";

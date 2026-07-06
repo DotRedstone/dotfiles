@@ -7,6 +7,7 @@
 { ... }: {
   imports = [
     ./locale.nix
+    ./time.nix
     ./environment.nix
     ./input-method.nix
     ./kmscon.nix

@@ -1,81 +1,77 @@
-[config]
-
-[templates]
-
-[templates.starship]
+[theme.templates.user.starship]
 input_path = "/home/dot/.dotfiles/home/dot/starship/starship.toml.template"
 output_path = "/home/dot/.cache/starship.toml"
 
-[templates.zellij]
+[theme.templates.user.zellij]
 input_path = "/home/dot/.dotfiles/home/dot/zellij/config.kdl.template"
 output_path = "/home/dot/.cache/zellij.kdl"
 
-[templates.neovim]
+[theme.templates.user.neovim]
 input_path = "/home/dot/.dotfiles/home/dot/nixvim/colors.lua.template"
 output_path = "/home/dot/.cache/nvim_colors.lua"
 
-[templates.lazygit]
+[theme.templates.user.lazygit]
 input_path = "/home/dot/.dotfiles/home/dot/cli-tools/lazygit-config.yml.template"
 output_path = "/home/dot/.cache/lazygit.yml"
 
-[templates.fcitx5_mellow_theme]
+[theme.templates.user.fcitx5_mellow_theme]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-sync/theme.conf.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-sync/theme.conf"
 
-[templates.fcitx5_mellow_panel]
+[theme.templates.user.fcitx5_mellow_panel]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-sync/panel.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-sync/panel.svg"
 
-[templates.fcitx5_mellow_highlight]
+[theme.templates.user.fcitx5_mellow_highlight]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-sync/highlight.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-sync/highlight.svg"
 
-[templates.fcitx5_mellow_dark_theme]
+[theme.templates.user.fcitx5_mellow_dark_theme]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-dark-sync/theme.conf.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-dark-sync/theme.conf"
 
-[templates.fcitx5_mellow_dark_panel]
+[theme.templates.user.fcitx5_mellow_dark_panel]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-dark-sync/panel.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-dark-sync/panel.svg"
 
-[templates.fcitx5_mellow_dark_highlight]
+[theme.templates.user.fcitx5_mellow_dark_highlight]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-mellow-dark-sync/highlight.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-mellow-dark-sync/highlight.svg"
 
-[templates.fcitx5_inflex_theme]
+[theme.templates.user.fcitx5_inflex_theme]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-sync/theme.conf.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-sync/theme.conf"
 
-[templates.fcitx5_inflex_panel]
+[theme.templates.user.fcitx5_inflex_panel]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-sync/panel.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-sync/panel.svg"
 
-[templates.fcitx5_inflex_highlight]
+[theme.templates.user.fcitx5_inflex_highlight]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-sync/highlight.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-sync/highlight.svg"
 
-[templates.fcitx5_inflex_dark_theme]
+[theme.templates.user.fcitx5_inflex_dark_theme]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-dark-sync/theme.conf.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-dark-sync/theme.conf"
 
-[templates.fcitx5_inflex_dark_panel]
+[theme.templates.user.fcitx5_inflex_dark_panel]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-dark-sync/panel.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-dark-sync/panel.svg"
 
-[templates.fcitx5_inflex_dark_highlight]
+[theme.templates.user.fcitx5_inflex_dark_highlight]
 input_path = "/home/dot/.dotfiles/home/dot/fcitx5/templates/noctalia-inflex-dark-sync/highlight.svg.template"
 output_path = "/home/dot/.local/share/fcitx5/themes/noctalia-inflex-dark-sync/highlight.svg"
 post_hook = "busctl --user call org.fcitx.Fcitx5 /controller org.fcitx.Fcitx.Controller1 ReloadAddonConfig s classicui >/dev/null 2>&1 || true"
 
-[templates.chrome_theme_colors]
+[theme.templates.user.chrome_theme_colors]
 input_path = "/home/dot/.dotfiles/home/dot/chrome/theme/colors.json.template"
 output_path = "/home/dot/.cache/chrome-noctalia-theme/colors.json"
 post_hook = "/home/dot/.nix-profile/bin/chrome-theme-injector >/dev/null 2>&1; pywalfox update >/dev/null 2>&1 || true"
 
-[templates.opencode_theme]
+[theme.templates.user.opencode_theme]
 input_path = "/home/dot/.dotfiles/home/dot/cli-tools/opencode-theme.json.template"
 output_path = "/home/dot/.config/opencode/themes/noctalia.json"
 
-[templates.opencode_tui]
+[theme.templates.user.opencode_tui]
 input_path = "/home/dot/.dotfiles/home/dot/cli-tools/opencode-tui.json.template"
 output_path = "/home/dot/.config/opencode/tui.json"

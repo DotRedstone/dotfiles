@@ -1,3 +1,6 @@
+# Noctalia v4 legacy/generated files.
 settings.json
 colors.json
-colors.json
+plugins.json
+plugins/
+colorschemes/

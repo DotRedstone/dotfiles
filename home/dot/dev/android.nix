@@ -17,7 +17,8 @@ let
     unset QT_WAYLAND_DISABLE_WINDOWDECORATION
 
     export _JAVA_AWT_WM_NONREPARENTING=1
-    export JDK_JAVA_OPTIONS="''${JDK_JAVA_OPTIONS:-} -Dsun.java2d.xrender=false -Dide.browser.jcef.gpu.disable=true -Dide.ui.new.ui.custom.decorations.on.linux=false"
+    export STUDIO_PROPERTIES="$HOME/.config/android-studio/idea.properties"
+    export STUDIO_VM_OPTIONS="$HOME/.config/android-studio/studio64.vmoptions"
 
     exec ${androidStudio}/bin/android-studio "$@"
   '';
@@ -38,4 +39,14 @@ in
     androidStudioLauncher
     androidStudioDesktop
   ];
+
+  xdg.configFile."android-studio/idea.properties".text = ''
+    sun.java2d.xrender=false
+    ide.browser.jcef.gpu.disable=true
+    ide.ui.new.ui.custom.decorations.on.linux=true
+  '';
+
+  xdg.configFile."android-studio/studio64.vmoptions".text = ''
+    -Dawt.toolkit.name=WLToolkit
+  '';
 }

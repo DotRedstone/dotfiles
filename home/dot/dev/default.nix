@@ -6,7 +6,9 @@
 
 {
   imports = [
+    ./android.nix
     ./cpp.nix
+    ./flutter.nix
     ./java.nix
     ./node.nix
     ./python.nix

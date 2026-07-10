@@ -15,8 +15,8 @@
   networking.hostName = "warden";
 
   # [Boot]
-  # Graphics patch for Intel Ultra 7 155H (Arc GPU)
-  boot.kernelParams = [ "xe.force_probe=7d85" ];
+  # Graphics patch for Intel Ultra 7 155H (Arc GPU) - Using i915 for stable sleep/suspend
+  boot.kernelParams = [ "i915.force_probe=7d85" ];
 
   # [Storage]
   # Swap device defined here; mount points are in mounts.nix

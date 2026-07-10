@@ -17,5 +17,6 @@
     XDG_CURRENT_DESKTOP = "niri";
     XDG_SESSION_DESKTOP = "niri";
     XDG_SESSION_TYPE = "wayland";
+    _JAVA_AWT_WM_NONREPARENTING = "1";
   };
 }

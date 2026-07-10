@@ -46,6 +46,7 @@
     ./piclist
     ./lmstudio
     ./rustdesk
+    ./codex
 
     # --- Development ---
     ./nixvim
@@ -54,7 +55,7 @@
     ./antigravity
 
     # --- Game ---
-    ./prism-launcher
+    ./hmcl
     ./mangohud
     ./steam
   ];
@@ -64,6 +65,9 @@
     username = "dot";
     homeDirectory = "/home/dot";
     stateVersion = "24.11";
+    sessionPath = [
+      "$HOME/.local/npm-global/bin"
+    ];
   };
 
   # [Home Services]

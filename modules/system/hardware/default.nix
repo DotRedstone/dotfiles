@@ -10,5 +10,6 @@
     ./bluetooth.nix
     ./power.nix
     ./tools.nix
+    ./xiaomi-fan.nix
   ];
 }

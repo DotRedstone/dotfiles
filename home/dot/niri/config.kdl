@@ -8,7 +8,8 @@ spawn-at-startup "sh" "-c" "sleep 1 && fcitx5 -d --replace"
 
 // [Monitor Settings]
 output "eDP-1" {
-    mode "3072x1920@165.002"
+    mode "3072x1920@120.001"
+    max-bpc 8
     scale 1.75
 }
 
@@ -103,6 +104,7 @@ binds {
     Mod+Q hotkey-overlay-title="关闭" { close-window; }
     Mod+F hotkey-overlay-title="最大化列" { maximize-column; }
     Mod+Shift+F hotkey-overlay-title="全屏" { fullscreen-window; }
+    F11 hotkey-overlay-title="全屏" { fullscreen-window; }
     Mod+Comma hotkey-overlay-title="合并入列" { consume-window-into-column; }
     Mod+Period hotkey-overlay-title="移出列" { expel-window-from-column; }
 
@@ -241,6 +243,20 @@ window-rule {
 }
 
 window-rule {
+    match app-id="^wemeetapp$" title="^wemeetapp$"
+    open-floating true
+    default-column-width { fixed 120; }
+    default-window-height { fixed 48; }
+    default-floating-position x=0 y=0 relative-to="bottom-right"
+    opacity 0.0
+}
+
+window-rule {
+    match app-id="^wpp$" title="^WPS Presentation Slide Show"
+    open-fullscreen true
+}
+
+window-rule {
     geometry-corner-radius 20
     clip-to-geometry true
     draw-border-with-background false
@@ -253,4 +269,3 @@ window-rule {
         saturation 1.1
     }
 }
-

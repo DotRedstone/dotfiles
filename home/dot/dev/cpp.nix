@@ -9,6 +9,9 @@
     # [Compilers & Debuggers]
     gcc
     gdb
+    llvmPackages.openmp
+    mpich
+    mpich.dev
 
     # [Build Systems]
     cmake

@@ -4,14 +4,16 @@
 # Scope: Home Manager
 # ---
 
-{ ... }:
+{ lib, pkgs, ... }:
 {
   programs.nixvim.plugins = {
     # [Service]
     copilot-lua = {
       enable = true;
       settings = {
-        copilot_node_command = "node --no-warnings";
+        copilot_node_command = lib.generators.mkLuaInline ''
+          { "${pkgs.nodejs}/bin/node", "--no-warnings" }
+        '';
         suggestion.enabled = false;
         panel.enabled = false;
         filetypes = {

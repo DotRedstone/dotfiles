@@ -10,12 +10,12 @@ let
   qt5PluginPath = "${config.home.profileDirectory}/${pkgs.qt5.qtbase.qtPluginPrefix}";
   qt5ctPluginPath = "${pkgs.libsForQt5.qt5ct}/${pkgs.qt5.qtbase.qtPluginPrefix}";
 
-  wemeetDark = pkgs.wemeet.overrideAttrs (old: {
+  wemeetStable = pkgs.wemeet.overrideAttrs (old: {
     postFixup = (old.postFixup or "") + ''
       for launcher in "$out/bin/wemeet" "$out/bin/wemeet-xwayland"; do
         substituteInPlace "$launcher" \
           --replace-fail "export QT_STYLE_OVERRIDE='fusion'" \
-          "export QT_STYLE_OVERRIDE='Fusion'; export QT_QPA_PLATFORMTHEME='qt5ct'; export QT_PLUGIN_PATH='${qt5PluginPath}'"
+          "export QT_STYLE_OVERRIDE='fusion'; export QT_QPA_PLATFORMTHEME='gtk3'"
       done
     '';
   });
@@ -42,6 +42,6 @@ in
 {
   home.packages = with pkgs; [
     wpsofficeDark
-    wemeetDark
+    wemeetStable
   ];
 }

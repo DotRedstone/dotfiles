@@ -17,6 +17,8 @@ in
     hicolor-icon-theme
     bibata-cursors
     adw-gtk3
+    libsForQt5.qt5ct
+    qt6Packages.qt6ct
     matugen
   ];
 

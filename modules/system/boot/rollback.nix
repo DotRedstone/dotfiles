@@ -13,11 +13,18 @@
   boot.initrd.systemd.services.warden-rollback = {
     description = "Warden Btrfs Impermanence Rollback";
     wantedBy = [ "initrd.target" ];
-    after = [ "initrd-root-device.target" ];
+    after = [
+      "initrd-root-device.target"
+      "systemd-hibernate-resume.service"
+    ];
     before = [ "sysroot.mount" ];
     unitConfig.DefaultDependencies = "no";
     serviceConfig.Type = "oneshot";
-    path = with pkgs; [ coreutils util-linux btrfs-progs ];
+    path = with pkgs; [
+      coreutils
+      util-linux
+      btrfs-progs
+    ];
     script = ''
       mkdir -p /btrfs_tmp
       mount -t btrfs /dev/disk/by-uuid/c8f96d2d-8a97-4cbb-8a17-bb9de844060b /btrfs_tmp
@@ -34,7 +41,9 @@
           snapshot_count=$(ls -1 /btrfs_tmp/old_roots | wc -l)
           if [ "$snapshot_count" -gt 15 ]; then
               ls -1 /btrfs_tmp/old_roots | sort | head -n -15 | while read -r name; do
-                  btrfs subvolume delete "/btrfs_tmp/old_roots/$name"
+                  if ! btrfs subvolume delete -R "/btrfs_tmp/old_roots/$name"; then
+                    echo "Warning: failed to delete old root snapshot $name" >&2
+                  fi
               done
           fi
       fi

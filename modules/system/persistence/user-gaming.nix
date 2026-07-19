@@ -11,6 +11,8 @@
       ".steam"
       ".local/share/PrismLauncher"
       ".minecraft"
+      ".hmcl"
+      ".java"
     ];
   };
 }

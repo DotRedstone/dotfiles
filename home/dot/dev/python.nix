@@ -15,5 +15,6 @@
     # [The Modern Choice: Ruff]
     # Replaces Black, Flake8, and Isort. It's written in Rust and extremely fast.
     ruff
+    conda
   ];
 }

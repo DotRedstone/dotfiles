@@ -20,4 +20,12 @@
     # [LSP & Tooling]
     clang-tools # Provides clangd for Neovim
   ];
+
+  xdg.configFile."clangd/config.yaml".text = ''
+    CompileFlags:
+      Add:
+        - -fopenmp
+        - -isystem
+        - ${pkgs.llvmPackages.openmp.dev}/include
+  '';
 }

@@ -10,5 +10,7 @@
     ./flclash.nix
     ./firewall.nix
     ./easytier.nix
+    ./todesk.nix
+    ./sshd.nix
   ];
 }

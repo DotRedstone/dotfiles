@@ -788,6 +788,10 @@ fn decode_xml_entities(input: &str) -> String {
 }
 
 fn clean_text(input: &str) -> String {
+    if input.contains('\u{FFFD}') {
+        return "[复杂长文本/特殊消息]".to_string();
+    }
+
     let mut text = input
         .replace("\r\n", "\n")
         .replace('\r', "\n")

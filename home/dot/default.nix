@@ -47,6 +47,7 @@
     ./lmstudio
     ./rustdesk
     ./codex
+    ./downloads
 
     # --- Development ---
     ./nixvim

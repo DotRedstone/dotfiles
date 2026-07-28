@@ -9,5 +9,6 @@
     ./accounts.nix
     ./shell.nix
     ./core-tools.nix
+    ./devguest.nix
   ];
 }

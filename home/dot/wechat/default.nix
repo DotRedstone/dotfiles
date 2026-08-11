@@ -6,6 +6,7 @@
 
 { ... }: {
   imports = [
+    ./clipboard-bridge.nix
     ./packages.nix
     ./desktop-entry.nix
     ./notify-bridge.nix

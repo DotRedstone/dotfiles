@@ -14,6 +14,8 @@
       "Pictures"
       ".local/share/fish"
       ".gemini"
+      ".local/state/wireplumber"
+      ".local/state/noctalia"
     ];
   };
 }

@@ -33,6 +33,9 @@
 
       # [Image Hosting]
       ".config/piclist"
+
+      # [Downloads]
+      ".config/gopeed"
     ];
   };
 }

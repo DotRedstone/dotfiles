@@ -1,0 +1,38 @@
+creation_rules:
+  - path_regex: secrets/cloudflare\.yaml$
+    key_groups:
+      - age:
+          # Cloudflare credentials are managed only from the workstation.
+          - age1l4sguf839qt6jdc326g2hnv69xn5yl399lgvlhqpj2nmpf5y6g7q8a754a
+
+  - path_regex: secrets/conduit\.yaml$
+    key_groups:
+      - age:
+          # Workstation recovery identity.
+          - age1l4sguf839qt6jdc326g2hnv69xn5yl399lgvlhqpj2nmpf5y6g7q8a754a
+          # Age recipient derived from the preserved RackNerd SSH host key.
+          - age1uxqq9pqxcxf350cg44nl7h4cd7x9tdw8yqmvjmhz6382v46uscfsgedrmu
+
+  - path_regex: secrets/gcp-free\.yaml$
+    key_groups:
+      - age:
+          # Workstation recovery identity.
+          - age1l4sguf839qt6jdc326g2hnv69xn5yl399lgvlhqpj2nmpf5y6g7q8a754a
+          # Preserved Google VM SSH host key.
+          - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAQkTr89CEf9DxiT3s2Bdj6mBw81yUN5DvoKyF3wCPlC root@free-tier-vm"
+
+  - path_regex: secrets/hopper\.yaml$
+    key_groups:
+      - age:
+          # Workstation recovery identity.
+          - age1l4sguf839qt6jdc326g2hnv69xn5yl399lgvlhqpj2nmpf5y6g7q8a754a
+          # Age recipient derived from the preserved Oracle VM SSH host key.
+          - age1wyd5x40s66c7n2aqt0ag3y2ylsdlxe45wmn6c2sk73k0vjcnasuq8ym2rq
+
+  - path_regex: secrets/target\.yaml$
+    key_groups:
+      - age:
+          # Workstation recovery identity.
+          - age1l4sguf839qt6jdc326g2hnv69xn5yl399lgvlhqpj2nmpf5y6g7q8a754a
+          # Age recipient derived from the preserved target SSH host key.
+          - age1yr94v5wvdq8fhs50564vumvvedulj3s2pn5yhq243l5unr5yfpksq29q9w

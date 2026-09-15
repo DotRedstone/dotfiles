@@ -1,0 +1,979 @@
+{
+  "port": 7890,
+  "socks-port": 7891,
+  "allow-lan": true,
+  "mode": "rule",
+  "log-level": "info",
+  "ipv6": false,
+  "dns": {
+    "enable": true,
+    "listen": "0.0.0.0:7874",
+    "ipv6": false,
+    "enhanced-mode": "fake-ip",
+    "fake-ip-range": "198.18.0.1/16",
+    "nameserver": [
+      "223.5.5.5"
+    ],
+    "nameserver-policy": {
+      "geosite:cn,private": [
+        "https://223.5.5.5/dns-query",
+        "https://119.29.29.29/dns-query"
+      ]
+    },
+    "respect-rules": true,
+    "fake-ip-filter-mode": "blacklist",
+    "fake-ip-filter": [
+      "*.lan",
+      "*.localdomain",
+      "*.example",
+      "*.invalid",
+      "*.localhost",
+      "*.test",
+      "*.local",
+      "*.home.arpa",
+      "*.direct",
+      "cable.auth.com",
+      "network-test.debian.org",
+      "detectportal.firefox.com",
+      "resolver1.opendns.com",
+      "global.turn.twilio.com",
+      "global.stun.twilio.com",
+      "app.yinxiang.com",
+      "injections.adguard.org",
+      "localhost.*.weixin.qq.com",
+      "*.blzstatic.cn",
+      "*.cmpassport.com",
+      "id6.me",
+      "open.e.189.cn",
+      "opencloud.wostore.cn",
+      "id.mail.wo.cn",
+      "mdn.open.wo.cn",
+      "hmrz.wo.cn",
+      "nishub1.10010.com",
+      "enrichgw.10010.com",
+      "*.wosms.cn",
+      "*.jegotrip.com.cn",
+      "*.icitymobile.mobi",
+      "*.pingan.com.cn",
+      "*.cmbchina.com",
+      "*.10099.com.cn",
+      "*.microdone.cn",
+      "PDC._msDCS.*.*",
+      "DC._msDCS.*.*",
+      "GC._msDCS.*.*",
+      "time.*.com",
+      "time.*.gov",
+      "time.*.edu.cn",
+      "time.*.apple.com",
+      "time-ios.apple.com",
+      "time1.*.com",
+      "time2.*.com",
+      "time3.*.com",
+      "time4.*.com",
+      "time5.*.com",
+      "time6.*.com",
+      "time7.*.com",
+      "ntp.*.com",
+      "ntp1.*.com",
+      "ntp2.*.com",
+      "ntp3.*.com",
+      "ntp4.*.com",
+      "ntp5.*.com",
+      "ntp6.*.com",
+      "ntp7.*.com",
+      "*.time.edu.cn",
+      "*.ntp.org.cn",
+      "+.pool.ntp.org",
+      "time1.cloud.tencent.com",
+      "music.163.com",
+      "*.music.163.com",
+      "*.126.net",
+      "musicapi.taihe.com",
+      "music.taihe.com",
+      "songsearch.kugou.com",
+      "trackercdn.kugou.com",
+      "*.kuwo.cn",
+      "api-jooxtt.sanook.com",
+      "api.joox.com",
+      "joox.com",
+      "y.qq.com",
+      "*.y.qq.com",
+      "streamoc.music.tc.qq.com",
+      "mobileoc.music.tc.qq.com",
+      "isure.stream.qqmusic.qq.com",
+      "dl.stream.qqmusic.qq.com",
+      "aqqmusic.tc.qq.com",
+      "amobile.music.tc.qq.com",
+      "*.xiami.com",
+      "*.music.migu.cn",
+      "music.migu.cn",
+      "+.msftconnecttest.com",
+      "+.msftncsi.com",
+      "localhost.ptlogin2.qq.com",
+      "localhost.sec.qq.com",
+      "+.qq.com",
+      "+.tencent.com",
+      "+.srv.nintendo.net",
+      "*.n.n.srv.nintendo.net",
+      "+.cdn.nintendo.net",
+      "+.stun.playstation.net",
+      "xbox.*.*.microsoft.com",
+      "*.*.xboxlive.com",
+      "xbox.*.microsoft.com",
+      "xnotify.xboxlive.com",
+      "+.battle.net",
+      "+.battlenet.com.cn",
+      "+.wotgame.cn",
+      "+.wggames.cn",
+      "+.wowsgame.cn",
+      "+.wargaming.net",
+      "proxy.golang.org",
+      "stun.*.*",
+      "stun.*.*.*",
+      "+.stun.*.*",
+      "+.stun.*.*.*",
+      "+.stun.*.*.*.*",
+      "+.stun.*.*.*.*.*",
+      "heartbeat.belkin.com",
+      "*.linksys.com",
+      "*.linksyssmartwifi.com",
+      "*.router.asus.com",
+      "mesu.apple.com",
+      "swscan.apple.com",
+      "swquery.apple.com",
+      "swdownload.apple.com",
+      "swcdn.apple.com",
+      "swdist.apple.com",
+      "lens.l.google.com",
+      "stun.l.google.com",
+      "na.b.g-tun.com",
+      "+.nflxvideo.net",
+      "*.square-enix.com",
+      "*.finalfantasyxiv.com",
+      "*.ffxiv.com",
+      "*.ff14.sdo.com",
+      "ff.dorado.sdo.com",
+      "*.mcdn.bilivideo.cn",
+      "+.media.dssott.com",
+      "shark007.net",
+      "Mijia Cloud",
+      "+.cmbchina.com",
+      "+.cmbimg.com",
+      "local.adguard.org",
+      "+.sandai.net",
+      "+.n0808.com",
+      "+.uu.163.com",
+      "ps.res.netease.com",
+      "+.pub.3gppnetwork.org",
+      "sessionserver.mojang.com",
+      "authserver.mojang.com",
+      "api.mojang.com",
+      "api.minecraftservices.com",
+      "rule-set:oc-cn-domain"
+    ],
+    "proxy-server-nameserver": [
+      "223.5.5.5"
+    ]
+  },
+  "proxies": [],
+  "proxy-providers": {
+    "VPS-Node-LA-Reality": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
+        "interval": 180
+      }
+    },
+    "VPS-Node-LA-WS": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
+        "interval": 180
+      }
+    },
+    "VPS-Node-SG-Reality": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
+        "interval": 180
+      }
+    },
+    "VPS-Node-SG-WS": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
+        "interval": 180
+      }
+    },
+    "Abuse-CF1": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
+        "interval": 180
+      }
+    },
+    "Abuse-CF2": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
+        "interval": 180
+      }
+    },
+    "Abuse-CF-Next": {
+      "type": "http",
+      "interval": 3600,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
+        "interval": 180
+      }
+    },
+    "Airport-Mitce1": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
+        "interval": 180
+      }
+    },
+    "Airport-Mitce2": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
+        "interval": 180
+      }
+    }
+  },
+  "proxy-groups": [
+    {
+      "name": "♻️ 全节点自动",
+      "type": "url-test",
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": 180,
+      "tolerance": 50,
+      "use": [
+        "VPS-Node-LA-Reality",
+        "VPS-Node-LA-WS",
+        "VPS-Node-SG-Reality",
+        "VPS-Node-SG-WS",
+        "Abuse-CF1",
+        "Abuse-CF2",
+        "Airport-Mitce1",
+        "Airport-Mitce2"
+      ]
+    },
+    {
+      "name": "♻️ 自建-自动",
+      "type": "url-test",
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": 180,
+      "tolerance": 50,
+      "use": [
+        "VPS-Node-LA-Reality",
+        "VPS-Node-LA-WS",
+        "VPS-Node-SG-Reality",
+        "VPS-Node-SG-WS"
+      ]
+    },
+    {
+      "name": "♻️ 自建-洛杉矶-自动",
+      "type": "url-test",
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": 180,
+      "tolerance": 50,
+      "use": [
+        "VPS-Node-LA-Reality",
+        "VPS-Node-LA-WS"
+      ]
+    },
+    {
+      "name": "♻️ 自建-新加坡-自动",
+      "type": "url-test",
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": 180,
+      "tolerance": 50,
+      "use": [
+        "VPS-Node-SG-Reality",
+        "VPS-Node-SG-WS"
+      ]
+    },
+    {
+      "name": "♻️ 机场-自动",
+      "type": "url-test",
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": 180,
+      "tolerance": 50,
+      "use": [
+        "Airport-Mitce1",
+        "Airport-Mitce2"
+      ]
+    },
+    {
+      "name": "♻️ 滥用-自动",
+      "type": "url-test",
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": 180,
+      "tolerance": 50,
+      "use": [
+        "Abuse-CF1",
+        "Abuse-CF2"
+      ]
+    },
+    {
+      "name": "🧪 CF-Next-灰度",
+      "type": "url-test",
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": 180,
+      "tolerance": 50,
+      "use": [
+        "Abuse-CF-Next"
+      ]
+    },
+    {
+      "name": "🛡️ 自建VPS",
+      "type": "select",
+      "proxies": [
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "🇸🇬 自建-新加坡"
+      ]
+    },
+    {
+      "name": "🇺🇸 自建-洛杉矶",
+      "type": "select",
+      "proxies": [
+        "♻️ 自建-洛杉矶-自动"
+      ],
+      "use": [
+        "VPS-Node-LA-Reality",
+        "VPS-Node-LA-WS"
+      ]
+    },
+    {
+      "name": "🇸🇬 自建-新加坡",
+      "type": "select",
+      "proxies": [
+        "♻️ 自建-新加坡-自动"
+      ],
+      "use": [
+        "VPS-Node-SG-Reality",
+        "VPS-Node-SG-WS"
+      ]
+    },
+    {
+      "name": "✈️ 机场节点",
+      "type": "select",
+      "proxies": [
+        "♻️ 机场-自动"
+      ],
+      "use": [
+        "Airport-Mitce1",
+        "Airport-Mitce2"
+      ]
+    },
+    {
+      "name": "☁️ 滥用节点",
+      "type": "select",
+      "proxies": [
+        "♻️ 滥用-自动"
+      ],
+      "use": [
+        "Abuse-CF1",
+        "Abuse-CF2"
+      ]
+    },
+    {
+      "name": "🌐 Default",
+      "type": "select",
+      "proxies": [
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🤖 ChatGPT",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🧠 AI",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "👨‍💻 开发者工具",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🟦 OKX",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🟨 Binance",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🟪 Bybit",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🎬 YouTube",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🎥 Netflix",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🎵 TikTok",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "📸 Instagram",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🐦 X",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "📨 Telegram",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "📞 即时通讯",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "💬 社交媒体",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "📦 Notion",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🍎 Apple",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "DIRECT",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动"
+      ]
+    },
+    {
+      "name": "🔎 Google",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🪟 Microsoft",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "DIRECT",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动"
+      ]
+    },
+    {
+      "name": "☁️ cloudflare",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🚝 测速工具",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "DIRECT",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动"
+      ]
+    },
+    {
+      "name": "🎮 Minecraft 登录",
+      "type": "select",
+      "proxies": [
+        "DIRECT",
+        "🌐 Default",
+        "🪟 Microsoft",
+        "♻️ 全节点自动"
+      ]
+    },
+    {
+      "name": "🎮 Steam",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "DIRECT",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动"
+      ]
+    },
+    {
+      "name": "🐟 漏网之鱼",
+      "type": "select",
+      "proxies": [
+        "🌐 Default",
+        "♻️ 全节点自动",
+        "🛡️ 自建VPS",
+        "♻️ 自建-自动",
+        "🇺🇸 自建-洛杉矶",
+        "♻️ 自建-洛杉矶-自动",
+        "🇸🇬 自建-新加坡",
+        "♻️ 自建-新加坡-自动",
+        "✈️ 机场节点",
+        "♻️ 机场-自动",
+        "☁️ 滥用节点",
+        "♻️ 滥用-自动",
+        "DIRECT"
+      ]
+    }
+  ],
+  "rules": [
+    "DOMAIN-SUFFIX,mojang.com,DIRECT",
+    "DOMAIN-SUFFIX,minecraftservices.com,DIRECT",
+    "DOMAIN-SUFFIX,minecraft.net,DIRECT",
+    "DOMAIN-SUFFIX,xboxlive.com,DIRECT",
+    "DOMAIN-SUFFIX,live.com,DIRECT",
+    "PROCESS-NAME,CloudflareST_proxy_linux_arm64,DIRECT",
+    "DOMAIN-SUFFIX,minecraft.net,🎮 Minecraft 登录",
+    "DOMAIN-SUFFIX,minecraftservices.com,🎮 Minecraft 登录",
+    "DOMAIN-SUFFIX,mojang.com,🎮 Minecraft 登录",
+    "DOMAIN-SUFFIX,xboxlive.com,🎮 Minecraft 登录",
+    "DOMAIN-SUFFIX,live.com,🎮 Minecraft 登录",
+    "DOMAIN-SUFFIX,microsoftonline.com,🎮 Minecraft 登录",
+    "DOMAIN-SUFFIX,msauth.net,🎮 Minecraft 登录",
+    "DOMAIN-SUFFIX,msftauth.net,🎮 Minecraft 登录",
+    "GEOSITE,openai,🤖 ChatGPT,no-resolve",
+    "DOMAIN-KEYWORD,gemini,🧠 AI",
+    "DOMAIN-SUFFIX,claude.ai,🧠 AI",
+    "DOMAIN-SUFFIX,anthropic.com,🧠 AI",
+    "DOMAIN-KEYWORD,antigravity,🧠 AI",
+    "DOMAIN-KEYWORD,github,👨‍💻 开发者工具",
+    "DOMAIN-KEYWORD,docker,👨‍💻 开发者工具",
+    "DOMAIN-KEYWORD,nixos,👨‍💻 开发者工具",
+    "DOMAIN-KEYWORD,npmjs,👨‍💻 开发者工具",
+    "DOMAIN-KEYWORD,pypi,👨‍💻 开发者工具",
+    "DOMAIN-KEYWORD,python,👨‍💻 开发者工具",
+    "DOMAIN-KEYWORD,okx,🟦 OKX",
+    "DOMAIN-KEYWORD,binance,🟨 Binance",
+    "DOMAIN-KEYWORD,bybit,🟪 Bybit",
+    "GEOSITE,youtube,🎬 YouTube,no-resolve",
+    "GEOSITE,netflix,🎥 Netflix,no-resolve",
+    "GEOSITE,tiktok,🎵 TikTok,no-resolve",
+    "GEOSITE,instagram,📸 Instagram,no-resolve",
+    "GEOSITE,twitter,🐦 X,no-resolve",
+    "GEOSITE,telegram,📨 Telegram,no-resolve",
+    "GEOSITE,notion,📦 Notion,no-resolve",
+    "GEOSITE,apple,🍎 Apple,no-resolve",
+    "GEOSITE,google,🔎 Google,no-resolve",
+    "GEOSITE,microsoft,🪟 Microsoft,no-resolve",
+    "GEOSITE,cloudflare,☁️ cloudflare,no-resolve",
+    "GEOSITE,steam,🎮 Steam,no-resolve",
+    "GEOSITE,speedtest,🚝 测速工具,no-resolve",
+    "GEOSITE,geolocation-!cn,🌐 Default,no-resolve",
+    "GEOSITE,cn,DIRECT,no-resolve",
+    "GEOIP,cn,DIRECT",
+    "MATCH,🐟 漏网之鱼"
+  ],
+  "tproxy-port": 7895,
+  "redir-port": 7892,
+  "tun": {
+    "enable": true,
+    "stack": "gvisor",
+    "device": "utun",
+    "dns-hijack": [
+      "127.0.0.1:53"
+    ],
+    "endpoint-independent-nat": true,
+    "auto-route": false,
+    "auto-detect-interface": false,
+    "auto-redirect": false,
+    "strict-route": false,
+    "disable-icmp-forwarding": false
+  },
+  "mixed-port": 7893,
+  "bind-address": "*",
+  "keep-alive-interval": 15,
+  "keep-alive-idle": 600,
+  "tcp-concurrent": true,
+  "unified-delay": true,
+  "geox-url": {
+    "mmdb": "https://testingcf.jsdelivr.net/gh/alecthw/mmdb_china_ip_list@release/lite/Country.mmdb",
+    "geosite": "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
+  },
+  "sniffer": {
+    "enable": true,
+    "override-destination": true,
+    "sniff": {
+      "QUIC": {
+        "ports": [
+          443
+        ]
+      },
+      "TLS": {
+        "ports": [
+          443,
+          8443
+        ]
+      },
+      "HTTP": {
+        "ports": [
+          80,
+          "8080-8880"
+        ],
+        "override-destination": true
+      }
+    },
+    "force-domain": [
+      "+.netflix.com",
+      "+.nflxvideo.net",
+      "+.amazonaws.com",
+      "+.media.dssott.com"
+    ],
+    "skip-domain": [
+      "Mijia Cloud",
+      "dlg.io.mi.com",
+      "+.oray.com",
+      "+.sunlogin.net",
+      "+.push.apple.com"
+    ],
+    "parse-pure-ip": true
+  },
+  "profile": {
+    "store-selected": true,
+    "store-fake-ip": true
+  },
+  "ntp": {
+    "enable": true,
+    "server": "time.apple.com",
+    "port": 123,
+    "interval": 30,
+    "write-to-system": true
+  },
+  "rule-providers": {
+    "oc-cn-domain": {
+      "type": "http",
+      "interval": 43200,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs",
+      "path": "./rule_provider/oc-cn-domain.mrs"
+    }
+  }
+}

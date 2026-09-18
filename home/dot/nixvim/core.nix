@@ -7,7 +7,7 @@
 { pkgs, ... }: {
   programs.nixvim = {
     enable = true;
-    nixpkgs.source = pkgs.path;
+    nixpkgs.useGlobalPackages = true;
 
     defaultEditor = true;
     viAlias = true;

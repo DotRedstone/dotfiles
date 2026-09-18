@@ -6,18 +6,32 @@
 
 { pkgs }:
 let
+  wechatSource = {
+    url = "https://dldir1.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.deb";
+    hash = "sha256-t9D41T6fZIvCx3pglqBBANAI8tnw05iKKkhZtZkqygo=";
+  };
+
+  wechatDeb = pkgs.fetchurl wechatSource;
+
+  # 4.1.13.23 moved its payload from /opt/apps/com.tencent.wechat to
+  # /opt/wechat. Keep the current Nixpkgs FHS wrapper working while it still
+  # expects the previous path; the compatibility links do not alter WeChat.
+  wechatCompatDeb = pkgs.runCommand "wechat-uos-4.1.13.23-compat.deb" {
+    nativeBuildInputs = [ pkgs.dpkg ];
+  } ''
+    dpkg-deb -R ${wechatDeb} package
+    mkdir -p package/opt/apps/com.tencent.wechat/entries/applications
+    ln -s ../../wechat package/opt/apps/com.tencent.wechat/files
+    ln -s ../../../../usr/share/icons package/opt/apps/com.tencent.wechat/entries/icons
+    cp package/usr/share/applications/wechat.desktop \
+      package/opt/apps/com.tencent.wechat/entries/applications/com.tencent.wechat.desktop
+    dpkg-deb -b package "$out"
+  '';
+
   wechat-uos = pkgs.callPackage (pkgs.path + "/pkgs/by-name/we/wechat-uos/package.nix") {
-    fetchurl =
-      args:
-      pkgs.fetchurl (
-        args
-        // {
-          curlOptsList = (args.curlOptsList or [ ]) ++ [
-            "-H"
-            "Referer: https://pro-store-packages.uniontech.com/"
-          ];
-        }
-      );
+    # nixpkgs still pins 4.1.1.7. Keep the official Universal package on the
+    # latest verified upstream release until nixpkgs catches up.
+    fetchurl = _: wechatCompatDeb;
   };
 
   notifyBridge = pkgs.stdenv.mkDerivation {

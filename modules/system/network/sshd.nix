@@ -9,7 +9,9 @@
     enable = true;
     openFirewall = true;
     settings = {
-      PasswordAuthentication = true; # default to true for local usability
+      AllowUsers = [ "dot" "devguest" ];
+      KbdInteractiveAuthentication = false;
+      PasswordAuthentication = false;
       PermitRootLogin = "no";
     };
   };

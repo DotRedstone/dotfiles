@@ -5,7 +5,7 @@
 # ---
 # Notes:
 # - Some monitors retain HDMI hotplug while powered off, so Niri cannot observe that state as a disconnect.
-# - DDC must first respond while the monitor is on before an unresponsive monitor can trigger a forced move.
+# - A retained HDMI hotplug plus three failed DDC reads is treated as an externally powered-off monitor.
 # - The raw Niri IPC path preserves unique workspace IDs, unlike CLI indices which may overlap across outputs.
 
 { pkgs, ... }:
@@ -27,7 +27,6 @@ let
     DDC_FAILURE_LIMIT = 3
     DDC_POLL_SECONDS = 4
 
-    ddc_responded = False
     ddc_failures = 0
     ddc_unavailable = False
 
@@ -72,7 +71,7 @@ let
 
     def ddc_bus_numbers():
         buses = []
-        for path in glob.glob("/sys/class/drm/card*-HDMI-A-1/i2c-*"):
+        for path in glob.glob("/sys/class/drm/card*-HDMI-A-1/ddc/i2c-dev/i2c-*"):
             name = os.path.basename(path)
             try:
                 buses.append(int(name.removeprefix("i2c-")))
@@ -110,7 +109,7 @@ let
         return False
 
     def monitor_ddc_power():
-        global ddc_responded, ddc_failures, ddc_unavailable
+        global ddc_failures, ddc_unavailable
 
         state = ddc_display_state()
         if state is None:
@@ -119,12 +118,8 @@ let
         if state:
             if ddc_unavailable:
                 print("niri-output-fallback: HDMI DDC response restored", file=sys.stderr)
-            ddc_responded = True
             ddc_failures = 0
             ddc_unavailable = False
-            return
-
-        if not ddc_responded:
             return
 
         ddc_failures += 1
@@ -132,7 +127,7 @@ let
             return
 
         ddc_unavailable = True
-        print("niri-output-fallback: HDMI DDC stopped responding; moving workspaces", file=sys.stderr)
+        print("niri-output-fallback: HDMI DDC failed three times; moving workspaces", file=sys.stderr)
         move_external_workspaces(force=True)
 
     if "--force" in sys.argv[1:]:

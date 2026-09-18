@@ -20,4 +20,5 @@ require("modules.theme").apply(config, wezterm)
 require("modules.ssh").apply(config, wezterm)
 require("modules.keybindings").apply(config, wezterm)
 
+config.color_scheme = "Noctalia"
 return config

@@ -275,6 +275,11 @@ window-rule {
 }
 
 window-rule {
+    match app-id="^wechat$"
+    open-floating false
+}
+
+window-rule {
     geometry-corner-radius 20
     clip-to-geometry true
     draw-border-with-background false

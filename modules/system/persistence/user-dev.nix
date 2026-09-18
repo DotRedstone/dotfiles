@@ -14,7 +14,6 @@
       ".config/Code"
       ".vscode"
       ".config/Antigravity"
-      ".antigravity"
     ];
   };
 }

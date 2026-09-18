@@ -8,6 +8,7 @@
   imports = [
     ./audio.nix
     ./bluetooth.nix
+    ./display-ddc.nix
     ./power.nix
     ./tools.nix
     ./xiaomi-fan.nix

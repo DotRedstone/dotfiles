@@ -9,6 +9,7 @@
     ./packages.nix
     ./links.nix
     ./shortcuts.nix
+    ./output-fallback.nix
   ];
 
   # [Session Variables]

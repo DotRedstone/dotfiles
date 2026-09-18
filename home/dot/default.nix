@@ -21,6 +21,7 @@
     ./niri
     ./noctalia
     ./activitywatch
+    ./autoclicker
     ./theme
     ./fcitx5
     ./cli-tools
@@ -56,6 +57,7 @@
     ./antigravity
 
     # --- Game ---
+    ./axolotl
     ./hmcl
     ./mangohud
     ./steam

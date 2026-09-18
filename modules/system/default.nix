@@ -12,6 +12,7 @@
     ./persist-snapshots.nix # Persist Data Protection
     ./users.nix         # dot's Identity
     ./i18n.nix          # Locale & Input
+    ./input-automation.nix # Wayland virtual input
     ./hardware.nix      # Power, Audio, Bluetooth
     ./network.nix       # Connectivity
     ./desktop.nix       # Niri & Graphics
@@ -20,6 +21,5 @@
     ./virtualization.nix# Docker & KVM
     ./gaming            # Steam & Gaming platforms
     ./dev.nix           # Development tools
-    ./keyd.nix          # Key Remapping
   ];
 }

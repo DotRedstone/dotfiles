@@ -15,6 +15,5 @@
     EnumerateSkipFirstKeys=
 
     [Hotkey/TriggerKeys]
-    0=Super+space
   '';
 }

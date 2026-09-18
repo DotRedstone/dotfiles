@@ -69,6 +69,19 @@ binds {
     Mod+W hotkey-overlay-title="Firefox" { spawn "firefox"; }
     Mod+E hotkey-overlay-title="文件" { spawn "nautilus"; }
 
+    // Input Method
+    Mod+Space repeat=false allow-inhibiting=false hotkey-overlay-title="切换输入法" {
+        spawn "fcitx5-toggle-input";
+    }
+
+    Mod+Shift+F6 repeat=false allow-inhibiting=false hotkey-overlay-title="连点器开关" {
+        spawn "autoclicker" "toggle";
+    }
+
+    Mod+Shift+M repeat=false hotkey-overlay-title="回收外接屏工作区" {
+        spawn "niri-output-fallback" "--force";
+    }
+
     // Mac-style Shortcuts
     Mod+C repeat=false hotkey-overlay-title="复制" { spawn "niri-mac-shortcut" "copy"; }
     Mod+V repeat=false hotkey-overlay-title="粘贴" { spawn "niri-mac-shortcut" "paste"; }

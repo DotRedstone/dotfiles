@@ -10,5 +10,6 @@
     ./config
     ./rime
     ./theme.nix
+    ./toggle.nix
   ];
 }

@@ -23,6 +23,11 @@
         CursorTheme = "Bibata-Modern-Classic";
         CursorSize = 24;
       };
+      Users = {
+        HideUsers = "devguest";
+        RememberLastUser = true;
+        RememberLastSession = true;
+      };
     };
   };
 

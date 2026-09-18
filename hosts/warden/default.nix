@@ -25,21 +25,23 @@
   ];
 
   # [Power]
-  # macOS/Windows-like behavior: power key and lid close enter sleep; power-menu
-  # "shutdown" is handled as hibernation in Noctalia so the session can return.
+  # This machine currently exposes only s2idle for suspend. Recent logs show the
+  # system entering s2idle after a short power-key press and never logging a
+  # resume, so keep blank/lock actions separate from real suspend.
   services.logind.settings.Login = {
-    HandlePowerKey = "suspend";
+    HandlePowerKey = "lock";
     HandlePowerKeyLongPress = "poweroff";
-    HandleLidSwitch = "suspend";
-    HandleLidSwitchExternalPower = "suspend";
-    HandleLidSwitchDocked = "suspend";
+    HandleLidSwitch = "lock";
+    HandleLidSwitchExternalPower = "lock";
+    HandleLidSwitchDocked = "ignore";
+    IdleAction = "ignore";
   };
 
   systemd.sleep.settings.Sleep = {
-    AllowSuspend = true;
+    AllowSuspend = false;
     AllowHibernation = true;
-    AllowHybridSleep = true;
-    AllowSuspendThenHibernate = true;
+    AllowHybridSleep = false;
+    AllowSuspendThenHibernate = false;
   };
 
   # [Storage]

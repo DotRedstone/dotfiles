@@ -115,8 +115,8 @@ binds {
     // Window Management
     Mod+Q hotkey-overlay-title="关闭" { close-window; }
     Mod+F hotkey-overlay-title="最大化列" { maximize-column; }
-    Mod+Shift+F hotkey-overlay-title="全屏" { fullscreen-window; }
-    F11 hotkey-overlay-title="全屏" { fullscreen-window; }
+    Mod+Shift+F hotkey-overlay-title="全屏" { spawn "niri-fullscreen-toggle"; }
+    F11 hotkey-overlay-title="全屏" { spawn "niri-fullscreen-toggle"; }
     Mod+Comma hotkey-overlay-title="合并入列" { consume-window-into-column; }
     Mod+Period hotkey-overlay-title="移出列" { expel-window-from-column; }
 
@@ -225,9 +225,15 @@ binds {
     }
 
     // System
+    XF86PowerOff allow-when-locked=true hotkey-overlay-title=null {
+        spawn "niri-power-key";
+    }
+
     Mod+Shift+E hotkey-overlay-title="退出 Niri" { quit; }
 }
 input {
+    disable-power-key-handling
+
     keyboard {
         numlock
     }

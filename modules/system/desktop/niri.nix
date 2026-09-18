@@ -4,7 +4,7 @@
 # Scope: System
 # ---
 
-{ pkgs, inputs, ... }:
+{ lib, pkgs, inputs, ... }:
 
 let
   niriPackage = inputs.niri.packages.${pkgs.stdenv.hostPlatform.system}.niri.overrideAttrs (old: {
@@ -17,6 +17,9 @@ let
         hash = "sha256-u7OEbVtePF21Phr8aTV0LZPFdDHu1Ju9Jnv+Sd33xDI=";
       })
     ];
+    buildInputs =
+      builtins.filter (pkg: lib.getName pkg != "libdisplay-info") (old.buildInputs or [ ])
+      ++ [ pkgs.libdisplay-info_0_3 ];
   });
 in
 {

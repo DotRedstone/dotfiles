@@ -2,7 +2,6 @@
 // Warden Niri Configuration
 // ---
 
-spawn-at-startup "xwayland-satellite"
 spawn-at-startup "dbus-update-activation-environment" "--systemd" "--all"
 
 // [Monitor Settings]
@@ -15,6 +14,7 @@ output "eDP-1" {
 output "HDMI-A-1" {
     mode "2560x1440@143.981"
     scale 1.0
+    focus-at-startup
 }
 
 // [Layout]

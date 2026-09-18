@@ -10,6 +10,9 @@
   inputs = {
     # [Core]
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # FlClash was removed from nixpkgs after 0.8.94; keep only this package on
+    # the last revision that shipped it until the local module is replaced.
+    nixpkgs-flclash.url = "github:nixos/nixpkgs/148bab9c1c3c53136ecb44a6ea356a0ed5b39b06";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 

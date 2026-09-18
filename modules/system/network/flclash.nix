@@ -5,12 +5,18 @@
 # Notes:
 # - FlClash upstream Linux flow uses sudo chown/chmod on FlClashCore for TUN privilege.
 # - On NixOS, /nix/store is read-only, so we route core execution to /run/wrappers/bin instead.
+# - FlClash 0.8.94 is pinned through nixpkgs-flclash because newer nixpkgs removed the package.
 # - Keep Clash Verge disabled to avoid mixed GUI state and migration confusion.
 # ---
 
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 let
-  flclashPatched = pkgs.flclash.overrideAttrs (old: {
+  flclashPkgs = import inputs.nixpkgs-flclash {
+    system = pkgs.stdenv.hostPlatform.system;
+    config.allowUnfree = true;
+  };
+
+  flclashPatched = flclashPkgs.flclash.overrideAttrs (old: {
     postPatch =
       (old.postPatch or "")
       + ''

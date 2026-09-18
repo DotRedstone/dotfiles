@@ -20,3 +20,7 @@ secrets/**/*.decrypted.yaml
 secrets/**/*.dec.yaml
 *.dec.yaml
 *.decrypted.yaml
+servers/cloudflare/edge-worker/node_modules/
+servers/cloudflare/edge-worker/.wrangler/
+servers/cloudflare/edge-worker/.dev.vars
+servers/cloudflare/edge-worker/wrangler.jsonc

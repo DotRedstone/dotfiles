@@ -80,3 +80,53 @@ output_path = "/home/dot/.config/opencode/tui.json"
 input_path = "/home/dot/.dotfiles/home/dot/firefox/pywalfox-colors.json.template"
 output_path = "/home/dot/.cache/wal/colors.json"
 post_hook = "pywalfox update >/dev/null 2>&1 || true"
+
+# Fcitx5 Dynamic Themes / Noctalia provider: managed by /home/dot/Projects/fcitx5-dynamic-themes/scripts/install.sh
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_rounded_light_theme]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/rounded-light/theme.conf.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-rounded-light/theme.conf"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_rounded_light_panel]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/rounded-light/panel-md3.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-rounded-light/panel.svg"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_rounded_light_highlight]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/rounded-light/highlight-md3.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-rounded-light/highlight.svg"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_rounded_dark_theme]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/rounded-dark/theme.conf.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-rounded-dark/theme.conf"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_rounded_dark_panel]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/rounded-dark/panel-md3.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-rounded-dark/panel.svg"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_rounded_dark_highlight]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/rounded-dark/highlight-md3.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-rounded-dark/highlight.svg"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_angular_light_theme]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/angular-light/theme.conf.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-angular-light/theme.conf"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_angular_light_panel]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/angular-light/panel.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-angular-light/panel.svg"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_angular_light_highlight]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/angular-light/highlight.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-angular-light/highlight.svg"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_angular_dark_theme]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/angular-dark/theme.conf.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-angular-dark/theme.conf"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_angular_dark_panel]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/angular-dark/panel.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-angular-dark/panel.svg"
+
+[theme.templates.user.fcitx5_dynamic_themes_noctalia_angular_dark_highlight]
+input_path = "/home/dot/Projects/fcitx5-dynamic-themes/providers/noctalia/templates/angular-dark/highlight.svg.template"
+output_path = "/home/dot/.local/share/fcitx5/themes/fcitx5-dynamic-angular-dark/highlight.svg"
+post_hook = "busctl --user call org.fcitx.Fcitx5 /controller org.fcitx.Fcitx.Controller1 ReloadAddonConfig s classicui >/dev/null 2>&1 || true"

@@ -1,6 +1,6 @@
 # ---
 # Module: Fcitx5 Theming
-# Description: Classic UI configuration with Mellow & Inflex Themes
+# Description: Classic UI configuration with dynamic rounded and compatibility themes.
 # Scope: Home Manager
 # ---
 
@@ -77,7 +77,7 @@ in
     if [ ! -f "$conf" ]; then
       printf '%s\n' \
         'Vertical Candidate List=False' \
-        'Theme=noctalia-inflex-dark-sync' \
+        'Theme=fcitx5-dynamic-rounded-dark' \
         'Font="FZYJHK B 14"' \
         'MenuFont="FZYJHK B 14"' \
         'TrayFont="FZYJHK B 11"' \
@@ -86,7 +86,7 @@ in
 
     # Ensure required keys exist and migrate to new font
     grep -q '^Vertical Candidate List=' "$conf" || printf '%s\n' 'Vertical Candidate List=False' >> "$conf"
-    grep -q '^Theme=' "$conf" || printf '%s\n' 'Theme=noctalia-inflex-dark-sync' >> "$conf"
+    grep -q '^Theme=' "$conf" || printf '%s\n' 'Theme=fcitx5-dynamic-rounded-dark' >> "$conf"
     
     if grep -q '^Font=' "$conf"; then
       sed -i 's/^Font=.*/Font="FZYJHK B 14"/' "$conf"

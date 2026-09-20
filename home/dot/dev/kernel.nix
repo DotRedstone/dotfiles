@@ -1,0 +1,95 @@
+# ---
+# Module: Linux Kernel Research
+# Description: Kernel build, virtualization, and debugging tools for local research
+# Scope: Home Manager
+# ---
+
+{ lib, pkgs, ... }:
+let
+  virtme-ng = pkgs.python3Packages.buildPythonApplication rec {
+    pname = "virtme-ng";
+    version = "1.41";
+    pyproject = true;
+
+    src = pkgs.fetchFromGitHub {
+      owner = "arighi";
+      repo = "virtme-ng";
+      rev = "v${version}";
+      hash = "sha256-/R+2ND/N+exF9eDSxAN8LR3cDuxBvpGSkiXcckyq8TY=";
+    };
+
+    build-system = with pkgs.python3Packages; [
+      argparse-manpage
+      setuptools
+    ];
+
+    dependencies = with pkgs.python3Packages; [
+      argcomplete
+      requests
+    ];
+
+    doCheck = false;
+  };
+
+  pkgConfigDeps = with pkgs; [
+    openssl.dev
+    elfutils.dev
+    ncurses.dev
+  ];
+
+  pkgConfigPath = lib.makeSearchPath "lib/pkgconfig" pkgConfigDeps;
+
+  kernelPkgConfig = pkgs.symlinkJoin {
+    name = "kernel-pkg-config";
+    paths = [ pkgs.pkg-config ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram "$out/bin/pkg-config" \
+        --prefix PKG_CONFIG_PATH : "${pkgConfigPath}"
+    '';
+  };
+in
+{
+  home.packages = with pkgs; [
+    # [Kernel Build]
+    gcc
+    binutils
+    gnumake
+    bc
+    flex
+    bison
+    perl
+    python3
+    kernelPkgConfig
+    openssl
+    openssl.dev
+    elfutils
+    elfutils.dev
+    ncurses
+    ncurses.dev
+    pahole
+    cpio
+    rsync
+    zstd
+    xz
+    gzip
+    bzip2
+    file
+
+    # [Virtualization]
+    qemu
+    virtme-ng
+    virtiofsd
+    kmod
+    iproute2
+
+    # [Kernel Diagnostics]
+    perf
+    gdb
+    trace-cmd
+    strace
+  ];
+
+  # pkg-config is intentionally scoped to the headers required for kernel builds.
+  home.sessionVariables.PKG_CONFIG_PATH = pkgConfigPath;
+}

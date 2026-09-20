@@ -10,6 +10,7 @@
     ./cpp.nix
     ./flutter.nix
     ./java.nix
+    ./kernel.nix
     ./node.nix
     ./python.nix
     ./scripts-runtime.nix

@@ -18,6 +18,13 @@ let
       hash = "sha256-/R+2ND/N+exF9eDSxAN8LR3cDuxBvpGSkiXcckyq8TY=";
     };
 
+    # The guest runs this script as PID 1 and NixOS has no /bin/bash.
+    # /nix/store remains visible in virtme-ng's copy-on-write host root.
+    postPatch = ''
+      substituteInPlace virtme/guest/virtme-init \
+        --replace-fail '#!/bin/bash' '#!${pkgs.bash}/bin/bash'
+    '';
+
     build-system = with pkgs.python3Packages; [
       argparse-manpage
       setuptools

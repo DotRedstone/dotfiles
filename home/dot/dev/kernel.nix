@@ -6,6 +6,23 @@
 
 { lib, pkgs, ... }:
 let
+  guestRuntimeDeps = with pkgs; [
+    bash
+    busybox
+    coreutils
+    util-linux
+    gnugrep
+    gnused
+    iproute2
+    kmod
+    kbd
+    shadow
+    socat
+    systemd
+  ];
+
+  guestRuntimePath = lib.makeBinPath guestRuntimeDeps;
+
   virtme-ng = pkgs.python3Packages.buildPythonApplication rec {
     pname = "virtme-ng";
     version = "1.41";
@@ -23,6 +40,9 @@ let
     postPatch = ''
       substituteInPlace virtme/guest/virtme-init \
         --replace-fail '#!/bin/bash' '#!${pkgs.bash}/bin/bash'
+      substituteInPlace virtme/guest/virtme-init \
+        --replace-fail 'export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin' \
+        'export PATH=${guestRuntimePath}'
     '';
 
     build-system = with pkgs.python3Packages; [

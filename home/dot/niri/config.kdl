@@ -191,7 +191,12 @@ binds {
     Mod+Shift+Equal hotkey-overlay-title="窗口高+" { set-window-height "+10%"; }
 
     // Screenshots
-    Mod+Shift+S hotkey-overlay-title="区域截图" {
+    // Capture transient menus before an interactive picker can dismiss them.
+    Mod+Shift+S hotkey-overlay-title="即时截图" {
+        spawn "sh" "-c" "grim - | wl-copy";
+    }
+
+    Mod+Shift+A hotkey-overlay-title="区域截图" {
         spawn "sh" "-c" "grim -g \"$(slurp)\" - | wl-copy";
     }
 

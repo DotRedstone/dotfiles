@@ -6,7 +6,7 @@ index 3b17a65..f0eb38d 100755
 -    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
 +    local defaults=/run/current-system/sw/bin:@guestRuntimePath@:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
 +    export PATH="${PATH:+$PATH:}$defaults"
-@@ -28,2 +29,22 @@ mount_kernel_filesystems() {
+@@ -28,4 +29,24 @@ mount_kernel_filesystems() {
 +            # A fresh tmpfs hides NixOS userland under /run. Preserve its
 +            # system links before mounting, then recreate them afterwards.
 +            local link target ln_cmd=""
@@ -31,3 +31,38 @@ index 3b17a65..f0eb38d 100755
 +            done
          fi
      fi
+@@ -67,9 +67,10 @@ mount_virtme_overlays() {
+     for tag in "${!virtme_rw_overlay@}"; do
+         dir="${!tag}"
++        [[ -e "$dir" ]] || continue
+         upperdir="/run/tmp/$tag/upper"
+         workdir="/run/tmp/$tag/work"
+         mkdir -p "$upperdir" "$workdir"
+         mnt_opts="lowerdir=$dir,upperdir=$upperdir,workdir=$workdir"
+         mount -t overlay -o xino=off,"${mnt_opts}" "${tag}" "${dir}" ||
+-            mount -t overlay -o "${mnt_opts}" "${tag}" "${dir}" &
++            mount -t overlay -o "${mnt_opts}" "${tag}" "${dir}"
+     done
+@@ -87,2 +109,6 @@ mount_kernel_modules() {
+     if [[ ! -d /lib/modules ]]; then
++        if [[ ! -d /lib ]]; then
++            log "skipping module setup: /lib is unavailable in guest"
++            return
++        fi
+         mkdir -p /lib/modules
+@@ -140,2 +166,3 @@ generate_fstab() {
++    [[ -e /run/current-system ]] && return
+     # Fix up /etc a little bit
+     touch /run/tmp/fstab
+@@ -175 +202 @@ generate_shadow() {
+-    (umask 0644 && touch /run/tmp/shadow)
++    install -m 0640 -o root -g shadow /dev/null /run/tmp/shadow
+@@ -207,2 +234,5 @@ run_systemd_tmpfiles() {
++    if [[ -e /run/current-system ]]; then
++        return
++    fi
+     if [[ $$ -ne 1 ]]; then
+         return
+@@ -665 +695 @@ run_user_shell() {
+-    setsid bash -c "su ${args[*]}" 0<> "/dev/$consdev" 1>&0 2>&0
++    setsid -c bash -c "runuser ${args[*]}" 0<> "/dev/$consdev" 1>&0 2>&0

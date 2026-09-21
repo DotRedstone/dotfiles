@@ -1,0 +1,33 @@
+diff --git a/virtme/guest/virtme-init b/virtme/guest/virtme-init
+index 3b17a65..f0eb38d 100755
+--- a/virtme/guest/virtme-init
++++ b/virtme/guest/virtme-init
+@@ -9 +9,2 @@ configure_environment() {
+-    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
++    local defaults=/run/current-system/sw/bin:@guestRuntimePath@:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
++    export PATH="${PATH:+$PATH:}$defaults"
+@@ -28,2 +29,22 @@ mount_kernel_filesystems() {
++            # A fresh tmpfs hides NixOS userland under /run. Preserve its
++            # system links before mounting, then recreate them afterwards.
++            local link target ln_cmd=""
++            local -a preserve=()
++            for link in /run/current-system /run/booted-system; do
++                if target=$(readlink "$link" 2> /dev/null); then
++                    preserve+=("$link" "$target")
++                fi
++            done
++            if ((${#preserve[@]})); then
++                ln_cmd=$(command -v ln)
++                ln_cmd="$(readlink -f "${ln_cmd%/*}")/${ln_cmd##*/}"
++            fi
++
+             # Mount tmpfs dirs
+             mount -t tmpfs -o mode=0755 run /run/
++
++            local i
++            for ((i = 0; i < ${#preserve[@]}; i += 2)); do
++                "$ln_cmd" -s -- "${preserve[i + 1]}" "${preserve[i]}" ||
++                    log "WARNING: failed to restore symlink ${preserve[i]}"
++            done
+         fi
+     fi

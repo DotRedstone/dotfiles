@@ -31,7 +31,7 @@ index 3b17a65..f0eb38d 100755
 +            done
          fi
      fi
-@@ -67,9 +67,10 @@ mount_virtme_overlays() {
+@@ -67,9 +67,16 @@ mount_virtme_overlays() {
      for tag in "${!virtme_rw_overlay@}"; do
          dir="${!tag}"
 +        [[ -e "$dir" ]] || continue
@@ -43,6 +43,12 @@ index 3b17a65..f0eb38d 100755
 -            mount -t overlay -o "${mnt_opts}" "${tag}" "${dir}" &
 +            mount -t overlay -o "${mnt_opts}" "${tag}" "${dir}"
      done
++
++    # Keep the standard world-writable sticky /tmp semantics after overlaying it.
++    if [[ -d /tmp ]]; then
++        chown root:root /tmp
++        chmod 1777 /tmp
++    fi
 @@ -87,2 +109,6 @@ mount_kernel_modules() {
      if [[ ! -d /lib/modules ]]; then
 +        if [[ ! -d /lib ]]; then

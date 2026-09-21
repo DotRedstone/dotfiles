@@ -191,9 +191,9 @@ binds {
     Mod+Shift+Equal hotkey-overlay-title="窗口高+" { set-window-height "+10%"; }
 
     // Screenshots
-    // Capture transient menus before an interactive picker can dismiss them.
-    Mod+Shift+S hotkey-overlay-title="即时截图" {
-        spawn "sh" "-c" "grim - | wl-copy";
+    // Niri captures a frozen frame before opening its interactive region picker.
+    Mod+Shift+S hotkey-overlay-title="冻结区域截图" {
+        screenshot;
     }
 
     Mod+Shift+A hotkey-overlay-title="区域截图" {

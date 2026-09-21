@@ -13,12 +13,12 @@ error = "{{colors.error.default.hex}}"
 
 [custom.user_host_noenv]
 when = 'test -z "$VIRTUAL_ENV" && test -z "$DIRENV_DIR" && test ! -f package.json && test ! -f Cargo.toml && test ! -f go.mod'
-command = 'echo "dot•warden"'
+command = 'printf "dot•%s" "${VIRTME_KERNEL:-warden}"'
 format = "[](bold primary)[$output](bold bg:primary fg:235)[](bold primary)"
 
 [custom.user_host_env]
 when = 'test -n "$VIRTUAL_ENV" || test -n "$DIRENV_DIR" || test -f package.json || test -f Cargo.toml || test -f go.mod'
-command = 'echo "dot•warden"'
+command = 'printf "dot•%s" "${VIRTME_KERNEL:-warden}"'
 format = "[](bold tertiary)[$output](bold bg:tertiary fg:235)[](bold tertiary)"
 
 [username]

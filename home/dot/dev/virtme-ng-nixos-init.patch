@@ -69,6 +69,9 @@ index 3b17a65..f0eb38d 100755
 +    fi
      if [[ $$ -ne 1 ]]; then
          return
-@@ -665 +695 @@ run_user_shell() {
+@@ -661,0 +692,2 @@ run_user_shell() {
++    # Let the inherited user prompt distinguish this guest from its host.
++    export VIRTME_KERNEL="$(uname -r)"
+@@ -665 +698 @@ run_user_shell() {
 -    setsid bash -c "su ${args[*]}" 0<> "/dev/$consdev" 1>&0 2>&0
 +    setsid -c bash -c "runuser ${args[*]}" 0<> "/dev/$consdev" 1>&0 2>&0

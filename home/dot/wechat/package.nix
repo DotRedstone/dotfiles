@@ -32,6 +32,20 @@ let
     # nixpkgs still pins 4.1.1.7. Keep the official Universal package on the
     # latest verified upstream release until nixpkgs catches up.
     fetchurl = _: wechatCompatDeb;
+    writeShellScript = name: text:
+      pkgs.writeShellScript name (
+        if name == "wechat-uos-launcher" then
+          builtins.replaceStrings
+            [ "export QT_AUTO_SCREEN_SCALE_FACTOR=1" ]
+            [ ''
+              export QT_AUTO_SCREEN_SCALE_FACTOR=''${QT_AUTO_SCREEN_SCALE_FACTOR:-0}
+              export QT_ENABLE_HIGHDPI_SCALING=''${QT_ENABLE_HIGHDPI_SCALING:-0}
+              export QT_SCALE_FACTOR=''${QT_SCALE_FACTOR:-1}
+            '' ]
+            text
+        else
+          text
+      );
   };
 
   notifyBridge = pkgs.stdenv.mkDerivation {

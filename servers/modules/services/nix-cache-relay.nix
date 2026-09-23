@@ -38,6 +38,12 @@ in
       default = "nix-cache.bdot.in";
       description = "Dedicated hostname that Cloudflare forwards to this origin over the existing port 80 listener.";
     };
+
+    serverAliases = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "Additional Host headers accepted by the cache virtual host, such as a static public IP.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -59,6 +65,8 @@ in
       virtualHosts.${cfg.serverName} = {
         # Do not claim the port 80 default vhost: Hopper already has a legacy default
         # application. Cloudflare forwards this explicit hostname to the same origin.
+        serverAliases = cfg.serverAliases;
+
         locations."/" = {
           extraConfig = ''
             # Hopper has no routed IPv6. Resolve the official cache dynamically with

@@ -11,7 +11,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 
@@ -61,18 +60,21 @@ in
         # Do not claim the port 80 default vhost: Hopper already has a legacy default
         # application. Cloudflare forwards this explicit hostname to the same origin.
         locations."/" = {
-          proxyPass = "https://cache.nixos.org";
           extraConfig = ''
+            # Hopper has no routed IPv6. Resolve the official cache dynamically with
+            # IPv4 only instead of waiting for every unreachable AAAA response.
+            resolver 1.1.1.1 ipv6=off valid=300s;
+            set $nix_cache_upstream cache.nixos.org;
+            proxy_pass https://$nix_cache_upstream;
             proxy_set_header Host cache.nixos.org;
             proxy_http_version 1.1;
             proxy_set_header Connection "";
             proxy_ssl_server_name on;
             proxy_ssl_name cache.nixos.org;
-            proxy_ssl_verify on;
-            proxy_ssl_trusted_certificate ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt;
 
-            # NARs and narinfo records are content-addressed and signed upstream. Cache
-            # them locally while keeping small failure responses short-lived.
+            # NARs and narinfo records are content-addressed and signed upstream; every
+            # Nix client verifies that official signature before accepting a substitute.
+            # Cache them locally while keeping small failure responses short-lived.
             proxy_cache nix_official_cache;
             proxy_cache_methods GET HEAD;
             proxy_cache_key "$scheme$proxy_host$request_uri";

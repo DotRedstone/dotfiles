@@ -35,6 +35,10 @@ Cloudflare 边缘代理与优选 IP 订阅代码位于
 模块部署，密钥只通过 Worker secret 注入。现网审计、灰度与清理步骤见
 [docs/cloudflare-edge-migration.md](./docs/cloudflare-edge-migration.md)。
 
+Hopper 同时提供一个有界的官方 Nix 二进制缓存中继：它按需从
+`cache.nixos.org` 下载并缓存在新加坡本地磁盘，其他受管主机优先命中该中继，
+断开时自动回退到官方缓存。它不保存私有构建产物，也不构成数据备份。
+
 ## 仓库边界
 
 `servers/` 是所有云服务器的唯一配置入口，但仍由外层 `dotfiles` Git 仓库提交与

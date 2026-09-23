@@ -12,6 +12,9 @@
     mongodb.enable = true;
     mysql.enable = true;
     navidrome.enable = true;
+    # Relay signed official packages into Singapore once, then serve cache hits to
+    # the workstation and other NixOS hosts from Hopper's local disk.
+    nixCacheRelay.enable = true;
     openlist.enable = true;
     postgresql.enable = true;
     redis.enable = true;

@@ -12,6 +12,7 @@
     ./mongodb.nix
     ./mysql.nix
     ./navidrome.nix
+    ./nix-cache-relay.nix
     ./openlist.nix
     ./postgresql.nix
     ./redis.nix

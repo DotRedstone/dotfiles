@@ -6,13 +6,13 @@
 
 { ... }: {
   xdg.desktopEntries."com.tencent.wechat" = {
-    name = "微信 UOS";
-    genericName = "WeChat UOS";
-    comment = "微信桌面版 UOS";
+    name = "微信";
+    genericName = "即时通讯";
+    comment = "微信桌面版";
     exec = "wechat-uos -- %U";
-    icon = "com.tencent.wechat";
+    icon = "wechat";
     terminal = false;
-    categories = [ "Chat" ];
+    categories = [ "Chat" "Network" ];
     startupNotify = true;
     settings = {
       StartupWMClass = "wechat";

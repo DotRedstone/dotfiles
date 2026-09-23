@@ -67,4 +67,18 @@ in
       '';
     })
   ];
+
+  xdg.desktopEntries.antigravity = {
+    name = "Google Antigravity";
+    genericName = "智能开发环境";
+    comment = "新一代智能 AI 编程开发环境";
+    exec = "antigravity %U";
+    icon = "antigravity";
+    terminal = false;
+    categories = [ "Development" "IDE" ];
+    mimeType = [ "x-scheme-handler/antigravity" ];
+    settings = {
+      StartupWMClass = "Antigravity";
+    };
+  };
 }

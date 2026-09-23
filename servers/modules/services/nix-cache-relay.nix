@@ -36,8 +36,8 @@ in
 
     serverName = lib.mkOption {
       type = lib.types.str;
-      default = "nix-cache.${config.networking.hostName}";
-      description = "Nginx server name; the virtual host is also the port 80 fallback for direct-IP clients.";
+      default = "nix-cache.bdot.in";
+      description = "Dedicated hostname that Cloudflare forwards to this origin over the existing port 80 listener.";
     };
   };
 
@@ -58,10 +58,8 @@ in
       };
 
       virtualHosts.${cfg.serverName} = {
-        # Existing public applications have explicit server names. This only handles the
-        # cache hostname and direct requests to Hopper's static public IP.
-        default = true;
-
+        # Do not claim the port 80 default vhost: Hopper already has a legacy default
+        # application. Cloudflare forwards this explicit hostname to the same origin.
         locations."/" = {
           proxyPass = "https://cache.nixos.org";
           extraConfig = ''

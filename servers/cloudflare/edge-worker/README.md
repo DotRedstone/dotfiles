@@ -118,9 +118,9 @@ Worker 同时发布 `router`、`desktop`、`mobile` 三份私有 Mihomo 配置�
 
 - 路由器源配置与旧更新器保留了权限为 `0600` 的回滚副本，具体路径和清理提醒见迁移
   文档。
+- 路由器测速脚本模板见 [`scripts/router-cfst.sh`](scripts/router-cfst.sh)，支持在推送到 Worker KV 的同时推送到 GitHub 仓库（`DotRedstone/cf-ip`）以满足公开分享需求。
 
 ## TODO
 
-- 给路由器的 CloudflareST 上传脚本做 Nix/OpenWrt 独立模块。
 - 灰度完成后加入最小化的 Worker Analytics 告警；不采集访问明细。
 - 只有确有需要时再做只读状态页，管理 UI 不属于核心路径。

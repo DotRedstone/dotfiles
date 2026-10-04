@@ -283,12 +283,17 @@ let
         platform_profile="''${2:-$profile}"
 
         current="$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || true)"
-        if [ "$current" = "$platform_profile" ]; then
-          return 0
-        fi
-
+        # The privileged dispatcher runs before this helper and may already
+        # have updated platform_profile.  Do not use that as a reason to skip
+        # Power Profiles Daemon: otherwise its visible state and Intel pstate
+        # limits can remain from the preceding mode (for example, low power
+        # with Turbo still disabled).
         if [ -n "$profile" ] && command -v powerprofilesctl >/dev/null 2>&1; then
           powerprofilesctl set "$profile" >/dev/null 2>&1 || log "powerprofilesctl could not set $profile"
+        fi
+
+        if [ "$current" = "$platform_profile" ]; then
+          return 0
         fi
 
         if [ -r /sys/firmware/acpi/platform_profile_choices ] \

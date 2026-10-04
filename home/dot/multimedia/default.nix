@@ -12,5 +12,6 @@
     ./upscayl.nix
     ./video-editing.nix
     ./peaclock.nix
+    ./qcm.nix
   ];
 }

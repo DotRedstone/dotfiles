@@ -8,20 +8,20 @@
 
 let
   antigravity = inputs.antigravity-nix.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-no-fhs;
-  chineseLocalizationVersion = "2.12.2-6298742303883264";
+  chineseLocalizationVersion = "2.17.0-5217732355031040";
   chineseLocalization = pkgs.fetchFromGitHub {
     owner = "Silas-02";
     repo = "antigravity2-win-linux-cn";
-    rev = "0d9ee3cb1e4eda2c752a1e178ebeca5ca7f08e0f";
-    hash = "sha256-L2OImQs/S8nRUHHDmb+ZiBdX0hhLch0rFFi/UvChqFg=";
+    rev = "f3cdcf59a187b88de8cb755f15a68f41868d9469";
+    hash = "sha256-Mk3M5BGJ2O6ax2zYqp/l+K7N+P/itM5trCORVuPcTRQ=";
   };
   localizedAntigravity = assert lib.assertMsg
     (antigravity.version == chineseLocalizationVersion)
     "Antigravity version changed; update the Chinese localization source before rebuilding.";
-    antigravity.overrideAttrs (old: {
+  antigravity.overrideAttrs (old: {
     nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.nodejs ];
     postInstall = (old.postInstall or "") + ''
-      # The upstream localization project targets this pinned 2.12.2 client.
+      # The upstream localization project targets this pinned 2.17.0 client.
       # Patch a build-local copy so the immutable Nix store stays reproducible.
       localization_resources="$out/lib/google-antigravity2/resources"
       localization_tmp="$(mktemp -d)"

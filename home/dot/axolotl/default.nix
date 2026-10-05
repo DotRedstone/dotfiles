@@ -4,7 +4,7 @@
 # Scope: Home Manager
 # ---
 
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 let
   version = "1.9.5";
   runtimeLibraryPath = pkgs.lib.makeLibraryPath (with pkgs; [
@@ -16,17 +16,37 @@ let
     openal
     libglvnd
     vulkan-loader
-    xorg.libX11
-    xorg.libXxf86vm
-    xorg.libXext
-    xorg.libXcursor
+    libx11
+    libxxf86vm
+    libxext
+    libxcursor
     libxkbcommon
-    xorg.libXrandr
-    xorg.libXtst
+    libxrandr
+    libxtst
     libpulseaudio
     wayland
     alsa-lib
     gtk3
+
+    # [CEF / MCEF Dependencies]
+    nss
+    nspr
+    at-spi2-core
+    cups
+    libdrm
+    cairo
+    pango
+    expat
+    dbus
+    libgbm
+    libxcomposite
+    libxdamage
+    libxfixes
+    libxcb
+    stdenv.cc.cc.lib
+    udev
+    pciutils
+    zlib
   ]);
 
   src = pkgs.fetchurl {
@@ -110,4 +130,11 @@ let
 in
 {
   home.packages = [ axolotlLauncher ];
+
+  home.activation.patchMcefLibraries = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mcef_dir="$HOME/.local/share/red.ghs.axolotl/profiles"
+    if [ -d "$mcef_dir" ]; then
+      ${pkgs.findutils}/bin/find "$mcef_dir" -type f \( -name "jcef_helper" -o -name "jcef_helper.real" -o -name "chrome-sandbox" \) -exec ${pkgs.patchelf}/bin/patchelf --set-interpreter ${pkgs.glibc}/lib/ld-linux-x86-64.so.2 {} + 2>/dev/null || true
+    fi
+  '';
 }

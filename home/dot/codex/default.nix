@@ -6,12 +6,12 @@
 
 { pkgs, inputs, ... }: {
   home.packages = [
-    inputs.codex-desktop-linux.packages.${pkgs.system}.default
+    inputs.codex-desktop-linux.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   xdg.desktopEntries.codex-desktop = {
-    name = "ChatGPT";
-    genericName = "AI 助手";
+    name = "Codex";
+    genericName = "ChatGPT AI 助手";
     comment = "OpenAI ChatGPT 桌面客户端";
     exec = "codex-desktop %u";
     icon = "codex-desktop";
@@ -23,6 +23,7 @@
     ];
     settings = {
       StartupWMClass = "codex-desktop";
+      Keywords = "codex;chatgpt;openai;ai;";
     };
   };
 }

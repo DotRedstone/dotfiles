@@ -53,6 +53,12 @@
     enableFishIntegration = true;
   };
 
+  # Direnv: Environment switcher
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+
   # FZF: Command-line fuzzy finder
   programs.fzf = {
     enable = true;

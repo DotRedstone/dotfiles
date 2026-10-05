@@ -135,7 +135,8 @@
             return {
               LineNr = { fg = colors.secondary_container },
               CursorLineNr = { fg = colors.primary, style = { "bold" } },
-              Visual = { bg = colors.surface2, style = { "underline" } },
+              Visual = { bg = colors.surface2, style = { "bold" } },
+              VisualNOS = { bg = colors.surface2, style = { "bold" } },
               PmenuSel = { bg = colors.surface2, style = { "bold" } },
               Pmenu = { fg = colors.text, bg = colors.surface0 },
               MatchParen = { bg = colors.surface2, style = { "bold", "underline" } },

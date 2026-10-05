@@ -13,8 +13,12 @@
     gtk4.theme = lib.mkForce null;
 
     theme = {
-      name = "adw-gtk3";
+      name = "adw-gtk3-dark";
       package = pkgs.adw-gtk3;
+    };
+
+    gtk3.extraConfig = {
+      gtk-application-prefer-dark-theme = 1;
     };
 
     iconTheme = { 
@@ -39,7 +43,7 @@
   dconf.settings = {
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
-      gtk-theme = "adw-gtk3";
+      gtk-theme = "adw-gtk3-dark";
       font-name = "Maple Mono NF 11";
       document-font-name = "Maple Mono NF 11";
       monospace-font-name = "Maple Mono NF 11";

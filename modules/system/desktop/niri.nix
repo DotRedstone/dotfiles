@@ -4,28 +4,13 @@
 # Scope: System
 # ---
 
-{ lib, pkgs, inputs, ... }:
-
-let
-  niriPackage = inputs.niri.packages.${pkgs.stdenv.hostPlatform.system}.niri.overrideAttrs (old: {
-    version = "${old.version or "unstable"}-shm-sharing";
-    __intentionallyOverridingVersion = true;
-    patches = (old.patches or [ ]) ++ [
-      (pkgs.fetchpatch {
-        name = "niri-shm-sharing-f3207c77095114f9f2202ca7db8333d4c1a958d1.patch";
-        url = "https://github.com/rucnyz/niri/commit/f3207c77095114f9f2202ca7db8333d4c1a958d1.patch";
-        hash = "sha256-u7OEbVtePF21Phr8aTV0LZPFdDHu1Ju9Jnv+Sd33xDI=";
-      })
-    ];
-    buildInputs =
-      builtins.filter (pkg: lib.getName pkg != "libdisplay-info") (old.buildInputs or [ ])
-      ++ [ pkgs.libdisplay-info_0_3 ];
-  });
-in
+{ pkgs, inputs, ... }:
 {
   programs.niri = {
     enable = true;
-    package = niriPackage;
+    # Upstream niri now ships the SHM (memfd) screencasting fallback and uses
+    # libdisplay-info 0.3 directly, so the previous local patch/override is gone.
+    package = inputs.niri.packages.${pkgs.stdenv.hostPlatform.system}.niri;
   };
 
   services.displayManager.defaultSession = "niri";

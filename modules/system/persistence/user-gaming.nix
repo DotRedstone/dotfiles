@@ -1,6 +1,6 @@
 # ---
 # Module: Persistence - User Gaming
-# Description: Steam, HMCL, and other gaming platform data
+# Description: Steam, PrismLauncher, and other gaming platform data
 # Scope: System
 # ---
 
@@ -11,7 +11,6 @@
       ".steam"
       ".local/share/PrismLauncher"
       ".minecraft"
-      ".hmcl"
       ".java"
     ];
   };

@@ -23,7 +23,7 @@ in {
     enable = true;
     # Will be socket-activated or started manually via virt-manager
     qemu = {
-      runAsRoot = false;
+      runAsRoot = true;
       swtpm.enable = true;
       vhostUserPackages = [ pkgs.virtiofsd ];
     };

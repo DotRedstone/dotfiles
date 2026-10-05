@@ -10,6 +10,7 @@
     ./boot.nix          # Rollback & Bootloader
     ./persistence.nix   # Warden Vault
     ./persist-snapshots.nix # Persist Data Protection
+    ./coredump.nix      # Coredump storage limits
     ./users.nix         # dot's Identity
     ./i18n.nix          # Locale & Input
     ./input-automation.nix # Wayland virtual input

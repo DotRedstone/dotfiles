@@ -1,21 +1,25 @@
 # ---
-# Module: Firefox Settings
-# Description: Performance, behavior, and typography overrides
+# Module: Zen Browser - Settings
+# Description: Performance, behavior, locale, and typography overrides for Zen Browser
 # Scope: Home Manager
 # ---
 
 { ... }: {
-  programs.firefox.profiles.dot.settings = {
+  programs.zen-browser.profiles.dot.settings = {
     # [Locale & UI]
     "intl.locale.requested" = "zh-CN";
+    "intl.locale.matchOS" = true;
     "browser.startup.page" = 3; # Restore previous session
     "browser.tabs.loadInBackground" = false; # Switch to new tabs immediately
     "browser.tabs.insertRelatedAfterCurrent" = true;
-    "ui.systemUsesDarkTheme" = 1;
 
-    # [Vertical Tabs - 2026 Modern UI]
-    "sidebar.verticalTabs" = true;
-    "sidebar.revamp" = true;
+    # [Theme & Contrast]
+    "ui.systemUsesDarkTheme" = 1;
+    "browser.theme.content-theme" = 0; # 0 = Dark
+    "browser.theme.toolbar-theme" = 0; # 0 = Dark
+    "layout.css.prefers-color-scheme.content-override" = 0; # 0 = Dark
+    "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
+    "devtools.chrome.enabled" = true;
 
     # [Typography]
     # Matching Warden's system-wide fonts
@@ -34,16 +38,20 @@
     "browser.download.folderList" = 2;
 
     # [Wayland / Mixed DPI]
-    # Avoid toolbar popup offset and jumpiness on mixed-scale Niri outputs.
-    "widget.wayland.fractional-scale.enabled" = false;
+    "widget.wayland.fractional-scale.enabled" = true;
 
     # [Privacy & Behavior]
     "general.autoScroll" = true;
-    "signon.rememberSignons" = false; # Use a password manager instead
-    "toolkit.legacyUserProfileCustomizations.stylesheets" = true; # Enable userChrome.css
+    "signon.rememberSignons" = false; # Use Bitwarden
+    "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+    "zen.window-sync.enabled" = false; # Keep windows independent instead of mirroring all tabs
 
     # [Performance]
     "gfx.webrender.all" = true; # Force hardware acceleration
     "media.ffmpeg.vaapi.enabled" = true; # Video hardware decoding
+
+    # [Media & MPRIS Integration]
+    "media.hardwaremediakeys.enabled" = true;
+    "dom.media.mediasession.enabled" = true;
   };
 }

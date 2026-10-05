@@ -1,5 +1,5 @@
 {
-  "wallpaper": "{{wallpaper.path}}",
+  "wallpaper": "{{image}}",
   "alpha": "100",
   "special": {
     "background": "{{colors.surface.default.hex}}",

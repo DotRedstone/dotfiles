@@ -40,6 +40,11 @@
     # [Codex Desktop]
     codex-desktop-linux.url = "github:ilysenko/codex-desktop-linux";
     codex-desktop-linux.inputs.nixpkgs.follows = "nixpkgs";
+
+    # [Zen Browser]
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+    zen-browser.inputs.nixpkgs.follows = "nixpkgs";
+    zen-browser.inputs.home-manager.follows = "home-manager";
   };
 
   outputs = { self, nixpkgs, home-manager, antigravity-nix, niri, ... }@inputs:
@@ -100,6 +105,7 @@
       modules = [ 
         ./home/dot 
         inputs.nixvim.homeModules.nixvim
+        inputs.zen-browser.homeModules.default
       ];
     };
   };

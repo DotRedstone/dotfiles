@@ -50,4 +50,22 @@ in
       0=默认
     '';
   };
+
+  # [Desktop Entry Override]
+  # Override upstream fcitx5-configtool.desktop to remove multi-locale strings
+  # like Catalan (Name[ca]=Configuració de fcitx 5) which fuzzy matches 'codex'.
+  xdg.desktopEntries.fcitx5-configtool = {
+    name = "Fcitx 5 配置";
+    genericName = "输入法配置";
+    comment = "修改 Fcitx 5 配置";
+    exec = "fcitx5-configtool";
+    icon = "fcitx";
+    terminal = false;
+    categories = [ "Settings" ];
+    settings = {
+      NotShowIn = "KDE;";
+      X-AppStream-Ignore = "true";
+      Keywords = "fcitx;im;input;shurufa;输入法;rime;";
+    };
+  };
 }

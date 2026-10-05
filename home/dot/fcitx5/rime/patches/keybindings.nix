@@ -9,4 +9,8 @@
     { when = "has_menu"; accept = "semicolon"; send = "2"; }
     { when = "has_menu"; accept = "apostrophe"; send = "3"; }
   ];
+  "switcher/hotkeys" = [
+    "Control+grave"
+    "Control+Shift+grave"
+  ];
 }

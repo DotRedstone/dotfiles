@@ -22,4 +22,20 @@
       ${pkgs.findutils}/bin/find "$sync_dir" -type f -name '*.custom.yaml' -exec ${pkgs.coreutils}/bin/chmod u+w {} +
     fi
   '';
+
+  home.activation.fcitx5RimeDeploy = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    rime_dir="$HOME/.local/share/fcitx5/rime"
+    shared_dir="/tmp/rime-shared-$UID"
+    rm -rf "$shared_dir"
+    mkdir -p "$shared_dir"
+    ln -sf ${pkgs.rime-data}/share/rime-data/* "$shared_dir/"
+    ln -sf ${pkgs.rime-ice}/share/rime-data/* "$shared_dir/"
+    ${pkgs.librime}/bin/rime_deployer --build "$rime_dir" "$shared_dir" "$rime_dir/build"
+    rm -rf "$shared_dir"
+    if ${pkgs.procps}/bin/pgrep -f fcitx5 >/dev/null 2>&1; then
+      if [ -x /run/current-system/sw/bin/fcitx5 ]; then
+        /run/current-system/sw/bin/fcitx5 -r -d >/dev/null 2>&1 || true
+      fi
+    fi
+  '';
 }

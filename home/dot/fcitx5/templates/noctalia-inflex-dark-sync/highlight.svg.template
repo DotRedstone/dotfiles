@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="30" height="30" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0" y="0" width="60" height="60" fill="{{colors.primary.dark.hex}}"/>
+  <path d="M13 4H47L56 13V47L47 56H13L4 47V13L13 4Z" fill="{{colors.primary.dark.hex}}"/>
+  <path d="M15 8H45L52 15V45L45 52H15L8 45V15L15 8Z" fill="none" stroke="{{colors.on_primary.dark.hex}}" stroke-width="1" stroke-opacity="0.28"/>
 </svg>

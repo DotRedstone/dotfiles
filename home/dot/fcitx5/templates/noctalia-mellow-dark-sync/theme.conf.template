@@ -1,8 +1,8 @@
 [Metadata]
 Name=noctalia-mellow-dark-sync
-Version=1.10
-Author=sanweiya
-Description="Noctalia dark mellow fcitx5 theme: rounded, soft, Wayland-only."
+Version=2.0
+Author=dot
+Description="Noctalia dark rounded dynamic theme for native Wayland apps."
 
 [InputPanel]
 NormalColor={{colors.on_surface.dark.hex}}

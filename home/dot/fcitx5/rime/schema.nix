@@ -10,6 +10,10 @@
       patch = {
         schema_list = [ { schema = "rime_ice"; } ];
         "menu/page_size" = 10;
+        "switcher/hotkeys" = [
+          "Control+grave"
+          "Control+Shift+grave"
+        ];
       };
     };
 }

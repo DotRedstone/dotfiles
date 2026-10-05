@@ -1,8 +1,8 @@
 [Metadata]
 Name=noctalia-inflex-sync
-Version=1.10
-Author=sanweiya
-Description="Noctalia light inflex fcitx5 theme: rectangular, crisp, structured, WeChat/XWayland-safe."
+Version=2.0
+Author=dot
+Description="Noctalia light angular dynamic theme for XWayland-compatible apps."
 
 [InputPanel]
 NormalColor={{colors.on_surface.light.hex}}

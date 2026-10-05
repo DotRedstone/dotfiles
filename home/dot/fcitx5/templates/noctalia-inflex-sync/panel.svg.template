@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="30" height="30" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0" y="0" width="60" height="60" fill="{{colors.surface.light.hex}}"/>
-  <rect x="0" y="0" width="60" height="4" fill="{{colors.primary.light.hex}}"/>
-  <rect x="1" y="1" width="58" height="58" fill="none" stroke="{{colors.outline.light.hex}}" stroke-width="2"/>
+  <path d="M12 4H48L56 12V48L48 56H12L4 48V12L12 4Z" fill="{{colors.surface.light.hex}}" stroke="{{colors.outline.light.hex}}" stroke-width="1.5"/>
+  <path d="M14 8H46L52 14V46L46 52H14L8 46V14L14 8Z" fill="none" stroke="{{colors.outline.light.hex}}" stroke-width="0.8" stroke-opacity="0.48"/>
+  <path d="M12 4H48L56 12H4L12 4Z" fill="{{colors.surface_container_high.light.hex}}"/>
 </svg>

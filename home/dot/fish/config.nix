@@ -29,7 +29,59 @@
 
       # Custom bind: jk to escape insert mode
       bind -M insert jk "set fish_bind_mode default; commandline -f backward-char force-repaint"
+
+      # [Server Deployment Completions]
+      complete -c deploy-server -f -a "hopper conduit target gcp-free" -d "受管服务器"
+      complete -c rebuild-server -f -a "hopper conduit target gcp-free" -d "受管服务器"
     '';
+
+    # [Functions]
+    functions = {
+      deploy-server = {
+        description = "Deploy configuration to remote server using nh";
+        body = ''
+          if test (count $argv) -lt 1
+              echo "用法: deploy-server <server> [额外参数]"
+              echo "受管服务器: hopper, conduit, target, gcp-free"
+              return 1
+          end
+
+          set -l host $argv[1]
+          set -l extra $argv[2..-1]
+
+          echo "==> 正在使用 nh 推送配置至 $host..."
+          nh os switch ~/.dotfiles/servers \
+              -H $host \
+              --target-host "dot@$host" \
+              --build-host "dot@$host" \
+              -d never \
+              -e passwordless \
+              $extra
+        '';
+      };
+
+      rebuild-server = {
+        description = "Deploy configuration to remote server using nixos-rebuild";
+        body = ''
+          if test (count $argv) -lt 1
+              echo "用法: rebuild-server <server> [额外参数]"
+              echo "受管服务器: hopper, conduit, target, gcp-free"
+              return 1
+          end
+
+          set -l host $argv[1]
+          set -l extra $argv[2..-1]
+
+          echo "==> 正在使用 nixos-rebuild 推送至 $host..."
+          nixos-rebuild switch \
+              --flake "path:$HOME/.dotfiles/servers#$host" \
+              --target-host "dot@$host" \
+              --build-host "dot@$host" \
+              --elevate sudo \
+              $extra
+        '';
+      };
+    };
 
     # [Abbreviations]
     shellAbbrs = {
@@ -113,6 +165,13 @@
       nsd    = "sudo nix-env -p /nix/var/nix/profiles/system --delete-generations";
       nclean = "nh clean all --keep 5";
       nconf  = "cd ~/.dotfiles && nvim";
+
+      # --- Server Deployment (nh) ---
+      nrss        = "deploy-server";
+      nrs-hopper  = "deploy-server hopper";
+      nrs-conduit = "deploy-server conduit";
+      nrs-target  = "deploy-server target";
+      nrs-gcp     = "deploy-server gcp-free";
 
       # --- Home Manager (nh/hms) ---
       hms = "nh home switch ~/.dotfiles";

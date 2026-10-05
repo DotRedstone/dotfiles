@@ -26,16 +26,18 @@
     ./fcitx5
     ./cli-tools
     ./monitoring
+    ./maintenance
 
     # --- File Management & Networking ---
     ./yazi
-    ./nautilus
+    ./dolphin
     ./ssh
     ./secrets
 
     # --- Daily Applications ---
     ./firefox
     ./chrome
+    ./zen-browser
     ./wechat
     ./telegram
     ./qq
@@ -43,9 +45,9 @@
     ./zathura
     ./office
     ./obsidian
+    ./obs
     ./multimedia
     ./piclist
-    ./lmstudio
     ./rustdesk
     ./codex
     ./downloads
@@ -58,7 +60,6 @@
 
     # --- Game ---
     ./axolotl
-    ./hmcl
     ./mangohud
     ./steam
   ];

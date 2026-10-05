@@ -10,7 +10,6 @@
     ./mpv.nix
     ./imv.nix
     ./upscayl.nix
-    ./video-editing.nix
     ./peaclock.nix
     ./qcm.nix
   ];

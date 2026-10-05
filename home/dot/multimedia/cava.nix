@@ -22,17 +22,7 @@
       };
       
       color = {
-        # Using a sleek gradient to match your brown/warm theme
-        gradient = 1;
-        gradient_count = 8;
-        gradient_color_1 = "'#ff9e64'";
-        gradient_color_2 = "'#e0af68'";
-        gradient_color_3 = "'#9ece6a'";
-        gradient_color_4 = "'#73daca'";
-        gradient_color_5 = "'#b4f9f8'";
-        gradient_color_6 = "'#2ac3de'";
-        gradient_color_7 = "'#7aa2f7'";
-        gradient_color_8 = "'#bb9af7'";
+        theme = ''"noctalia"'';
       };
       
       smoothing = {
@@ -45,4 +35,44 @@
 
   # Resolve activation conflict with existing regular file
   xdg.configFile."cava/config".force = true;
+
+  # [Service]
+  systemd.user.services.cava-bar = {
+    Unit = {
+      Description = "Cava audio visualizer bridge for status bar";
+      After = [ "pipewire.service" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.writeShellScript "cava-bar-runner" ''
+        set -eu
+        mkdir -p /run/user/$UID/cava-bar
+        cat << 'EOF' > /run/user/$UID/cava-bar/config
+[general]
+framerate = 30
+bars = 6
+
+[input]
+method = pipewire
+source = auto
+
+[output]
+method = raw
+raw_target = /dev/stdout
+data_format = ascii
+ascii_max_range = 7
+bar_delimiter = 59
+EOF
+        exec ${pkgs.cava}/bin/cava -p /run/user/$UID/cava-bar/config | while IFS= read -r line; do
+          printf '%s\n' "$line" > /dev/shm/cava_bars.tmp
+          mv -f /dev/shm/cava_bars.tmp /dev/shm/cava_bars
+        done
+      ''}";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
+  };
 }

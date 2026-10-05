@@ -26,6 +26,9 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIz3aLIG8cKC7/086K4vK3SSYPlA7T7yZBQeh9CmpoNz"
   ];
 
+  # [Nix-LD for dynamic C/C++ libraries in Python wheels]
+  programs.nix-ld.enable = true;
+
   sops = {
     defaultSopsFile = ../../secrets/hopper.yaml;
     defaultSopsFormat = "yaml";

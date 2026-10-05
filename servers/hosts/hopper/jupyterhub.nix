@@ -21,6 +21,10 @@ let
   # itself is supplied by jupyterlabEnv below so imported packages and the
   # notebook kernel always use the same interpreter.
   jupyterToolPath = lib.makeBinPath [
+    pkgs.gcc
+    pkgs.gnumake
+    pkgs.pkg-config
+    pkgs.binutils
     pkgs.nodejs
     pkgs.jdk
     pkgs.git
@@ -136,30 +140,70 @@ in {
       home_dir="$(getent passwd "$account" | cut -d: -f6)"
       venv_dir="$home_dir/.venvs/python-project"
 
-      if [ ! -x "$venv_dir/bin/python" ]; then
+      if [ ! -x "$venv_dir/bin/python" ] || [ ! -x "$venv_dir/bin/pip" ]; then
         ${pkgs.util-linux}/bin/runuser -u "$account" -- \
           env HOME="$home_dir" \
           ${config.services.jupyterhub.jupyterlabEnv}/bin/python3 \
           -m venv --system-site-packages "$venv_dir"
       fi
 
+      # Remove EXTERNALLY-MANAGED marker so pip installs proceed without resistance
+      rm -f "$venv_dir/EXTERNALLY-MANAGED" "$venv_dir/lib/"*"/EXTERNALLY-MANAGED" 2>/dev/null || true
+
+      # Register default 'python3' and custom 'python-project' kernel specs to point to the user venv
+      ${pkgs.util-linux}/bin/runuser -u "$account" -- \
+        env HOME="$home_dir" \
+        "$venv_dir/bin/python" -m ipykernel install --user \
+        --name python3 \
+        --display-name "Python 3" >/dev/null
+
       ${pkgs.util-linux}/bin/runuser -u "$account" -- \
         env HOME="$home_dir" \
         "$venv_dir/bin/python" -m ipykernel install --user \
         --name python-project \
         --display-name "Python (项目扩展)" >/dev/null
+
+      # Ensure login shells (bash -l in Jupyter terminal) load tools and auto-activate venv
+      profile="$home_dir/.profile"
+      bashrc="$home_dir/.bashrc"
+
+      cat > "$profile" <<'EOF'
+# [Jupyter User Login Profile]
+if [ -f "$HOME/.bashrc" ]; then
+  . "$HOME/.bashrc"
+fi
+EOF
+      chown "$account:jupyter-users" "$profile"
+      chmod 644 "$profile"
+
+      cat > "$bashrc" <<EOF
+# [Jupyter User Interactive Shell]
+export PATH="\$HOME/.venvs/python-project/bin:\$HOME/.local/bin:${jupyterToolPath}:${jupyterPdfExportPath}:\$PATH"
+
+if [ -f "\$HOME/.venvs/python-project/bin/activate" ]; then
+  source "\$HOME/.venvs/python-project/bin/activate"
+fi
+EOF
+      chown "$account:jupyter-users" "$bashrc"
+      chmod 644 "$bashrc"
     done
   '';
 
   environment.etc."jupyter/labconfig/default_setting_overrides.json".text = builtins.toJSON {
     "@jupyterlab/translation-extension:plugin".locale = "zh_CN";
 
+    "@jupyterlab/terminal-extension:plugin" = {
+      fontFamily = "'Maple Mono NF', 'Maple Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Sarasa Mono SC', Consolas, monospace";
+      fontSize = 14;
+      lineHeight = 1.2;
+    };
+
     "@jupyterlab/apputils-extension:themes" = {
       theme = "Catppuccin Mocha";
       "adaptive-theme" = false;
       "theme-scrollbars" = true;
       overrides = {
-        "code-font-family" = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+        "code-font-family" = "'Maple Mono NF', 'Maple Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Sarasa Mono SC', Consolas, monospace";
         "code-font-size" = "14px";
         "content-font-family" = "Inter, Noto Sans SC, system-ui, sans-serif";
         "content-font-size1" = "14px";
@@ -234,6 +278,8 @@ in {
       # instead of installing into Nix's read-only interpreter at runtime.
       ipykernel
       pip
+      setuptools
+      wheel
       jupyterhub
       jupyterlab
       nbconvert
@@ -272,10 +318,19 @@ in {
       c.JupyterHub.admin_users = {"jupyter-dot"}
       c.SystemdSpawner.cpu_limit = 2.0
       c.SystemdSpawner.mem_limit = '4G'
-      # SystemdSpawner owns the environment passed to the transient notebook
-      # unit.  Mutate its existing map so the NixOS-provided JUPYTER_PATH is
-      # retained while nbconvert can discover Pandoc and XeLaTeX.
-      c.SystemdSpawner.environment["PATH"] = "${jupyterPdfExportPath}:${jupyterToolPath}:/run/current-system/sw/bin"
+
+      # Inject user venv bin, user local bin, jupyterlabEnv, and tools into PATH
+      def pre_spawn_hook(spawner):
+          username = spawner.user.name
+          home_dir = f"/home/{username}"
+          venv_bin = f"{home_dir}/.venvs/python-project/bin"
+          local_bin = f"{home_dir}/.local/bin"
+          system_paths = "${jupyterPdfExportPath}:${jupyterToolPath}:/run/current-system/sw/bin"
+          spawner.environment["PATH"] = f"{venv_bin}:{local_bin}:${config.services.jupyterhub.jupyterlabEnv}/bin:{system_paths}"
+          spawner.environment["VIRTUAL_ENV"] = f"{home_dir}/.venvs/python-project"
+          spawner.environment["PIP_DISABLE_PIP_VERSION_CHECK"] = "1"
+
+      c.SystemdSpawner.pre_spawn_hook = pre_spawn_hook
     '';
   };
 }

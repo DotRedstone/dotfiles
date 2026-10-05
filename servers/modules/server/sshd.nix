@@ -17,6 +17,9 @@
       PasswordAuthentication = false;
       PermitRootLogin = "no";
       X11Forwarding = false;
+      MaxStartups = "50:30:200";
+      ClientAliveInterval = 30;
+      ClientAliveCountMax = 5;
     };
   };
 }

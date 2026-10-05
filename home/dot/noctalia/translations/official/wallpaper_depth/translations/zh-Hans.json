@@ -1,0 +1,69 @@
+{
+  "panel": {
+    "automatic": "自动生成",
+    "clear_cache": "清除蒙版缓存",
+    "description": "为当前壁纸通过 AI 深度估计生成前景遮罩蒙版，让桌面时钟和挂件自然穿插在景深前景之后。",
+    "feather": "边缘羽化度",
+    "generate": "立即生成蒙版",
+    "no_outputs": "未连接任何显示器。",
+    "off": "已停用",
+    "on": "已启用",
+    "output": {
+      "cached": "已命中缓存",
+      "error": "蒙版生成失败",
+      "no_wallpaper": "未检测到静态壁纸",
+      "processing": "正在计算景深…",
+      "ready": "蒙版已生效",
+      "ready_time": "蒙版已在 {seconds} 秒内应用",
+      "waiting": "等待生成"
+    },
+    "outputs": "显示器列表",
+    "parameters": "蒙版参数调节",
+    "settings": "插件设置",
+    "setup": {
+      "checking": "正在检查本地模型…",
+      "disclosure": "初始化将在本地创建隔离 Python 环境，并从 Hugging Face 下载 99MB 的 Apache-2.0 Depth Anything V2 Small 深度估计模型。壁纸纯本地处理，绝不上传。",
+      "error": "初始化失败",
+      "install": "安装景深模型",
+      "missing": "需要初始化环境与模型",
+      "offline": "桌面离线模式已阻止联网下载模型。",
+      "prerequisites": "请先安装所需命令：{commands}。",
+      "ready": "模型已就绪",
+      "retry": "重试初始化",
+      "running": "正在部署景深模型…"
+    },
+    "threshold": "前景分离阈值"
+  },
+  "service": {
+    "busy": "请等待当前正在进行的景深计算完成。",
+    "clear_cache_failed": "清除蒙版缓存失败。",
+    "generation_failed": "景深蒙版生成失败。",
+    "invalid_result": "景深辅助脚本返回了无效数据。",
+    "invalid_settings": "插件配置项存在错误。",
+    "offline": "请先关闭离线模式再执行环境初始化。",
+    "python_missing": "未检测到 python3 命令。",
+    "setup_failed": "模型环境初始化失败。",
+    "setup_missing": "尚未安装模型与运行环境。",
+    "setup_running": "正在安装运行时环境并下载 99MB 预训练模型。",
+    "start_clear_cache_failed": "无法启动缓存清理操作。",
+    "start_helper_failed": "无法启动景深运算辅助脚本。",
+    "start_setup_failed": "无法启动初始化任务。",
+    "start_validation_failed": "无法启动环境验证流程。",
+    "validation_failed": "环境验证未通过。"
+  },
+  "settings": {
+    "auto_generate": {
+      "description": "当壁纸或景深参数发生变更时，自动重新生成输出蒙版。",
+      "label": "自动计算生成"
+    },
+    "feather": {
+      "description": "景深阈值边缘的柔和过渡宽度。",
+      "label": "边缘羽化度"
+    },
+    "threshold": {
+      "description": "前景深度阈值。高于此阈值的壁纸前景将遮挡在其下方的桌面挂件；数值越小，前景覆盖范围越广。",
+      "label": "前景分离阈值"
+    }
+  },
+  "title": "景深壁纸"
+}

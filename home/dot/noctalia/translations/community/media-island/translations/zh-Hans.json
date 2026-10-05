@@ -1,0 +1,33 @@
+{
+  "panel": {
+    "close": "关闭灵动岛",
+    "next": "下一首",
+    "no-media": "暂无播放内容",
+    "no-media-detail": "请在支持 MPRIS 协议的媒体播放器中开始播放。",
+    "pause": "暂停",
+    "play": "播放",
+    "previous": "上一首"
+  },
+  "settings": {
+    "auto-show": {
+      "description": "在开始播放或切换曲目时自动呼出灵动岛预览片刻。",
+      "label": "曲目切换时自动显示"
+    },
+    "preview-seconds": {
+      "description": "自动预览停留的秒数。",
+      "label": "预览显示时长"
+    }
+  },
+  "tooltip": {
+    "artist": "艺术家",
+    "paused": "已暂停",
+    "playback": "播放状态",
+    "playing": "播放中",
+    "title": "曲名"
+  },
+  "widget": {
+    "no-media": "媒体",
+    "open-island": "打开媒体灵动岛",
+    "unknown-title": "未知曲目"
+  }
+}

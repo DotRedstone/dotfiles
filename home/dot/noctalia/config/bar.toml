@@ -1,0 +1,44 @@
+[bar.default]
+background_opacity = 0.72
+center = ["clock", "lyrics"]
+concave_edge_corners = false
+end = [
+  "group:g1",
+  "udiskie",
+  "tray",
+  "network",
+  "bluetooth",
+  "volume",
+  "brightness",
+  "battery",
+]
+margin_edge = 12
+margin_ends = 18
+margin_opposite_edge = 0
+radius = 26
+smart_auto_hide = false
+start = ["launcher", "workspaces", "cpu", "bongocat"]
+
+[[bar.default.capsule_group]]
+accordion = false
+accordion_direction = "end"
+enabled = true
+fill = "surface_variant"
+id = "g1"
+members = ["clipboard", "notifications"]
+opacity = 0.68
+padding = 5.0
+
+[widget.bongocat]
+type = "noctalia/bongocat:cat"
+
+[widget.udiskie]
+type = "aristides/udiskie:status"
+hide_when_empty = true
+
+[widget.lyrics]
+type = "tranzem/media-lyrics:now-playing"
+show_lyric_line = true
+title_scroll = "always"
+max_length = 360
+hide_when_no_media = false

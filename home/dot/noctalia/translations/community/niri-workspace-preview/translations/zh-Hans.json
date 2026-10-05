@@ -1,0 +1,100 @@
+{
+  "settings": {
+    "active_color": {
+      "description": "每个 Niri 工作区所上报的活动窗口颜色。",
+      "label": "活动窗口颜色"
+    },
+    "fixed_height": {
+      "description": "固定尺寸模式下每个工作区框架的高度（逻辑像素）。",
+      "label": "固定高度"
+    },
+    "fixed_width": {
+      "description": "固定尺寸模式下每个工作区框架的宽度（逻辑像素）。",
+      "label": "固定宽度"
+    },
+    "floating_color": {
+      "description": "紧凑模式与精确定位模式下悬浮窗口使用的颜色。",
+      "label": "悬浮窗口颜色"
+    },
+    "floating_mode": {
+      "description": "在紧凑条带中展示悬浮窗口，或按其在 Niri 视口中的真实坐标展示。",
+      "exact": "精确定位",
+      "label": "悬浮窗口模式",
+      "strip": "紧凑条带"
+    },
+    "focused_color": {
+      "description": "当前拥有键盘焦点的单一窗口颜色。",
+      "label": "当前焦点窗口颜色"
+    },
+    "highlight_focused": {
+      "description": "对当前拥有键盘焦点的窗口应用配置的高亮颜色。",
+      "label": "高亮当前焦点窗口"
+    },
+    "highlight_hovered": {
+      "description": "当鼠标光标悬停时为窗口微缩图绘制轮廓边框。",
+      "label": "高亮鼠标悬停窗口"
+    },
+    "hover_color": {
+      "description": "鼠标悬停时的边框颜色（焦点与紧急状态优先）。",
+      "label": "悬停颜色"
+    },
+    "invert_scroll": {
+      "description": "将向下滚动改为向左移动，向上滚动改为向右移动。",
+      "label": "反转滚轮方向"
+    },
+    "max_output_length": {
+      "description": "单个工作区预览图在主轴上的最大长度（逻辑像素）。",
+      "label": "最大预览长度"
+    },
+    "normal_color": {
+      "description": "无更高优先级状态时的普通窗口回退颜色。",
+      "label": "普通窗口颜色"
+    },
+    "output_gap": {
+      "description": "不同显示器输出预览之间的间距（逻辑像素）。",
+      "label": "显示器间距"
+    },
+    "preview_size": {
+      "description": "每个显示器预览在交叉轴上的尺寸大小（逻辑像素）。",
+      "label": "预览尺寸"
+    },
+    "show_floating": {
+      "description": "在平铺布局旁同时展示悬浮窗口。",
+      "label": "显示悬浮窗口"
+    },
+    "show_icons": {
+      "description": "当微缩图尺寸足够大时，显示本地解析的应用程序图标。",
+      "label": "显示应用图标"
+    },
+    "size_mode": {
+      "auto": "自动缩放",
+      "description": "根据窗口几何尺寸自动适应大小，或使用指定固定尺寸框架。",
+      "fixed": "固定尺寸",
+      "label": "尺寸模式"
+    },
+    "urgent_color": {
+      "description": "请求用户注意（紧急）的窗口颜色。",
+      "label": "紧急窗口颜色"
+    },
+    "viewport_border_width": {
+      "description": "当前可见视口高亮边框的粗细（逻辑像素）。",
+      "label": "视口边框粗细"
+    },
+    "viewport_color": {
+      "description": "可见窗口使用的边框颜色（窗口状态色或悬停色优先）。",
+      "label": "视口高亮颜色"
+    },
+    "viewport_mode": {
+      "both": "高亮并显示独立视口图",
+      "description": "在完整预览图内高亮可见窗口、添加独立视口预览图，或二者并用。",
+      "highlight": "在全景图中高亮",
+      "label": "可见视口模式",
+      "off": "关闭",
+      "separate": "独立视口图"
+    },
+    "window_gap": {
+      "description": "微缩窗口之间的间距（逻辑像素）。",
+      "label": "窗口间距"
+    }
+  }
+}

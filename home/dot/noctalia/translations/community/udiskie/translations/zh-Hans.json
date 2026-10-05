@@ -1,0 +1,69 @@
+{
+  "btn_docs": "查看文档",
+  "btn_eject": "弹出",
+  "btn_mount": "挂载",
+  "btn_mount_all": "挂载全部",
+  "btn_open": "打开",
+  "btn_poweroff": "安全关电",
+  "btn_retry": "重试连接",
+  "btn_unlock": "解密解锁",
+  "btn_unmount": "卸载",
+  "btn_unmount_all": "卸载全部",
+  "copy_path_tooltip": "复制挂载路径",
+  "error_missing_dep": "PATH 中未找到 udiskie 可执行程序",
+  "no_partitions_found": "未找到分区",
+  "notif_drive_connected_body": "{label} 已连接",
+  "notif_drive_connected_title": "设备已连接",
+  "notif_drive_mounted_body": "{label} 已就绪可使用",
+  "notif_drive_mounted_title": "设备已挂载",
+  "notif_drive_removed_body": "{label} 已断开连接",
+  "notif_drive_removed_title": "设备已移除",
+  "notif_drive_unmounted_body": "{label} 已安全卸载",
+  "notif_drive_unmounted_title": "设备已卸载",
+  "notif_eject_failed_fallback": "无法弹出 {device}",
+  "notif_eject_failed_title": "弹出失败",
+  "notif_mount_all_failed_fallback": "无法挂载所有设备",
+  "notif_mount_all_failed_title": "全部挂载失败",
+  "notif_mount_failed_fallback": "无法挂载 {device}",
+  "notif_mount_failed_title": "挂载失败",
+  "notif_poweroff_failed_fallback": "无法对 {device} 安全切断电源",
+  "notif_poweroff_failed_title": "安全切断电源失败",
+  "notif_unmount_all_failed_fallback": "一个或多个设备正忙",
+  "notif_unmount_all_failed_title": "全部卸载失败",
+  "notif_unmount_failed_fallback": "设备 {device} 正忙或正在使用中",
+  "notif_unmount_failed_title": "卸载失败",
+  "notify_path_copied": "路径已复制到剪贴板",
+  "panel_empty": "未检测到 USB 外接设备",
+  "panel_title": "可移动设备管理",
+  "settings": {
+    "auto_open_filemanager": {
+      "description": "插入并挂载磁盘时自动在文件管理器中打开。",
+      "label": "自动打开文件管理器"
+    },
+    "enable_notifications": {
+      "description": "设备插拔与挂载事件时显示原生桌面通知。",
+      "label": "桌面通知"
+    },
+    "file_manager_cmd": {
+      "description": "用于打开已挂载目录的文件管理器命令。",
+      "label": "文件管理器命令"
+    },
+    "glyph": {
+      "description": "状态栏上 Udiskie 挂件显示的图标。",
+      "label": "顶栏图标"
+    },
+    "hide_when_empty": {
+      "description": "未连接任何外接存储设备时自动隐藏状态栏挂件。",
+      "label": "无设备时隐藏"
+    },
+    "show_count": {
+      "description": "在状态栏挂件上显示当前已挂载设备的数量。",
+      "label": "显示挂载数量"
+    }
+  },
+  "status_locked": "已锁定 (LUKS 加密)",
+  "status_mounted": "已挂载",
+  "status_unmounted": "未挂载",
+  "tooltip_empty": "无已挂载设备",
+  "tooltip_mounted": "已挂载外设"
+}

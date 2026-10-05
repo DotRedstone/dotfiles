@@ -1,0 +1,28 @@
+{
+  "settings": {
+    "copy_to_clipboard": {
+      "label": "复制识别结果到剪贴板"
+    },
+    "glyph": {
+      "label": "状态栏图标"
+    },
+    "languages": {
+      "description": "传递给 tesseract -l 的语言代码，以 + 连接（例如 chi_sim+eng）。需要先安装对应的 tessdata 语言包。",
+      "label": "Tesseract 识别语言"
+    },
+    "psm": {
+      "description": "Tesseract 如何对捕获区域进行分段。统一文本块适合绝大多数屏幕截图区域。",
+      "label": "页面分段模式",
+      "options": {
+        "auto": "自动",
+        "block": "统一文本块",
+        "line": "单行文本"
+      }
+    },
+    "show_notification": {
+      "description": "识别完成后弹出带有识别文字预览的桌面通知。",
+      "label": "显示结果通知"
+    }
+  },
+  "title": "文字识别 (OCR)"
+}

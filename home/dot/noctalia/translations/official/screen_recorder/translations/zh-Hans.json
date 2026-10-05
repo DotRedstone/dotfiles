@@ -1,0 +1,186 @@
+{
+  "notify": {
+    "launch-failed": "无法启动 gpu-screen-recorder",
+    "no-monitor": "无法检测当前焦点显示器",
+    "portal-not-running": "xdg-desktop-portal 未运行",
+    "recording-failed": "录制失败",
+    "recording-saved": "录制已保存",
+    "recording-stopped-early": "gpu-screen-recorder 已退出且未保存录制。详情查看 Noctalia 日志。",
+    "replay-active": "回放缓存已启用",
+    "replay-failed": "回放失败",
+    "replay-saved": "回放已保存",
+    "replay-stopped": "回放缓存已停止"
+  },
+  "settings": {
+    "audio_bitrate": {
+      "description": "0 = 自动（Opus/FLAC 为 128，AAC 为 160）；降低此值可减小文件大小",
+      "label": "音频比特率（kbps）"
+    },
+    "audio_codec": {
+      "label": "音频编码器",
+      "options": {
+        "aac": "AAC",
+        "flac": "FLAC",
+        "opus": "Opus"
+      }
+    },
+    "audio_source": {
+      "label": "音频来源",
+      "options": {
+        "both": "输出 + 麦克风",
+        "default_input": "麦克风",
+        "default_output": "系统输出",
+        "none": "无音频",
+        "custom": "自定义"
+      }
+    },
+    "color_range": {
+      "label": "色彩范围",
+      "options": {
+        "full": "完整",
+        "limited": "有限"
+      }
+    },
+    "copy_to_clipboard": {
+      "label": "复制路径到剪贴板"
+    },
+    "directory": {
+      "description": "留空时使用 ~/Videos/Recordings",
+      "label": "输出目录"
+    },
+    "filename_pattern": {
+      "description": "不包含扩展名的日期格式模板；使用 %s 表示 Unix 时间戳",
+      "label": "文件名格式"
+    },
+    "frame_rate": {
+      "label": "帧率"
+    },
+    "hide_inactive": {
+      "label": "空闲时隐藏小组件"
+    },
+    "quality": {
+      "label": "质量",
+      "options": {
+        "high": "高",
+        "medium": "中",
+        "ultra": "极高",
+        "very_high": "很高"
+      }
+    },
+    "replay_duration": {
+      "label": "回放时长（秒）"
+    },
+    "replay_enabled": {
+      "label": "启用回放缓存"
+    },
+    "replay_filename_pattern": {
+      "description": "保存回放使用的日期格式模板（不包含扩展名）；使用 %s 表示 Unix 时间戳",
+      "label": "回放文件名格式"
+    },
+    "replay_storage": {
+      "label": "回放存储",
+      "options": {
+        "disk": "磁盘",
+        "ram": "内存"
+      }
+    },
+    "resolution": {
+      "description": "\"original\" 或 WIDTHxHEIGHT，例如 1920x1080",
+      "label": "分辨率"
+    },
+    "restore_portal": {
+      "label": "恢复 Portal 会话"
+    },
+    "show_cursor": {
+      "label": "显示光标"
+    },
+    "video_codec": {
+      "label": "视频编码器",
+      "options": {
+        "av1": "AV1",
+        "h264": "H.264",
+        "hevc": "HEVC",
+        "vp8": "VP8",
+        "vp9": "VP9"
+      }
+    },
+    "video_source": {
+      "description": "GPU Screen Recorder 捕获模式；“焦点”录制 Noctalia 当前焦点显示器",
+      "label": "视频来源",
+      "options": {
+        "focused": "焦点",
+        "portal": "Portal"
+      }
+    },
+    "custom_audio_sources": {
+      "description": "逗号分隔的 gpu-screen-recorder 音频源列表。",
+      "label": "自定义音频源"
+    },
+    "frame_rate_mode": {
+      "label": "帧率模式",
+      "options": {
+        "vfr": "可变帧率 (VFR)",
+        "cfr": "恒定帧率 (CFR)"
+      }
+    },
+    "glyph_idle": {
+      "label": "空闲图标"
+    },
+    "glyph_pending": {
+      "description": "录制或回放缓冲区启动中显示。",
+      "label": "启动中图标"
+    },
+    "glyph_recording": {
+      "label": "录制中图标"
+    },
+    "glyph_replaying": {
+      "label": "回放缓冲区图标"
+    },
+    "glyph_unavailable": {
+      "description": "未安装 gpu-screen-recorder 时显示。",
+      "label": "不可用图标"
+    },
+    "post_save_script": {
+      "description": "录屏或回放保存后执行的脚本。",
+      "label": "保存后脚本"
+    },
+    "video_bitrate": {
+      "description": "CBR 模式下使用的正整数码率 (kbps)",
+      "label": "视频码率 (kbps)"
+    },
+    "video_bitrate_mode": {
+      "label": "码率控制模式",
+      "options": {
+        "qp": "恒定质量 (QP)",
+        "vbr": "可变码率 (VBR)",
+        "cbr": "恒定码率 (CBR)"
+      }
+    },
+    "video_encoder": {
+      "description": "CPU 编码仅支持 H264，GPU 为硬件加速",
+      "label": "视频编码器",
+      "options": {
+        "gpu": "GPU 硬件加速",
+        "cpu": "CPU 软解"
+      }
+    },
+    "video_qp": {
+      "description": "数值越小画质越高，文件体积越大",
+      "label": "视频质量 (QP)"
+    },
+    "video_quality": {
+      "label": "视频质量预设",
+      "options": {
+        "high": "高",
+        "medium": "中",
+        "ultra": "极致",
+        "very_high": "极高"
+      }
+    }
+  },
+  "shortcut": {
+    "record-screen": "录制屏幕",
+    "recording": "正在录制",
+    "replay-buffer": "回放缓存"
+  }
+}

@@ -93,6 +93,7 @@ function normalizeRateLimit(rl) {
   if (!rl)
     return null;
   const percent = Number(rl.used_percent ?? rl.usedPercent ?? 0) / 100;
+  const resetDate = rl.resets_at ? new Date(Number(rl.resets_at) * 1000) : null;
   let label = "";
   const minutes = Number(rl.window_minutes ?? rl.windowMinutes ?? 0);
   if (minutes === 10080)
@@ -107,8 +108,14 @@ function normalizeRateLimit(rl) {
   return {
     label,
     percent: Math.min(1, Math.max(0, percent)),
-    resetAt: rl.resets_at ? new Date(Number(rl.resets_at) * 1000).toISOString() : ""
+    resetAt: resetDate && !Number.isNaN(resetDate.getTime()) ? resetDate.toISOString() : "",
+    resetLabel: resetDate && !Number.isNaN(resetDate.getTime()) ? localTimeLabel(resetDate) : ""
   };
+}
+
+function localTimeLabel(date) {
+  const pad = value => String(value).padStart(2, "0");
+  return `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 function usageTotal(usage) {

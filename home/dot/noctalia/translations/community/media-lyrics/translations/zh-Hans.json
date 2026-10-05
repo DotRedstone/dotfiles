@@ -1,0 +1,104 @@
+{
+  "common": {
+    "no-title": "(无标题)",
+    "unknown-artist": "未知艺术家"
+  },
+  "panel": {
+    "choose-lyrics": "歌词版本",
+    "loading-lyrics": "正在加载歌词…",
+    "lyrics-error": "歌词获取失败：",
+    "no-lyrics": "未找到歌词",
+    "no-media-player": "未检测到播放器",
+    "no-variants": "未找到其他候选歌词",
+    "now-playing": "正在播放",
+    "reload-lyrics": "重新加载歌词",
+    "synced": "逐字滚动同步",
+    "unsynced": "普通文本歌词",
+    "variant-default": "默认版本"
+  },
+  "provider": {
+    "cache": "本地缓存",
+    "embedded": "内嵌歌词",
+    "local": "本地文件"
+  },
+  "service": {
+    "lyrics-unreachable": "LRCLIB 歌词服务器连接失败（网络错误）"
+  },
+  "settings": {
+    "album_art_only": {
+      "description": "仅显示专辑封面（不显示文本文字）。",
+      "label": "仅显示封面"
+    },
+    "art_size": {
+      "description": "专辑封面尺寸大小（像素）。",
+      "label": "封面大小"
+    },
+    "artist_first": {
+      "description": "显示为 \"歌手 - 歌名\" 格式，而非默认的 \"歌名 - 歌手\"。",
+      "label": "歌手排在前面"
+    },
+    "hide_album_art": {
+      "description": "隐藏封面图片及默认占位图标。",
+      "label": "隐藏封面"
+    },
+    "hide_artist": {
+      "description": "仅显示曲目标题，不显示歌手名称。",
+      "label": "隐藏歌手"
+    },
+    "hide_when_no_media": {
+      "description": "没有正在运行的 MPRIS 媒体播放器时自动隐藏小组件。",
+      "label": "无播放时隐藏"
+    },
+    "local_lyrics_dir": {
+      "description": "存放本地 .lrc 歌词文件的目录，命名规则为 '歌手 - 歌名.lrc'，将优先于网络 LRCLIB 检索。",
+      "label": "本地歌词目录"
+    },
+    "max_length": {
+      "description": "状态栏组件最大宽度（像素），超长标题将滚动或省略截断。",
+      "label": "最大宽度"
+    },
+    "min_length": {
+      "description": "状态栏组件最小宽度（像素）。",
+      "label": "最小宽度"
+    },
+    "offset_ms": {
+      "description": "微调歌词时间轴：正值提前显示，负值延后显示。",
+      "label": "歌词时间轴微调 (毫秒)"
+    },
+    "panel_size": {
+      "description": "歌词面板默认尺寸预设：紧凑 (440)、中等 (520)、大尺寸 (640)。",
+      "label": "面板尺寸预设",
+      "options": {
+        "compact": "紧凑 (440)",
+        "large": "大尺寸 (640)",
+        "medium": "中等 (520)",
+        "mini": "迷你"
+      }
+    },
+    "player_allowlist": {
+      "description": "允许显示歌词的播放器白名单（英文逗号分隔），留空表示允许所有播放器。",
+      "label": "播放器白名单"
+    },
+    "player_blocklist": {
+      "description": "禁止显示歌词的播放器黑名单（英文逗号分隔），留空表示不屏蔽任何播放器。",
+      "label": "播放器黑名单"
+    },
+    "show_lyric_line": {
+      "description": "在顶栏胶囊中实时滚动显示当前句歌词，而不是显示歌手名字。",
+      "label": "实时显示当前歌词"
+    },
+    "title_scroll": {
+      "description": "超出长度限制时的曲目标题滚动方式。",
+      "label": "超长标题滚动",
+      "options": {
+        "always": "始终滚动",
+        "none": "不滚动",
+        "on_hover": "鼠标悬停时滚动"
+      }
+    },
+    "use_cache": {
+      "description": "将在线获取的歌词缓存到本地，便于离线回放时复用。",
+      "label": "缓存歌词"
+    }
+  }
+}

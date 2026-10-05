@@ -35,7 +35,13 @@
         buildInputs = [ pkgs.makeWrapper ];
         postBuild = ''
           rm $out/bin/noctalia
+          rm -rf $out/share/noctalia/assets
+          mkdir -p $out/share/noctalia/assets
+          cp -r ${basePackage}/share/noctalia/assets/* $out/share/noctalia/assets/
+          chmod -R u+w $out/share/noctalia/assets
+          cp -f ${./translations/core/zh-Hans.json} $out/share/noctalia/assets/translations/zh-Hans.json
           makeWrapper ${basePackage}/bin/noctalia $out/bin/noctalia \
+            --set NOCTALIA_ASSETS_DIR "$out/share/noctalia/assets" \
             --run 'gemini_path="$HOME/.config/sops-nix/secrets/gemini_api_key"; if [ -r "$gemini_path" ]; then export NOCTALIA_AP_GOOGLE_API_KEY="$(cat "$gemini_path")"; fi' \
             --run 'wallhaven_path="$HOME/.config/sops-nix/secrets/wallhaven_api_key"; if [ -r "$wallhaven_path" ]; then export NOCTALIA_WALLHAVEN_API_KEY="$(cat "$wallhaven_path")"; fi'
           ln -s $out/bin/noctalia $out/bin/noctalia-shell

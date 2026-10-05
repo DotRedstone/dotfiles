@@ -1,0 +1,6 @@
+[notification]
+background_opacity = 0.86
+border = true
+offset_x = 20
+offset_y = 16
+position = "top_right"

@@ -19,6 +19,8 @@ const friendlyAppNames = new Map([
   ["com.mitchellh.ghostty", "Ghostty"],
   ["ghostty", "Ghostty"],
   ["kitty", "Kitty"],
+  ["org.kde.dolphin", "Dolphin"],
+  ["dolphin", "Dolphin"],
   ["org.gnome.nautilus", "Files"],
   ["nautilus", "Files"],
   ["firefox", "Firefox"],

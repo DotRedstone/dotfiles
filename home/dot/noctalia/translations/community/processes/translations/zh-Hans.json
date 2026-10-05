@@ -1,0 +1,103 @@
+{
+  "days": {
+    "one": "天",
+    "other": "天"
+  },
+  "hours": {
+    "one": "小时",
+    "other": "小时"
+  },
+  "last_update": "上次刷新",
+  "minutes": {
+    "one": "分钟",
+    "other": "分钟"
+  },
+  "num_system_processes": "系统进程",
+  "num_user_processes": "用户进程",
+  "procs": {
+    "applications_header": "运行中的应用",
+    "copied_to_clipboard": "已复制到剪贴板",
+    "copy_failed": "复制失败",
+    "nodata": "暂无数据",
+    "process": {
+      "cpu": {
+        "label": "CPU",
+        "tip": "CPU 使用率"
+      },
+      "disk": {
+        "label": "磁盘",
+        "tip": "磁盘读写 I/O"
+      },
+      "mem": {
+        "label": "内存",
+        "tip": "内存占用"
+      },
+      "name": {
+        "label": "名称",
+        "tip": "进程名称"
+      },
+      "pid": {
+        "label": "PID",
+        "tip": "进程标识符 (PID)"
+      },
+      "swap": {
+        "label": "SWAP",
+        "tip": "交换空间占用"
+      },
+      "username": {
+        "label": "用户",
+        "tip": "所属用户"
+      }
+    },
+    "process_buttons": {
+      "cancel": "关闭详情面板",
+      "force_kill": "强制结束 (SIGKILL) 选中的进程并关闭视图",
+      "kill": "正常结束 (SIGINT) 选中的进程并关闭视图"
+    },
+    "processes_header": "系统进程列表",
+    "system_info": {
+      "unknown": "Linux"
+    }
+  },
+  "search_placeholder": "输入关键词过滤进程…",
+  "settings": {
+    "delay": {
+      "description": "监控数据刷新间隔（秒）",
+      "label": "刷新间隔"
+    },
+    "process_hover_background": {
+      "description": "鼠标悬停进程条目时的背景颜色",
+      "label": "悬停背景色"
+    },
+    "process_hover_color": {
+      "description": "鼠标悬停进程条目时的文字颜色",
+      "label": "悬停文字色"
+    },
+    "show_apps": {
+      "description": "是否在监控面板顶部显示桌面应用分类区域。",
+      "label": "显示桌面应用"
+    },
+    "show_processes": {
+      "description": "是否在监控面板中显示底层进程列表。",
+      "label": "显示底层进程"
+    },
+    "sort_column_background": {
+      "description": "排序依据列的背景高亮颜色",
+      "label": "排序列背景色"
+    },
+    "sort_column_color": {
+      "description": "排序依据列的文字高亮颜色",
+      "label": "排序列文字色"
+    }
+  },
+  "system_processes_label": "系统进程",
+  "system_processes_tip": "仅显示系统级核心进程",
+  "tip_clear_search": "清空搜索内容",
+  "tip_close": "关闭",
+  "tip_options": "查看选项",
+  "tip_settings": "插件设置",
+  "title": "任务管理器",
+  "total_processes": "进程总数",
+  "user_processes_label": "用户进程",
+  "user_processes_tip": "仅显示当前用户进程"
+}

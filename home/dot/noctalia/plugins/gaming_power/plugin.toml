@@ -2,6 +2,7 @@ id = "dot/gaming_power"
 name = "Gaming Power"
 version = "1.0.0"
 min_noctalia = "5.0.0"
+plugin_api = 3
 author = "dot"
 license = "MIT"
 dependencies = []

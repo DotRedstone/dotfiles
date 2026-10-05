@@ -16,7 +16,6 @@
     grim
     slurp
     swappy
-    obs-studio     # Professional Wayland screen recorder
 
     # [Desktop Services]
     awww    # Wallpaper daemon

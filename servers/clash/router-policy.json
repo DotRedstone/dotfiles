@@ -273,6 +273,7 @@
         "VPS-Node-SG-WS",
         "Abuse-CF1",
         "Abuse-CF2",
+        "Abuse-CF-Next",
         "Airport-Mitce1",
         "Airport-Mitce2"
       ]
@@ -331,7 +332,8 @@
       "tolerance": 50,
       "use": [
         "Abuse-CF1",
-        "Abuse-CF2"
+        "Abuse-CF2",
+        "Abuse-CF-Next"
       ]
     },
     {
@@ -394,7 +396,8 @@
       ],
       "use": [
         "Abuse-CF1",
-        "Abuse-CF2"
+        "Abuse-CF2",
+        "Abuse-CF-Next"
       ]
     },
     {

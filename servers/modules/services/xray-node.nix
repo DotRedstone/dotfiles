@@ -52,6 +52,15 @@ let
             headers = { };
           };
         };
+        sniffing = {
+          enabled = true;
+          destOverride = [
+            "http"
+            "tls"
+            "quic"
+          ];
+          routeOnly = true;
+        };
       }
 
       {
@@ -61,10 +70,13 @@ let
         protocol = "vless";
         settings = {
           clients = [
-            {
+            ({
               id = secret "reality_client_uuid";
               email = "${config.networking.hostName}-reality";
             }
+            // lib.optionalAttrs (cfg.realityFlow != "") {
+              flow = cfg.realityFlow;
+            })
           ];
           decryption = "none";
           encryption = "none";
@@ -82,6 +94,15 @@ let
             mldsa65Seed = secret "reality_mldsa65_seed";
           };
           tcpSettings.header.type = "none";
+        };
+        sniffing = {
+          enabled = true;
+          destOverride = [
+            "http"
+            "tls"
+            "quic"
+          ];
+          routeOnly = true;
         };
       }
     ];
@@ -163,6 +184,13 @@ in
       type = lib.types.str;
       description = "Allowed REALITY client SNI.";
       example = "www.example.com";
+    };
+
+    realityFlow = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      example = "xtls-rprx-vision";
+      description = "Client flow control algorithm.";
     };
   };
 

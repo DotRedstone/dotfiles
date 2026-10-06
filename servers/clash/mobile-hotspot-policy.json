@@ -120,7 +120,6 @@
         "VPS-Node-SG-WS",
         "Abuse-CF1",
         "Abuse-CF2",
-        "Abuse-CF-Next",
         "Airport-Mitce1",
         "Airport-Mitce2"
       ]
@@ -179,8 +178,7 @@
       "tolerance": 50,
       "use": [
         "Abuse-CF1",
-        "Abuse-CF2",
-        "Abuse-CF-Next"
+        "Abuse-CF2"
       ]
     },
     {
@@ -243,8 +241,7 @@
       ],
       "use": [
         "Abuse-CF1",
-        "Abuse-CF2",
-        "Abuse-CF-Next"
+        "Abuse-CF2"
       ]
     },
     {
@@ -304,7 +301,7 @@
       ]
     },
     {
-      "name": "👨‍💻 开发者工具",
+      "name": "👨💻 开发者工具",
       "type": "select",
       "proxies": [
         "🌐 Default",
@@ -709,12 +706,12 @@
     "DOMAIN-SUFFIX,claude.ai,🧠 AI",
     "DOMAIN-SUFFIX,anthropic.com,🧠 AI",
     "DOMAIN-KEYWORD,antigravity,🧠 AI",
-    "DOMAIN-KEYWORD,github,👨‍💻 开发者工具",
-    "DOMAIN-KEYWORD,docker,👨‍💻 开发者工具",
-    "DOMAIN-KEYWORD,nixos,👨‍💻 开发者工具",
-    "DOMAIN-KEYWORD,npmjs,👨‍💻 开发者工具",
-    "DOMAIN-KEYWORD,pypi,👨‍💻 开发者工具",
-    "DOMAIN-KEYWORD,python,👨‍💻 开发者工具",
+    "DOMAIN-KEYWORD,github,👨💻 开发者工具",
+    "DOMAIN-KEYWORD,docker,👨💻 开发者工具",
+    "DOMAIN-KEYWORD,nixos,👨💻 开发者工具",
+    "DOMAIN-KEYWORD,npmjs,👨💻 开发者工具",
+    "DOMAIN-KEYWORD,pypi,👨💻 开发者工具",
+    "DOMAIN-KEYWORD,python,👨💻 开发者工具",
     "DOMAIN-KEYWORD,okx,🟦 OKX",
     "DOMAIN-KEYWORD,binance,🟨 Binance",
     "DOMAIN-KEYWORD,bybit,🟪 Bybit",

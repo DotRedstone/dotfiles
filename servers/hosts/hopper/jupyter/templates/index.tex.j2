@@ -1,0 +1,274 @@
+((*- extends 'latex/index.tex.j2' -*))
+
+((*- block docclass -*))
+\documentclass[UTF8,11pt,fontset=none]{ctexart}
+((*- endblock docclass -*))
+
+((*- block packages -*))
+((( super() )))
+\usepackage{fontspec}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{newunicodechar}
+
+% Unicode character fallbacks
+\newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{□}{\ensuremath{\square}}
+\newunicodechar{≤}{\ensuremath{\le}}
+\newunicodechar{≥}{\ensuremath{\ge}}
+\newunicodechar{≠}{\ensuremath{\ne}}
+\newunicodechar{±}{\ensuremath{\pm}}
+\newunicodechar{×}{\ensuremath{\times}}
+\newunicodechar{÷}{\ensuremath{\div}}
+
+% Page Geometry: Modern clean margins on A4
+\geometry{a4paper, top=2.2cm, bottom=2.2cm, left=2.2cm, right=2.2cm, headheight=16pt, footskip=14pt}
+
+% Line spacing & paragraph
+\linespread{1.18}
+\setlength{\parskip}{0.5em plus 0.2em minus 0.1em}
+\setlength{\parindent}{0pt}
+\setlist{nosep, leftmargin=1.5em}
+
+% Section depth
+\setcounter{secnumdepth}{-1}
+((*- endblock packages -*))
+
+((*- block definitions -*))
+((( super() )))
+
+% Disable legacy margin-hanging prompt
+\renewcommand{\prompt}[4]{}
+
+% Modern Color Palette
+\definecolor{brandblue}{HTML}{0969DA}
+\definecolor{darkslate}{HTML}{24292F}
+\definecolor{lightgray}{HTML}{57606A}
+\definecolor{codebg}{HTML}{F6F8FA}
+\definecolor{codeframe}{HTML}{D0D7DE}
+\definecolor{outbg}{HTML}{FFFFFF}
+\definecolor{outframe}{HTML}{D0D7DE}
+\definecolor{streambg}{HTML}{F6F8FA}
+\definecolor{streambar}{HTML}{0969DA}
+\definecolor{quoteframe}{HTML}{0969DA}
+\definecolor{quotebg}{HTML}{F0F7FF}
+
+% Transform Pandoc default 0.5\linewidth horizontal rules (---) into full-width modern dividers
+\NewCommandCopy{\origrule}{\rule}
+\RenewDocumentCommand{\rule}{o m m}{%
+  \IfValueTF{#1}{%
+    \origrule[#1]{#2}{#3}%
+  }{%
+    \def\targetw{0.5\linewidth}%
+    \def\currw{#2}%
+    \ifx\currw\targetw
+      {\par\vspace{0.4em}\noindent\color{codeframe}\origrule{\linewidth}{0.6pt}\par\vspace{0.4em}}%
+    \else
+      \origrule{#2}{#3}%
+    \fi
+  }%
+}
+
+% Font Configuration
+\setmainfont{DejaVu Sans}[
+  BoldFont = DejaVu Sans,
+  BoldFeatures = {Weight=bold}
+]
+\setsansfont{DejaVu Sans}
+
+% Monospace font: JetBrains Mono
+\setmonofont{JetBrainsMono-Regular.ttf}[
+  Path = @JETBRAINS_MONO@,
+  BoldFont = JetBrainsMono-Bold.ttf,
+  ItalicFont = JetBrainsMono-Italic.ttf,
+  Scale = 0.88
+]
+
+% CJK Fonts
+\setCJKmainfont{SourceHanSans.ttc}[
+  Path = @SOURCE_HAN_SANS@,
+  FontIndex = 2,
+  AutoFakeBold = 2.5
+]
+\setCJKsansfont{SourceHanSans.ttc}[
+  Path = @SOURCE_HAN_SANS@,
+  FontIndex = 2,
+  AutoFakeBold = 2.5
+]
+\setCJKmonofont{LXGWWenKaiMono-Regular.ttf}[
+  Path = @LXGW_WENKAI@,
+  BoldFont = LXGWWenKaiMono-Medium.ttf,
+  Scale = 0.9
+]
+
+% Modern Section Headings with Accent Decorations
+\ctexset{
+  section = {
+    format = \Large\bfseries\color{darkslate}\raggedright\color{brandblue}\rule[-0.15ex]{3.5pt}{1.15em}\hspace{0.5em}\color{darkslate},
+    beforeskip = 2.4ex plus 0.5ex minus 0.2ex,
+    afterskip = 1.2ex
+  },
+  subsection = {
+    format = \large\bfseries\color{darkslate}\raggedright\color{brandblue!80}\raisebox{0.1ex}{\footnotesize\ensuremath{\blacktriangleright}}\hspace{0.4em}\color{darkslate},
+    beforeskip = 1.8ex plus 0.4ex minus 0.2ex,
+    afterskip = 0.8ex
+  },
+  subsubsection = {
+    format = \normalsize\bfseries\color{brandblue}\raggedright,
+    beforeskip = 1.2ex plus 0.3ex minus 0.2ex,
+    afterskip = 0.6ex
+  }
+}
+
+% Modern GitHub Primer Syntax Highlighting
+\makeatletter
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\color[HTML]{6E7781}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\color[HTML]{6E7781}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\color[HTML]{6E7781}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\color[HTML]{CF222E}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\color[HTML]{CF222E}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\color[HTML]{CF222E}}
+\expandafter\def\csname PY@tok@s\endcsname{\color[HTML]{0A3069}}
+\expandafter\def\csname PY@tok@s1\endcsname{\color[HTML]{0A3069}}
+\expandafter\def\csname PY@tok@s2\endcsname{\color[HTML]{0A3069}}
+\expandafter\def\csname PY@tok@nb\endcsname{\color[HTML]{8250DF}}
+\expandafter\def\csname PY@tok@nf\endcsname{\color[HTML]{8250DF}}
+\expandafter\def\csname PY@tok@m\endcsname{\color[HTML]{0550AE}}
+\expandafter\def\csname PY@tok@mi\endcsname{\color[HTML]{0550AE}}
+\expandafter\def\csname PY@tok@mf\endcsname{\color[HTML]{0550AE}}
+\expandafter\def\csname PY@tok@o\endcsname{\color[HTML]{CF222E}}
+\makeatother
+
+% Modern Header & Footer (fancyhdr)
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{codeframe}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[L]{\small\color{lightgray}\textsf{Jupyter Notebook}}
+\fancyhead[R]{\small\color{lightgray}\textsf{\thepage\ / \pageref{LastPage}}}
+\fancyfoot[L]{\footnotesize\color{lightgray!70}\textsf{Generated with JupyterLab}}
+\fancyfoot[R]{\footnotesize\color{lightgray}\textsf{\today}}
+
+% Modern Blockquote
+\renewenvironment{quote}{%
+  \begin{tcolorbox}[
+    breakable,
+    enhanced,
+    colback=quotebg,
+    colframe=quoteframe,
+    borderline west={2.5pt}{0pt}{quoteframe},
+    boxrule=0pt,
+    frame hidden,
+    arc=0pt,
+    left=3.5mm, right=3mm, top=2mm, bottom=2mm,
+    before skip=2mm, after skip=2mm
+  ]
+}{%
+  \end{tcolorbox}
+}
+
+% Box styles for code & outputs
+\tcbset{
+  jupyterinbox/.style={
+    breakable,
+    enhanced,
+    colback=codebg,
+    colframe=codeframe,
+    boxrule=0.6pt,
+    arc=3.5pt,
+    left=3.5mm,
+    right=3.5mm,
+    top=2.5mm,
+    bottom=2.5mm,
+    before skip=2.5mm,
+    after skip=1mm
+  },
+  jupyteroutbox/.style={
+    breakable,
+    enhanced,
+    colback=outbg,
+    colframe=outframe,
+    boxrule=0.5pt,
+    arc=3.5pt,
+    left=3.5mm,
+    right=3.5mm,
+    top=2mm,
+    bottom=2mm,
+    before skip=0.8mm,
+    after skip=2.5mm
+  },
+  jupyterstreambox/.style={
+    breakable,
+    enhanced,
+    borderline west={2pt}{0pt}{streambar},
+    colback=streambg,
+    boxrule=0pt,
+    frame hidden,
+    arc=0pt,
+    left=3mm,
+    right=2mm,
+    top=1.5mm,
+    bottom=1.5mm,
+    before skip=1mm,
+    after skip=2mm
+  }
+}
+((*- endblock definitions -*))
+
+((*- block maketitle -*))
+((*- endblock maketitle -*))
+
+((* block input scoped *))
+((*- if cell.execution_count is defined and cell.execution_count is not none -*))
+  ((*- set count = cell.execution_count -*))
+((*- else -*))
+  ((*- set count = " " -*))
+((*- endif -*))
+\begin{tcolorbox}[jupyterinbox,
+  title={\scriptsize\sffamily\bfseries\color{brandblue!90!black}\textsc{In}\,[((( count )))]},
+  attach boxed title to top left={xshift=2.5mm, yshift=-2.2mm},
+  boxed title style={size=small, colframe=codeframe, colback=codebg, arc=2pt, boxrule=0.5pt, left=1.5mm, right=1.5mm, top=0.5mm, bottom=0.5mm}
+]
+\begin{Verbatim}[commandchars=\\\{\}]
+((( cell.source | highlight_code(strip_verbatim=True) )))
+\end{Verbatim}
+\end{tcolorbox}
+((* endblock input *))
+
+((* block execute_result scoped *))
+((*- if cell.execution_count is defined and cell.execution_count is not none -*))
+  ((*- set count = cell.execution_count -*))
+((*- else -*))
+  ((*- set count = " " -*))
+((*- endif -*))
+((*- for type in output.data | filter_data_type -*))
+  ((*- if type in ['text/plain'] -*))
+\begin{tcolorbox}[jupyteroutbox,
+  title={\scriptsize\sffamily\bfseries\color{orange!85!black}\textsc{Out}\,[((( count )))]},
+  attach boxed title to top left={xshift=2.5mm, yshift=-2.2mm},
+  boxed title style={size=small, colframe=outframe, colback=white, arc=2pt, boxrule=0.5pt, left=1.5mm, right=1.5mm, top=0.5mm, bottom=0.5mm}
+]
+\begin{Verbatim}[commandchars=\\\{\}]
+((( output.data['text/plain'] | wrap_text(charlim) | escape_latex | ansi2latex )))
+\end{Verbatim}
+\end{tcolorbox}
+  ((*- else -*))
+    ((( super() )))
+  ((*- endif -*))
+((*- endfor -*))
+((* endblock execute_result *))
+
+((* block stream *))
+\begin{tcolorbox}[jupyterstreambox]
+\begin{Verbatim}[commandchars=\\\{\}]
+((( output.text | wrap_text(charlim) | escape_latex | strip_trailing_newline | ansi2latex )))
+\end{Verbatim}
+\end{tcolorbox}
+((* endblock stream *))

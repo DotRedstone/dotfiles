@@ -11,7 +11,7 @@
     ./oci-platform.nix
     ./reverse-proxy.nix
     ./services.nix
-    ./jupyterhub.nix
+    ./jupyter
     ./hermes.nix
     ../../modules/server
     ../../modules/services

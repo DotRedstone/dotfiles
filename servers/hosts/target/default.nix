@@ -7,7 +7,8 @@
 { ... }: {
   imports = [
     ./hardware-configuration.nix
-    ./services.nix
+    ./gaming
+    ./infra
     ../../modules/server
     ../../modules/services
   ];

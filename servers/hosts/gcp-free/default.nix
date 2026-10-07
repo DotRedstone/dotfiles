@@ -8,7 +8,8 @@
   imports = [
     ./disko.nix
     ./google-compute.nix
-    ./services.nix
+    ./proxy
+    ./infra
     ../../modules/server
     ../../modules/services
   ];

@@ -9,7 +9,8 @@
     ./disko.nix
     ./networking.nix
     ./platform.nix
-    ./services.nix
+    ./proxy
+    ./infra
     ../../modules/server
     ../../modules/services
   ];

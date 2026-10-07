@@ -143,6 +143,7 @@
       "url": "http://www.gstatic.com/generate_204",
       "interval": 300,
       "tolerance": 50,
+      "filter": "^(?!.*Vision).*",
       "use": [
         "VPS-Node-LA-Reality"
       ]

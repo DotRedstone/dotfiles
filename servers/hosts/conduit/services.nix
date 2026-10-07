@@ -23,6 +23,8 @@
       realityListenAddress = "107.174.1.97";
       realityTarget = "www.nvidia.com:443";
       realityServerName = "www.nvidia.com";
+      # Grey-release identity; the established Reality client remains unchanged.
+      realityVisionEnable = true;
     };
 
     xraySubscriptions = {

@@ -77,7 +77,11 @@ let
             // lib.optionalAttrs (cfg.realityFlow != "") {
               flow = cfg.realityFlow;
             })
-          ];
+          ] ++ lib.optional cfg.realityVisionEnable {
+            id = secret "reality_vision_client_uuid";
+            email = "${config.networking.hostName}-reality-vision";
+            flow = "xtls-rprx-vision";
+          };
           decryption = "none";
           encryption = "none";
         };
@@ -143,6 +147,7 @@ let
     "reality_private_key"
     "reality_mldsa65_seed"
   ]
+  ++ lib.optional cfg.realityVisionEnable "reality_vision_client_uuid"
   ++ webSocketClientSecretNames
   ++ realityShortIdNames;
 in
@@ -191,6 +196,12 @@ in
       default = "";
       example = "xtls-rprx-vision";
       description = "Client flow control algorithm.";
+    };
+
+    realityVisionEnable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Add an isolated XTLS Vision client alongside the existing REALITY client.";
     };
   };
 

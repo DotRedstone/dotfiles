@@ -156,3 +156,37 @@ export async function getPreferredEndpoints(
   }
   return [{ address: env.PUBLIC_HOST, port: 443, label: "CF-Origin" }];
 }
+
+function formatEndpoint(endpoint: PreferredEndpoint): string {
+  const address = endpoint.address.includes(":")
+    ? `[${endpoint.address}]`
+    : endpoint.address;
+  return `${address}:${endpoint.port}#${endpoint.label}`;
+}
+
+export async function preferredEndpointsResponse(env: Env): Promise<Response> {
+  const state = await env.EDGE_STATE.get<PreferredEndpointState>(
+    KV_KEY,
+    "json",
+  );
+  if (
+    state?.version !== 1 ||
+    !Array.isArray(state.endpoints) ||
+    state.endpoints.length === 0
+  ) {
+    return new Response("preferred endpoint pool unavailable\n", {
+      status: 503,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+
+  return new Response(
+    `${state.endpoints.slice(0, MAXIMUM_ENDPOINTS).map(formatEndpoint).join("\n")}\n`,
+    {
+      headers: {
+        "Cache-Control": "no-store",
+        "Content-Type": "text/plain; charset=utf-8",
+      },
+    },
+  );
+}

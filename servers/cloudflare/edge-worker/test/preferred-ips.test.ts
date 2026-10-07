@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { parsePreferredEndpoints } from "../src/preferred-ips";
+import {
+  parsePreferredEndpoints,
+  preferredEndpointsResponse,
+} from "../src/preferred-ips";
+import type { Env } from "../src/types";
 
 describe("preferred endpoint parser", () => {
   it("accepts the router text formats and removes duplicates", () => {
@@ -20,5 +24,26 @@ describe("preferred endpoint parser", () => {
 
   it("rejects an empty list", () => {
     expect(() => parsePreferredEndpoints("# empty\n")).toThrow();
+  });
+
+  it("exports only the stored router-selected endpoint pool", async () => {
+    const env = {
+      EDGE_STATE: {
+        get: async () => ({
+          version: 1,
+          updatedAt: "2026-10-08T00:00:00.000Z",
+          endpoints: [
+            { address: "203.0.113.1", port: 443, label: "HKG" },
+            { address: "2001:db8::1", port: 8443, label: "NRT" },
+          ],
+        }),
+      },
+    } as unknown as Env;
+
+    const response = await preferredEndpointsResponse(env);
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe(
+      "203.0.113.1:443#HKG\n[2001:db8::1]:8443#NRT\n",
+    );
   });
 });

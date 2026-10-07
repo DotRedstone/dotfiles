@@ -7,6 +7,7 @@ export interface Env {
   TROJAN_PASSWORD: string;
   ROUTE_SECRET: string;
   SUBSCRIPTION_TOKEN: string;
+  PREFERRED_ENDPOINTS_TOKEN: string;
   CONFIG_TOKENS: string;
   IP_UPDATE_KEY: string;
 }

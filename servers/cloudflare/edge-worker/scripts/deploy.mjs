@@ -146,6 +146,7 @@ async function main() {
     TROJAN_PASSWORD: edge.trojan_password,
     ROUTE_SECRET: edge.route_secret,
     SUBSCRIPTION_TOKEN: edge.subscription_token,
+    PREFERRED_ENDPOINTS_TOKEN: edge.preferred_endpoints_token,
     CONFIG_TOKENS: JSON.stringify(edge.config_tokens),
     IP_UPDATE_KEY: edge.ip_update_key,
   };

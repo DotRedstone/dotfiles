@@ -1,6 +1,9 @@
 import { uuidToBytes } from "./bytes";
 import { configurationProfile, configurationResponse } from "./clash-config";
-import { updatePreferredEndpoints } from "./preferred-ips";
+import {
+  preferredEndpointsResponse,
+  updatePreferredEndpoints,
+} from "./preferred-ips";
 import { handleWebSocket, handleXHttp } from "./relay";
 import { matchesTransportPath } from "./routes";
 import { sha224Hex } from "./sha224";
@@ -26,6 +29,9 @@ function loadAuth(env: Env): ProxyAuth {
   if (!SECRET_PATTERN.test(env.SUBSCRIPTION_TOKEN)) {
     throw new Error("invalid subscription token");
   }
+  if (!SECRET_PATTERN.test(env.PREFERRED_ENDPOINTS_TOKEN)) {
+    throw new Error("invalid preferred endpoint token");
+  }
   if (env.TROJAN_PASSWORD.length < 16 || env.IP_UPDATE_KEY.length < 32) {
     throw new Error("weak secret");
   }
@@ -40,6 +46,7 @@ export default {
     const url = new URL(request.url);
     const transportPath = `/edge/${env.ROUTE_SECRET}`;
     const subscriptionPath = `/sub/${env.SUBSCRIPTION_TOKEN}`;
+    const preferredEndpointsPath = `/preferred/${env.PREFERRED_ENDPOINTS_TOKEN}`;
 
     if (request.method === "POST" && url.pathname === "/admin/preferred-ips") {
       try {
@@ -54,6 +61,15 @@ export default {
       try {
         loadAuth(env);
         return await subscriptionResponse(request, env);
+      } catch {
+        return hiddenNotFound();
+      }
+    }
+
+    if (request.method === "GET" && url.pathname === preferredEndpointsPath) {
+      try {
+        loadAuth(env);
+        return await preferredEndpointsResponse(env);
       } catch {
         return hiddenNotFound();
       }

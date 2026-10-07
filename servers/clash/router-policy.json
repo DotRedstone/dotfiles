@@ -5,6 +5,12 @@
   "mode": "rule",
   "log-level": "info",
   "ipv6": false,
+  "unified-delay": true,
+  "tcp-concurrent": true,
+  "profile": {
+    "store-selected": true,
+    "store-fake-ip": true
+  },
   "dns": {
     "enable": true,
     "listen": "0.0.0.0:1053",

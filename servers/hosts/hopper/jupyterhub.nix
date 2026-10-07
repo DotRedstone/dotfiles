@@ -295,6 +295,22 @@ EOF
     \definecolor{quoteframe}{HTML}{0969DA}
     \definecolor{quotebg}{HTML}{F0F7FF}
 
+    % Transform Pandoc default 0.5\linewidth horizontal rules (---) into full-width modern dividers
+    \NewCommandCopy{\origrule}{\rule}
+    \RenewDocumentCommand{\rule}{o m m}{%
+      \IfValueTF{#1}{%
+        \origrule[#1]{#2}{#3}%
+      }{%
+        \def\targetw{0.5\linewidth}%
+        \def\currw{#2}%
+        \ifx\currw\targetw
+          {\par\vspace{0.4em}\noindent\color{codeframe}\origrule{\linewidth}{0.6pt}\par\vspace{0.4em}}%
+        \else
+          \origrule{#2}{#3}%
+        \fi
+      }%
+    }
+
     % Font Configuration
     \setmainfont{DejaVu Sans}[
       BoldFont = DejaVu Sans,

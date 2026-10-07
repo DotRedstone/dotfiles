@@ -8,6 +8,4 @@ export interface ClashProviderSource {
 
 export function buildProfiles(input: {
   providers: Record<string, ClashProviderSource>;
-  publicHost: string;
-  subscriptionToken: string;
 }): Record<"router" | "desktop" | "mobile" | "root", string>;

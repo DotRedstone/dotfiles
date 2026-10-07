@@ -10,10 +10,6 @@ const providers = Object.fromEntries(
     "VPS-Node-SG-Reality",
     "VPS-Node-SG-WS",
     "VPS-Node-SG-Preferred",
-    "VPS-Node-SG-HY2",
-    "Abuse-CF1",
-    "Abuse-CF2",
-    "Airport-Mitce2",
   ].map((name) => [name, { url: `https://example.com/${name}` }]),
 );
 
@@ -21,8 +17,6 @@ describe("buildProfiles", () => {
   it("builds unified profiles across all devices matching router baseline", () => {
     const profiles = buildProfiles({
       providers,
-      publicHost: "edge.example.com",
-      subscriptionToken: "a".repeat(32),
     });
     const desktop = JSON.parse(profiles.desktop);
     const router = JSON.parse(profiles.router);
@@ -46,56 +40,53 @@ describe("buildProfiles", () => {
     expect(router.tun.device).toBe("meta");
 
     // Providers
-    expect(router["proxy-providers"]["Abuse-CF-Next"].url).toBe(
-      `https://edge.example.com/sub/${"a".repeat(32)}`,
-    );
-    expect(router["proxy-providers"]["Airport-Mitce1"]).toBeUndefined();
-    expect(router["proxy-providers"]["Airport-Mitce2"].url).toBe(
-      "https://example.com/Airport-Mitce2",
-    );
-    expect(router["proxy-providers"]["VPS-Node-SG-HY2"].url).toBe(
-      "https://example.com/VPS-Node-SG-HY2",
+    expect(Object.keys(router["proxy-providers"])).toEqual([
+      "VPS-Node-LA-Reality",
+      "VPS-Node-LA-WS",
+      "VPS-Node-LA-Preferred",
+      "VPS-Node-SG-Reality",
+      "VPS-Node-SG-WS",
+      "VPS-Node-SG-Preferred",
+    ]);
+    expect(router["proxy-providers"]["VPS-Node-SG-Preferred"].url).toBe(
+      "https://example.com/VPS-Node-SG-Preferred",
     );
     expect(
       router["proxy-providers"]["VPS-Node-LA-Reality"].path,
     ).toBeUndefined();
-    expect(router["proxy-providers"]["Abuse-CF-Next"].path).toBeUndefined();
 
     // Groups
     const groupNames = router["proxy-groups"].map(
       (group: { name: string }) => group.name,
     );
-    expect(groupNames).toContain("♻️ 全节点自动");
-    expect(groupNames).toContain("🧪 CF-Next-灰度");
-    expect(groupNames).toContain("🧪 CF-Next-WS");
-    expect(groupNames).toContain("🧪 CF-Next-XHTTP");
-    expect(groupNames).toContain("🧪 CF-Next-Trojan-WS");
-    expect(groupNames).toContain("⚡ 稳定-洛杉矶直连");
-    expect(groupNames).toContain("🧪 协议手工测试");
-    expect(groupNames).toContain("🧷 洛杉矶-直连-WS");
-    expect(groupNames).toContain("♻️ 直连-WS-自动");
-    expect(groupNames).toContain("♻️ 直连-Reality-自动");
-    expect(groupNames).toContain("♻️ YX-优选-自动");
-    expect(groupNames).toContain("🧪 LA-YX-优选");
-    expect(groupNames).toContain("🧪 SG-YX-优选");
+    expect(groupNames).toContain("♻️ 洛杉矶-直连-自动");
+    expect(groupNames).toContain("🇺🇸 洛杉矶-直连-手动");
+    expect(groupNames).toContain("♻️ 洛杉矶-优选-自动");
+    expect(groupNames).toContain("🇺🇸 洛杉矶-优选-手动");
+    expect(groupNames).toContain("♻️ 新加坡-直连-自动");
+    expect(groupNames).toContain("🇸🇬 新加坡-直连-手动");
+    expect(groupNames).toContain("♻️ 新加坡-优选-自动");
+    expect(groupNames).toContain("🇸🇬 新加坡-优选-手动");
     expect(groupNames).toContain("🌐 Default");
+    expect(groupNames).toContain("🎬 YouTube");
+    expect(groupNames).toContain("🤖 ChatGPT");
+    expect(groupNames).toContain("🐟 漏网之鱼");
+    expect(groupNames).not.toContain("🧪 协议手工测试");
+    expect(groupNames).not.toContain("🧪 CF-Next-灰度");
 
     const defaultGroup = router["proxy-groups"].find(
       (group: { name: string }) => group.name === "🌐 Default",
     );
-    expect(defaultGroup.proxies[0]).toBe("⚡ 稳定-洛杉矶直连");
-    expect(router["proxy-groups"].length).toBe(53);
+    expect(defaultGroup.proxies[0]).toBe("🇺🇸 洛杉矶");
+    expect(router["proxy-groups"].length).toBe(34);
     expect(router.rules.length).toBe(41);
   });
 
   it("removes retired providers safely without crash", () => {
     const profiles = buildProfiles({
       providers: {},
-      publicHost: "edge.example.com",
-      subscriptionToken: "a".repeat(32),
     });
     const router = JSON.parse(profiles.router);
-    expect(router["proxy-providers"]["Airport-Mitce1"]).toBeUndefined();
-    expect(router["proxy-providers"]["Abuse-CF-Next"]).toBeDefined();
+    expect(router["proxy-providers"]).toEqual({});
   });
 });

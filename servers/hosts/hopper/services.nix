@@ -40,6 +40,9 @@
       realityListenAddress = "0.0.0.0";
       realityTarget = "www.nvidia.com:443";
       realityServerName = "www.nvidia.com";
+      # Keep the established Reality identity intact while introducing a
+      # separately selectable Vision path for long-lived transfers.
+      realityVisionEnable = true;
     };
 
     xraySubscriptions = {

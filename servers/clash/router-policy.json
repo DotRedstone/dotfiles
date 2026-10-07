@@ -200,20 +200,96 @@
       ]
     },
     {
-      "name": "⚡ 已验证-CDN优先",
+      "name": "🧪 CF-Next-WS",
+      "type": "url-test",
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "tolerance": 50,
+      "filter": "VLESS-WS$",
+      "use": ["Abuse-CF-Next"]
+    },
+    {
+      "name": "🧪 CF-Next-XHTTP",
+      "type": "url-test",
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "tolerance": 50,
+      "filter": "VLESS-XHTTP$",
+      "use": ["Abuse-CF-Next"]
+    },
+    {
+      "name": "🧪 CF-Next-Trojan-WS",
+      "type": "url-test",
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "tolerance": 50,
+      "filter": "Trojan-WS$",
+      "use": ["Abuse-CF-Next"]
+    },
+    {
+      "name": "⚡ CF-Next-手工测试",
       "type": "select",
       "proxies": [
-        "♻️ 自建-洛杉矶-CDN",
+        "🧪 CF-Next-灰度",
+        "🧪 CF-Next-WS",
+        "🧪 CF-Next-XHTTP",
+        "🧪 CF-Next-Trojan-WS"
+      ]
+    },
+    {
+      "name": "⚡ 稳定-洛杉矶直连",
+      "type": "select",
+      "proxies": [
+        "🧷 洛杉矶-直连-WS",
         "♻️ 自建-洛杉矶-自动",
         "♻️ 自建-新加坡-自动",
         "♻️ 自建-自动"
       ]
     },
     {
-      "name": "♻️ 自建-洛杉矶-CDN",
+      "name": "🧷 洛杉矶-直连-WS",
       "type": "select",
       "use": [
         "VPS-Node-LA-WS"
+      ]
+    },
+    {
+      "name": "🧪 LA-直连-WS",
+      "type": "select",
+      "use": ["VPS-Node-LA-WS"]
+    },
+    {
+      "name": "🧪 LA-Reality",
+      "type": "select",
+      "use": ["VPS-Node-LA-Reality"]
+    },
+    {
+      "name": "🧪 SG-直连-WS",
+      "type": "select",
+      "use": ["VPS-Node-SG-WS"]
+    },
+    {
+      "name": "🧪 SG-Reality",
+      "type": "select",
+      "use": ["VPS-Node-SG-Reality"]
+    },
+    {
+      "name": "🧪 SG-Hysteria2",
+      "type": "select",
+      "use": ["VPS-Node-SG-HY2"]
+    },
+    {
+      "name": "🧪 协议手工测试",
+      "type": "select",
+      "proxies": [
+        "🧪 LA-直连-WS",
+        "🧪 LA-Reality",
+        "🧪 SG-直连-WS",
+        "🧪 SG-Reality",
+        "🧪 SG-Hysteria2",
+        "🧪 CF-Next-WS",
+        "🧪 CF-Next-XHTTP",
+        "🧪 CF-Next-Trojan-WS"
       ]
     },
     {
@@ -271,7 +347,10 @@
       "name": "🌐 Default",
       "type": "select",
       "proxies": [
-        "⚡ 已验证-CDN优先",
+        "⚡ 稳定-洛杉矶直连",
+        "🧪 协议手工测试",
+        "⚡ CF-Next-手工测试",
+        "🧪 CF-Next-灰度",
         "♻️ 全节点自动",
         "🛡️ 自建VPS",
         "♻️ 自建-自动",
@@ -405,6 +484,9 @@
       "type": "select",
       "proxies": [
         "🌐 Default",
+        "⚡ 稳定-洛杉矶直连",
+        "🧪 协议手工测试",
+        "⚡ CF-Next-手工测试",
         "♻️ 全节点自动",
         "🛡️ 自建VPS",
         "♻️ 自建-自动",

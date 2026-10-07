@@ -6,10 +6,10 @@ const providers = Object.fromEntries(
   [
     "VPS-Node-LA-Reality",
     "VPS-Node-LA-WS",
-    "VPS-Node-LA-CDN",
+    "VPS-Node-LA-Preferred",
     "VPS-Node-SG-Reality",
     "VPS-Node-SG-WS",
-    "VPS-Node-SG-CDN",
+    "VPS-Node-SG-Preferred",
     "VPS-Node-SG-HY2",
     "Abuse-CF1",
     "Abuse-CF2",
@@ -75,9 +75,9 @@ describe("buildProfiles", () => {
     expect(groupNames).toContain("🧷 洛杉矶-直连-WS");
     expect(groupNames).toContain("♻️ 直连-WS-自动");
     expect(groupNames).toContain("♻️ 直连-Reality-自动");
-    expect(groupNames).toContain("♻️ CDN-WS-自动");
-    expect(groupNames).toContain("🧪 LA-CDN-WS");
-    expect(groupNames).toContain("🧪 SG-CDN-WS");
+    expect(groupNames).toContain("♻️ YX-优选-自动");
+    expect(groupNames).toContain("🧪 LA-YX-优选");
+    expect(groupNames).toContain("🧪 SG-YX-优选");
     expect(groupNames).toContain("🌐 Default");
 
     const defaultGroup = router["proxy-groups"].find(

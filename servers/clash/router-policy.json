@@ -52,7 +52,7 @@
         "interval": 300
       }
     },
-    "VPS-Node-LA-CDN": {
+    "VPS-Node-LA-Preferred": {
       "type": "http",
       "interval": 86400,
       "health-check": {
@@ -79,7 +79,7 @@
         "interval": 300
       }
     },
-    "VPS-Node-SG-CDN": {
+    "VPS-Node-SG-Preferred": {
       "type": "http",
       "interval": 86400,
       "health-check": {
@@ -187,14 +187,14 @@
       ]
     },
     {
-      "name": "♻️ CDN-WS-自动",
+      "name": "♻️ YX-优选-自动",
       "type": "url-test",
       "url": "https://www.gstatic.com/generate_204",
       "interval": 300,
       "tolerance": 50,
       "use": [
-        "VPS-Node-LA-CDN",
-        "VPS-Node-SG-CDN"
+        "VPS-Node-LA-Preferred",
+        "VPS-Node-SG-Preferred"
       ]
     },
     {
@@ -330,14 +330,14 @@
       "use": ["VPS-Node-SG-HY2"]
     },
     {
-      "name": "🧪 LA-CDN-WS",
+      "name": "🧪 LA-YX-优选",
       "type": "select",
-      "use": ["VPS-Node-LA-CDN"]
+      "use": ["VPS-Node-LA-Preferred"]
     },
     {
-      "name": "🧪 SG-CDN-WS",
+      "name": "🧪 SG-YX-优选",
       "type": "select",
-      "use": ["VPS-Node-SG-CDN"]
+      "use": ["VPS-Node-SG-Preferred"]
     },
     {
       "name": "🧪 协议手工测试",
@@ -345,10 +345,10 @@
       "proxies": [
         "🧪 LA-直连-WS",
         "🧪 LA-Reality",
-        "🧪 LA-CDN-WS",
+        "🧪 LA-YX-优选",
         "🧪 SG-直连-WS",
         "🧪 SG-Reality",
-        "🧪 SG-CDN-WS"
+        "🧪 SG-YX-优选"
       ]
     },
     {

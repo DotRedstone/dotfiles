@@ -15,7 +15,7 @@ const secretsPath = path.resolve(
   "secrets",
   "cloudflare.yaml",
 );
-const host = "next-free.dotdot.ggff.net";
+const host = "edge-next.dotdot.ggff.net";
 
 const result = spawnSync(
   "sops",

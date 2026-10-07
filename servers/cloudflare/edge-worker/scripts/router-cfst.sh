@@ -7,7 +7,7 @@
 set -eu
 
 # [Configuration]
-PUBLIC_HOST="next-free.dotdot.ggff.net"
+PUBLIC_HOST="edge-next.dotdot.ggff.net"
 IP_UPDATE_KEY="mw878WcVzyoLBziU6cHa-NVX9nAOOWd_FfNFFPsDaKI"
 GITHUB_REPO="DotRedstone/cf-ip"
 GITHUB_FILE="cloudflare_ips.txt"

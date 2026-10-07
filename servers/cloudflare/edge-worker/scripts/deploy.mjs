@@ -21,7 +21,7 @@ const secretsPath = path.resolve(
 );
 const workerName = "edge-proxy-next";
 const namespaceTitle = "edge-proxy-next-state";
-const publicHost = "next-free.dotdot.ggff.net";
+const publicHost = "edge-next.dotdot.ggff.net";
 const dryRun = process.argv.includes("--dry-run");
 
 function run(command, arguments_, options = {}) {

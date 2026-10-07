@@ -65,6 +65,20 @@ npm run clash:urls
   `PROXY_UDP_PORT=9898`、`DNS_PORT=1053`；热点透明代理必须设置
   `PROXY_HOTSPOT=1`。
 
+## 路由器接入边界
+
+OpenClash 的活动配置是路由器本地配置的权威副本。它自行管理 provider
+缓存、控制器密钥和启动顺序；不要通过 Mihomo Controller 将本仓库生成的完整
+profile 直接覆盖活动配置，也不要为 provider 注入相对 `path`。
+
+新增或更新一个 provider 时，先由 OpenClash 备份活动配置，并将它作为独立
+provider 加入，确认节点目录和健康检查恢复后才在 UI 中改变选择组。`🌐 Default`
+必须保留一个已验证的洛杉矶保底出口；任何灰度（包括 Hysteria2）只加入手动选择组，
+不应在冷启动、订阅刷新或 provider 下载失败时替换默认出口。
+
+`dns.proxy-server-nameserver` 仅用于解析代理服务器和订阅源的域名，使用不依赖
+代理的国内 DNS IP，避免“节点未加载 -> 境外 DoH 不可达 -> 节点永远无法加载”的循环。
+
 ## 更新与回滚
 
 每次修改生成器或加密订阅源后运行：

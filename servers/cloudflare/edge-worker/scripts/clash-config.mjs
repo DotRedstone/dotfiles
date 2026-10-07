@@ -6,10 +6,6 @@ const mobileHotspotPolicy = require("../../../clash/mobile-hotspot-policy.json")
 
 const SELF_PROVIDER = "Abuse-CF-Next";
 
-function safeProviderPath(name) {
-  return `./providers/${name.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-")}.yaml`;
-}
-
 function clone(value) {
   return structuredClone(value);
 }
@@ -22,7 +18,11 @@ function injectProviderUrls({ baseline, providers, subscriptionUrl }) {
   for (const [name, provider] of Object.entries(catalog)) {
     if (name === SELF_PROVIDER) {
       provider.url = subscriptionUrl;
-      provider.path = safeProviderPath(name);
+      // OpenClash owns provider cache paths itself.  Supplying a relative path
+      // here makes Mihomo resolve it from its process working directory, not
+      // OpenClash's cache directory, so a refresh can erase the last working
+      // provider catalog during a cold start.
+      delete provider.path;
       activeProviders.add(name);
       continue;
     }
@@ -33,7 +33,7 @@ function injectProviderUrls({ baseline, providers, subscriptionUrl }) {
       continue;
     }
     provider.url = source.url;
-    provider.path = safeProviderPath(name);
+    delete provider.path;
     provider.interval ??= source.interval ?? 86400;
     activeProviders.add(name);
   }

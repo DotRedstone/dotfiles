@@ -57,6 +57,10 @@ describe("buildProfiles", () => {
     expect(router["proxy-providers"]["VPS-Node-SG-HY2"].url).toBe(
       "https://example.com/VPS-Node-SG-HY2",
     );
+    expect(
+      router["proxy-providers"]["VPS-Node-LA-Reality"].path,
+    ).toBeUndefined();
+    expect(router["proxy-providers"]["Abuse-CF-Next"].path).toBeUndefined();
 
     // Groups
     const groupNames = router["proxy-groups"].map(

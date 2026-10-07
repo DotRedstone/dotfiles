@@ -38,7 +38,7 @@ npm run deploy
 ```
 
 脚本固定部署到新 Worker `edge-proxy-next` 和测试域名
-`next-free.dotdot.ggff.net`，不会覆盖旧 Worker。以下五项始终作为 Worker secret 写入：
+`edge-next.dotdot.ggff.net`，不会覆盖旧 Worker。以下五项始终作为 Worker secret 写入：
 
 - `VLESS_UUID`
 - `TROJAN_PASSWORD`

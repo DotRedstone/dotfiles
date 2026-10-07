@@ -164,7 +164,8 @@
       "tolerance": 50,
       "filter": "^(?!.*Vision).*",
       "use": [
-        "VPS-Node-LA-Reality"
+        "VPS-Node-LA-Reality",
+        "VPS-Node-LA-WS"
       ]
     },
     {
@@ -209,6 +210,23 @@
       "tolerance": 50,
       "use": [
         "Abuse-CF-Next"
+      ]
+    },
+    {
+      "name": "⚡ 已验证-CDN优先",
+      "type": "select",
+      "proxies": [
+        "♻️ 自建-洛杉矶-CDN",
+        "♻️ 自建-洛杉矶-自动",
+        "♻️ 自建-新加坡-自动",
+        "♻️ 自建-自动"
+      ]
+    },
+    {
+      "name": "♻️ 自建-洛杉矶-CDN",
+      "type": "select",
+      "use": [
+        "VPS-Node-LA-WS"
       ]
     },
     {
@@ -269,6 +287,7 @@
       "name": "🌐 Default",
       "type": "select",
       "proxies": [
+        "⚡ 已验证-CDN优先",
         "♻️ 全节点自动",
         "🛡️ 自建VPS",
         "♻️ 自建-自动",

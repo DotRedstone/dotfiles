@@ -68,13 +68,15 @@ describe("buildProfiles", () => {
     );
     expect(groupNames).toContain("♻️ 全节点自动");
     expect(groupNames).toContain("🧪 CF-Next-灰度");
+    expect(groupNames).toContain("⚡ 已验证-CDN优先");
+    expect(groupNames).toContain("♻️ 自建-洛杉矶-CDN");
     expect(groupNames).toContain("🌐 Default");
 
     const defaultGroup = router["proxy-groups"].find(
       (group: { name: string }) => group.name === "🌐 Default",
     );
-    expect(defaultGroup.proxies[0]).toBe("♻️ 全节点自动");
-    expect(router["proxy-groups"].length).toBe(36);
+    expect(defaultGroup.proxies[0]).toBe("⚡ 已验证-CDN优先");
+    expect(router["proxy-groups"].length).toBe(38);
     expect(router.rules.length).toBe(41);
   });
 

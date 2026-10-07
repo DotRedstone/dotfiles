@@ -32,6 +32,12 @@
     };
     rustfs.enable = true;
 
+    hysteria2Node = {
+      enable = true;
+      domain = "hy2-sg.bdot.in";
+      acmeEmail = "admin@bdot.in";
+    };
+
     xrayNode = {
       enable = true;
       webSocketPort = 20001;
@@ -50,6 +56,7 @@
       hostName = "sg-node.540123.xyz";
       publicAddress = "140.245.62.36";
       entryNames = [
+        "hysteria2"
         "websocket"
         "reality"
       ];

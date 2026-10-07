@@ -47,7 +47,7 @@ let
 
         for uri in uris:
             endpoint = urllib.parse.urlsplit(uri)
-            if endpoint.scheme != "vless":
+            if endpoint.scheme not in {"vless", "hysteria2"}:
                 raise SystemExit(f"{name}: unsupported subscription scheme")
             if endpoint.hostname != expected_address:
                 raise SystemExit(f"{name}: subscription address does not match the host profile")

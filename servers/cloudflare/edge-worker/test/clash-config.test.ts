@@ -8,6 +8,7 @@ const providers = Object.fromEntries(
     "VPS-Node-LA-WS",
     "VPS-Node-SG-Reality",
     "VPS-Node-SG-WS",
+    "VPS-Node-SG-HY2",
     "Abuse-CF1",
     "Abuse-CF2",
     "Airport-Mitce1",
@@ -52,6 +53,9 @@ describe("buildProfiles", () => {
     );
     expect(router["proxy-providers"]["Airport-Mitce2"].url).toBe(
       "https://example.com/Airport-Mitce2",
+    );
+    expect(router["proxy-providers"]["VPS-Node-SG-HY2"].url).toBe(
+      "https://example.com/VPS-Node-SG-HY2",
     );
 
     // Groups

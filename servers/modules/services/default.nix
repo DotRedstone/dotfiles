@@ -8,6 +8,7 @@
   imports = [
     ./easytier.nix
     ./gcp-egress-guard.nix
+    ./hysteria2-node.nix
     ./komari-agent.nix
     ./mongodb.nix
     ./mysql.nix

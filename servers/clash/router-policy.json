@@ -66,6 +66,15 @@
         "interval": 300
       }
     },
+    "VPS-Node-SG-HY2": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "https://www.gstatic.com/generate_204",
+        "interval": 300
+      }
+    },
     "Abuse-CF1": {
       "type": "http",
       "interval": 86400,
@@ -226,7 +235,8 @@
       ],
       "use": [
         "VPS-Node-SG-Reality",
-        "VPS-Node-SG-WS"
+        "VPS-Node-SG-WS",
+        "VPS-Node-SG-HY2"
       ]
     },
     {

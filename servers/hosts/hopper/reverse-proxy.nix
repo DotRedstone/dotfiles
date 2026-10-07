@@ -66,6 +66,14 @@
           '';
         };
       };
+
+      "hy2-sg.bdot.in" = {
+        locations."/.well-known/acme-challenge/" = {
+          proxyPass = "http://127.0.0.1:8888";
+          extraConfig = "proxy_buffering off;";
+        };
+        locations."/".return = "404";
+      };
     };
   };
 

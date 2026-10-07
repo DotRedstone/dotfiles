@@ -144,8 +144,7 @@
       "interval": 300,
       "tolerance": 50,
       "use": [
-        "VPS-Node-LA-Reality",
-        "VPS-Node-LA-WS"
+        "VPS-Node-LA-Reality"
       ]
     },
     {

@@ -11,7 +11,6 @@ const providers = Object.fromEntries(
     "VPS-Node-SG-HY2",
     "Abuse-CF1",
     "Abuse-CF2",
-    "Airport-Mitce1",
     "Airport-Mitce2",
   ].map((name) => [name, { url: `https://example.com/${name}` }]),
 );
@@ -48,9 +47,7 @@ describe("buildProfiles", () => {
     expect(router["proxy-providers"]["Abuse-CF-Next"].url).toBe(
       `https://edge.example.com/sub/${"a".repeat(32)}`,
     );
-    expect(router["proxy-providers"]["Airport-Mitce1"].url).toBe(
-      "https://example.com/Airport-Mitce1",
-    );
+    expect(router["proxy-providers"]["Airport-Mitce1"]).toBeUndefined();
     expect(router["proxy-providers"]["Airport-Mitce2"].url).toBe(
       "https://example.com/Airport-Mitce2",
     );

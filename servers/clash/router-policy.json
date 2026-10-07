@@ -106,15 +106,6 @@
         "interval": 300
       }
     },
-    "Airport-Mitce1": {
-      "type": "http",
-      "interval": 86400,
-      "health-check": {
-        "enable": true,
-        "url": "http://www.gstatic.com/generate_204",
-        "interval": 300
-      }
-    },
     "Airport-Mitce2": {
       "type": "http",
       "interval": 86400,
@@ -139,7 +130,6 @@
         "VPS-Node-SG-WS",
         "Abuse-CF1",
         "Abuse-CF2",
-        "Airport-Mitce1",
         "Airport-Mitce2"
       ]
     },
@@ -186,10 +176,7 @@
       "url": "http://www.gstatic.com/generate_204",
       "interval": 300,
       "tolerance": 50,
-      "use": [
-        "Airport-Mitce1",
-        "Airport-Mitce2"
-      ]
+      "use": ["Airport-Mitce2"]
     },
     {
       "name": "♻️ 滥用-自动",
@@ -267,10 +254,7 @@
       "proxies": [
         "♻️ 机场-自动"
       ],
-      "use": [
-        "Airport-Mitce1",
-        "Airport-Mitce2"
-      ]
+      "use": ["Airport-Mitce2"]
     },
     {
       "name": "☁️ 滥用节点",

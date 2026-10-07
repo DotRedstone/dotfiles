@@ -330,12 +330,25 @@
       "use": ["VPS-Node-SG-HY2"]
     },
     {
+      "name": "🧪 LA-CDN-WS",
+      "type": "select",
+      "use": ["VPS-Node-LA-CDN"]
+    },
+    {
+      "name": "🧪 SG-CDN-WS",
+      "type": "select",
+      "use": ["VPS-Node-SG-CDN"]
+    },
+    {
       "name": "🧪 协议手工测试",
       "type": "select",
       "proxies": [
-        "♻️ 直连-WS-自动",
-        "♻️ 直连-Reality-自动",
-        "♻️ CDN-WS-自动"
+        "🧪 LA-直连-WS",
+        "🧪 LA-Reality",
+        "🧪 LA-CDN-WS",
+        "🧪 SG-直连-WS",
+        "🧪 SG-Reality",
+        "🧪 SG-CDN-WS"
       ]
     },
     {

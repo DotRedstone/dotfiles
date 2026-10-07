@@ -6,8 +6,10 @@ const providers = Object.fromEntries(
   [
     "VPS-Node-LA-Reality",
     "VPS-Node-LA-WS",
+    "VPS-Node-LA-CDN",
     "VPS-Node-SG-Reality",
     "VPS-Node-SG-WS",
+    "VPS-Node-SG-CDN",
     "VPS-Node-SG-HY2",
     "Abuse-CF1",
     "Abuse-CF2",
@@ -71,13 +73,16 @@ describe("buildProfiles", () => {
     expect(groupNames).toContain("⚡ 稳定-洛杉矶直连");
     expect(groupNames).toContain("🧪 协议手工测试");
     expect(groupNames).toContain("🧷 洛杉矶-直连-WS");
+    expect(groupNames).toContain("♻️ 直连-WS-自动");
+    expect(groupNames).toContain("♻️ 直连-Reality-自动");
+    expect(groupNames).toContain("♻️ CDN-WS-自动");
     expect(groupNames).toContain("🌐 Default");
 
     const defaultGroup = router["proxy-groups"].find(
       (group: { name: string }) => group.name === "🌐 Default",
     );
     expect(defaultGroup.proxies[0]).toBe("⚡ 稳定-洛杉矶直连");
-    expect(router["proxy-groups"].length).toBe(48);
+    expect(router["proxy-groups"].length).toBe(51);
     expect(router.rules.length).toBe(41);
   });
 

@@ -13,6 +13,8 @@
       "hysteria2"
       "websocket"
       "reality"
+      "cdn"
     ];
+    entryExpectedAddresses.cdn = "sg-cdn.bdot.in";
   };
 }

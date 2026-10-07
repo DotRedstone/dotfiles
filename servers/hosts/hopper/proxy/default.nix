@@ -6,6 +6,7 @@
 
 { ... }: {
   imports = [
+    ./cdn-websocket.nix
     ./hysteria2.nix
     ./xray.nix
     ./subscriptions.nix

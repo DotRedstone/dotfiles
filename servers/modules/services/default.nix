@@ -22,6 +22,7 @@
     ./restic-receiver.nix
     ./rustfs.nix
     ./xray-gateway.nix
+    ./xray-cdn-websocket.nix
     ./xray-node.nix
     ./xray-subscriptions.nix
   ];

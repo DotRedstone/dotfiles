@@ -52,6 +52,15 @@
         "interval": 300
       }
     },
+    "VPS-Node-LA-CDN": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
+        "interval": 300
+      }
+    },
     "VPS-Node-SG-Reality": {
       "type": "http",
       "interval": 86400,
@@ -67,6 +76,15 @@
       "health-check": {
         "enable": true,
         "url": "https://www.gstatic.com/generate_204",
+        "interval": 300
+      }
+    },
+    "VPS-Node-SG-CDN": {
+      "type": "http",
+      "interval": 86400,
+      "health-check": {
+        "enable": true,
+        "url": "http://www.gstatic.com/generate_204",
         "interval": 300
       }
     },
@@ -144,6 +162,39 @@
         "VPS-Node-LA-WS",
         "VPS-Node-SG-Reality",
         "VPS-Node-SG-WS"
+      ]
+    },
+    {
+      "name": "♻️ 直连-WS-自动",
+      "type": "url-test",
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": 300,
+      "tolerance": 50,
+      "use": [
+        "VPS-Node-LA-WS",
+        "VPS-Node-SG-WS"
+      ]
+    },
+    {
+      "name": "♻️ 直连-Reality-自动",
+      "type": "url-test",
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": 300,
+      "tolerance": 50,
+      "use": [
+        "VPS-Node-LA-Reality",
+        "VPS-Node-SG-Reality"
+      ]
+    },
+    {
+      "name": "♻️ CDN-WS-自动",
+      "type": "url-test",
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "tolerance": 50,
+      "use": [
+        "VPS-Node-LA-CDN",
+        "VPS-Node-SG-CDN"
       ]
     },
     {
@@ -282,14 +333,9 @@
       "name": "🧪 协议手工测试",
       "type": "select",
       "proxies": [
-        "🧪 LA-直连-WS",
-        "🧪 LA-Reality",
-        "🧪 SG-直连-WS",
-        "🧪 SG-Reality",
-        "🧪 SG-Hysteria2",
-        "🧪 CF-Next-WS",
-        "🧪 CF-Next-XHTTP",
-        "🧪 CF-Next-Trojan-WS"
+        "♻️ 直连-WS-自动",
+        "♻️ 直连-Reality-自动",
+        "♻️ CDN-WS-自动"
       ]
     },
     {

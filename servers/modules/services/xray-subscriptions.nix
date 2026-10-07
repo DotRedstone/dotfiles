@@ -28,13 +28,14 @@ let
     import sys
     import urllib.parse
 
-    expected_address = sys.argv[1]
-    arguments = sys.argv[2:]
-    if len(arguments) % 2 != 0:
-        raise SystemExit("subscription check received incomplete arguments")
+    arguments = sys.argv[1:]
+    if len(arguments) % 3 != 0:
+      raise SystemExit("subscription check received incomplete arguments")
 
     checked = 0
-    for name, secret_path in zip(arguments[0::2], arguments[1::2]):
+    for name, expected_address, secret_path in zip(
+        arguments[0::3], arguments[1::3], arguments[2::3]
+    ):
         encoded = pathlib.Path(secret_path).read_text(encoding="utf-8").strip()
         try:
             decoded = base64.b64decode(encoded, validate=True).decode("utf-8")
@@ -58,7 +59,9 @@ let
 
   subscriptionCheckArguments = lib.concatMapStringsSep " " (
     name:
-    "${lib.escapeShellArg name} ${
+      "${lib.escapeShellArg name} ${lib.escapeShellArg (
+        cfg.entryExpectedAddresses.${name} or cfg.publicAddress
+      )} ${
       lib.escapeShellArg config.sops.secrets."xray/subscription_${name}_content".path
     }"
   ) cfg.entryNames;
@@ -87,6 +90,12 @@ in
       ];
       description = "Stable identifiers used to map subscription paths and bodies from SOPS.";
     };
+
+    entryExpectedAddresses = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      description = "Optional per-entry endpoint hostname overrides used by subscription validation.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -95,6 +104,10 @@ in
         assertion =
           cfg.entryNames != [ ] && lib.length cfg.entryNames == lib.length (lib.unique cfg.entryNames);
         message = "dot.services.xraySubscriptions.entryNames must be non-empty and unique.";
+      }
+      {
+        assertion = lib.all (name: lib.elem name cfg.entryNames) (lib.attrNames cfg.entryExpectedAddresses);
+        message = "dot.services.xraySubscriptions.entryExpectedAddresses may only override declared entryNames.";
       }
     ];
 
@@ -155,7 +168,7 @@ in
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = "${pkgs.python3}/bin/python3 ${subscriptionCheck} ${lib.escapeShellArg cfg.publicAddress} ${subscriptionCheckArguments}";
+        ExecStart = "${pkgs.python3}/bin/python3 ${subscriptionCheck} ${subscriptionCheckArguments}";
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectHome = true;

@@ -329,11 +329,13 @@ EOF
     % CJK Fonts
     \setCJKmainfont{SourceHanSans.ttc}[
       Path = ${pkgs.source-han-sans}/share/fonts/truetype/,
-      FontIndex = 2
+      FontIndex = 2,
+      AutoFakeBold = 2.5
     ]
     \setCJKsansfont{SourceHanSans.ttc}[
       Path = ${pkgs.source-han-sans}/share/fonts/truetype/,
-      FontIndex = 2
+      FontIndex = 2,
+      AutoFakeBold = 2.5
     ]
     \setCJKmonofont{LXGWWenKaiMono-Regular.ttf}[
       Path = ${pkgs.lxgw-wenkai}/share/fonts/truetype/,

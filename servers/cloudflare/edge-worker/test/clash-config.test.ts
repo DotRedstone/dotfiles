@@ -67,7 +67,7 @@ describe("buildProfiles", () => {
     );
     expect(defaultGroup.proxies[0]).toBe("♻️ 全节点自动");
     expect(router["proxy-groups"].length).toBe(36);
-    expect(router.rules.length).toBe(40);
+    expect(router.rules.length).toBe(41);
   });
 
   it("removes retired providers safely without crash", () => {

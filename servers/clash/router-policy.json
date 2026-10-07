@@ -700,6 +700,7 @@
   ],
   "rules": [
     "PROCESS-NAME,CloudflareST_proxy_linux_arm64,DIRECT",
+    "IP-CIDR,140.245.62.36/32,DIRECT,no-resolve",
     "DOMAIN-SUFFIX,minecraft.net,🎮 Minecraft 登录",
     "DOMAIN-SUFFIX,minecraftservices.com,🎮 Minecraft 登录",
     "DOMAIN-SUFFIX,mojang.com,🎮 Minecraft 登录",

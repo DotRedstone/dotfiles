@@ -1,62 +1,10 @@
 # ---
-# Module: Hopper Hermes Agent
-# Description: Private document-focused Hermes service using the SiliconFlow-compatible API.
+# Module: Hopper Hermes Service
+# Description: Core hermes-agent daemon, runtime packages, model settings, and memory files
 # Scope: Host
-# Notes:
-# - Hermes has no dashboard or Docker runtime; Telegram is the only messaging surface.
-# - Do not add third-party MCP servers or optional skill dependencies without a specific need.
 # ---
 
-{
-  config,
-  hermes-agent,
-  lib,
-  pkgs,
-  ...
-}:
-
-{
-  sops.secrets."hermes/siliconflow_api_key" = {
-    restartUnits = [ "hermes-agent.service" ];
-  };
-
-  sops.secrets."hermes/telegram_bot_token" = {
-    restartUnits = [ "hermes-agent.service" ];
-  };
-
-  sops.secrets."hermes/telegram_allowed_users" = {
-    restartUnits = [ "hermes-agent.service" ];
-  };
-
-  sops.templates."hermes.env" = {
-    owner = "hermes";
-    group = "hermes";
-    mode = "0440";
-    content = ''
-      SILICONFLOW_API_KEY=${config.sops.placeholder."hermes/siliconflow_api_key"}
-      TELEGRAM_BOT_TOKEN=${config.sops.placeholder."hermes/telegram_bot_token"}
-      TELEGRAM_ALLOWED_USERS=${config.sops.placeholder."hermes/telegram_allowed_users"}
-    '';
-  };
-
-  # `dot` already administers Hopper through passwordless sudo. Membership lets
-  # the operator use the shared Hermes CLI and inspect its task output locally.
-  users.users.dot.extraGroups = [ "hermes" ];
-
-  # Keep experimental Python dependencies writable but isolated from the
-  # Nix-managed service environment.  This stays in Hermes's own workspace,
-  # is created once, and survives service restarts and ordinary rebuilds.
-  system.activationScripts.hermes-workspace-venv = lib.stringAfter [ "users" ] ''
-    venv_dir=/var/lib/hermes/workspace/.venv
-    if [ ! -x "$venv_dir/bin/python" ]; then
-      ${pkgs.coreutils}/bin/mkdir -p /var/lib/hermes/workspace
-      ${pkgs.coreutils}/bin/chown hermes:hermes /var/lib/hermes/workspace
-      ${pkgs.util-linux}/bin/runuser -u hermes -- \
-        env HOME=/var/lib/hermes \
-        ${pkgs.python3}/bin/python3 -m venv --system-site-packages "$venv_dir"
-    fi
-  '';
-
+{ config, hermes-agent, pkgs, ... }: {
   services.hermes-agent = {
     enable = true;
     # The upstream default bundles every optional cloud, voice, memory, and
@@ -133,16 +81,16 @@
       gateway.media_delivery_allow_dirs = [ "/var/lib/hermes/workspace" ];
 
       max_concurrent_sessions = 1;
-  };
+    };
 
     documents = {
-      "AGENTS.md" = ./hermes/AGENTS.md;
+      "AGENTS.md" = ./AGENTS.md;
     };
 
     hermesHomeFiles = {
-      "SOUL.md" = ./hermes/SOUL.md;
-      "memories/MEMORY.md" = ./hermes/MEMORY.md;
-      "memories/USER.md" = ./hermes/USER.md;
+      "SOUL.md" = ./SOUL.md;
+      "memories/MEMORY.md" = ./MEMORY.md;
+      "memories/USER.md" = ./USER.md;
     };
   };
 }

@@ -9,10 +9,12 @@
     ./disko.nix
     ./networking.nix
     ./oci-platform.nix
-    ./reverse-proxy.nix
-    ./services.nix
+    ./infra
+    ./proxy
+    ./storage
+    ./media
     ./jupyter
-    ./hermes.nix
+    ./hermes
     ../../modules/server
     ../../modules/services
   ];

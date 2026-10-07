@@ -12,5 +12,6 @@
     ./settings.nix
     ./pdf-export.nix
     ./service.nix
+    ./reverse-proxy.nix
   ];
 }

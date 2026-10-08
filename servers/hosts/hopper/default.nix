@@ -16,7 +16,6 @@
     ./jupyter
     ./hermes
     ./gmail
-    ./bot
     ../../modules/server
     ../../modules/services
   ];

@@ -20,6 +20,9 @@
     # use the same upstream through a shallow Git fetch and pin it in flake.lock.
     hermes-agent.url = "git+https://github.com/NousResearch/hermes-agent.git?ref=main&shallow=1";
     hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
+
+    gmail-archiver.url = "github:DotRedstone/gmail-archiver";
+    gmail-archiver.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -27,6 +30,7 @@
       nixpkgs,
       disko,
       hermes-agent,
+      gmail-archiver,
       sops-nix,
       ...
     }:
@@ -53,6 +57,7 @@
           modules = [
             disko.nixosModules.disko
             hermes-agent.nixosModules.default
+            gmail-archiver.nixosModules.default
             sops-nix.nixosModules.sops
             ./hosts/hopper
           ];

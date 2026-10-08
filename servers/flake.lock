@@ -67,11 +67,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791438559,
-        "narHash": "sha256-CiWJ8+YJ9r4z8aJPca6EGckNowLQCMJDpd74E9UQOAk=",
+        "lastModified": 1791480414,
+        "narHash": "sha256-jNN88xtdCRyZkgG9z7kM3ZenrDwxekaZm89cNHA+QB4=",
         "owner": "DotRedstone",
         "repo": "gmail-archiver",
-        "rev": "e9af57d685e865e773e75ddf9ca66f2170d0f400",
+        "rev": "bc37f443079e4fabf684c222acf6e3d6b3aa9b5b",
         "type": "github"
       },
       "original": {

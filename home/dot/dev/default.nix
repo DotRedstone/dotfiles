@@ -9,6 +9,7 @@
     ./android.nix
     ./cpp.nix
     ./flutter.nix
+    ./go.nix
     ./java.nix
     ./kernel.nix
     ./node.nix

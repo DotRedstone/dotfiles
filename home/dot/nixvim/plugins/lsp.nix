@@ -32,6 +32,7 @@
         cmake.enable = true;
         docker_compose_language_service.enable = true;
         dockerls.enable = true;
+        gopls.enable = true;
         jsonls.enable = true;
         lua_ls = {
           enable = true;

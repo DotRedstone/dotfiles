@@ -9,6 +9,7 @@
     serverAliases = [ "gemini-origin.bdot.in" ];
     locations."/" = {
       proxyPass = "https://generativelanguage.googleapis.com/";
+      recommendedProxySettings = false;
       extraConfig = ''
         proxy_set_header Host generativelanguage.googleapis.com;
         proxy_ssl_server_name on;

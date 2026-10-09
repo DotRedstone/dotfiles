@@ -10,5 +10,6 @@
     ./hysteria2.nix
     ./xray.nix
     ./subscriptions.nix
+    ./gemini.nix
   ];
 }

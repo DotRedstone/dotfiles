@@ -112,18 +112,17 @@ run_pool() {
   result_tmp="$(mktemp /tmp/cfst-${pool}-result.csv.XXXXXX)"
   ip_tmp="$(mktemp "$WORKDIR/new-ips-${pool}.txt.XXXXXX")"
   log_tmp="$(mktemp /tmp/cfst-${pool}-run.XXXXXX)"
+  pid_tmp="$(mktemp /tmp/cfst-${pool}-pid.XXXXXX)"
+  rm -f "$pid_tmp"
   chown nobody:nogroup "$result_tmp" "$log_tmp"
   cfst_pid=""
   cleanup() {
     [ -z "$cfst_pid" ] || kill "$cfst_pid" 2>/dev/null || true
-    rm -f "$result_tmp" "$ip_tmp" "$log_tmp"
+    rm -f "$result_tmp" "$ip_tmp" "$log_tmp" "$pid_tmp"
   }
   trap cleanup EXIT INT TERM
 
-  # Do not daemonize start-stop-daemon.  Its foreground process is the actual
-  # unprivileged CloudflareST child, so the deadline and cleanup trap can
-  # reliably terminate it if the SSH caller or the test itself goes away.
-  /sbin/start-stop-daemon -S \
+  /sbin/start-stop-daemon -S -b -m -p "$pid_tmp" \
     -c nobody:nogroup -d "$run_dir" -O "$log_tmp" -x "$run_dir/cfst" -- \
     -o "$result_tmp" \
     -n "${CFST_LATENCY_THREADS:-8}" \
@@ -131,8 +130,9 @@ run_pool() {
     -sl "${CFST_MIN_SPEED:-2}" \
     -dn "${CFST_DOWNLOADS:-8}" \
     -dt "${CFST_DURATION:-4}" \
-    -url "https://${host}${CFST_SPEEDTEST_PATH}" -p 0 &
-  cfst_pid="$!"
+    -f "$run_dir/ip.txt" \
+    -url "https://${host}${CFST_SPEEDTEST_PATH}" -p 0
+  cfst_pid="$(cat "$pid_tmp")"
   deadline=$(( $(date +%s) + ${CFST_MAX_RUNTIME:-600} ))
   while kill -0 "$cfst_pid" 2>/dev/null; do
     sleep 1

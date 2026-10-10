@@ -20,6 +20,7 @@ const secretsPath = path.resolve(
   "cloudflare.yaml",
 );
 const workerName = "edge-proxy-next";
+const preferredControlWorkerName = "edge-preferred-control";
 const namespaceTitle = "edge-proxy-next-state";
 const publicHost = "edge-next.dotdot.ggff.net";
 const dryRun = process.argv.includes("--dry-run");
@@ -123,11 +124,40 @@ async function deployClashProfiles(credentials, namespaceId, stored, edge) {
   }
 }
 
-function redact(value, sensitiveValues) {
-  return sensitiveValues.reduce(
-    (output, sensitive) => output.replaceAll(sensitive, "<redacted>"),
-    value,
-  );
+function deployWorker({
+  configPath,
+  secretsPath,
+  credentials,
+  message,
+  dryRun,
+}) {
+  const arguments_ = [
+    "wrangler",
+    "deploy",
+    "--config",
+    configPath,
+    "--secrets-file",
+    secretsPath,
+    "--strict",
+    "--minify",
+    "--message",
+    message,
+  ];
+  if (dryRun) arguments_.push("--dry-run");
+  const deployed = spawnSync("npx", arguments_, {
+    cwd: workerDirectory,
+    env: {
+      ...process.env,
+      CLOUDFLARE_ACCOUNT_ID: credentials.account_id,
+      CLOUDFLARE_API_TOKEN: credentials.api_token,
+      WRANGLER_SEND_METRICS: "false",
+    },
+    encoding: "utf8",
+    maxBuffer: 4 * 1024 * 1024,
+  });
+  if (deployed.status !== 0) {
+    throw new Error(`${deployed.stderr}\n${deployed.stdout}`);
+  }
 }
 
 async function main() {
@@ -141,6 +171,14 @@ async function main() {
   );
   const configPath = path.join(temporaryDirectory, "wrangler.jsonc");
   const workerSecretsPath = path.join(temporaryDirectory, "secrets.json");
+  const preferredControlConfigPath = path.join(
+    temporaryDirectory,
+    "preferred-control.wrangler.jsonc",
+  );
+  const preferredControlSecretsPath = path.join(
+    temporaryDirectory,
+    "preferred-control.secrets.json",
+  );
   const workerSecrets = {
     VLESS_UUID: edge.vless_uuid,
     TROJAN_PASSWORD: edge.trojan_password,
@@ -173,7 +211,10 @@ async function main() {
           name: workerName,
           main: path.join(workerDirectory, "src", "index.ts"),
           compatibility_date: "2026-09-01",
-          workers_dev: false,
+          // Keep a private-token control-plane fallback independent of the
+          // custom domain.  It is used only for configuration and preferred
+          // endpoint lists; traffic nodes keep their own CDN hostnames.
+          workers_dev: true,
           routes: [{ pattern: publicHost, custom_domain: true }],
           kv_namespaces: [{ binding: "EDGE_STATE", id: namespaceId }],
           vars: {
@@ -191,44 +232,48 @@ async function main() {
       mode: 0o600,
     });
 
-    const arguments_ = [
-      "wrangler",
-      "deploy",
-      "--config",
+    deployWorker({
       configPath,
-      "--secrets-file",
-      workerSecretsPath,
-      "--strict",
-      "--minify",
-      "--message",
-      dryRun ? "原子化边缘代理本地检查" : "原子化边缘代理声明式部署",
-    ];
-    if (dryRun) arguments_.push("--dry-run");
-    const deployed = spawnSync("npx", arguments_, {
-      cwd: workerDirectory,
-      env: {
-        ...process.env,
-        CLOUDFLARE_ACCOUNT_ID: credentials.account_id,
-        CLOUDFLARE_API_TOKEN: credentials.api_token,
-        WRANGLER_SEND_METRICS: "false",
-      },
-      encoding: "utf8",
-      maxBuffer: 4 * 1024 * 1024,
+      secretsPath: workerSecretsPath,
+      credentials,
+      message: "原子化边缘代理声明式部署",
+      dryRun,
     });
-    if (deployed.status !== 0) {
-      const sensitiveValues = [
-        credentials.api_token,
-        ...Object.values(workerSecrets),
-        workerSecretsPath,
-      ];
-      throw new Error(
-        redact(`${deployed.stderr}\n${deployed.stdout}`, sensitiveValues),
-      );
-    }
+    fs.writeFileSync(
+      preferredControlConfigPath,
+      `${JSON.stringify(
+        {
+          account_id: credentials.account_id,
+          name: preferredControlWorkerName,
+          main: path.join(workerDirectory, "src", "preferred-control.ts"),
+          compatibility_date: "2026-09-01",
+          workers_dev: true,
+          kv_namespaces: [{ binding: "EDGE_STATE", id: namespaceId }],
+        },
+        null,
+        2,
+      )}\n`,
+      { mode: 0o600 },
+    );
+    fs.writeFileSync(
+      preferredControlSecretsPath,
+      JSON.stringify({
+        PREFERRED_ENDPOINTS_TOKEN: edge.preferred_endpoints_token,
+        IP_UPDATE_KEY: edge.ip_update_key,
+      }),
+      { mode: 0o600 },
+    );
+    deployWorker({
+      configPath: preferredControlConfigPath,
+      secretsPath: preferredControlSecretsPath,
+      credentials,
+      message: "区域优选控制面声明式部署",
+      dryRun,
+    });
     console.log(
       dryRun
         ? "Worker dry-run completed successfully."
-        : `Worker ${workerName} deployed successfully to ${publicHost}.`,
+        : `Workers ${workerName} and ${preferredControlWorkerName} deployed successfully.`,
     );
   } finally {
     fs.rmSync(temporaryDirectory, { recursive: true, force: true });

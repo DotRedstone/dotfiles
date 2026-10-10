@@ -69,7 +69,9 @@ export async function subscriptionResponse(
   request: Request,
   env: Env,
 ): Promise<Response> {
-  const endpoints = await getPreferredEndpoints(env);
+  // The historical subscription endpoint did not carry a region selector.
+  // Keep it stable while router profiles use their explicit /la and /sg lists.
+  const endpoints = await getPreferredEndpoints(env, "la");
   const plain = buildLinks(env, endpoints).join("\n");
   const format = new URL(request.url).searchParams.get("format");
   const body = format === "plain" ? plain : utf8ToBase64(plain);

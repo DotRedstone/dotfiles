@@ -1,128 +1,171 @@
 #!/bin/sh
 # ---
-# Module: Router CloudflareST Dual-Upload Script
-# Description: Run CloudflareST speedtest and upload preferred IPs to both Cloudflare Worker KV and GitHub repo
+# Module: Router CloudflareST origin-aware updater
+# Description: Tests Cloudflare ingress IPs against each regional CDN origin and uploads separate signed pools.
 # Scope: Script
 # ---
+# Notes:
+# - Secrets belong in /root/cfst/edge.env (mode 0600), never in this repository.
+# - The test URL must bypass CDN cache so each measurement reaches the matching origin.
 set -eu
 
-# [Configuration]
-PUBLIC_HOST="edge-next.dotdot.ggff.net"
-IP_UPDATE_KEY="mw878WcVzyoLBziU6cHa-NVX9nAOOWd_FfNFFPsDaKI"
-GITHUB_REPO="DotRedstone/cf-ip"
-GITHUB_FILE="cloudflare_ips.txt"
-GITHUB_TOKEN="${GITHUB_TOKEN:-}"
+WORKDIR="/root/cfst"
+CONFIG_FILE="${CFST_CONFIG_FILE:-${WORKDIR}/edge.env}"
+CFST_BIN="${CFST_BIN:-${WORKDIR}/CloudflareST_proxy_linux_arm64}"
+RUN_DIR_BASE="${CFST_RUN_DIR_BASE:-/tmp/cfst-direct}"
 
-# [Paths]
-CFST_DIR="/root/cfst"
-CFST_BIN="${CFST_DIR}/CloudflareST_proxy_linux_arm64"
-OUTPUT_CSV="${CFST_DIR}/result.csv"
-OUTPUT_TXT="${CFST_DIR}/cloudflare_ips.txt"
-GIT_REPO_DIR="${CFST_DIR}/cf-ip"
-
-# [Speedtest]
-run_speedtest() {
-  if [ ! -x "${CFST_BIN}" ]; then
-    echo "[!] CloudflareST executable not found at ${CFST_BIN}"
-    return 1
-  fi
-
-  cd "${CFST_DIR}"
-  "${CFST_BIN}" \
-    -url https://cf.xiu2.xyz/url \
-    -sl 5 \
-    -dn 100 \
-    -tl 250 \
-    -o "${OUTPUT_CSV}"
-
-  if [ -f "${OUTPUT_CSV}" ]; then
-    awk -F, 'NR>1 && $1 ~ /^[0-9a-fA-F:.]+$/ {printf "%s:%s#%s-%sMB/s\n", $1, $2, $4, $6}' "${OUTPUT_CSV}" > "${OUTPUT_TXT}"
-  fi
+usage() {
+  echo "usage: $0 [--pool la|sg] [--upload-only]" >&2
+  exit 64
 }
 
-# [Upload to Cloudflare Worker KV]
-upload_to_kv() {
-  if [ ! -s "${OUTPUT_TXT}" ]; then
-    echo "[!] Preferred IPs file ${OUTPUT_TXT} is empty or missing, skip KV upload"
-    return 1
-  fi
+[ -r "$CONFIG_FILE" ] || {
+  echo "missing $CONFIG_FILE" >&2
+  exit 1
+}
+# shellcheck disable=SC1090
+. "$CONFIG_FILE"
 
+: "${EDGE_UPDATE_BASE:?EDGE_UPDATE_BASE is required}"
+: "${IP_UPDATE_KEY:?IP_UPDATE_KEY is required}"
+: "${CFST_SPEEDTEST_PATH:?CFST_SPEEDTEST_PATH is required}"
+
+case "$EDGE_UPDATE_BASE" in https://*) ;; *) echo "EDGE_UPDATE_BASE must be an HTTPS URL" >&2; exit 1 ;; esac
+case "$CFST_SPEEDTEST_PATH" in /*) ;; *) echo "CFST_SPEEDTEST_PATH must begin with /" >&2; exit 1 ;; esac
+
+selected_pool=""
+upload_only=0
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --pool) [ "$#" -ge 2 ] || usage; selected_pool="$2"; shift 2 ;;
+    --upload-only) upload_only=1; shift ;;
+    *) usage ;;
+  esac
+done
+case "$selected_pool" in ""|la|sg) ;; *) usage ;; esac
+
+pool_host() {
+  case "$1" in la) printf '%s\n' 'la-cdn.bdot.in' ;; sg) printf '%s\n' 'sg-cdn.bdot.in' ;; *) return 1 ;; esac
+}
+pool_label() {
+  case "$1" in la) printf '%s\n' 'LA-CF' ;; sg) printf '%s\n' 'SG-CF' ;; esac
+}
+resolve_edge_ip() {
+  edge_host="${EDGE_UPDATE_BASE#https://}"
+  edge_host="${edge_host%%/*}"
+  nslookup "$edge_host" "${CFST_DNS_SERVER:-1.1.1.1}" 2>/dev/null |
+    sed -n '/^Name:/,$ { /^Address: [0-9][0-9.]*$/ { s/^Address: //; p; q; } }'
+}
+
+upload_pool() {
+  pool="$1"
+  input_file="$2"
+  [ -s "$input_file" ] || return 1
   timestamp="$(date +%s)"
-  body="$(sed '/^[[:space:]]*$/d' "${OUTPUT_TXT}")"
-  signature="$(printf '%s\n%s' "${timestamp}" "${body}" \
-    | openssl dgst -sha256 -hmac "${IP_UPDATE_KEY}" -hex \
-    | awk '{print $NF}')"
-
-  echo "[*] Uploading preferred IPs to Cloudflare Worker KV..."
-  curl --fail-with-body -s \
-    -H "X-Edge-Timestamp: ${timestamp}" \
-    -H "X-Edge-Signature: ${signature}" \
-    --data-binary "${body}" \
-    "https://${PUBLIC_HOST}/admin/preferred-ips"
-  echo "[+] Worker KV updated successfully."
-}
-
-# [Upload to GitHub for Public Sharing]
-upload_to_github() {
-  if [ ! -s "${OUTPUT_TXT}" ]; then
-    echo "[!] Preferred IPs file ${OUTPUT_TXT} is empty or missing, skip GitHub upload"
+  signature="$( (printf '%s\n' "$timestamp"; cat "$input_file") | openssl dgst -sha256 -hmac "$IP_UPDATE_KEY" -hex | awk '{print $NF}')"
+  edge_host="${EDGE_UPDATE_BASE#https://}"
+  edge_host="${edge_host%%/*}"
+  edge_ip="$(resolve_edge_ip)"
+  [ -n "$edge_ip" ] || {
+    logger -t cfst "cannot resolve the preferred-pool Worker endpoint"
     return 1
-  fi
-
-  commit_date="$(date '+%Y-%m-%d %H:%M:%S')"
-  commit_msg="更新Cloudflare优选IP列表 - ${commit_date}"
-
-  # [Method 1: Local Git Repo]
-  if [ -d "${GIT_REPO_DIR}/.git" ]; then
-    echo "[*] Uploading to GitHub via local git repository..."
-    cd "${GIT_REPO_DIR}"
-    cp "${OUTPUT_TXT}" "${GITHUB_FILE}"
-    git add "${GITHUB_FILE}"
-    if git diff --staged --quiet; then
-      echo "[-] No changes in preferred IPs, skip git commit."
-      return 0
-    fi
-    git commit -m "${commit_msg}"
-    git push origin main
-    echo "[+] Pushed to GitHub repo via git."
-    return 0
-  fi
-
-  # [Method 2: GitHub Contents API]
-  if [ -n "${GITHUB_TOKEN}" ]; then
-    echo "[*] Uploading to GitHub via REST API..."
-    api_url="https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}"
-    sha="$(curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      "${api_url}" | grep '"sha"' | head -n 1 | cut -d'"' -f4 || true)"
-
-    content_b64="$(base64 < "${OUTPUT_TXT}" | tr -d '\r\n')"
-
-    if [ -n "${sha}" ]; then
-      payload="$(printf '{"message":"%s","content":"%s","sha":"%s"}' "${commit_msg}" "${content_b64}" "${sha}")"
-    else
-      payload="$(printf '{"message":"%s","content":"%s"}' "${commit_msg}" "${content_b64}")"
-    fi
-
-    curl -s -X PUT \
-      -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      "${api_url}" \
-      -d "${payload}" > /dev/null
-    echo "[+] Updated GitHub file via REST API."
-    return 0
-  fi
-
-  echo "[!] Neither ${GIT_REPO_DIR}/.git nor GITHUB_TOKEN is available, skip GitHub upload."
+  }
+  curl --fail-with-body --silent --show-error \
+    --resolve "$edge_host:443:$edge_ip" \
+    --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 30 \
+    -H "X-Edge-Timestamp: $timestamp" \
+    -H "X-Edge-Signature: $signature" \
+    -H "Content-Type: text/plain" \
+    --data-binary "@$input_file" \
+    "${EDGE_UPDATE_BASE}/admin/preferred-ips/${pool}" >/dev/null
 }
 
-# [Main]
-main() {
-  if [ "${1:-}" != "--upload-only" ]; then
-    run_speedtest
+run_pool() {
+  pool="$1"
+  host="$(pool_host "$pool")"
+  label="$(pool_label "$pool")"
+  result_file="$WORKDIR/result-${pool}.csv"
+  ip_file="$WORKDIR/new-ips-${pool}.txt"
+  run_dir="$RUN_DIR_BASE/$pool"
+  mkdir -p "$run_dir"
+  chmod 755 "$run_dir"
+
+  if [ "$upload_only" -eq 1 ]; then
+    upload_pool "$pool" "$ip_file"
+    logger -t cfst "uploaded existing ${pool} preferred endpoint pool"
+    return 0
   fi
-  upload_to_kv || true
-  upload_to_github || true
+  [ -x "$CFST_BIN" ] || {
+    logger -t cfst "CloudflareST binary not found at $CFST_BIN"
+    return 1
+  }
+  cp "$CFST_BIN" "$run_dir/cfst"
+  seed_source="${CFST_SEED_FILE:-$ip_file}"
+  if [ -s "$seed_source" ]; then
+    sed 's/:443.*//' "$seed_source" > "$run_dir/ip.txt"
+  else
+    cp "$WORKDIR/ip.txt" "$run_dir/ip.txt"
+  fi
+  chmod 755 "$run_dir/cfst"
+  chmod 644 "$run_dir/ip.txt"
+
+  result_tmp="$(mktemp /tmp/cfst-${pool}-result.csv.XXXXXX)"
+  ip_tmp="$(mktemp "$WORKDIR/new-ips-${pool}.txt.XXXXXX")"
+  log_tmp="$(mktemp /tmp/cfst-${pool}-run.XXXXXX)"
+  chown nobody:nogroup "$result_tmp" "$log_tmp"
+  cfst_pid=""
+  cleanup() {
+    [ -z "$cfst_pid" ] || kill "$cfst_pid" 2>/dev/null || true
+    rm -f "$result_tmp" "$ip_tmp" "$log_tmp"
+  }
+  trap cleanup EXIT INT TERM
+
+  # Do not daemonize start-stop-daemon.  Its foreground process is the actual
+  # unprivileged CloudflareST child, so the deadline and cleanup trap can
+  # reliably terminate it if the SSH caller or the test itself goes away.
+  /sbin/start-stop-daemon -S \
+    -c nobody:nogroup -d "$run_dir" -O "$log_tmp" -x "$run_dir/cfst" -- \
+    -o "$result_tmp" \
+    -n "${CFST_LATENCY_THREADS:-8}" \
+    -t "${CFST_ATTEMPTS:-1}" \
+    -sl "${CFST_MIN_SPEED:-2}" \
+    -dn "${CFST_DOWNLOADS:-8}" \
+    -dt "${CFST_DURATION:-4}" \
+    -url "https://${host}${CFST_SPEEDTEST_PATH}" -p 0 &
+  cfst_pid="$!"
+  deadline=$(( $(date +%s) + ${CFST_MAX_RUNTIME:-600} ))
+  while kill -0 "$cfst_pid" 2>/dev/null; do
+    sleep 1
+    if [ "$(date +%s)" -ge "$deadline" ]; then
+      logger -t cfst "${pool} CloudflareST run exceeded its runtime budget"
+      kill "$cfst_pid" 2>/dev/null || true
+      wait "$cfst_pid" 2>/dev/null || true
+      exit 1
+    fi
+  done
+  wait "$cfst_pid" || true
+  cfst_pid=""
+
+  [ -s "$result_tmp" ] || {
+    logger -t cfst "${pool} CloudflareST produced no result"
+    tail -c 1200 "$log_tmp" >&2 || true
+    exit 1
+  }
+  awk -F',' -v label="$label" 'NR>1 && $1 ~ /^[0-9a-fA-F:.]+$/ { printf "%s:443#%s-%02d-%.2fMB/s\\n", $1, label, NR - 1, $6 }' "$result_tmp" | head -n "${CFST_RESULTS:-8}" > "$ip_tmp"
+  result_count="$(wc -l < "$ip_tmp")"
+  [ "$result_count" -ge "${CFST_MIN_RESULTS:-4}" ] || {
+    logger -t cfst "${pool} pool has only $result_count usable endpoints; preserving last known-good list"
+    exit 1
+  }
+  upload_pool "$pool" "$ip_tmp"
+  mv "$result_tmp" "$result_file"; result_tmp=""
+  mv "$ip_tmp" "$ip_file"; ip_tmp=""
+  logger -t cfst "updated ${pool} preferred endpoint pool with $result_count entries"
 }
 
-main "$@"
+if [ -n "$selected_pool" ]; then
+  run_pool "$selected_pool"
+else
+  run_pool la
+  run_pool sg
+fi

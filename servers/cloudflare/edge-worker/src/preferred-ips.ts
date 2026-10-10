@@ -1,10 +1,28 @@
 import { equalBytes } from "./bytes";
 import type { Env, PreferredEndpoint, PreferredEndpointState } from "./types";
 
-const KV_KEY = "preferred-endpoints-v1";
+const KV_KEY_PREFIX = "preferred-endpoints-v2";
 const MAXIMUM_BODY_BYTES = 256 * 1024;
 const MAXIMUM_ENDPOINTS = 1000;
 const MAXIMUM_CLOCK_SKEW_SECONDS = 300;
+
+/**
+ * The pool names intentionally describe the tested origin, not the Cloudflare
+ * POP selected by CloudflareST.  A router tests each pool with that origin's
+ * hostname as the TLS SNI, so the two lists remain independently meaningful.
+ */
+export const preferredEndpointPools = ["la", "sg"] as const;
+export type PreferredEndpointPool = (typeof preferredEndpointPools)[number];
+
+export function parsePreferredEndpointPool(
+  value: string,
+): PreferredEndpointPool | undefined {
+  return preferredEndpointPools.find((pool) => pool === value);
+}
+
+function kvKey(pool: PreferredEndpointPool): string {
+  return `${KV_KEY_PREFIX}:${pool}`;
+}
 
 function normalizeAddress(value: string): string | undefined {
   const address = value.trim().replace(/^\[|\]$/g, "");
@@ -99,6 +117,7 @@ function hexToBytes(value: string): Uint8Array | undefined {
 export async function updatePreferredEndpoints(
   request: Request,
   env: Env,
+  pool: PreferredEndpointPool = "la",
 ): Promise<Response> {
   const timestampText = request.headers.get("X-Edge-Timestamp") ?? "";
   const suppliedSignature = hexToBytes(
@@ -133,7 +152,7 @@ export async function updatePreferredEndpoints(
       updatedAt: new Date().toISOString(),
       endpoints,
     };
-    await env.EDGE_STATE.put(KV_KEY, JSON.stringify(state));
+    await env.EDGE_STATE.put(kvKey(pool), JSON.stringify(state));
     return new Response(null, { status: 204 });
   } catch {
     return new Response("Bad Request", { status: 400 });
@@ -142,9 +161,10 @@ export async function updatePreferredEndpoints(
 
 export async function getPreferredEndpoints(
   env: Env,
+  pool: PreferredEndpointPool = "la",
 ): Promise<PreferredEndpoint[]> {
   const state = await env.EDGE_STATE.get<PreferredEndpointState>(
-    KV_KEY,
+    kvKey(pool),
     "json",
   );
   if (
@@ -164,9 +184,12 @@ function formatEndpoint(endpoint: PreferredEndpoint): string {
   return `${address}:${endpoint.port}#${endpoint.label}`;
 }
 
-export async function preferredEndpointsResponse(env: Env): Promise<Response> {
+export async function preferredEndpointsResponse(
+  env: Env,
+  pool: PreferredEndpointPool = "la",
+): Promise<Response> {
   const state = await env.EDGE_STATE.get<PreferredEndpointState>(
-    KV_KEY,
+    kvKey(pool),
     "json",
   );
   if (

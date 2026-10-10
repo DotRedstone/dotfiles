@@ -1,10 +1,10 @@
 import { uuidToBytes } from "./bytes";
 import { configurationProfile, configurationResponse } from "./clash-config";
 import {
+  parsePreferredEndpointPool,
   preferredEndpointsResponse,
   updatePreferredEndpoints,
 } from "./preferred-ips";
-import { handleWebSocket, handleXHttp } from "./relay";
 import { matchesTransportPath } from "./routes";
 import { sha224Hex } from "./sha224";
 import { subscriptionResponse } from "./subscription";
@@ -48,10 +48,19 @@ export default {
     const subscriptionPath = `/sub/${env.SUBSCRIPTION_TOKEN}`;
     const preferredEndpointsPath = `/preferred/${env.PREFERRED_ENDPOINTS_TOKEN}`;
 
-    if (request.method === "POST" && url.pathname === "/admin/preferred-ips") {
+    const preferredAdminPoolPrefix = "/admin/preferred-ips/";
+    if (
+      request.method === "POST" &&
+      url.pathname.startsWith(preferredAdminPoolPrefix)
+    ) {
       try {
         loadAuth(env);
-        return await updatePreferredEndpoints(request, env);
+        const pool = parsePreferredEndpointPool(
+          url.pathname.slice(preferredAdminPoolPrefix.length),
+        );
+        return pool
+          ? await updatePreferredEndpoints(request, env, pool)
+          : hiddenNotFound();
       } catch {
         return hiddenNotFound();
       }
@@ -69,7 +78,25 @@ export default {
     if (request.method === "GET" && url.pathname === preferredEndpointsPath) {
       try {
         loadAuth(env);
-        return await preferredEndpointsResponse(env);
+        // Compatibility only while routers refresh to their explicit pool URL.
+        return await preferredEndpointsResponse(env, "la");
+      } catch {
+        return hiddenNotFound();
+      }
+    }
+
+    const preferredPoolPrefix = `${preferredEndpointsPath}/`;
+    if (
+      request.method === "GET" &&
+      url.pathname.startsWith(preferredPoolPrefix)
+    ) {
+      try {
+        loadAuth(env);
+        const pool = parsePreferredEndpointPool(
+          url.pathname.slice(preferredPoolPrefix.length),
+        );
+        if (!pool) return hiddenNotFound();
+        return await preferredEndpointsResponse(env, pool);
       } catch {
         return hiddenNotFound();
       }
@@ -95,6 +122,9 @@ export default {
 
     try {
       const auth = loadAuth(env);
+      // Keep control-plane endpoints (profiles and preferred IP pools) usable
+      // even if the transport-only sockets runtime is unavailable on an edge.
+      const { handleWebSocket, handleXHttp } = await import("./relay");
       if (request.headers.get("Upgrade")?.toLowerCase() === "websocket") {
         return handleWebSocket(request, env, auth);
       }

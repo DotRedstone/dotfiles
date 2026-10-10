@@ -10,11 +10,16 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 
 let
   cfg = config.dot.services.xrayCdnWebSocket;
+  secret = name: config.sops.placeholder."xray/${name}";
+  speedTestPayload = pkgs.runCommand "xray-cdn-speedtest.bin" { } ''
+    dd if=/dev/zero of="$out" bs=1M count=8 status=none
+  '';
 in
 {
   options.dot.services.xrayCdnWebSocket = {
@@ -47,12 +52,35 @@ in
         mode = "0440";
         restartUnits = [ "nginx.service" ];
       };
+      "xray/cdn_speedtest_path" = {
+        owner = "root";
+        group = "nginx";
+        mode = "0440";
+        restartUnits = [ "nginx.service" ];
+      };
+    };
+
+    sops.templates."xray-cdn-speedtest.conf" = {
+      owner = "root";
+      group = "nginx";
+      mode = "0440";
+      content = ''
+        location ${secret "cdn_speedtest_path"} {
+          alias ${speedTestPayload};
+          default_type application/octet-stream;
+          add_header Cache-Control "no-store" always;
+          add_header X-Content-Type-Options "nosniff" always;
+        }
+      '';
     };
 
     services.nginx.virtualHosts.${cfg.serverName} = {
       addSSL = true;
       sslCertificate = config.sops.secrets."xray/cdn_origin_certificate".path;
       sslCertificateKey = config.sops.secrets."xray/cdn_origin_certificate_key".path;
+      extraConfig = ''
+        include ${config.sops.templates."xray-cdn-speedtest.conf".path};
+      '';
 
       locations."/" = {
         proxyPass = "http://127.0.0.1:${toString cfg.webSocketPort}";

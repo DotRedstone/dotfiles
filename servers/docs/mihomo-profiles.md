@@ -1,93 +1,51 @@
 # 统一 Mihomo 配置
 
-本仓库把 Clash/Mihomo 的规则、代理分组和 DNS 策略集中维护，并发布四个独立凭证入口：
-`router`、`desktop`、`mobile`、`root`。前三个入口下发当前路由器基线；`root` 下发已验证的
-Android 热点基线。配置成品
-不提交到 Git：其中包含订阅地址，只保留在
-Cloudflare KV 中，并由不可预测的私有 URL 读取。
+路由器、桌面和 Android 均以同一份规则基线为准。生成后的配置包含私有订阅地址，
+不提交到 Git；加密源位于 `servers/secrets/cloudflare.yaml`，由 Cloudflare KV 或路由器
+活动配置提供给客户端。
 
-## 结构
+## 节点结构
+
+节点层只保留六个 provider：
+
+- 洛杉矶：`Reality`、`WS 直连`、`WS + Cloudflare 优选`。
+- 新加坡：`Reality`、`WS 直连`、`WS + Cloudflare 优选`。
+
+每个区域有“直连自动/手动”和“优选自动/手动”四个选择组；`🇺🇸 洛杉矶` 与
+`🇸🇬 新加坡` 汇总本地区四种选项，`🌐 Default` 默认选洛杉矶。ChatGPT、AI、开发、
+流媒体、通讯、社交、Apple、Google、Microsoft、Cloudflare、Steam 和漏网流量等业务
+规则组保持独立，均可选择默认、任一区域或直连。
+
+## 两地优选池
+
+CloudflareST 的“优选 IP”是用户到 Cloudflare 的入口，并不等于服务器所在地。为防止
+把某次测得的 POP 名称误当成节点地区，路由器维护两份独立结果：
 
 ```text
-加密订阅源 + CF-Next 节点订阅
-             |
-             v
-  当前路由器策略基线 + Android 热点基线
-             |
-             +-- router / desktop / mobile / root
-                 独立凭证；root 保留 Android 的 TProxy/UID 参数
+CloudflareST --SNI la-cdn.bdot.in--> la pool --> 洛杉矶优选 provider
+CloudflareST --SNI sg-cdn.bdot.in--> sg pool --> 新加坡优选 provider
 ```
 
-所有版本共享以下选择组：
+两个测速 URL 均为私有 8 MiB、`Cache-Control: no-store` 的 Nginx 文件，因此测速会
+经过相应的真实回源，而不是命中 Cloudflare 缓存。`edge-preferred-control` Worker 只
+接收 HMAC 签名后的结果并存入 KV；它不承载代理传输，也不公开优选 IP 列表。
 
-- `🌐 Default`：日常默认出口，通过稳定故障转移链自动选择。
-- `🛡️ 自建`：洛杉矶与新加坡原生节点。
-- `☁️ CDN`：既有 CDN 节点与独立的 `🧪 CF-Next 灰度`。
-- 分类组：ChatGPT、AI、开发、流媒体、通讯、社交、Apple、Google、Microsoft、Cloudflare、游戏。
+路由器上的 `/root/cfst/run_cfst.sh` 默认顺序跑完两个池；`--pool la` 或 `--pool sg`
+可单独运行，`--upload-only` 仅重传上次成功结果。配置与签名密钥位于
+`/root/cfst/edge.env`，权限为 `0600`。若测速或上传失败，脚本不会覆盖最后一份成功池。
 
-国内与私有网络直连；境外规则、未命中流量由 `🚀 默认` 处理。DNS 使用 fake-ip，国内与
-境外域名分别走对应 DoH；境外 DNS 会经 `🚀 默认`，避免直连解析泄漏。
+## 更新和回滚
 
-## 节点组与 CF-Next 灰度
-
-默认出口是 `🛟 稳定故障转移`：先使用原有 `♻️ 全节点自动`，其当前节点失效会依次退到
-`♻️ 自建-自动`、`♻️ 滥用-自动`。所有测速组的失败阈值为一次、健康检查超时为五秒，避免已
-失效节点长时间卡在选择结果里。策略组选择会持久化，不会因订阅刷新或重启而悄悄变更。
-
-`🧪 CF-Next-灰度` 是独立的 Worker 节点池，不参与 `♻️ 全节点自动`。它不再将三种
-传输混在一个延迟池中：优先 VLESS XHTTP，失效后回退 VLESS WS，最后才使用 Trojan WS。
-每种传输各自测速，避免某个偶然低延迟但长连接抖动的 Trojan 节点被误选。灰度步骤是：
-
-1. 在 UI 中将 `☁️ cloudflare` 选择为 `🧪 CF-Next-灰度`，只验证 Cloudflare 规则命中的流量。
-2. 确认稳定后，将 `🌐 Default` 切为 `🧪 CF-Next-灰度`，进行全局灰度。
-3. 出现异常立即将 `🌐 Default` 切回 `🛟 稳定故障转移`；不需重新导入订阅。
-
-## 取得导入地址
-
-在仓库中运行：
+修改 Worker 或加密订阅源后，在仓库中运行：
 
 ```bash
 cd /home/dot/.dotfiles/servers/cloudflare/edge-worker
-npm run clash:urls
-```
-
-它只在本机解密后打印四个私有导入地址。四者使用不同凭证：单一设备配置泄漏时可以只轮换
-对应凭证，而不影响其他设备。不要把输出粘贴到公开聊天、截图或 Git 仓库。
-
-## 客户端导入
-
-- 任一普通 Mihomo 客户端：使用 `router`、`desktop` 或 `mobile` 对应凭证入口。
-- Box for Root / Box4Magisk / KernelSU：使用 `root` 地址。它保留了用户已验证的
-  Android 热点基线：`tproxy-port: 9898`、`redir-port: 9797`、DNS
-  `0.0.0.0:1053`、`tun.device: meta`、Android UID 拦截与 `auto-redirect`，以及
-  `external-controller: 0.0.0.0:9090`、`external-ui: ./dashboard`。因此
-  `/data/adb/box/scripts/tproxy.conf` 必须使用 `PROXY_TCP_PORT=9898`、
-  `PROXY_UDP_PORT=9898`、`DNS_PORT=1053`；热点透明代理必须设置
-  `PROXY_HOTSPOT=1`。
-
-## 路由器接入边界
-
-OpenClash 的活动配置是路由器本地配置的权威副本。它自行管理 provider
-缓存、控制器密钥和启动顺序；不要通过 Mihomo Controller 将本仓库生成的完整
-profile 直接覆盖活动配置，也不要为 provider 注入相对 `path`。
-
-新增或更新一个 provider 时，先由 OpenClash 备份活动配置，并将它作为独立
-provider 加入，确认节点目录和健康检查恢复后才在 UI 中改变选择组。`🌐 Default`
-必须保留一个已验证的洛杉矶保底出口；任何灰度（包括 Hysteria2）只加入手动选择组，
-不应在冷启动、订阅刷新或 provider 下载失败时替换默认出口。
-
-`dns.proxy-server-nameserver` 仅用于解析代理服务器和订阅源的域名，使用不依赖
-代理的国内 DNS IP，避免“节点未加载 -> 境外 DoH 不可达 -> 节点永远无法加载”的循环。
-
-## 更新与回滚
-
-每次修改生成器或加密订阅源后运行：
-
-```bash
 npm run check
 npm run deploy:dry-run
 npm run deploy
 ```
 
-先将新 profile 当作独立订阅导入测试。路由器采用 OpenClash 备份后再替换；失败时恢复原
-配置即可。Worker 不保存客户端控制器密码，也不开放通用 UDP 转发。
+修改路由器活动配置前必须创建备份。OpenClash 的活动配置与 provider 缓存由路由器管理；
+不要通过 Mihomo Controller 覆盖整份配置。出现问题时，恢复对应
+`/etc/openclash/backup/config.yaml.before-*` 备份并重启 OpenClash；优选池异常时直接在
+选择组中切回本区直连自动或手动节点即可。

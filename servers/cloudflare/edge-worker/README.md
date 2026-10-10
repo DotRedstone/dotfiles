@@ -99,16 +99,10 @@ curl --fail-with-body \
 - `edge-proxy-next`、独立 KV 和测试自定义域名已经创建。
 - 5 项敏感绑定均为 `secret_text`，KV 使用独立 `kv_namespace` binding。
 - 已导入当前 100 个优选入口，订阅生成 300 个节点。
-- 真实 Cloudflare 边缘和路由器 Mihomo 数据面测试已通过 VLESS WS、VLESS XHTTP、
-  Trojan WS 和 VLESS XUDP DNS。
-- 三种传输均取得 HTTPS 204 并完整下载 1 MiB；WS 与 XHTTP 的 DNS 响应均为
-  `rcode=0`。主 OpenClash 最终健康检查为三类各 100/100。
-- 灰度中修复了 Mihomo XHTTP 的尾斜杠与响应时序兼容，并加入只允许 DNS 53 端口的
-  XUDP Mux 最小解析；任意 UDP 转发没有因此开放。
-- OpenClash 已加入 `Abuse-CF-Next` provider 和独立 `🧪 CF-Next-灰度` 组，运行时加载
-  300 个节点；所有既有代理组均未引用它，旧节点选择和默认流量完全未变。
-- 路由器更新器已使用签名接口替代 GitHub 上传，`--upload-only` 和 provider 主动刷新
-  均已验证；CloudflareST 冒烟测试期间 OpenClash 全程保持运行。
+- 优选控制面与代理传输 Worker 分离：`edge-preferred-control` 只保存并下发签名的
+  CloudflareST 结果，避免传输代码变动影响路由器订阅更新。
+- 路由器分别针对 `la-cdn.bdot.in`、`sg-cdn.bdot.in` 的真实 TLS SNI 与回源测速，生成
+  `la`、`sg` 两个完全独立的入口池；标签只描述目标区域，不把 Cloudflare POP 误当作节点地区。
 
 ## 统一 Mihomo Profile
 
@@ -118,7 +112,8 @@ Worker 同时发布 `router`、`desktop`、`mobile` 三份私有 Mihomo 配置�
 
 - 路由器源配置与旧更新器保留了权限为 `0600` 的回滚副本，具体路径和清理提醒见迁移
   文档。
-- 路由器测速脚本模板见 [`scripts/router-cfst.sh`](scripts/router-cfst.sh)，支持在推送到 Worker KV 的同时推送到 GitHub 仓库（`DotRedstone/cf-ip`）以满足公开分享需求。
+- 路由器测速脚本模板见 [`scripts/router-cfst.sh`](scripts/router-cfst.sh)。密钥仅放在路由器
+  的 `/root/cfst/edge.env`（`0600`），不上传 GitHub，也不会把优选入口公开发布。
 
 ## TODO
 

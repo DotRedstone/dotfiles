@@ -16,6 +16,15 @@
 let
   cfg = config.dot.services.xrayNode;
   secret = name: config.sops.placeholder."xray/${name}";
+  managedAccounts = lib.filterAttrs (_: account: account.enabled) config.dot.proxyAccounts.accounts;
+  managedAccountNames = builtins.attrNames managedAccounts;
+  managedClients = map (name: {
+    id = secret "managed_${name}_uuid";
+    email = "managed:${name}";
+    level = 1;
+  }) managedAccountNames;
+  managedSecretNames = map (name: "managed_${name}_uuid") managedAccountNames;
+  hasManagedAccounts = managedAccountNames != [ ];
   realityShortIdNames = builtins.genList (index: "reality_short_id_${toString index}") 8;
   webSocketClientSecretNames =
     if cfg.webSocketClientCount == 1 then
@@ -33,14 +42,16 @@ let
         port = cfg.webSocketPort;
         protocol = "vless";
         settings = {
-          clients = lib.imap0 (index: name: {
-            id = secret name;
-            email =
-              if cfg.webSocketClientCount == 1 then
-                "${config.networking.hostName}-websocket"
-              else
-                "${config.networking.hostName}-websocket-${toString index}";
-          }) webSocketClientSecretNames;
+          clients =
+            (lib.imap0 (index: name: {
+              id = secret name;
+              email =
+                if cfg.webSocketClientCount == 1 then
+                  "${config.networking.hostName}-websocket"
+                else
+                  "${config.networking.hostName}-websocket-${toString index}";
+            }) webSocketClientSecretNames)
+            ++ managedClients;
           decryption = "none";
           encryption = "none";
         };
@@ -81,7 +92,7 @@ let
             id = secret "reality_vision_client_uuid";
             email = "${config.networking.hostName}-reality-vision";
             flow = "xtls-rprx-vision";
-          };
+          } ++ managedClients;
           decryption = "none";
           encryption = "none";
         };
@@ -109,7 +120,31 @@ let
           routeOnly = true;
         };
       }
-    ];
+    ] ++ lib.optional hasManagedAccounts {
+      tag = "xray-account-api";
+      listen = "127.0.0.1";
+      port = cfg.accountApiPort;
+      protocol = "dokodemo-door";
+      settings = {
+        address = "127.0.0.1";
+        port = cfg.accountApiPort;
+        network = "tcp";
+      };
+    };
+
+    api = lib.optionalAttrs hasManagedAccounts {
+      tag = "xray-account-api";
+      services = [ "HandlerService" "StatsService" ];
+    };
+
+    stats = lib.optionalAttrs hasManagedAccounts { };
+
+    policy = lib.optionalAttrs hasManagedAccounts {
+      levels."1" = {
+        statsUserUplink = true;
+        statsUserDownlink = true;
+      };
+    };
 
     outbounds = [
       {
@@ -126,7 +161,11 @@ let
 
     routing = {
       domainStrategy = "AsIs";
-      rules = [
+      rules = lib.optional hasManagedAccounts {
+        type = "field";
+        inboundTag = [ "xray-account-api" ];
+        outboundTag = "xray-account-api";
+      } ++ [
         {
           type = "field";
           ip = [ "geoip:private" ];
@@ -149,6 +188,7 @@ let
   ]
   ++ lib.optional cfg.realityVisionEnable "reality_vision_client_uuid"
   ++ webSocketClientSecretNames
+  ++ managedSecretNames
   ++ realityShortIdNames;
 in
 {
@@ -165,6 +205,12 @@ in
       type = lib.types.ints.positive;
       default = 1;
       description = "Number of independently authenticated VLESS WebSocket clients.";
+    };
+
+    accountApiPort = lib.mkOption {
+      type = lib.types.port;
+      default = 10085;
+      description = "Loopback-only Xray API port for managed-account accounting.";
     };
 
     realityPort = lib.mkOption {

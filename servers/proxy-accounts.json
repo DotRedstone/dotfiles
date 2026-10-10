@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "accounts": {
+    "guest": {
+      "enabled": true,
+      "quotaGiB": 50,
+      "expiresAt": null
+    }
+  }
+}

@@ -14,7 +14,16 @@
       "websocket"
       "reality"
       "cdn"
+      "guest"
     ];
-    entryExpectedAddresses.cdn = "sg-cdn.bdot.in";
+    entryExpectedAddresses = {
+      cdn = [ "sg-cdn.bdot.in" ];
+      guest = [
+        "107.174.1.97"
+        "140.245.62.36"
+        "la-cdn.bdot.in"
+        "sg-cdn.bdot.in"
+      ];
+    };
   };
 }

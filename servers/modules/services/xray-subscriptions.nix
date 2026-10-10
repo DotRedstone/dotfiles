@@ -4,7 +4,7 @@
 # Scope: System
 # Notes:
 # - Route paths and response bodies are runtime templates and never enter the Nix store.
-# - Nginx cannot start until every decoded subscription uses the host's declared public address.
+# - Nginx cannot start until every decoded endpoint is in that subscription's declared address allowlist.
 # ---
 
 {
@@ -33,9 +33,10 @@ let
       raise SystemExit("subscription check received incomplete arguments")
 
     checked = 0
-    for name, expected_address, secret_path in zip(
+    for name, expected_addresses, secret_path in zip(
         arguments[0::3], arguments[1::3], arguments[2::3]
     ):
+        allowed_addresses = set(filter(None, expected_addresses.split(",")))
         encoded = pathlib.Path(secret_path).read_text(encoding="utf-8").strip()
         try:
             decoded = base64.b64decode(encoded, validate=True).decode("utf-8")
@@ -50,7 +51,7 @@ let
             endpoint = urllib.parse.urlsplit(uri)
             if endpoint.scheme not in {"vless", "hysteria2"}:
                 raise SystemExit(f"{name}: unsupported subscription scheme")
-            if endpoint.hostname != expected_address:
+            if endpoint.hostname not in allowed_addresses:
                 raise SystemExit(f"{name}: subscription address does not match the host profile")
             checked += 1
 
@@ -60,7 +61,7 @@ let
   subscriptionCheckArguments = lib.concatMapStringsSep " " (
     name:
       "${lib.escapeShellArg name} ${lib.escapeShellArg (
-        cfg.entryExpectedAddresses.${name} or cfg.publicAddress
+        lib.concatStringsSep "," (cfg.entryExpectedAddresses.${name} or [ cfg.publicAddress ])
       )} ${
       lib.escapeShellArg config.sops.secrets."xray/subscription_${name}_content".path
     }"
@@ -92,9 +93,9 @@ in
     };
 
     entryExpectedAddresses = lib.mkOption {
-      type = lib.types.attrsOf lib.types.str;
+      type = lib.types.attrsOf (lib.types.listOf lib.types.str);
       default = { };
-      description = "Optional per-entry endpoint hostname overrides used by subscription validation.";
+      description = "Optional per-entry endpoint hostname allowlists used by subscription validation.";
     };
   };
 

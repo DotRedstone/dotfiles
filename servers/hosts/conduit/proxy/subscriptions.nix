@@ -14,6 +14,6 @@
       "reality"
       "cdn"
     ];
-    entryExpectedAddresses.cdn = "la-cdn.bdot.in";
+    entryExpectedAddresses.cdn = [ "la-cdn.bdot.in" ];
   };
 }

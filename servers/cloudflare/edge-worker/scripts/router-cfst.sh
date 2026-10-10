@@ -122,7 +122,9 @@ run_pool() {
   }
   trap cleanup EXIT INT TERM
 
-  /sbin/start-stop-daemon -S -b -m -p "$pid_tmp" \
+  # Keep CloudflareST as a child of this shell so the watchdog can reliably
+  # wait for its real exit status instead of polling a detached PID.
+  /sbin/start-stop-daemon -S \
     -c nobody:nogroup -d "$run_dir" -O "$log_tmp" -x "$run_dir/cfst" -- \
     -o "$result_tmp" \
     -n "${CFST_LATENCY_THREADS:-8}" \
@@ -131,8 +133,8 @@ run_pool() {
     -dn "${CFST_DOWNLOADS:-8}" \
     -dt "${CFST_DURATION:-4}" \
     -f "$run_dir/ip.txt" \
-    -url "https://${host}${CFST_SPEEDTEST_PATH}" -p 0
-  cfst_pid="$(cat "$pid_tmp")"
+    -url "https://${host}${CFST_SPEEDTEST_PATH}" -p 0 &
+  cfst_pid="$!"
   deadline=$(( $(date +%s) + ${CFST_MAX_RUNTIME:-600} ))
   while kill -0 "$cfst_pid" 2>/dev/null; do
     sleep 1
@@ -143,15 +145,21 @@ run_pool() {
       exit 1
     fi
   done
-  wait "$cfst_pid" || true
-  cfst_pid=""
+  if wait "$cfst_pid"; then
+    cfst_pid=""
+  else
+    cfst_pid=""
+    logger -t cfst "${pool} CloudflareST exited unsuccessfully"
+    tail -c 1200 "$log_tmp" >&2 || true
+    exit 1
+  fi
 
   [ -s "$result_tmp" ] || {
     logger -t cfst "${pool} CloudflareST produced no result"
     tail -c 1200 "$log_tmp" >&2 || true
     exit 1
   }
-  awk -F',' -v label="$label" 'NR>1 && $1 ~ /^[0-9a-fA-F:.]+$/ { printf "%s:443#%s-%02d-%.2fMB/s\\n", $1, label, NR - 1, $6 }' "$result_tmp" | head -n "${CFST_RESULTS:-8}" > "$ip_tmp"
+  awk -F',' -v label="$label" 'NR>1 && $1 ~ /^[0-9a-fA-F:.]+$/ { printf "%s:443#%s-%02d-%.2fMB/s\n", $1, label, NR - 1, $6 }' "$result_tmp" | head -n "${CFST_RESULTS:-8}" > "$ip_tmp"
   result_count="$(wc -l < "$ip_tmp")"
   [ "$result_count" -ge "${CFST_MIN_RESULTS:-4}" ] || {
     logger -t cfst "${pool} pool has only $result_count usable endpoints; preserving last known-good list"

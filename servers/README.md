@@ -4,6 +4,10 @@
 `/home/dot/.dotfiles/servers`。共享基线与每项服务都拆成单一职责模块，密钥由
 SOPS 加密后随 Git 配置保存。
 
+开始修改前先阅读 [AGENTS.md](./AGENTS.md)。目录职责见
+[hosts/README.md](./hosts/README.md) 与 [modules/README.md](./modules/README.md)；它们
+解释“主机组装层”和“可复用服务模块”应如何分工。
+
 ## 主机与纳管状态
 
 `hosts/` 只放能够由此 Flake 重建的主机；不要把“SSH 能登录的 NixOS”误认为已经

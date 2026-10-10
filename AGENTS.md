@@ -4,6 +4,10 @@
 
 This repository manages the user’s personal NixOS system and Home Manager configuration for host `warden` and user `dot`. For human-readable documentation, see [README.md](./README.md).
 
+It also contains `servers/`, a separate NixOS server Flake. Read
+[docs/repository-map.md](./docs/repository-map.md) before choosing commands: desktop and
+server outputs share Git history but never share a deployment target.
+
 Principles:
 
 * Keep changes reversible.
@@ -20,6 +24,7 @@ home-manager switch --flake .#dot@warden
 sudo nixos-rebuild dry-run --flake .#warden
 sudo nixos-rebuild switch --flake .#warden
 nix flake check .
+nix flake check path:./servers
 ```
 
 Validation Rules:
@@ -28,6 +33,41 @@ Validation Rules:
 * System module changes should be validated with `nixos-rebuild dry-run` or `nixos-rebuild switch`.
 * Do not use `sudo nixos-rebuild switch` for Home Manager-only changes.
 * Do not claim full validation if only one side was tested.
+* Server changes use `servers/flake.nix`; follow `servers/AGENTS.md` and never run a
+  desktop `nixos-rebuild` command against a remote server by accident.
+
+## Read-First Routing
+
+Before editing, read the closest switchboard and the directory README when present.
+
+| Change | Read first | Edit boundary |
+| --- | --- | --- |
+| Warden hardware, mounts, host identity | `hosts/warden/default.nix` | `hosts/warden/` |
+| Global Warden system behavior | `modules/system/default.nix` | one `modules/system/<domain>/` module |
+| User app or desktop behavior | `home/dot/default.nix` | one `home/dot/<app>/` module |
+| Servers | `servers/README.md`, `servers/AGENTS.md` | `servers/hosts/` or `servers/modules/` |
+| Cloudflare Worker | `servers/cloudflare/README.md` | `servers/cloudflare/edge-worker/` |
+
+Do not use an entrypoint as a dumping ground. `default.nix` files are switchboards;
+put new behavior in a single-purpose sibling module and import it deliberately.
+
+## Worktree Hygiene
+
+* Start with `git status --short`; pre-existing dirty files belong to the user.
+* Do not format, move, stage, revert, or commit unrelated changes.
+* Keep documentation-only, refactor-only, and behavior-changing work in separate commits.
+* When a new Nix file is referenced by a Flake before it is staged, use `git add -N`
+  or validate through `path:.` so evaluation sees it.
+
+## Documentation Contract
+
+* Root `README.md` is the human entry point; `docs/` covers cross-cutting concepts.
+* A complex directory gets a concise `README.md` for responsibilities, entrypoints,
+  safety boundaries, and validation—never credentials or runtime data.
+* `AGENTS.md` files state execution constraints; they must not include tokens, private
+  keys, personal data, subscription URLs, or decrypted SOPS values.
+* If a structural change invalidates a README or routing table, update it in the same
+  change set.
 
 ## Nix Module Header Format
 

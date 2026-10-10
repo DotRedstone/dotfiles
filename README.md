@@ -2,6 +2,9 @@
 
 这是用户 `dot` 的个人 NixOS 系统和 Home Manager 配置文件。
 
+仓库还包含独立的云服务器 Flake；桌面与服务器共享 Git 历史，但不共享构建输出或
+部署命令。第一次进入仓库时，先看 [仓库导航与改动路由](./docs/repository-map.md)。
+
 ## 核心架构
 
 - **主机 (Host)**: `warden` (Redmi Book Pro 16 2024)
@@ -22,6 +25,8 @@
 ## 文档指引
 
 - [AGENTS.md](./AGENTS.md): 针对 AI 协作助手的技术规范指南。
+- [仓库导航与改动路由](./docs/repository-map.md): 桌面、服务器、边缘 Worker 与文档的最短入口。
+- [服务器 Flake](./servers/README.md): 云服务器的独立入口、主机清单与部署边界。
 - [docs/](./docs/): 详细的功能模块文档：
   - [架构概览](./docs/architecture.md)
   - [日常维护](./docs/maintenance.md)

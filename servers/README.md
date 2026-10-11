@@ -34,9 +34,12 @@ RustFS、MySQL、PostgreSQL、MongoDB、Redis、Nginx、Xray、Komari 与 Hermes
 `hopper` 的 ARM64、OCI 网络、数据恢复和两阶段接管说明见
 [docs/hopper-migration.md](./docs/hopper-migration.md)。
 
-Cloudflare 边缘代理与优选 IP 订阅代码位于
-[cloudflare/edge-worker](./cloudflare/edge-worker/README.md)，它独立于 NixOS 主机
-模块部署，密钥只通过 Worker secret 注入。现网审计、灰度与清理步骤见
+Cloudflare 边缘代理的通用代码位于独立的
+`/home/dot/Projects/edge-proxy-worker` 仓库；本仓库的
+[cloudflare/edge-worker](./cloudflare/edge-worker/README.md) 固定其本机 Git 提交，
+只保存部署参数、SOPS 引用、Mihomo 基线和路由器适配。它独立于 NixOS 主机模块部署，
+密钥只通过 Worker secret 注入。独立项目目前没有远端，跨主机部署需先提供锁定的
+Git 对象。现网审计、灰度与清理步骤见
 [docs/cloudflare-edge-migration.md](./docs/cloudflare-edge-migration.md)。
 
 双节点代理的通用编译器、规则与 Xray 模块已拆到独立的

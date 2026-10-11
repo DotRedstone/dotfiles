@@ -1,121 +1,59 @@
-# Edge Worker
+# Edge Proxy Worker 部署适配
 
-这是现有 Cloudflare 节点 Worker 的最小替代实现。它只保留当前链路真正使用的
-能力，不包含管理面板、远程 UI、第三方订阅转换、访问日志或运行时抓取脚本。
+本目录只维护此部署的 Worker 名称、域名、Cloudflare 账号与 SOPS 密钥来源、Mihomo
+基线及路由器适配。协议实现、配置生成器、测试和 npm 依赖由独立项目
+`/home/dot/Projects/edge-proxy-worker` 维护，接口见该项目的 `README.md` 与
+`docs/architecture.md`。`scripts/pinned-source.mjs` 固定完整 Git 提交
+`489e9bbbb8ad54c0e6f76a1e6fbe0cf959276ea0`。部署脚本用 `git archive` 导出该
+提交到权限受限的临时目录，运行 `npm ci`，再使用其中的 `src/index.ts`、
+`src/preferred-control.ts` 和 `buildProfiles({ baseline, providers })`。工作树中的后续改动
+不会自动进入部署。
 
-## 当前能力
+目前独立项目只有本机 Git 对象、没有远端。另一台机器必须先取得包含上述提交的仓库，
+并放在适配器所指路径；这套部署尚不能仅凭 dotfiles 在另一台机器复现。修改固定提交时，
+先检查独立项目接口和版本，再更新适配器引用并重新验证。Mihomo 基线保存在
+`servers/clash/router-policy.json`，私有 provider URL、账号、令牌与密钥保存在
+`servers/secrets/cloudflare.yaml` 的 SOPS 密文中，不进入独立项目。
 
-- VLESS over WebSocket
-- VLESS over XHTTP `stream-one`
-- Trojan over WebSocket
-- VLESS DNS UDP（传统长度前缀及 Mihomo XUDP；仅目的端口 53，经 DoH 转发）
-- KV 中的优选 IP 列表与 Base64/纯文本订阅
-- 路由器使用 HMAC-SHA256 签名更新优选 IP
-- 未知路径统一返回普通 404，不记录 URL、IP、User-Agent 或凭据
+## 本地验证与部署
 
-每个请求只使用自己的局部状态。Worker 全局作用域没有会被并发请求修改的配置，
-也没有从 GitHub、远程 Pages 或订阅转换器加载运行时代码。
-
-## 本地检查
-
-```bash
-cd /home/dot/.dotfiles/servers/cloudflare/edge-worker
-npm install
-npm run check
-```
-
-## 首次部署
-
-当前节点账号、R2 凭据和 Worker Secret 已加密保存在
-`servers/secrets/cloudflare.yaml`，只授权工作站的 Age 身份解密。部署脚本会查询或创建
-独立 KV、生成临时 Wrangler 配置、上传 Worker 与 Secret，并在结束时删除所有临时
-明文文件：
+需要 Node.js 22 或更新版本、npm、Git、tar、SOPS，以及可解密上述 SOPS 文件的本机
+Age 身份。独立项目先运行 `npm ci && npm run check`；这里的部署适配运行：
 
 ```bash
 cd /home/dot/.dotfiles/servers/cloudflare/edge-worker
-npm run deploy:dry-run
-npm run deploy
+node --check scripts/pinned-source.mjs
+node --check scripts/deploy.mjs
+node scripts/deploy.mjs --dry-run
 ```
 
-脚本固定部署到新 Worker `edge-proxy-next` 和测试域名
-`edge-next.dotdot.ggff.net`，不会覆盖旧 Worker。以下五项始终作为 Worker secret 写入：
-
-- `VLESS_UUID`
-- `TROJAN_PASSWORD`
-- `ROUTE_SECRET`
-- `SUBSCRIPTION_TOKEN`
-- `IP_UPDATE_KEY`
-
-- `ROUTE_SECRET` 与 `SUBSCRIPTION_TOKEN` 使用至少 24 字节随机值的 base64url 文本。
-- `IP_UPDATE_KEY` 使用至少 32 字节随机值。
-- `PUBLIC_HOST` 是新 Worker 的测试自定义域名。
-
-订阅地址是 `https://PUBLIC_HOST/sub/SUBSCRIPTION_TOKEN`。默认返回 Base64；追加
-`?format=plain` 可在人工检查时得到分享链接，每次响应都禁止缓存。
-
-## 路由器上传优选 IP
-
-上传正文每行一个入口，支持以下格式：
-
-```text
-203.0.113.10#FRA
-203.0.113.11,443,SIN
-[2001:db8::10]:443#NRT
-```
-
-签名内容严格为 `Unix时间戳 + 换行 + 原始正文`，签名结果用小写十六进制：
+`--dry-run` 解密本地配置、生成四份 Mihomo 配置，并对主 Worker 和独立优选控制面执行
+Wrangler 本地打包。它使用占位 KV ID，不调用 Cloudflare API，也不写 KV 或发布
+Worker；因此不证明真实 binding、Secret 或客户端连接可用。脚本的临时配置与密钥文件
+使用 `0600` 权限，退出时清理。实际部署需单独执行：
 
 ```bash
-timestamp="$(date +%s)"
-body="$(sed '/^[[:space:]]*$/d' cloudflare_ips.txt)"
-signature="$(printf '%s\n%s' "$timestamp" "$body" \
-  | openssl dgst -sha256 -hmac "$IP_UPDATE_KEY" -hex \
-  | awk '{print $NF}')"
-
-curl --fail-with-body \
-  -H "X-Edge-Timestamp: $timestamp" \
-  -H "X-Edge-Signature: $signature" \
-  --data-binary "$body" \
-  "https://PUBLIC_HOST/admin/preferred-ips"
+node scripts/deploy.mjs
 ```
 
-服务端只接受前后五分钟内的签名，列表上限 1000 项、正文上限 256 KiB。上传不再
-需要 GitHub PAT，也不需要停止 OpenClash。
+实际部署会查询或创建 `edge-proxy-next-state` KV，将四份私有配置写入
+`clash/config/<profile>`，然后部署 `edge-proxy-next` 和 `edge-preferred-control`。
+它可能改变现有灰度链路，须先复核固定源码、KV、测试域名和回退路径；本次迁移未执行。
+Cloudflare 运行时验证还需分别检查配置下载、优选池更新、WS、XHTTP、Trojan、DNS
+UDP 与客户端选择。旧 Worker、旧 KV 和旧 provider 在灰度期间保留，出现问题时将
+OpenClash 选择组切回旧 provider；如需恢复旧部署脚本，可回退本目录迁移提交。
 
-## 灰度与回滚
+## 绑定与路由器
 
-1. 用新 Worker 名称、新 KV 和新测试域名部署。
-2. 在 OpenClash 中把新订阅作为独立 provider 加入，旧 provider 保持不动。
-3. 分别验证 WS、XHTTP、Trojan、DNS UDP 和大文件下载，并观察至少一天错误率与
-   CPU 时间。
-4. 只切换代理组的默认选择，不立即删除旧 Worker。
-5. 出现问题时把代理组切回旧 provider；这是即时回滚，不需要改 DNS。
+主 Worker 使用 `EDGE_STATE` KV、`PUBLIC_HOST` 等普通变量，以及
+`VLESS_UUID`、`TROJAN_PASSWORD`、`ROUTE_SECRET`、`SUBSCRIPTION_TOKEN`、
+`PREFERRED_ENDPOINTS_TOKEN`、`CONFIG_TOKENS`、`IP_UPDATE_KEY` 七项 Secret。
+独立优选控制面共用 KV，只接收 `PREFERRED_ENDPOINTS_TOKEN` 和 `IP_UPDATE_KEY`。
+具体接口及签名格式见独立项目 README。`scripts/router-cfst.sh` 是此部署的路由器
+CloudflareST 适配模板，私有密钥只保留在路由器的 `/root/cfst/edge.env`（`0600`）。
+`node scripts/show-clash-profile-urls.mjs` 会输出含私有 token 的下载地址，只能在受信任
+终端手动使用，不能写入日志或工单。
 
-确认稳定后再停用旧 Worker，并删除旧 KV 中含完整 URL 的历史日志。删除日志是不可
-恢复操作，执行前应先确认不再需要安全取证。
-
-## 当前灰度状态（2026-09-06）
-
-- `edge-proxy-next`、独立 KV 和测试自定义域名已经创建。
-- 5 项敏感绑定均为 `secret_text`，KV 使用独立 `kv_namespace` binding。
-- 已导入当前 100 个优选入口，订阅生成 300 个节点。
-- 优选控制面与代理传输 Worker 分离：`edge-preferred-control` 只保存并下发签名的
-  CloudflareST 结果，避免传输代码变动影响路由器订阅更新。
-- 路由器分别针对 `la-cdn.bdot.in`、`sg-cdn.bdot.in` 的真实 TLS SNI 与回源测速，生成
-  `la`、`sg` 两个完全独立的入口池；标签只描述目标区域，不把 Cloudflare POP 误当作节点地区。
-
-## 统一 Mihomo Profile
-
-Worker 同时发布 `router`、`desktop`、`mobile` 三份私有 Mihomo 配置。公共分流规则与节点
-分组只维护一份，平台差异仅限端口、LAN 监听与 TUN 参数。导入方式、更新和回滚见
+历史灰度记录与路由器回退路径见
+[`../../docs/cloudflare-edge-migration.md`](../../docs/cloudflare-edge-migration.md) 和
 [`../../docs/mihomo-profiles.md`](../../docs/mihomo-profiles.md)。
-
-- 路由器源配置与旧更新器保留了权限为 `0600` 的回滚副本，具体路径和清理提醒见迁移
-  文档。
-- 路由器测速脚本模板见 [`scripts/router-cfst.sh`](scripts/router-cfst.sh)。密钥仅放在路由器
-  的 `/root/cfst/edge.env`（`0600`），不上传 GitHub，也不会把优选入口公开发布。
-
-## TODO
-
-- 灰度完成后加入最小化的 Worker Analytics 告警；不采集访问明细。
-- 只有确有需要时再做只读状态页，管理 UI 不属于核心路径。

@@ -17,8 +17,9 @@
 | 云主机或服务器服务 | `servers/README.md`、`servers/AGENTS.md` | `servers/hosts/` 或 `servers/modules/` | `nix flake check path:./servers` |
 | 双节点代理通用规则或编译器 | `/home/dot/Projects/proxy-stack/README.md` | 独立 `proxy-stack` 仓库 | `node --test test/*.test.mjs`、`nix flake check path:.` |
 | Cloudflare 入口 IP 本地测速工具 | `/home/dot/Projects/cf-optimizer/README.md` | 独立 `cf-optimizer` 仓库 | 以该项目 README 和实际实现为准 |
+| Worker 协议、优选池与配置生成器 | `/home/dot/Projects/edge-proxy-worker/README.md` | 独立 `edge-proxy-worker` 仓库 | `npm run check` |
 | 代理账户、节点与来源 | `servers/proxy-deployment/README.md` | `servers/proxy-deployment/` 与 SOPS | 锁定版本编译器 `validate` 和两节点求值 |
-| Cloudflare Worker / 优选池分发 | `servers/cloudflare/README.md` | `servers/cloudflare/edge-worker/` | 该目录的 `npm run check` |
+| Cloudflare Worker 部署参数与路由器适配 | `servers/cloudflare/README.md` | `servers/cloudflare/edge-worker/` | `node scripts/deploy.mjs --dry-run` |
 | 密钥、SOPS 或持久化 | `docs/secrets-sops.md`、`docs/impermanence.md` | 对应声明模块 | 只做安全的构建或 dry-run |
 
 ## 两个 Flake 的边界

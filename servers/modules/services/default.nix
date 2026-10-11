@@ -17,6 +17,8 @@
     ./openlist.nix
     ./postgresql.nix
     ./proxy-delivery-publisher.nix
+    ./proxy-origin-proof.nix
+    ./proxy-preferred-probe.nix
     ./proxy-accounts.nix
     ./redis.nix
     ./restic-backup.nix

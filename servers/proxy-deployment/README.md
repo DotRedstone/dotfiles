@@ -13,6 +13,8 @@
   `owner-campus-canary` 是两地 `signed-upload` 的隔离登记，尚无实测结果或已验证
   v2 池。GitHub 来源需核对 owner、ref 和 path，并验证对应回源健康状态。
 - `owned-domains.json` 仅保存直连规则所需的自有域名后缀和节点 IP。
+- `cloudflare-resources.json` 固定隔离灰度的两个 KV ID、各自的 binding、Worker
+  名称与入口；这些是部署专属的公开标识，不包含令牌或私有运行时值。
 - `profiles/` 分别保存路由器、桌面和移动端的网络行为。路由器配置保留现有的
   TUN、DNS、端口与控制器参数用于测试，尚未安装到路由器。
 
@@ -58,8 +60,7 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 需要 SOPS `proxy/probe_env`、`proxy/probe_tls_cert` 和 `proxy/probe_tls_key`。
 `probe_env` 内登记独立请求/响应 HMAC、明确允许的 Cloudflare 公网 CIDR、两地
 `originId`、TLS 主机、专用路径和相应证明凭据。两模块的 `package` 选项须指向
-固定 `edge-proxy-worker` 修订的源码包；当前项目尚未提供可跨主机取得的固定
-发布物，启用前必须先解决该来源并核对散列。
+固定 `edge-proxy-worker` 修订的源码包；启用前须核对目标主机上的同一路径与散列。
 
 `edge-worker-source.json` 固定 `edge-proxy-worker 4fbe909` 的完整提交和归档
 NAR 散列。`node scripts/prepare-edge-source.mjs /home/dot/Projects/edge-proxy-worker`
@@ -77,8 +78,10 @@ nix copy --to ssh://dot@HOPPER_SSH_TARGET "$edge_source_store"
 store 路径，再将它显式传给新模块的 `package` 选项。现有 `nixos-rebuild
 --target-host` 链也会传输本地构建的闭包；Hopper 的 ARM 构建路径需继续遵循
 服务器迁移文档。已在本机用隔离 file-store 复制并读回该单路径 closure，
-只读 SSH 检查显示两台目标当前尚无该路径；**没有执行远程复制**。这种方式
-可以完成一次受控灰度，但新工作站只克隆 dotfiles 时仍无法重建源码。长期
+已通过 Nix SSH 将该固定源码路径复制到 Conduit 与 Hopper，并分别用远端
+`nix path-info` 和 `nix hash path --sri` 核对 NAR 散列一致。此操作仅增加
+store 路径，未构建系统或启动服务。这种方式可以完成一次受控灰度，但新工作站
+只克隆 dotfiles 时仍无法重建源码。长期
 发布须提供可审查、可跨主机取得的同一 Git 对象或已固定的二进制缓存产物。
 不得只替换旧
 `pinned-source.mjs` 的提交号：旧 `deploy.mjs` 仍调用新源码已移除的
@@ -98,7 +101,7 @@ store 路径，再将它显式传给新模块的 `package` 选项。现有 `nixo
 1. 路由器在实际网络生成两地测量结果，经可信回源探测写入 `owner-campus-canary`
    的两个 v2 池；只有池格式和健康通过才允许发布。
 2. 确定 probe 的独立 HTTPS 域名、证书、受限来源和运行主机，向该主机的 SOPS
-   写入完整 `probe_env`；为新版 Worker 创建独立 KV、绑定和私有交付域名。
+   写入完整 `probe_env`；核对新版 Worker 的独立 KV 绑定并确定私有交付域名。
 3. 为指定发布主机准备完整 `proxy/delivery_runtime`，核对两地 UUID 与 SOPS
    一致，并更新当前仍有用户未提交改动的 `servers/flake.lock` 到已验编译器修订。
 4. 在两台主机先用 `nixos-rebuild test` 验证 SSH、旧 Xray 身份、旧订阅和新 canary
@@ -112,8 +115,9 @@ store 路径，再将它显式传给新模块的 `package` 选项。现有 `nixo
 
 现有 LA/SG CDN 域名与各自 Nginx TLS 虚拟主机可承载独立的 proof 精确路径，
 不要求修改旧 WS 路由。只读 Cloudflare 清单确认旧 `edge-proxy-next-state` KV、
-`edge-proxy-next` 和 `edge-preferred-control` 仍存在；新版独立优选 KV、交付 KV
-及对应 Worker 尚不存在。旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2
+`edge-proxy-next` 和 `edge-preferred-control` 仍存在。两个新版隔离 KV 已创建且
+读回为空，ID 和预留 Worker 名称见 `cloudflare-resources.json`；新 Worker 尚未
+部署，未设置路由。旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2
 池或账户文档。probe 的公开 HTTPS 名称、证书与访问路由没有可核验的现成部署
 绑定；现有 CDN 证书只声明给各自回源虚拟主机，不能推断适用于 probe API。
 

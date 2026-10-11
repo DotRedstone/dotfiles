@@ -4,7 +4,7 @@
 基线及路由器适配。协议实现、配置生成器、测试和 npm 依赖由独立项目
 `/home/dot/Projects/edge-proxy-worker` 维护，接口见该项目的 `README.md` 与
 `docs/architecture.md`。`scripts/pinned-source.mjs` 固定完整 Git 提交
-`489e9bbbb8ad54c0e6f76a1e6fbe0cf959276ea0`。部署脚本用 `git archive` 导出该
+`e84f549df1293117ffcf6e47dcc8ff4e5f5f6b57`。部署脚本用 `git archive` 导出该
 提交到权限受限的临时目录，运行 `npm ci`，再使用其中的 `src/index.ts`、
 `src/preferred-control.ts` 和 `buildProfiles({ baseline, providers })`。工作树中的后续改动
 不会自动进入部署。
@@ -49,6 +49,10 @@ OpenClash 选择组切回旧 provider；如需恢复旧部署脚本，可回退�
 `VLESS_UUID`、`TROJAN_PASSWORD`、`ROUTE_SECRET`、`SUBSCRIPTION_TOKEN`、
 `PREFERRED_ENDPOINTS_TOKEN`、`CONFIG_TOKENS`、`IP_UPDATE_KEY` 七项 Secret。
 独立优选控制面共用 KV，只接收 `PREFERRED_ENDPOINTS_TOKEN` 和 `IP_UPDATE_KEY`。
+两个 Worker 都将 `PREFERRED_POOLS` 设置为 JSON 数组文本 `["la","sg"]`，
+`DEFAULT_PREFERRED_POOL` 设置为 `la`。这保持现有 `la`、`sg` 路径与
+`preferred-endpoints-v2:<pool>` KV 键，并让无 pool 的兼容路径和订阅继续使用 `la`。
+两侧绑定必须相同；修改池名时还需核对路由器上传路径与已有 KV 数据。
 具体接口及签名格式见独立项目 README。`scripts/router-cfst.sh` 是此部署的路由器
 CloudflareST 适配模板，私有密钥只保留在路由器的 `/root/cfst/edge.env`（`0600`）。
 `node scripts/show-clash-profile-urls.mjs` 会输出含私有 token 的下载地址，只能在受信任

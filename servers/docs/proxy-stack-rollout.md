@@ -19,6 +19,19 @@
 两项目应先确定配置数据的唯一编译入口和 Worker 运行时的唯一源码，再由部署仓库
 锁定兼容的修订；不能只凭构建成功推断两者的接口可互换。
 
+`proxy-stack` 已在修订 `4643491` 固定这条边界，其主要接口见该项目的
+`docs/contracts.md`、`schema/measurement.schema.json`、`schema/pool-v2.schema.json`
+和 `schema/delivery-manifest.schema.json`。部署侧在受限环境使用同一固定编译器，
+为每个账户预编译 router、desktop、mobile 三份配置及 `la-cf`、`sg-cf` 两份
+provider。发布时先写入五份不可变私有文档并验证，再切换 manifest；Worker 按账户
+令牌及 manifest 授权，原样返回文档，不在请求时编译或改写规则。每账户独立令牌和
+两台 Xray 身份由 SOPS 与受限运行时提供，生成文件及令牌不得进入 Git 或 Nix store。
+
+当前 `servers/flake.lock` 仍指向旧编译器修订，且有任务外未提交改动；
+`edge-proxy-worker` 的现行固定部署适配仍使用旧的四份 profile KV 键。两端的
+修订与交付接口都对齐后，再单独审阅锁定和适配变更。旧 KV、订阅与 Worker 在此期间
+保持原有路径。
+
 ## 本地变更
 
 - 独立 `proxy-stack` Git/Flake 提供 11 个 Mihomo 策略组、按账户地区优先的两地
@@ -46,6 +59,12 @@ proxy-stack: sh -n + shellcheck router/run-cfst.sh      通过
 servers: nix flake check path:./servers --no-build      四主机求值通过
 servers: nix build path:./servers#proxyStackWorkerBundles --no-link  三 bundle 构建通过
 ```
+
+接口定版修订 `4643491` 的后续合成检查：对本目录执行 `node src/cli.mjs validate`
+通过；`test/render-deployment-fixture.mjs` 用合成凭据与池生成 router、desktop、mobile
+三份配置及两地 CF provider；三份 `mihomo -t` 均通过。检查在自动清理的临时目录
+运行，复用了本机已有 GeoSite/GeoIP 数据以避免在线下载。它仍未测试 Worker 的
+manifest 鉴权或私有文档交付；当前 Flake 锁也未更新到该修订。
 
 这些结果只证明语法、引用与构建。尚无真实账户凭据的直连/CF TLS 回源、应用登录、
 大文件、订阅刷新或单账户撤销验证。路由器只读 SSH 拒绝当前密钥；Controller 返回 401，

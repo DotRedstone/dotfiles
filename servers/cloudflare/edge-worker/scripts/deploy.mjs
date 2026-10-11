@@ -30,6 +30,11 @@ const workerName = "edge-proxy-next";
 const preferredControlWorkerName = "edge-preferred-control";
 const namespaceTitle = "edge-proxy-next-state";
 const publicHost = "edge-next.dotdot.ggff.net";
+const preferredPools = ["la", "sg"];
+const preferredPoolVars = {
+  PREFERRED_POOLS: JSON.stringify(preferredPools),
+  DEFAULT_PREFERRED_POOL: "la",
+};
 const dryRun = process.argv.includes("--dry-run");
 
 function run(command, arguments_, options = {}) {
@@ -224,6 +229,7 @@ async function main() {
             PUBLIC_HOST: publicHost,
             SITE_NAME: "CF-Next",
             DOH_URL: "https://dns.google/dns-query",
+            ...preferredPoolVars,
           },
         },
         null,
@@ -253,6 +259,7 @@ async function main() {
           compatibility_date: "2026-09-01",
           workers_dev: true,
           kv_namespaces: [{ binding: "EDGE_STATE", id: namespaceId }],
+          vars: preferredPoolVars,
         },
         null,
         2,

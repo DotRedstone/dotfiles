@@ -4,9 +4,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { buildProfiles } from "./clash-config.mjs";
+import { preparePinnedSource } from "./pinned-source.mjs";
 
 const workerDirectory = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -18,6 +18,13 @@ const secretsPath = path.resolve(
   "..",
   "secrets",
   "cloudflare.yaml",
+);
+const baselinePath = path.resolve(
+  workerDirectory,
+  "..",
+  "..",
+  "clash",
+  "router-policy.json",
 );
 const workerName = "edge-proxy-next";
 const preferredControlWorkerName = "edge-preferred-control";
@@ -65,19 +72,13 @@ async function cloudflareApi(credentials, apiPath, init = {}) {
   return body.result;
 }
 
-async function ensureNamespace(credentials, allowCreate) {
+async function ensureNamespace(credentials) {
   const namespaces = await cloudflareApi(
     credentials,
     `/accounts/${credentials.account_id}/storage/kv/namespaces?per_page=100`,
   );
   const existing = namespaces.find((item) => item.title === namespaceTitle);
   if (existing) return existing.id;
-  if (!allowCreate) {
-    throw new Error(
-      `KV namespace ${namespaceTitle} does not exist; run a real deployment first.`,
-    );
-  }
-
   const created = await cloudflareApi(
     credentials,
     `/accounts/${credentials.account_id}/storage/kv/namespaces`,
@@ -108,12 +109,7 @@ async function putNamespaceValue(credentials, namespaceId, key, value) {
   }
 }
 
-async function deployClashProfiles(credentials, namespaceId, stored, edge) {
-  const profiles = buildProfiles({
-    providers: stored.clash?.providers,
-    publicHost,
-    subscriptionToken: edge.subscription_token,
-  });
+async function deployClashProfiles(credentials, namespaceId, profiles) {
   for (const [profile, configuration] of Object.entries(profiles)) {
     await putNamespaceValue(
       credentials,
@@ -125,6 +121,7 @@ async function deployClashProfiles(credentials, namespaceId, stored, edge) {
 }
 
 function deployWorker({
+  sourceDirectory,
   configPath,
   secretsPath,
   credentials,
@@ -145,7 +142,7 @@ function deployWorker({
   ];
   if (dryRun) arguments_.push("--dry-run");
   const deployed = spawnSync("npx", arguments_, {
-    cwd: workerDirectory,
+    cwd: sourceDirectory,
     env: {
       ...process.env,
       CLOUDFLARE_ACCOUNT_ID: credentials.account_id,
@@ -161,47 +158,53 @@ function deployWorker({
 }
 
 async function main() {
-  const stored = loadSecrets();
-  const credentials = stored.accounts.proxy;
-  const edge = stored.edge_next;
-  const namespaceId = await ensureNamespace(credentials, !dryRun);
   const runtimeDirectory = process.env.XDG_RUNTIME_DIR ?? os.tmpdir();
   const temporaryDirectory = fs.mkdtempSync(
     path.join(runtimeDirectory, "edge-worker-deploy-"),
   );
-  const configPath = path.join(temporaryDirectory, "wrangler.jsonc");
-  const workerSecretsPath = path.join(temporaryDirectory, "secrets.json");
-  const preferredControlConfigPath = path.join(
-    temporaryDirectory,
-    "preferred-control.wrangler.jsonc",
-  );
-  const preferredControlSecretsPath = path.join(
-    temporaryDirectory,
-    "preferred-control.secrets.json",
-  );
-  const workerSecrets = {
-    VLESS_UUID: edge.vless_uuid,
-    TROJAN_PASSWORD: edge.trojan_password,
-    ROUTE_SECRET: edge.route_secret,
-    SUBSCRIPTION_TOKEN: edge.subscription_token,
-    PREFERRED_ENDPOINTS_TOKEN: edge.preferred_endpoints_token,
-    CONFIG_TOKENS: JSON.stringify(edge.config_tokens),
-    IP_UPDATE_KEY: edge.ip_update_key,
-  };
-
   try {
-    // Build before touching Cloudflare so an incomplete encrypted source catalog
-    // cannot result in a partially updated remote profile set.
+    const sourceDirectory = preparePinnedSource(temporaryDirectory);
+    const { buildProfiles } = await import(
+      pathToFileURL(path.join(sourceDirectory, "scripts", "clash-config.mjs"))
+        .href
+    );
+    const stored = loadSecrets();
+    const credentials = stored.accounts.proxy;
+    const edge = stored.edge_next;
+    const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
     const profiles = buildProfiles({
+      baseline,
       providers: stored.clash?.providers,
-      publicHost,
-      subscriptionToken: edge.subscription_token,
     });
     if (Object.keys(profiles).length !== 4) {
       throw new Error("expected exactly four Clash profiles");
     }
+    // Dry run must stay local; the placeholder validates Wrangler's binding shape.
+    const namespaceId = dryRun
+      ? "00000000000000000000000000000000"
+      : await ensureNamespace(credentials);
+    const configPath = path.join(temporaryDirectory, "wrangler.jsonc");
+    const workerSecretsPath = path.join(temporaryDirectory, "secrets.json");
+    const preferredControlConfigPath = path.join(
+      temporaryDirectory,
+      "preferred-control.wrangler.jsonc",
+    );
+    const preferredControlSecretsPath = path.join(
+      temporaryDirectory,
+      "preferred-control.secrets.json",
+    );
+    const workerSecrets = {
+      VLESS_UUID: edge.vless_uuid,
+      TROJAN_PASSWORD: edge.trojan_password,
+      ROUTE_SECRET: edge.route_secret,
+      SUBSCRIPTION_TOKEN: edge.subscription_token,
+      PREFERRED_ENDPOINTS_TOKEN: edge.preferred_endpoints_token,
+      CONFIG_TOKENS: JSON.stringify(edge.config_tokens),
+      IP_UPDATE_KEY: edge.ip_update_key,
+    };
+
     if (!dryRun) {
-      await deployClashProfiles(credentials, namespaceId, stored, edge);
+      await deployClashProfiles(credentials, namespaceId, profiles);
     }
     fs.writeFileSync(
       configPath,
@@ -209,7 +212,7 @@ async function main() {
         {
           account_id: credentials.account_id,
           name: workerName,
-          main: path.join(workerDirectory, "src", "index.ts"),
+          main: path.join(sourceDirectory, "src", "index.ts"),
           compatibility_date: "2026-09-01",
           // Keep a private-token control-plane fallback independent of the
           // custom domain.  It is used only for configuration and preferred
@@ -233,6 +236,7 @@ async function main() {
     });
 
     deployWorker({
+      sourceDirectory,
       configPath,
       secretsPath: workerSecretsPath,
       credentials,
@@ -245,7 +249,7 @@ async function main() {
         {
           account_id: credentials.account_id,
           name: preferredControlWorkerName,
-          main: path.join(workerDirectory, "src", "preferred-control.ts"),
+          main: path.join(sourceDirectory, "src", "preferred-control.ts"),
           compatibility_date: "2026-09-01",
           workers_dev: true,
           kv_namespaces: [{ binding: "EDGE_STATE", id: namespaceId }],
@@ -264,6 +268,7 @@ async function main() {
       { mode: 0o600 },
     );
     deployWorker({
+      sourceDirectory,
       configPath: preferredControlConfigPath,
       secretsPath: preferredControlSecretsPath,
       credentials,

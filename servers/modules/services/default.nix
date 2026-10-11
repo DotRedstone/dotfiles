@@ -16,6 +16,7 @@
     ./nix-cache-relay.nix
     ./openlist.nix
     ./postgresql.nix
+    ./proxy-delivery-publisher.nix
     ./proxy-accounts.nix
     ./redis.nix
     ./restic-backup.nix

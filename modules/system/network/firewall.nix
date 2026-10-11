@@ -6,6 +6,6 @@
 
 { ... }: {
   # [Firewall]
-  # Trust TUN interfaces created by local Clash-compatible proxy clients.
-  networking.firewall.trustedInterfaces = [ "FlClash" "tun0" "Meta" ];
+  # Trust TUN interfaces only when a Mihomo profile explicitly enables one.
+  networking.firewall.trustedInterfaces = [ "mihomo" "Mihomo" "tun0" "Meta" ];
 }

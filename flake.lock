@@ -195,22 +195,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-flclash": {
-      "locked": {
-        "lastModified": 1785571196,
-        "narHash": "sha256-KoTsyMQqnXQZq8deCEnu4QkyldkwH/bpMMhUcfMdGIw=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "148bab9c1c3c53136ecb44a6ea356a0ed5b39b06",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "148bab9c1c3c53136ecb44a6ea356a0ed5b39b06",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1790463110,
@@ -304,7 +288,6 @@
         "impermanence": "impermanence",
         "niri": "niri",
         "nixpkgs": "nixpkgs_2",
-        "nixpkgs-flclash": "nixpkgs-flclash",
         "nixvim": "nixvim",
         "noctalia": "noctalia",
         "silent-sddm": "silent-sddm",

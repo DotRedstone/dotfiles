@@ -16,6 +16,10 @@ Noctalia 的一部分插件开关与 materialized 文件由应用在运行时维
 | 中文翻译覆写 | `translations/` |
 | 给界面调用的小脚本 | `scripts.nix`、`scripts/` |
 
+Mihomo Control 是唯一的本机代理控制面：其核心与 loopback controller 由系统模块
+`modules/system/network/mihomo.nix` 管理，Noctalia 只连接和展示控制 API，不负责保存
+订阅或提升权限。迁移和恢复操作见 [`../../../docs/mihomo.md`](../../../docs/mihomo.md)。
+
 使用 MD3 语义 token（如 `surface`、`primary`、`outline`）而不是为单个插件硬编码
 颜色。密钥始终从 sops-nix 生成的只读路径读取，不进 TOML、不进 Git、不出现在日志中。
 

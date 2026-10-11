@@ -15,6 +15,8 @@
       "/etc/ssh"
       "/var/lib/docker"
       "/var/lib/AccountsService"
+      # Root-owned Mihomo config and provider cache; it contains private URLs.
+      "/var/lib/mihomo"
     ];
   };
 }

@@ -1,13 +1,13 @@
 # ---
 # Module: Network Switchboard
-# Description: Unified entry point for NetworkManager, Proxy, and Firewall
+# Description: Unified entry point for NetworkManager, Mihomo, and firewall modules
 # Scope: System
 # ---
 
 { ... }: {
   imports = [
     ./networkmanager.nix
-    ./flclash.nix
+    ./mihomo.nix
     ./firewall.nix
     ./easytier.nix
     ./todesk.nix

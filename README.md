@@ -39,4 +39,5 @@
   - [通知链路](./docs/notifications.md)
   - [终端 (WezTerm)](./docs/terminal-wezterm.md)
   - [编辑器 (NixVim)](./docs/editor-nixvim.md)
+  - [本机 Mihomo 与 Noctalia](./docs/mihomo.md)
   - [应用列表](./docs/apps.md)

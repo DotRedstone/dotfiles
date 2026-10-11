@@ -5,6 +5,7 @@ concave_edge_corners = false
 end = [
   "group:g1",
   "udiskie",
+  "mihomo",
   "tray",
   "network",
   "bluetooth",
@@ -35,6 +36,9 @@ type = "noctalia/bongocat:cat"
 [widget.udiskie]
 type = "aristides/udiskie:status"
 hide_when_empty = true
+
+[widget.mihomo]
+type = "mdj2812/mihomo-control:widget"
 
 [widget.lyrics]
 type = "tranzem/media-lyrics:now-playing"

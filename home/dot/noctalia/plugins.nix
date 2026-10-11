@@ -82,6 +82,7 @@ let
     ensure_plugin aristides/udiskie
     ensure_plugin tordex/processes
     ensure_plugin tranzem/media-lyrics
+    ensure_plugin mdj2812/mihomo-control
 
     # [Local Plugins]
     ensure_plugin dot/gaming_power

@@ -7,6 +7,17 @@
 { pkgs, ... }:
 let
   niri-mac-shortcut = pkgs.writeShellScriptBin "niri-mac-shortcut" ''
+    # `wtype -M` only presses a modifier; it does not release it automatically.
+    # Always release modifiers in reverse order so a global Super shortcut cannot
+    # leave Ctrl/Shift logically held in XWayland clients such as WeChat or QQ.
+    send_ctrl() {
+      ${pkgs.wtype}/bin/wtype -M ctrl "$@" -m ctrl
+    }
+
+    send_ctrl_shift() {
+      ${pkgs.wtype}/bin/wtype -M ctrl -M shift "$@" -m shift -m ctrl
+    }
+
     # Get the app_id of the focused window
     APP_ID=$(niri msg --json focused-window 2>/dev/null | ${pkgs.jq}/bin/jq -r '.app_id // ""' 2>/dev/null || echo "")
 
@@ -21,45 +32,45 @@ let
     case "$1" in
       copy)
         if is_terminal; then
-          ${pkgs.wtype}/bin/wtype -M ctrl -M shift -k c
+          send_ctrl_shift -k c
         else
-          ${pkgs.wtype}/bin/wtype -M ctrl -k c
+          send_ctrl -k c
         fi
         ;;
       paste)
         if is_terminal; then
-          ${pkgs.wtype}/bin/wtype -M ctrl -M shift -k v
+          send_ctrl_shift -k v
         else
-          ${pkgs.wtype}/bin/wtype -M ctrl -k v
+          send_ctrl -k v
         fi
         ;;
       cut)
         if ! is_terminal; then
-          ${pkgs.wtype}/bin/wtype -M ctrl -k x
+          send_ctrl -k x
         fi
         ;;
       undo)
         if ! is_terminal; then
-          ${pkgs.wtype}/bin/wtype -M ctrl -k z
+          send_ctrl -k z
         fi
         ;;
       redo)
         if ! is_terminal; then
-          ${pkgs.wtype}/bin/wtype -M ctrl -M shift -k z
+          send_ctrl_shift -k z
         fi
         ;;
       select-all)
         if ! is_terminal; then
-          ${pkgs.wtype}/bin/wtype -M ctrl -k a
+          send_ctrl -k a
         fi
         ;;
       save)
         if ! is_terminal; then
-          ${pkgs.wtype}/bin/wtype -M ctrl -k s
+          send_ctrl -k s
         fi
         ;;
       paste-plain)
-        ${pkgs.wtype}/bin/wtype -M ctrl -M shift -k v
+        send_ctrl_shift -k v
         ;;
       esac
   '';

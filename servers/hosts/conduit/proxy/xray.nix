@@ -4,10 +4,11 @@
 # Scope: Host
 # ---
 
-{ ... }: {
+{ config, ... }: {
   dot.services = {
     xrayNode = {
       enable = true;
+      managedAccounts = config.dot.proxyAccounts.accounts;
       webSocketPort = 20001;
       realityPort = 20002;
       realityListenAddress = "107.174.1.97";

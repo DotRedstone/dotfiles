@@ -23,6 +23,10 @@
 
     gmail-archiver.url = "github:DotRedstone/gmail-archiver";
     gmail-archiver.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Private remote is fetched at one exact revision from flake.lock.
+    proxyStack.url = "git+https://github.com/DotRedstone/proxy-stack.git?ref=main";
+    proxyStack.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -32,11 +36,18 @@
       hermes-agent,
       gmail-archiver,
       sops-nix,
+      proxyStack,
       ...
     }:
     {
+      packages = {
+        x86_64-linux.proxyStackWorkerBundles = proxyStack.checks.x86_64-linux.workerBundles;
+        aarch64-linux.proxyStackWorkerBundles = proxyStack.checks.aarch64-linux.workerBundles;
+      };
+
       nixosConfigurations = {
         conduit = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit proxyStack; };
           modules = [
             disko.nixosModules.disko
             sops-nix.nixosModules.sops
@@ -45,6 +56,7 @@
         };
 
         gcp-free = nixpkgs.lib.nixosSystem {
+          specialArgs = { proxyStack = null; };
           modules = [
             disko.nixosModules.disko
             sops-nix.nixosModules.sops
@@ -53,7 +65,7 @@
         };
 
         hopper = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit hermes-agent; };
+          specialArgs = { inherit hermes-agent proxyStack; };
           modules = [
             disko.nixosModules.disko
             hermes-agent.nixosModules.default
@@ -64,6 +76,7 @@
         };
 
         target = nixpkgs.lib.nixosSystem {
+          specialArgs = { proxyStack = null; };
           modules = [
             sops-nix.nixosModules.sops
             ./hosts/target

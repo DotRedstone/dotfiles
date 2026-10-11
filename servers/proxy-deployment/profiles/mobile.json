@@ -1,0 +1,8 @@
+{
+  "version": 1, "kind": "mobile",
+  "settings": {
+    "mixed-port": 7890, "allow-lan": false, "ipv6": false, "log-level": "warning",
+    "tun": { "enable": false },
+    "dns": { "enable": true, "listen": "127.0.0.1:1053", "enhanced-mode": "fake-ip", "nameserver": ["https://dns.google/dns-query", "https://cloudflare-dns.com/dns-query"] }
+  }
+}

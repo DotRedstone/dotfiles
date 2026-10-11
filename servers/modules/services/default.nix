@@ -4,7 +4,7 @@
 # Scope: System
 # ---
 
-{ ... }: {
+{ proxyStack ? null, ... }: {
   imports = [
     ./easytier.nix
     ./gcp-egress-guard.nix
@@ -24,7 +24,6 @@
     ./rustfs.nix
     ./xray-gateway.nix
     ./xray-cdn-websocket.nix
-    ./xray-node.nix
     ./xray-subscriptions.nix
-  ];
+  ] ++ [ (if proxyStack == null then ./xray-node.nix else proxyStack.nixosModules.xrayNode) ];
 }

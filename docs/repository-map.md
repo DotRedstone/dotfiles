@@ -15,9 +15,10 @@
 | Niri / Noctalia / 视觉语言 | `docs/desktop-niri.md`、`home/dot/noctalia/README.md` | 对应 Home Manager 模块 | `home-manager build --flake .#dot@warden` |
 | Fcitx5 / Rime | `docs/fcitx5-rime.md`、`home/dot/fcitx5/README.md` | `home/dot/fcitx5/` | `home-manager build --flake .#dot@warden` |
 | 云主机或服务器服务 | `servers/README.md`、`servers/AGENTS.md` | `servers/hosts/` 或 `servers/modules/` | `nix flake check path:./servers` |
-| 双节点代理通用规则或编译器 | `docs/proxy-network-design-draft.md`、`/home/dot/Projects/proxy-stack/README.md` | 独立 `proxy-stack` 仓库 | `node --test test/*.test.mjs`、`nix flake check path:.` |
+| 双节点代理通用规则或编译器 | `/home/dot/Projects/proxy-stack/README.md` | 独立 `proxy-stack` 仓库 | `node --test test/*.test.mjs`、`nix flake check path:.` |
+| Cloudflare 入口 IP 本地测速工具 | `/home/dot/Projects/cf-optimizer/README.md` | 独立 `cf-optimizer` 仓库 | 以该项目 README 和实际实现为准 |
 | 代理账户、节点与来源 | `servers/proxy-deployment/README.md` | `servers/proxy-deployment/` 与 SOPS | 锁定版本编译器 `validate` 和两节点求值 |
-| Cloudflare Worker / 优选 IP | `servers/cloudflare/README.md` | `servers/cloudflare/edge-worker/` | 该目录的 `npm run check` |
+| Cloudflare Worker / 优选池分发 | `servers/cloudflare/README.md` | `servers/cloudflare/edge-worker/` | 该目录的 `npm run check` |
 | 密钥、SOPS 或持久化 | `docs/secrets-sops.md`、`docs/impermanence.md` | 对应声明模块 | 只做安全的构建或 dry-run |
 
 ## 两个 Flake 的边界

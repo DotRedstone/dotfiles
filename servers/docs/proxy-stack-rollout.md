@@ -39,7 +39,9 @@ provider。发布时先写入五份不可变私有文档并验证，再切换 ma
 `servers/cloudflare/edge-worker/scripts/deploy.mjs` 仍调用旧固定 Worker 的
 `buildProfiles`；升级必须同时改造该适配器，不能仅替换固定提交。
 受限任务的输入、SOPS 键和隔离验收见 [部署目录](../proxy-deployment/README.md)。
-新模块尚未启用，账户目录尚无隔离账户，SOPS 与现网没有本阶段变更。
+新模块尚未启用。部署目录现已登记独立的 `canary`，旧 Xray 目录同名账户保持
+disabled；两地 UUID 与控制令牌只新增在 SOPS 密文中。未生成真实 v2 池，
+未发布私有文档或改变现网。
 
 ## 本地变更
 
@@ -48,7 +50,8 @@ provider。发布时先写入五份不可变私有文档并验证，再切换 ma
 - Xray 模块从本地服务目录抽出为锁定 input；两台海外主机从部署侧传入旧账户目录，
   SOPS secret 名称、入站端口和旧身份保持原样。`target` 与 `gcp-free` 仍使用旧模块。
 - 部署侧新增非秘密的账户、节点、来源、自有域名和三类客户端 profile 目录。
-  新账户目录目前为空；旧 `proxy-accounts.json`、旧订阅、旧 Worker 和路由器配置可用。
+  新目录的 canary 仅完成预备登记；旧 `proxy-accounts.json`、旧订阅、旧 Worker
+  和路由器配置保留。
 - 三种 Worker 的独立 bundle 可从 `servers#proxyStackWorkerBundles` 的锁定修订构建。
   配置 Worker、优选控制 Worker 和参数化 CFST 脚本均未安装；优选控制的受信任
   回源探测服务绑定尚待实现与验收。

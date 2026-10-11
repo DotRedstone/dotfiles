@@ -4,13 +4,14 @@
 审阅后才能发布；在此之前，现用的 `servers/proxy-accounts.json`、
 `servers/clash/router-policy.json` 和订阅保持原有路径。
 
-- `accounts.json` 的账户集合有意保持为空。现有账户仍由旧目录管理。迁移账户前，需核对
-  `primaryOrigin`、两项批准的来源 ID、四种节点出口、生命周期元数据，以及分别
-  存入 SOPS 的凭据。
+- `accounts.json` 登记独立的 `canary` 测试账户；旧 `proxy-accounts.json` 中同名账户
+  保持 disabled，现用账户不变。启用前需核对 `primaryOrigin`、两项批准的来源 ID、
+  四种节点出口、生命周期元数据以及各自的 SOPS 凭据。
 - `nodes.json` 记录两处现有的公开节点端点和 Cloudflare 名称。REALITY 客户端参数
   与 WebSocket 路径属于私有运行时输入，不写入本文件。
 - `preferred-sources.json` 登记路由器现用的两处独立 CloudflareST 来源。
-  GitHub 来源需核对 owner、ref 和 path，并验证对应回源健康状态。
+  `owner-campus-canary` 是两地 `signed-upload` 的隔离登记，尚无实测结果或已验证
+  v2 池。GitHub 来源需核对 owner、ref 和 path，并验证对应回源健康状态。
 - `owned-domains.json` 仅保存直连规则所需的自有域名后缀和节点 IP。
 - `profiles/` 分别保存路由器、桌面和移动端的网络行为。路由器配置保留现有的
   TUN、DNS、端口与控制器参数用于测试，尚未安装到路由器。
@@ -59,6 +60,41 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 `originId`、TLS 主机、专用路径和相应证明凭据。两模块的 `package` 选项须指向
 固定 `edge-proxy-worker` 修订的源码包；当前项目尚未提供可跨主机取得的固定
 发布物，启用前必须先解决该来源并核对散列。
+
+`edge-worker-source.json` 固定 `edge-proxy-worker 4fbe909` 的完整提交和归档
+NAR 散列。`node scripts/prepare-edge-source.mjs /home/dot/Projects/edge-proxy-worker`
+会从该提交归档、核对散列并加入本机 Nix store；它不读取工作树的未提交文件。
+独立 Worker 项目目前没有远端，另一台机器无法仅凭 dotfiles 重建源码包。
+发布前须提供可审查、可跨主机取得的同一 Git 对象或按散列复制已验证 store
+路径，随后将该包显式传给两个 Nix 模块的 `package` 选项。不得只替换旧
+`pinned-source.mjs` 的提交号：旧 `deploy.mjs` 仍调用新源码已移除的
+`buildProfiles`。
+
+## canary 凭据与启用门槛
+
+`servers/secrets/conduit.yaml` 和 `hopper.yaml` 各自保存不同的
+`xray/managed_canary_uuid`、`proxy/origin_proof_key` 和
+`proxy/origin_proof_token`。`servers/secrets/cloudflare.yaml` 的 `canary`
+分支保存独立交付令牌、订阅令牌、两地上传 HMAC、优选池读取令牌以及探测
+请求/响应 HMAC；这些值未复制到通用项目或明文配置。仅登记密文不会改变
+运行服务：旧 Xray 账户目录中的 `canary.enabled` 仍为 false。
+
+进入隔离灰度前，还需完成以下部署侧输入与实机证据：
+
+1. 路由器在实际网络生成两地测量结果，经可信回源探测写入 `owner-campus-canary`
+   的两个 v2 池；只有池格式和健康通过才允许发布。
+2. 确定 probe 的独立 HTTPS 域名、证书、受限来源和运行主机，向该主机的 SOPS
+   写入完整 `probe_env`；为新版 Worker 创建独立 KV、绑定和私有交付域名。
+3. 为指定发布主机准备完整 `proxy/delivery_runtime`，核对两地 UUID 与 SOPS
+   一致，并更新当前仍有用户未提交改动的 `servers/flake.lock` 到已验编译器修订。
+4. 在两台主机先用 `nixos-rebuild test` 验证 SSH、旧 Xray 身份、旧订阅和新 canary
+   的 REALITY、CF TLS 回源；只对隔离客户端添加新配置，验证三平台交付、
+   provider 更新与单账户撤销。旧 Worker、旧 KV 和路由器默认组继续保留。
+
+这些条件目前未全部满足，未执行服务器、Cloudflare 或路由器切换。发生问题时
+保持旧 manifest 与旧订阅，停用 canary 和新模块；如已执行 `nixos-rebuild test`，
+恢复上一代系统配置并验证旧身份与 SSH。任何触及现用入口的切换需另行提交
+可审查的 diff、实测证据和回退命令。
 
 probe 的公网 HTTPS 路由、证书信任、来源限制及新版 Worker 绑定需要单独审阅；
 当前模块既不开放防火墙，也不覆盖旧代理路由。先在隔离环境验证错误证书、错误

@@ -47,8 +47,9 @@ Git 对象。现网审计、灰度与清理步骤见
 `flake.lock` 固定其 Git 修订；远程构建端须能读取该私有仓库，发布前还须复核
 访问权限与锁定源码。账户、LA/SG 真实端点、优选来源和客户端网络参数留在
 [proxy-deployment](./proxy-deployment/README.md)；SOPS 密钥仍在本仓库。
-现有 `clash/router-policy.json`、`proxy-accounts.json`、旧 Worker 与订阅保持可用，
-新编译器尚未向现网发布。`target` 和 `gcp-free` 没有加入这次双节点代理。
+隔离 canary 已登记但旧 Xray 目录仍将其关闭；现有 `clash/router-policy.json`、
+`proxy-accounts.json`、旧 Worker 与订阅保持可用，新编译器尚未向现网发布。
+`target` 和 `gcp-free` 没有加入这次双节点代理。
 从**当前锁定修订**本地构建三类 Worker bundle 的命令是：
 
 ```bash

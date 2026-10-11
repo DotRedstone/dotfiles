@@ -1,6 +1,6 @@
 # 微信集成 (WeChat)
 
-WeChat UOS 在当前桌面环境（Niri + Noctalia）下存在特定的显示与通知问题，本仓库通过特定的 Workaround 实现了深度集成。
+WeChat UOS 在 Niri + Noctalia 环境下有输入法候选框显示和系统通知问题。本仓库分别提供主题兼容方案与通知桥服务。
 
 ## 输入法适配 (IME)
 
@@ -9,25 +9,15 @@ WeChat UOS 在当前桌面环境（Niri + Noctalia）下存在特定的显示与
 - **对策**: 在微信中应使用 **Inflex (Rectangular)** 系列直角主题。
 - **原则**: 严禁为了照顾微信而降低全局系统的透明度或毛玻璃质量。
 
-## 通知桥接 (WeChat Notify Bridge)
+## 通知桥接
 
-由于官方微信客户端无法可靠触发系统通知，系统配置了自定义的桥接服务。
+`wechat-notify-bridge.service` 是用户级服务，用于补充微信未发出的系统通知。
+其数据来源、SQLCipher 密钥处理、安全边界和故障检查统一记录在
+[微信通知桥](./wechat-notify-bridge.md)。查看服务状态：
 
-### 工作原理
-- **监听**: 系统运行 `wechat-notify-bridge` 用户级服务。
-- **检测**: 该服务通过监听微信本地 SQLite 数据库的变化来获取新消息。
-- **解密**: 自动从微信进程中寻找 SQLCipher 密钥。
-
-### 核心限制
-- **`ptrace_scope`**: 系统内核设置会影响密钥提取。
-- **安全性**: 
-  - **严禁**在日志中打印 SQLCipher 密钥内容。
-  - **严禁**将解密后的运行时密钥缓存提交至 Git。
-
-## 系统服务
-微信通知桥通过 Systemd User Service 管理：
-- **服务名**: `wechat-notify-bridge.service`
-- **操作**: `systemctl --user status wechat-notify-bridge`
+```bash
+systemctl --user status wechat-notify-bridge
+```
 
 相关链接：
 - [系统通知](./notifications.md)

@@ -1,6 +1,6 @@
 # 编辑器 (NixVim)
 
-本系统的编辑器基于 [NixVim](https://github.com/nix-community/nixvim) 构建，提供了类似 LazyVim 的现代编辑体验，同时深度集成了 NixOS 生态。
+本系统通过 [NixVim](https://github.com/nix-community/nixvim) 声明式配置 Neovim。插件、快捷键和配色分别由 `home/dot/nixvim/` 中的模块维护。
 
 ## 核心快捷键 (Leader = Space)
 
@@ -36,7 +36,7 @@
 
 - **UI**: `lualine`, `bufferline`, `neo-tree`, `noice` (消息美化), `which-key`。
 - **功能**: `telescope` (搜索), `flash` (导航), `snacks` (综合工具集), `persistence` (会话恢复)。
-- **编码**: `treesitter` (高亮), `lsp` (LSP 支持), `conform-nvim` (格式化), `lint` (诊断), `blink-cmp` (极致补全)。
+- **编码**: `treesitter` (高亮), `lsp` (LSP 支持), `conform-nvim` (格式化), `lint` (诊断), `blink-cmp` (补全)。
 - **AI**: `copilot-lua` & `blink-copilot`。
 
 ## 配色方案

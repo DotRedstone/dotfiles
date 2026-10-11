@@ -1,206 +1,36 @@
-# Noctalia 插件 UI 规范
+# Noctalia 本地插件维护
 
-## 总原则
+本仓库当前使用 Noctalia v5 插件结构。本地插件位于
+[`home/dot/noctalia/plugins/`](../home/dot/noctalia/plugins/)；
+[插件同步模块](../home/dot/noctalia/plugins.nix)负责注册来源并启用所需插件。
+旧的 QML `Panel.qml`、`Main.qml` 和 `_shared` 组件方案不属于当前仓库实现。
 
-Noctalia 插件 UI 应优先使用官方基础组件：`qs.Commons`、`qs.Widgets`、`Style`、`Color`、`NText`、`NIcon`、`NIconButton`、`NBox`、`NTabBar`、`NTabButton`。本仓库的 `home/dot/noctalia/config/plugins/_shared/` 只补足官方组件体系里缺少的业务级通用组件。
+## 已有插件
 
-插件 Panel 只做展示和轻量状态组合，复杂业务逻辑放在 helper、provider 或 `Main.qml`。常规插件面板应由 Card、Section、Metric、List、Empty、Warning 组合，不在每个插件里重复手写 `Rectangle` 卡片、进度条、状态胶囊和空状态。
+`gaming_power` 是当前仓库中的本地插件：
 
-共享组件不得读取插件 settings、不得调用 helper、不得读写 cache，不依赖某个插件的 `mainInstance`。
+| 文件 | 职责 |
+| --- | --- |
+| `plugin.toml` | 插件身份、Noctalia 版本和入口声明 |
+| `service.luau` | 读取系统性能状态并发布插件状态 |
+| `shortcut.luau` | 显示控制中心快捷项并调用受限的性能切换命令 |
+| `translations/` | 界面文字的中英文翻译 |
 
-## 组件使用规范
+性能模式的实际控制逻辑由系统侧命令维护。插件只读取状态并调用该命令，
+不复制系统权限或设备控制逻辑。
 
-### PluginCard
+## 新插件边界
 
-统一插件面板里的卡片容器。
+- 先确认现有官方或社区插件能否满足需求。只有本机特有的集成需要留在
+  `home/dot/noctalia/plugins/`；可复用的完整插件达到独立维护条件时，
+  按根目录 [AGENTS.md](../AGENTS.md) 的项目边界迁出。
+- 在 `plugin.toml` 声明与当前 Noctalia API 相符的入口。服务、快捷项和翻译
+  各自维护职责；不要把系统配置或密钥复制到插件中。
+- 界面颜色使用 Noctalia 的语义 token。错误提示不显示 token、原始响应、
+  使用记录或其他个人数据。
+- 增加插件后检查同步模块的来源与启用列表，运行
+  `home-manager build --flake .#dot@warden`。实际加载、交互和权限行为
+  仍需在 Noctalia 会话中验证。
 
-```qml
-Shared.PluginCard {
-    variant: "surfaceVariant"
-    outlined: true
-
-    Shared.SectionHeader {
-        icon: "chart-bar"
-        title: "Today"
-    }
-}
-```
-
-### SectionHeader
-
-统一 section 标题行，支持右侧动作。
-
-```qml
-Shared.SectionHeader {
-    icon: "history"
-    title: "Last 7 Days"
-    subtitle: "Local summary"
-    actionIcon: "refresh"
-    onActionClicked: mainInstance.refresh()
-}
-```
-
-### MetricCard
-
-统一小统计卡片，用于 prompts、sessions、AFK、当前应用等。
-
-```qml
-Shared.MetricCard {
-    icon: "message-circle"
-    label: "Prompts"
-    value: "16"
-    subtext: "Today"
-}
-```
-
-### MetricRow
-
-统一左侧 label、右侧 value、可选 subtext 的列表行。
-
-```qml
-Shared.MetricRow {
-    label: "GPT 5.5"
-    value: "27.2M Tokens"
-    subtext: "Cache read included"
-}
-```
-
-### ProgressBar
-
-统一进度条。`value` 范围为 `0.0-1.0`，组件内部会 clamp 到 `0.0-1.0`。默认 `semanticThresholds: true`，超过 `0.7` 使用 warning 色，超过 `0.9` 使用 error 色，适合额度、容量、风险类进度。
-
-```qml
-Shared.ProgressBar {
-    value: 0.71
-    animated: true
-}
-```
-
-额度、容量、风险型进度条应保留语义阈值：
-
-```qml
-Shared.ProgressBar {
-    value: quotaPercent
-    semanticThresholds: true
-}
-```
-
-历史统计、普通数值对比型进度条应关闭语义阈值并显式指定统计色：
-
-```qml
-Shared.ProgressBar {
-    value: share
-    semanticThresholds: false
-    barColor: Color.mPrimary
-}
-```
-
-不要让普通历史统计条使用 warning/error 阈值颜色，否则会错误表达“危险”。
-
-### StatusBadge
-
-统一状态胶囊，用于 source status、tier label、API 状态。
-
-```qml
-Shared.StatusBadge {
-    text: "Connected"
-    icon: "circle-check"
-    variant: "success"
-}
-```
-
-### SegmentedControl
-
-统一分段切换按钮，用于短选项。
-
-```qml
-Shared.SegmentedControl {
-    model: ["日", "周", "月"]
-    currentIndex: 0
-    onClicked: index => root.modeIndex = index
-}
-```
-
-### EmptyState
-
-统一空状态。
-
-```qml
-Shared.EmptyState {
-    icon: "inbox"
-    title: "No data"
-    description: "Waiting for local summary."
-}
-```
-
-### WarningBanner
-
-统一警告和错误提示条。
-
-```qml
-Shared.WarningBanner {
-    variant: "error"
-    title: "Provider unavailable"
-    message: "Check local auth status."
-}
-```
-
-### BarChart
-
-统一简单柱状图，不承担复杂图表逻辑。推荐给每个 chart item 提供聚合后的 tooltip 文案。
-
-```qml
-Shared.BarChart {
-    model: [
-        { label: "Mon", value: 120, tooltip: "Mon · 2h 00m" },
-        { label: "Tue", value: 80, tooltip: "Tue · 1h 20m" }
-    ]
-}
-```
-
-```js
-{ label: "05/07", value: 5460, tooltip: "05/07 · 1小时31分钟" }
-```
-
-tooltip 只显示聚合摘要，不显示敏感原始数据。`screen-time` tooltip 不允许包含窗口标题、URL、文件名。月视图可以隐藏部分 x-axis label，但 tooltip 必须完整。
-
-## 颜色规范
-
-背景使用 `Color.mSurface` 和 `Color.mSurfaceVariant`。主强调使用 `Color.mPrimary`。正文使用 `Color.mOnSurface`，次级文本使用 `Color.mOnSurfaceVariant`。边框使用 `Color.mOutline` 或 `Qt.alpha(Color.mOutline, 0.2)`。错误使用 `Color.mError`。
-
-插件 QML 中禁止新增大面积硬编码 `#xxxxxx` 颜色。允许少量通过 `Qt.alpha(Color.*, value)` 派生透明度。
-
-## 间距和圆角规范
-
-页面外边距使用 `Style.marginL`。卡片内边距使用 `Style.marginL`。section 间距使用 `Style.marginL`。行内间距使用 `Style.marginS` 或 `Style.marginM`。卡片圆角使用 `Style.radiusS` 或 Noctalia 已有常用 radius。小胶囊使用 `height / 2`。不要在单个插件里重新定义一套圆角体系。
-
-## 字体规范
-
-大数字使用 `Style.fontSizeXXXL` 或 `Style.fontSizeXXL`，加粗。section title 使用 `Style.fontSizeL` 和 semi/bold。正文使用 `Style.fontSizeM`。次级文本使用 `Style.fontSizeS` 或 `Style.fontSizeXS`，颜色为 `Color.mOnSurfaceVariant`。插件中不直接写裸 pixel 字号。
-
-## 状态规范
-
-正常状态使用 `primary` 或 `neutral`。警告使用 warning 风格或 error alpha 背景。错误使用 `WarningBanner` 的 `error`。空状态使用 `EmptyState`。加载中应显示泛化 waiting/source 状态，不展示原始响应。
-
-## 隐私规范
-
-UI 不展示 token、API key、session、cookie。`screen-time` 不展示 title、URL、windowTitle、fileName、raw events。`model-usage` 不展示 email、token、raw JSON。错误信息应泛化，不打印原始响应。
-
-## 新插件 Checklist
-
-- 是否使用 `_shared` 组件组织 Card、Section、Metric、List、Empty、Warning。
-- 是否避免新增大面积硬编码颜色。
-- 是否避免把复杂业务逻辑塞进 `Panel.qml`。
-- 是否提供 `EmptyState`。
-- 是否提供错误或 warning 状态。
-- 普通统计进度条是否关闭 `semanticThresholds`。
-- 风险型进度条是否保留 `semanticThresholds`。
-- 图表是否提供 tooltip。
-- tooltip 是否只展示聚合数据。
-- 是否使用 `Style.*` 和 `Style.uiScaleRatio` 保持缩放。
-- 是否 `home-manager build --flake .#dot@warden` 通过。
-- 是否没有 cache、secret、token、session、原始 usage 或 ActivityWatch 数据进入 git。
-
-## 迁移顺序建议
-
-已迁移第一批：`screen-time`、`model-usage`。后续建议顺序为 `keybind-cheatsheet`、`privacy-indicator`、`clipper`、`todo`、`screen-toolkit`。其中 `screen-toolkit` 有截图和 overlay 场景，应最后单独整理工具态视觉。
+目录职责和服务边界见
+[Noctalia Shell 配置](../home/dot/noctalia/README.md)。

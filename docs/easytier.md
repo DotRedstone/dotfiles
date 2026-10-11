@@ -11,7 +11,7 @@ EasyTier 服务会从以下路径读取参数：
 
 **方式一：使用快速连接 URI（推荐）**
 
-如果 Web 面板或控制台提供了一键连接的 `-w` 参数（例如 `easytier-core -w udp://[ip]:[port]/[network]`），你可以直接使用 URI：
+如果 Web 面板或控制台提供 `-w` 连接 URI（例如 `easytier-core -w udp://[ip]:[port]/[network]`），可使用以下配置：
 
 ```bash
 EASYTIER_URI="udp://[ip]:[port]/[network]"

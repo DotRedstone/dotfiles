@@ -16,6 +16,28 @@ Principles:
 * Prefer local, app-specific workarounds over global hacks.
 * Keep the Noctalia visual system consistent.
 
+## Configuration and Project Boundary
+
+* Keep this repository focused on declarative configuration, host-specific
+  values, secret references, and the smallest integration needed to use a tool.
+* Review the boundary as a feature grows. Once its reusable implementation can
+  be maintained independently, with a coherent interface and its own test or
+  release cycle, or is useful outside this configuration, move it and its
+  maintenance docs promptly to an independent Git repository under
+  `/home/dot/Projects/`. Keep only a pinned reference, module instantiation,
+  and deployment-specific configuration here.
+* Do not extract a small Nix module, template, or host-specific helper solely
+  because it spans several files. Split when independent maintenance is real,
+  not to maximize the number of repositories.
+* Treat extraction as a scoped migration: document the interface and ownership,
+  preserve a working rollback path, and validate the external project and the
+  affected Flake separately. Do not equate a locked input with a live rollout.
+* Before moving code into an independent repository, separate generic behavior
+  from this deployment's accounts, contact IDs, real endpoints, domains, tokens,
+  and host choices. Do not copy those values into source, README files, examples,
+  fixtures, tests, or the new repository's Git history. Use synthetic examples;
+  keep real values in this repository's configuration or SOPS as appropriate.
+
 ## Common Commands
 
 ```bash
@@ -68,6 +90,20 @@ put new behavior in a single-purpose sibling module and import it deliberately.
   keys, personal data, subscription URLs, or decrypted SOPS values.
 * If a structural change invalidates a README or routing table, update it in the same
   change set.
+* Write maintenance docs mainly in concise Chinese; retain exact command names,
+  paths, options, and upstream terms. Reuse one name for each component across
+  README, docs, and module comments.
+* Use neutral, precise language in README files, guides, code comments, and
+  release notes. Do not paste conversational wording from the user or an agent
+  into lasting documents; express the intended behavior and reason directly.
+* Give each fact one primary home and link to it elsewhere. Distinguish the
+  intended design, declared source, build result, and observed runtime state.
+  Keep temporary logs and task-specific TODOs out of lasting architecture docs.
+* Explain why a boundary exists, how to validate it, and how to recover from a
+  risky change. Keep simple changes simple; add a TODO or design document only
+  when it helps someone carry out or review multi-step work.
+* Apply these writing rules when touching relevant docs; do not rewrite
+  unrelated documents solely to standardize style.
 
 ## Nix Module Header Format
 
@@ -95,6 +131,12 @@ Rules:
 * Avoid vague descriptions like “configuration”.
 * `default.nix` files should use `Entry` or `Switchboard` in the `Module` field.
 * High-risk modules should include `Notes`.
+* Use short `# [Section]` comments only where they help navigate a longer module.
+  Follow nearby naming and language conventions instead of adding a label for
+  every option.
+* Explain non-obvious choices, invariants, security boundaries, and rollback
+  constraints next to the relevant code. Do not restate what an option already
+  says or copy conversational task notes into code comments.
 
 ## Repository Boundaries
 

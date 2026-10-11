@@ -35,9 +35,21 @@ in
         message = "preferred probe must stay on loopback until a separate TLS route is reviewed"; }
     ];
 
-    sops.secrets."proxy/probe_env" = { owner = "root"; mode = "0400"; };
-    sops.secrets."proxy/probe_tls_cert" = { owner = "root"; mode = "0400"; };
-    sops.secrets."proxy/probe_tls_key" = { owner = "root"; mode = "0400"; };
+    sops.secrets."proxy/probe_env" = {
+      owner = "root";
+      mode = "0400";
+      restartUnits = [ "proxy-preferred-probe.service" ];
+    };
+    sops.secrets."proxy/probe_tls_cert" = {
+      owner = "root";
+      mode = "0400";
+      restartUnits = [ "proxy-preferred-probe.service" ];
+    };
+    sops.secrets."proxy/probe_tls_key" = {
+      owner = "root";
+      mode = "0400";
+      restartUnits = [ "proxy-preferred-probe.service" ];
+    };
 
     systemd.services.proxy-preferred-probe = {
       description = "Restricted HTTPS probe for CDN candidates";

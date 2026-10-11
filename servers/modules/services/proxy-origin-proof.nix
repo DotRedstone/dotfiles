@@ -39,11 +39,20 @@ in
         message = "origin proof needs a dedicated path"; }
     ];
 
-    sops.secrets."proxy/origin_proof_key" = { owner = "root"; mode = "0400"; };
-    sops.secrets."proxy/origin_proof_token" = { owner = "root"; mode = "0400"; };
+    sops.secrets."proxy/origin_proof_key" = {
+      owner = "root";
+      mode = "0400";
+      restartUnits = [ "proxy-origin-proof.service" ];
+    };
+    sops.secrets."proxy/origin_proof_token" = {
+      owner = "root";
+      mode = "0400";
+      restartUnits = [ "proxy-origin-proof.service" ];
+    };
     sops.templates."proxy-origin-proof.env" = {
       owner = "root";
       mode = "0400";
+      restartUnits = [ "proxy-origin-proof.service" ];
       content = ''
         ORIGIN_PROOF_KEY=${config.sops.placeholder."proxy/origin_proof_key"}
         ORIGIN_PROOF_ACCESS_TOKEN=${config.sops.placeholder."proxy/origin_proof_token"}

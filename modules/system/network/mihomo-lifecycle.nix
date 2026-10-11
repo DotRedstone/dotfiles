@@ -37,13 +37,10 @@ let
   };
 in
 {
-  users.groups.mihomo-control = { };
-  users.users.dot.extraGroups = [ "mihomo-control" ];
-
   security.polkit.extraConfig = ''
     polkit.addRule(function(action, subject) {
       if (action.id == "org.freedesktop.systemd1.manage-units" &&
-          subject.isInGroup("mihomo-control") &&
+          subject.user == "dot" &&
           action.lookup("unit") == "mihomo.service" &&
           ["start", "stop", "restart"].indexOf(action.lookup("verb")) >= 0) {
         return polkit.Result.YES;

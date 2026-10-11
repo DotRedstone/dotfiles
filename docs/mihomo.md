@@ -9,7 +9,8 @@ Noctalia 通过独立项目 [`DotRedstone/noctalia-mihomo-control`](https://gith
 
 - Mihomo 服务以 root 运行，以便未来由配置显式启用 TUN；当前迁移不会自动开启 TUN、
   修改默认路由或替代路由器透明代理。`mihomo.service` 没有开机目标依赖，只有 Noctalia
-  面板通过受限 helper 才能启动、停止或重启它。
+  面板通过受限 helper 才能启动、停止或重启它。Polkit 仅授权本机用户 `dot` 对该唯一
+  单元执行这三个动作；它不能管理其他 systemd 单元，也不能启用、禁用或屏蔽 Mihomo。
 - 控制器固定为 `127.0.0.1:9090`，不监听局域网，也不设置远程管理入口。
 - 配置和 provider 缓存位于 `/var/lib/mihomo`，由 impermanence 持久化，权限为 root-only。
 - `mihomo-profile-import` 只接受**未定义** `external-controller` 或 `secret` 的配置，避免

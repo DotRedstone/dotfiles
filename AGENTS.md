@@ -1,44 +1,26 @@
-# Dotfiles Agent Guide
+# Dotfiles Agent 协作指南
 
-## Repository Purpose
+## 仓库用途
 
-This repository manages the user’s personal NixOS system and Home Manager configuration for host `warden` and user `dot`. For human-readable documentation, see [README.md](./README.md).
+本仓库管理 `warden` 主机与 `dot` 用户的 NixOS、Home Manager 个人配置。面向使用者的入口见 [README.md](./README.md)。
 
-It also contains `servers/`, a separate NixOS server Flake. Read
-[docs/repository-map.md](./docs/repository-map.md) before choosing commands: desktop and
-server outputs share Git history but never share a deployment target.
+`servers/` 是独立的 NixOS 服务器 Flake。选择命令前先阅读 [docs/repository-map.md](./docs/repository-map.md)：桌面与服务器共享 Git 历史，但部署目标不同。
 
-Principles:
+基本原则：
 
-* Keep changes reversible.
-* Keep modules small and single-purpose.
-* Do not sacrifice the global desktop experience to fix one application.
-* Prefer local, app-specific workarounds over global hacks.
-* Keep the Noctalia visual system consistent.
+- 改动应可回退，模块应小而职责单一。
+- 不为修复单个应用而损害整个桌面环境；优先采用应用局部的处理方式。
+- 保持 Noctalia 视觉系统一致。
 
-## Configuration and Project Boundary
+## 配置与独立项目的边界
 
-* Keep this repository focused on declarative configuration, host-specific
-  values, secret references, and the smallest integration needed to use a tool.
-* Review the boundary as a feature grows. Once its reusable implementation can
-  be maintained independently, with a coherent interface and its own test or
-  release cycle, or is useful outside this configuration, move it and its
-  maintenance docs promptly to an independent Git repository under
-  `/home/dot/Projects/`. Keep only a pinned reference, module instantiation,
-  and deployment-specific configuration here.
-* Do not extract a small Nix module, template, or host-specific helper solely
-  because it spans several files. Split when independent maintenance is real,
-  not to maximize the number of repositories.
-* Treat extraction as a scoped migration: document the interface and ownership,
-  preserve a working rollback path, and validate the external project and the
-  affected Flake separately. Do not equate a locked input with a live rollout.
-* Before moving code into an independent repository, separate generic behavior
-  from this deployment's accounts, contact IDs, real endpoints, domains, tokens,
-  and host choices. Do not copy those values into source, README files, examples,
-  fixtures, tests, or the new repository's Git history. Use synthetic examples;
-  keep real values in this repository's configuration or SOPS as appropriate.
+- 本仓库以声明式配置、主机专属值、密钥引用和使用工具所需的最少集成为主。
+- 功能成长时重新评估边界。可复用实现具备明确接口、独立测试或发布周期，或者已能在本配置之外使用时，应及时把实现及其维护文档迁移至 `/home/dot/Projects/` 下的独立 Git 仓库。本仓库只保留固定版本的引用、模块实例化及部署专属配置。
+- 不因一个小型 Nix 模块、模板或主机专属辅助脚本跨越几个文件，就将其拆为独立项目。是否拆分取决于实际的独立维护需要。
+- 迁移应明确范围：记录接口与维护归属，保留可用的回退路径，分别验证独立项目与受影响的 Flake。锁定依赖版本不能证明实际部署已生效。
+- 迁移前，将通用行为与本部署的账号、联系人标识、真实端点、域名、令牌和主机选择分开。不得把这些值复制到新项目的源码、README、示例、样例数据、测试或 Git 历史。示例使用合成数据；真实值按需保留在本仓库配置或 SOPS 中。
 
-## Common Commands
+## 常用命令
 
 ```bash
 home-manager build --flake .#dot@warden
@@ -49,179 +31,122 @@ nix flake check .
 nix flake check path:./servers
 ```
 
-Validation Rules:
+验证规则：
 
-* Home Manager changes should be validated with `home-manager build` or `home-manager switch`.
-* System module changes should be validated with `nixos-rebuild dry-run` or `nixos-rebuild switch`.
-* Do not use `sudo nixos-rebuild switch` for Home Manager-only changes.
-* Do not claim full validation if only one side was tested.
-* Server changes use `servers/flake.nix`; follow `servers/AGENTS.md` and never run a
-  desktop `nixos-rebuild` command against a remote server by accident.
+- Home Manager 改动使用 `home-manager build` 或 `home-manager switch` 验证。
+- 系统模块改动使用 `nixos-rebuild dry-run` 或 `nixos-rebuild switch` 验证。
+- 仅修改 Home Manager 时，不运行 `sudo nixos-rebuild switch`。
+- 只验证一侧时，不声称整个配置已通过验证。
+- 服务器改动使用 `servers/flake.nix`，遵循 `servers/AGENTS.md`；不得误将桌面的 `nixos-rebuild` 命令用于远程服务器。
 
-## Read-First Routing
+## 修改前的阅读路径
 
-Before editing, read the closest switchboard and the directory README when present.
+编辑前先阅读最近的入口模块及所在目录的 README（如有）。
 
-| Change | Read first | Edit boundary |
+| 改动范围 | 先阅读 | 修改边界 |
 | --- | --- | --- |
-| Warden hardware, mounts, host identity | `hosts/warden/default.nix` | `hosts/warden/` |
-| Global Warden system behavior | `modules/system/default.nix` | one `modules/system/<domain>/` module |
-| User app or desktop behavior | `home/dot/default.nix` | one `home/dot/<app>/` module |
-| Servers | `servers/README.md`, `servers/AGENTS.md` | `servers/hosts/` or `servers/modules/` |
+| Warden 硬件、挂载、主机身份 | `hosts/warden/default.nix` | `hosts/warden/` |
+| Warden 全局系统行为 | `modules/system/default.nix` | 一个 `modules/system/<domain>/` 模块 |
+| 用户应用或桌面行为 | `home/dot/default.nix` | 一个 `home/dot/<app>/` 模块 |
+| 服务器 | `servers/README.md`、`servers/AGENTS.md` | `servers/hosts/` 或 `servers/modules/` |
 | Cloudflare Worker | `servers/cloudflare/README.md` | `servers/cloudflare/edge-worker/` |
 
-Do not use an entrypoint as a dumping ground. `default.nix` files are switchboards;
-put new behavior in a single-purpose sibling module and import it deliberately.
+入口文件不承载具体功能。`default.nix` 用于组织模块；新行为应放入职责单一的同级模块，并显式引入。
 
-## Worktree Hygiene
+## 工作区与 Git
 
-* Start with `git status --short`; pre-existing dirty files belong to the user.
-* Do not format, move, stage, revert, or commit unrelated changes.
-* Keep documentation-only, refactor-only, and behavior-changing work in separate commits.
-* When a new Nix file is referenced by a Flake before it is staged, use `git add -N`
-  or validate through `path:.` so evaluation sees it.
+- 先运行 `git status --short`；已有的未提交改动属于用户。
+- 不格式化、移动、暂存、撤销或提交无关改动。
+- 纯文档、纯重构和行为改动分别提交。
+- 新 Nix 文件在被 Flake 引用但尚未暂存时，可使用 `git add -N`，或通过 `path:.` 验证，使求值过程能看到该文件。
 
-## Documentation Contract
+## 文档约定
 
-* Root `README.md` is the human entry point; `docs/` covers cross-cutting concepts.
-* A complex directory gets a concise `README.md` for responsibilities, entrypoints,
-  safety boundaries, and validation—never credentials or runtime data.
-* `AGENTS.md` files state execution constraints; they must not include tokens, private
-  keys, personal data, subscription URLs, or decrypted SOPS values.
-* If a structural change invalidates a README or routing table, update it in the same
-  change set.
-* Write maintenance docs mainly in concise Chinese; retain exact command names,
-  paths, options, and upstream terms. Reuse one name for each component across
-  README, docs, and module comments.
-* Use neutral, precise language in README files, guides, code comments, and
-  release notes. Do not paste conversational wording from the user or an agent
-  into lasting documents; express the intended behavior and reason directly.
-* Give each fact one primary home and link to it elsewhere. Distinguish the
-  intended design, declared source, build result, and observed runtime state.
-  Keep temporary logs and task-specific TODOs out of lasting architecture docs.
-* Explain why a boundary exists, how to validate it, and how to recover from a
-  risky change. Keep simple changes simple; add a TODO or design document only
-  when it helps someone carry out or review multi-step work.
-* Apply these writing rules when touching relevant docs; do not rewrite
-  unrelated documents solely to standardize style.
+- 根目录 `README.md` 是使用者入口；`docs/` 说明跨模块概念。
+- 复杂目录使用简洁的 `README.md` 说明职责、入口、安全边界和验证方式，不写入凭据或运行时数据。
+- `AGENTS.md` 记录执行约束，不包含令牌、私钥、个人数据、订阅地址或解密后的 SOPS 值。
+- 结构变化使 README 或导航表失效时，在同一变更中更新它们。
+- 面向维护者的文档和新写的解释性注释以简洁中文为主；命令、路径、选项、代码标识符和上游术语保持准确。README、其他文档与模块注释对同一组件使用一致的名称。
+- README、指南、代码注释和发布说明使用中立、准确的书面语。不直接复制用户或 Agent 的口语化表述；明确写出行为及原因。
+- 每项事实只保留一处主要说明，其他位置通过链接引用。在文档与报告中区分预期设计、声明式源码、构建结果和实际运行状态；不将临时日志或单次任务 TODO 写入长期架构文档。
+- 说明边界存在的原因、验证方法及高风险改动的恢复方式。简单改动保持简单；只有多步骤工作需要交接或审查时才增加 TODO 或设计文档。
+- 修改相关文档时应用这些规则，不为统一风格而批量改写无关文档。
 
-## Nix Module Header Format
+## Nix 模块文件头
 
-All `.nix` modules should start with:
+所有 `.nix` 模块以以下格式开头：
 
 ```nix
 # ---
-# Module: <Human-readable module name>
-# Description: <one sentence responsibility>
+# Module: <易于识别的模块名称>
+# Description: <概括单一职责的一句话>
 # Scope: <System | Home Manager | Host | Theme | Script | Flake>
 # ---
 ```
 
-Optional:
+可选说明：
 
 ```nix
 # Notes:
-# - <maintenance warning>
-# - <do not modify X here>
+# - <维护警示>
+# - <不应在此修改的事项>
 ```
 
-Rules:
+规则：
 
-* `Description` must describe a single responsibility.
-* Avoid vague descriptions like “configuration”.
-* `default.nix` files should use `Entry` or `Switchboard` in the `Module` field.
-* High-risk modules should include `Notes`.
-* Use short `# [Section]` comments only where they help navigate a longer module.
-  Follow nearby naming and language conventions instead of adding a label for
-  every option.
-* Explain non-obvious choices, invariants, security boundaries, and rollback
-  constraints next to the relevant code. Do not restate what an option already
-  says or copy conversational task notes into code comments.
+- `Description` 只描述一项职责，避免使用“配置”等含糊描述。
+- `default.nix` 的 `Module` 字段应使用 `Entry` 或 `Switchboard`。
+- 高风险模块应填写 `Notes`。
+- 仅在较长模块需要导航时使用简短的 `# [Section]` 注释；沿用附近的名称与语言习惯，不为每个选项增加标签。
+- 在相关代码旁解释不明显的选择、不变量、安全边界和回退约束。不复述选项已有的含义，也不把任务对话写入注释。
 
-## Repository Boundaries
+## 仓库目录边界
 
-Notes:
+- `flake.nix`：Flake 入口。
+- `hosts/warden/`：主机专属硬件、挂载、身份和交换空间。
+- `modules/system/`：NixOS 系统模块。
+- `home/dot/`：Home Manager 用户模块。
+- `home/dot/fcitx5/`：Fcitx5、Rime 及输入法主题集成。
+- `home/dot/noctalia/`：Noctalia Shell 配置与用户模板。
+- `home/dot/wechat/`：微信软件包与通知桥接。
+- `scripts/`：手动诊断与辅助脚本。
 
-* `flake.nix`: flake entry point.
-* `hosts/warden/`: host-specific hardware, mounts, identity, swap.
-* `modules/system/`: NixOS system-level modules.
-* `home/dot/`: Home Manager user-level modules.
-* `home/dot/fcitx5/`: Fcitx5, Rime, and input-method theme integration.
-* `home/dot/noctalia/`: Noctalia shell config and user templates.
-* `home/dot/wechat/`: WeChat package and notification bridge.
-* `scripts/`: manual diagnostics and helper scripts.
+一次行为改动应落在一个负责该行为的模块中；不在全局桌面配置中加入应用专属变通方案；不混合重构与行为改动。
 
-Rules:
+## Fcitx5 与 Rime
 
-* Change one behavior in one module.
-* Do not put app-specific workarounds into global desktop config.
-* Do not mix refactors with behavior changes.
+- Fcitx5 和 Rime 配置按职责拆分；Rime 补丁位于 `home/dot/fcitx5/rime/patches/`。
+- 候选词按键只修改 `keybindings.nix`；CapsLock / Shift 行为只修改 `ascii-composer.nix`。
+- Lua 处理器只修改 Rime Lua 模块或 `lua-processors.nix`；主题只修改 `theme.nix`、自定义主题或 Noctalia 模板。
+- 微信 UOS 使用 XWayland / fcitx4 兼容路径，透明圆角候选框背景可能显示黑角。Inflex 同步主题提供适用于 XWayland 的矩形回退；不要在该类主题中重新加入透明圆角。
 
-## Fcitx5 and Rime Rules
+## Noctalia 主题
 
-Notes:
+- Noctalia 用户模板用于动态调色板同步；优先使用 Noctalia 颜色令牌，避免写死十六进制颜色。
+- 使用 MD3 语义令牌：`surface`、`on_surface`、`surface_variant` / `outline`、`primary`、`on_primary`。
+- 不提交生成的缓存文件。Noctalia 需要在 `~/.local/share/fcitx5/themes` 下生成主题时，不要再次将该目录做成只读的 `symlinkJoin`。
 
-* Fcitx5 and Rime config are atomized.
-* Rime patches live under `home/dot/fcitx5/rime/patches/`.
-* Candidate key changes should only touch `keybindings.nix`.
-* CapsLock / Shift behavior should only touch `ascii-composer.nix`.
-* Lua processor changes should only touch the Rime Lua modules or `lua-processors.nix`.
-* Theme changes should only touch `theme.nix`, custom themes, or Noctalia templates.
+## 持久化与 Impermanence
 
-Important:
+高风险约束：
 
-* WeChat UOS uses the XWayland / fcitx4 compatibility path.
-* Transparent rounded candidate backgrounds can render as black corners there.
-* Inflex sync themes are the XWayland-safe rectangular fallback.
-* Do not reintroduce transparent rounded corners into XWayland-safe themes.
+- 不持久化 `/etc/shadow`、`/etc/passwd`、`/etc/group` 或 `/etc/gshadow`。
+- 密码哈希应保存在 `/persist/secrets/*.passwd`。
+- 不随意修改 Btrfs 子卷挂载选项；`/persist` 必须保持可写。
+- 已作为子卷挂载的路径避免重复声明持久化。
 
-## Noctalia Theme Rules
+## 微信
 
-Notes:
+- 微信通知桥接较脆弱且涉及敏感数据；不输出 SQLCipher 密钥、不提交运行时密钥缓存、不读取或暴露私人消息数据库内容。
+- 不通过降低全局透明度或破坏全局主题来修复微信。
 
-* Noctalia user templates are used for dynamic palette sync.
-* Prefer Noctalia color tokens over hardcoded hex colors.
-* Use MD3 semantic tokens:
+## QQ
 
-  * `surface`
-  * `on_surface`
-  * `surface_variant` / `outline`
-  * `primary`
-  * `on_primary`
-* Do not commit generated cache files.
-* Do not make `~/.local/share/fcitx5/themes` a read-only `symlinkJoin` again if Noctalia needs to generate themes there.
+- Linux QQ 已原生发送 `org.freedesktop.Notifications.Notify` 通知。除非明确要求，不构建 QQ 数据库桥接；优先诊断原生通知和 portal。
 
-## Persistence / Impermanence Rules
+## 提交格式
 
-High-risk rules:
-
-* Do not persist `/etc/shadow`, `/etc/passwd`, `/etc/group`, or `/etc/gshadow`.
-* Password hashes should live in `/persist/secrets/*.passwd`.
-* Do not casually change Btrfs subvolume mount options.
-* `/persist` must remain writable.
-* Avoid duplicating persistence for paths already mounted as subvolumes.
-
-## WeChat Rules
-
-Notes:
-
-* The WeChat notification bridge is fragile and security-sensitive.
-* Do not print SQLCipher keys.
-* Do not commit runtime key caches.
-* Do not read or expose private message database contents.
-* Do not fix WeChat by lowering global opacity or degrading the global theme.
-
-## QQ Rules
-
-Notes:
-
-* Linux QQ already emits native `org.freedesktop.Notifications.Notify`.
-* Do not build a QQ database bridge unless explicitly requested.
-* Prefer native notification / portal diagnostics first.
-
-## Commit Style
-
-Use Conventional Commits:
+使用 Conventional Commits：
 
 ```text
 feat(scope): ...
@@ -232,55 +157,28 @@ docs(scope): ...
 chore(scope): ...
 ```
 
-Recommended scopes:
+推荐作用域：`fcitx5`、`rime`、`noctalia`、`wechat`、`qq`、`persistence`、`i18n`、`niri`、`theme`、`system`、`home`、`repo`。
 
-* `fcitx5`
-* `rime`
-* `noctalia`
-* `wechat`
-* `qq`
-* `persistence`
-* `i18n`
-* `niri`
-* `theme`
-* `system`
-* `home`
-* `repo`
+- 一个提交只包含一种改动类型，不混合重构与行为改动。
+- 提交前说明验证命令及结果。
+- **提交描述必须使用中文**，类型和作用域保持英文，例如 `fix(wechat):`。
 
-Rules:
-
-* One commit should do one type of change.
-* Do not mix refactors and behavior changes.
-* Mention validation commands and results before committing.
-* **Commit messages must use Chinese descriptions.**
-    * Keep type and scope in English (e.g., `fix(wechat):`).
-    * The description after the colon must be in Chinese.
-
-Examples:
+示例：
 
 ```text
 refactor(fcitx5): 原子化 Rime 配置
 fix(wechat): 缓存所有 SQLCipher 密钥候选
-docs(repo): 添加 agent 协作规范
+docs(repo): 添加 Agent 协作规范
 ```
 
-## Safety Rules
+## 安全约束
 
-Notes:
+- 除非有意更新依赖，否则不修改锁文件。
+- 不提交密钥、令牌、私钥或生成的运行时缓存。
+- 不通过仓库代码修改 `/persist` 下的用户持久数据。
+- 不因用户定制看起来特殊就将其移除。
+- 破坏性改动先询问；安全诊断不需要确认。
 
-* Do not update lock files unless dependency updates are intended.
-* Do not commit secrets, tokens, private keys, or generated runtime cache.
-* Do not edit persisted user data under `/persist` from repository code.
-* Do not remove user customizations just because they look unusual.
-* Ask before destructive changes.
-* Safe diagnostics do not need confirmation.
+## 任务报告
 
-## Agent Output Requirements
-
-After every task, agents should report:
-
-* changed files
-* whether behavior changed
-* validation commands run
-* risks and rollback notes
-* whether the user needs to run Home Manager, NixOS rebuild, reboot, or restart services
+每次任务结束时报告修改的文件、行为是否变化、验证命令及结果、风险与回退方式，以及用户是否仍需运行 Home Manager、NixOS rebuild、重启系统或重启服务。

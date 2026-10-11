@@ -1,4 +1,4 @@
-# Servers Agent Guide
+# 服务器 Agent 协作指南
 
 `servers/` 是独立的云服务器 Flake，不继承根 Flake 的构建目标。根目录
 `AGENTS.md` 的安全、密钥和提交规则仍然有效，本文件定义服务器层的额外约束。

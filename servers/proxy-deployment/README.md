@@ -65,8 +65,22 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 NAR 散列。`node scripts/prepare-edge-source.mjs /home/dot/Projects/edge-proxy-worker`
 会从该提交归档、核对散列并加入本机 Nix store；它不读取工作树的未提交文件。
 独立 Worker 项目目前没有远端，另一台机器无法仅凭 dotfiles 重建源码包。
-发布前须提供可审查、可跨主机取得的同一 Git 对象或按散列复制已验证 store
-路径，随后将该包显式传给两个 Nix 模块的 `package` 选项。不得只替换旧
+一次性的隔离验证可由工作站通过现有 Nix SSH 传输链复制该固定 store 路径：
+
+```bash
+edge_source_store=$(node scripts/prepare-edge-source.mjs /home/dot/Projects/edge-proxy-worker)
+nix copy --to ssh://dot@CONDUIT_SSH_TARGET "$edge_source_store"
+nix copy --to ssh://dot@HOPPER_SSH_TARGET "$edge_source_store"
+```
+
+目标账户已是受信任的 Nix 用户；复制后分别在两机用 `nix path-info` 核对同一
+store 路径，再将它显式传给新模块的 `package` 选项。现有 `nixos-rebuild
+--target-host` 链也会传输本地构建的闭包；Hopper 的 ARM 构建路径需继续遵循
+服务器迁移文档。已在本机用隔离 file-store 复制并读回该单路径 closure，
+只读 SSH 检查显示两台目标当前尚无该路径；**没有执行远程复制**。这种方式
+可以完成一次受控灰度，但新工作站只克隆 dotfiles 时仍无法重建源码。长期
+发布须提供可审查、可跨主机取得的同一 Git 对象或已固定的二进制缓存产物。
+不得只替换旧
 `pinned-source.mjs` 的提交号：旧 `deploy.mjs` 仍调用新源码已移除的
 `buildProfiles`。
 
@@ -95,6 +109,13 @@ NAR 散列。`node scripts/prepare-edge-source.mjs /home/dot/Projects/edge-proxy
 保持旧 manifest 与旧订阅，停用 canary 和新模块；如已执行 `nixos-rebuild test`，
 恢复上一代系统配置并验证旧身份与 SSH。任何触及现用入口的切换需另行提交
 可审查的 diff、实测证据和回退命令。
+
+现有 LA/SG CDN 域名与各自 Nginx TLS 虚拟主机可承载独立的 proof 精确路径，
+不要求修改旧 WS 路由。只读 Cloudflare 清单确认旧 `edge-proxy-next-state` KV、
+`edge-proxy-next` 和 `edge-preferred-control` 仍存在；新版独立优选 KV、交付 KV
+及对应 Worker 尚不存在。旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2
+池或账户文档。probe 的公开 HTTPS 名称、证书与访问路由没有可核验的现成部署
+绑定；现有 CDN 证书只声明给各自回源虚拟主机，不能推断适用于 probe API。
 
 probe 的公网 HTTPS 路由、证书信任、来源限制及新版 Worker 绑定需要单独审阅；
 当前模块既不开放防火墙，也不覆盖旧代理路由。先在隔离环境验证错误证书、错误

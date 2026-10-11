@@ -2,6 +2,8 @@
 
 本仓库同时保存一台桌面主机和多台云服务器的 NixOS 配置。两者在同一 Git
 历史中协作，但属于 **两个独立 Flake**：不要把其中一方的构建或部署命令用于另一方。
+双节点代理的通用实现另在 `/home/dot/Projects/proxy-stack` 独立 Git/Flake 仓库；
+`servers/flake.nix` 通过锁定的 `proxyStack` input 引用它，Warden Flake 不引用。
 
 ## 先判断改动落点
 
@@ -13,6 +15,8 @@
 | Niri / Noctalia / 视觉语言 | `docs/desktop-niri.md`、`home/dot/noctalia/README.md` | 对应 Home Manager 模块 | `home-manager build --flake .#dot@warden` |
 | Fcitx5 / Rime | `docs/fcitx5-rime.md`、`home/dot/fcitx5/README.md` | `home/dot/fcitx5/` | `home-manager build --flake .#dot@warden` |
 | 云主机或服务器服务 | `servers/README.md`、`servers/AGENTS.md` | `servers/hosts/` 或 `servers/modules/` | `nix flake check path:./servers` |
+| 双节点代理通用规则或编译器 | `docs/proxy-network-design-draft.md`、`/home/dot/Projects/proxy-stack/README.md` | 独立 `proxy-stack` 仓库 | `node --test test/*.test.mjs`、`nix flake check path:.` |
+| 代理账户、节点与来源 | `servers/proxy-deployment/README.md` | `servers/proxy-deployment/` 与 SOPS | 锁定版本编译器 `validate` 和两节点求值 |
 | Cloudflare Worker / 优选 IP | `servers/cloudflare/README.md` | `servers/cloudflare/edge-worker/` | 该目录的 `npm run check` |
 | 密钥、SOPS 或持久化 | `docs/secrets-sops.md`、`docs/impermanence.md` | 对应声明模块 | 只做安全的构建或 dry-run |
 
@@ -35,6 +39,8 @@
 桌面 Flake 的唯一输出是 `warden` 和 `dot@warden`；服务器主机则以
 `servers#hopper`、`servers#conduit` 等名称输出。服务器清单中“可 SSH”不等于
 “已声明式受管”，当前收编状态以 `servers/inventory/README.md` 为准。
+`proxy-stack` 只保存通用代码，并作为 `servers/` 的私有远端锁定 input。
+账户、真实节点、SOPS 和优选来源仍由 `servers/` 管理；接入 input 不等于现网发布。
 
 ## Agent 的最短工作流
 

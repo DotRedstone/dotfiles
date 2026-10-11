@@ -39,6 +39,22 @@ Cloudflare 边缘代理与优选 IP 订阅代码位于
 模块部署，密钥只通过 Worker secret 注入。现网审计、灰度与清理步骤见
 [docs/cloudflare-edge-migration.md](./docs/cloudflare-edge-migration.md)。
 
+双节点代理的通用编译器、规则与 Xray 模块已拆到独立的
+`/home/dot/Projects/proxy-stack` Flake，并发布在私有 GitHub 仓库。
+`flake.lock` 固定其 Git 修订；远程构建端须能读取该私有仓库，发布前还须复核
+访问权限与锁定源码。账户、LA/SG 真实端点、优选来源和客户端网络参数留在
+[proxy-deployment](./proxy-deployment/README.md)；SOPS 密钥仍在本仓库。
+现有 `clash/router-policy.json`、`proxy-accounts.json`、旧 Worker 与订阅保持可用，
+新编译器尚未向现网发布。`target` 和 `gcp-free` 没有加入这次双节点代理。
+从**当前锁定修订**本地构建三类 Worker bundle 的命令是：
+
+```bash
+nix build path:/home/dot/.dotfiles/servers#proxyStackWorkerBundles --no-link --print-out-paths
+```
+
+此命令不解密 SOPS、不发布 Cloudflare。控制 Worker 还需要受信任的回源探测服务绑定；
+配置 Worker 还需要独立的私有部署包和测试账户。完成这些验收后才能提出灰度发布。
+
 Hopper 同时提供一个有界的官方 Nix 二进制缓存中继：它按需从
 `cache.nixos.org` 下载并缓存在新加坡本地磁盘，其他受管主机优先命中该中继，
 断开时自动回退到官方缓存。它不保存私有构建产物，也不构成数据备份。

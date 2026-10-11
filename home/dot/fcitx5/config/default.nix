@@ -1,12 +1,7 @@
 # ---
-# Module: Fcitx5 Global Config
-# Description: Hotkeys and behavior settings
-# Scope: Home Manager
-# ---
-
-# ---
 # Module: Fcitx5 Config Entry
-# Description: Main configuration generator for ~/.config/fcitx5/config
+# Description: Generates the Fcitx5 config file from behavior and hotkey modules
+# Scope: Home Manager
 # ---
 
 { ... }:

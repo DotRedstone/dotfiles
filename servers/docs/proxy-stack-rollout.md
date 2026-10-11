@@ -32,6 +32,15 @@ provider。发布时先写入五份不可变私有文档并验证，再切换 ma
 修订与交付接口都对齐后，再单独审阅锁定和适配变更。旧 KV、订阅与 Worker 在此期间
 保持原有路径。
 
+部署仓库已增加默认关闭的发布 timer、回源证明与可信探测模块。发布核心用
+`proxy-stack cd6663b` 和 `edge-proxy-worker 4fbe909` 完成合成账户的跨仓库检查：
+三平台配置通过 Mihomo 静态检查，五份文档经内存 KV 由 Worker 原样交付，
+故障注入保持旧 manifest 可读。实际 `servers/flake.lock` 仍是旧修订，
+`servers/cloudflare/edge-worker/scripts/deploy.mjs` 仍调用旧固定 Worker 的
+`buildProfiles`；升级必须同时改造该适配器，不能仅替换固定提交。
+受限任务的输入、SOPS 键和隔离验收见 [部署目录](../proxy-deployment/README.md)。
+新模块尚未启用，账户目录尚无隔离账户，SOPS 与现网没有本阶段变更。
+
 ## 本地变更
 
 - 独立 `proxy-stack` Git/Flake 提供 11 个 Mihomo 策略组、按账户地区优先的两地

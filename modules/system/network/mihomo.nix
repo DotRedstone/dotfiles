@@ -92,7 +92,6 @@ in
     documentation = [ "https://wiki.metacubex.one/" ];
     wants = [ "network-online.target" ];
     after = [ "network-online.target" ];
-    wantedBy = [ "multi-user.target" ];
     unitConfig.ConditionPathExists = configPath;
 
     serviceConfig = {

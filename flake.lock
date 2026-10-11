@@ -280,6 +280,23 @@
         "type": "github"
       }
     },
+    "noctalia-mihomo-control": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791710399,
+        "narHash": "sha256-0q8FNYIgyeNLR6ns1MZ8m1LtOG3OlBA5ZC8A/iNF5/A=",
+        "owner": "DotRedstone",
+        "repo": "noctalia-mihomo-control",
+        "rev": "7da549e4f9c927eb4f9d1d1beafa8ff35a0615e8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "DotRedstone",
+        "ref": "v0.1.0",
+        "repo": "noctalia-mihomo-control",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "antigravity-nix": "antigravity-nix",
@@ -290,6 +307,7 @@
         "nixpkgs": "nixpkgs_2",
         "nixvim": "nixvim",
         "noctalia": "noctalia",
+        "noctalia-mihomo-control": "noctalia-mihomo-control",
         "silent-sddm": "silent-sddm",
         "sops-nix": "sops-nix",
         "zen-browser": "zen-browser"

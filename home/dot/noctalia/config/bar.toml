@@ -38,7 +38,7 @@ type = "aristides/udiskie:status"
 hide_when_empty = true
 
 [widget.mihomo]
-type = "mdj2812/mihomo-control:widget"
+type = "nmc/mihomo-control:widget"
 
 [widget.lyrics]
 type = "tranzem/media-lyrics:now-playing"

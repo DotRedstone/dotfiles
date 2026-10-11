@@ -7,7 +7,7 @@
 # - Noctalia v5 stores enabled plugin sources in app-managed state, not plain config.
 # - This startup sync is intentionally idempotent and only adds missing sources/plugins.
 
-{ config, pkgs, ... }:
+{ config, inputs, pkgs, ... }:
 
 let
   noctaliaPluginSync = pkgs.writeShellScript "noctalia-plugin-sync" ''
@@ -62,6 +62,7 @@ let
     ensure_source official git https://github.com/noctalia-dev/official-plugins
     ensure_source community git https://github.com/noctalia-dev/community-plugins
     ensure_source dot path /home/dot/.dotfiles/home/dot/noctalia/plugins
+    ensure_source nmc path ${inputs.noctalia-mihomo-control}
 
     disable_plugin dot/sidebar
     disable_plugin dot/md3_dashboard
@@ -82,7 +83,10 @@ let
     ensure_plugin aristides/udiskie
     ensure_plugin tordex/processes
     ensure_plugin tranzem/media-lyrics
-    ensure_plugin mdj2812/mihomo-control
+    disable_plugin mdj2812/mihomo-control
+
+    # [Pinned External Plugins]
+    ensure_plugin nmc/mihomo-control
 
     # [Local Plugins]
     ensure_plugin dot/gaming_power

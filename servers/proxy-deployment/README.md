@@ -38,8 +38,9 @@ Mihomo 静态检查。它先写五份不可变文档并逐项读回，最后单�
 `flock` 防止该主机重复执行；多主机并发发布需另行设计分布式协调。生产 `--apply`
 拒绝空账户目录。`--check` 读取池和当前 manifest，但仅在内存模拟写入。
 
-受限运行时由 SOPS 的 `proxy/delivery_runtime` 提供 JSON，包含
-`version: 1`、`preferredReadToken`、每账户 `runtimeByAccount`，以及
+受限运行时由 SOPS 的 `proxy/delivery_runtime` 提供 JSON；sops-nix 将其解密为
+`root` 所有、`0400` 的运行时文件，发布任务直接读取该文件，不再次调用 `sops`。
+JSON 包含 `version: 1`、`preferredReadToken`、每账户 `runtimeByAccount`，以及
 `cloudflare.accountId`、`deliveryNamespaceId`、`apiToken`。每账户运行时包含独立
 `deliveryToken`、`deliveryBaseUrl`、两地 UUID、REALITY 公钥与 short ID、WS 路径。
 真实值只进入加密文件；目录和示例不记录其正文。控制面、交付 Worker 使用独立 KV，
@@ -78,10 +79,11 @@ nix copy --to ssh://dot@HOPPER_SSH_TARGET "$edge_source_store"
 store 路径，再将它显式传给新模块的 `package` 选项。现有 `nixos-rebuild
 --target-host` 链也会传输本地构建的闭包；Hopper 的 ARM 构建路径需继续遵循
 服务器迁移文档。已在本机用隔离 file-store 复制并读回该单路径 closure，
-已通过 Nix SSH 将该固定源码路径复制到 Conduit 与 Hopper，并分别用远端
-`nix path-info` 和 `nix hash path --sri` 核对 NAR 散列一致。此操作仅增加
-store 路径，未构建系统或启动服务。这种方式可以完成一次受控灰度，但新工作站
-只克隆 dotfiles 时仍无法重建源码。长期
+曾通过 Nix SSH 将该固定源码路径复制到 Conduit 与 Hopper，并分别用远端
+`nix path-info` 和 `nix hash path --sri` 核对 NAR 散列一致。由于它未被系统代际
+或 GC root 引用，后续复查时两机均已不再保有该路径；一次性复制不能视作持久来源。
+启用模块时应由实际系统闭包传输并持有源码；若先做不启用服务的测试，可使用有
+记录且可撤销的临时 GC root。新工作站只克隆 dotfiles 时仍无法重建源码。长期
 发布须提供可审查、可跨主机取得的同一 Git 对象或已固定的二进制缓存产物。
 不得只替换旧
 `pinned-source.mjs` 的提交号：旧 `deploy.mjs` 仍调用新源码已移除的
@@ -95,6 +97,9 @@ store 路径，未构建系统或启动服务。这种方式可以完成一次�
 分支保存独立交付令牌、订阅令牌、两地上传 HMAC、优选池读取令牌以及探测
 请求/响应 HMAC；这些值未复制到通用项目或明文配置。仅登记密文不会改变
 运行服务：旧 Xray 账户目录中的 `canary.enabled` 仍为 false。
+两地主机当前的 SOPS 文件仍缺少 `proxy/delivery_runtime`，也没有 probe 的
+`proxy/probe_env` 与 TLS 证书、私钥。现有两份主机密文已经在对应主机上使用其
+SSH 主机身份只读解密成功，但这不验证尚未写入的运行时字段或服务权限。
 
 进入隔离灰度前，还需完成以下部署侧输入与实机证据：
 

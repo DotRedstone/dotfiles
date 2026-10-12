@@ -5,12 +5,26 @@ import os from "node:os";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
-import { cloudflareStore, readValidatedPools, requireEnabledAccount, runPublication } from "../scripts/publish-runner.mjs";
+import { cloudflareStore, readPrivateRuntime, readValidatedPools, requireEnabledAccount, runPublication } from "../scripts/publish-runner.mjs";
 
 const token = "T".repeat(40);
 const catalog = { accounts: { accounts: { sample: {
   enabled: true, sourceIdByOrigin: { la: "sample-net", sg: "sample-net" },
 } } } };
+
+test("reads sops-nix runtime JSON only from an owner-private file", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "proxy-private-runtime-"));
+  try {
+    const file = path.join(directory, "runtime.json");
+    const runtime = { version: 1, preferredReadToken: token };
+    fs.writeFileSync(file, JSON.stringify(runtime), { mode: 0o400 });
+    assert.deepEqual(readPrivateRuntime(file), runtime);
+    fs.chmodSync(file, 0o440);
+    assert.throws(() => readPrivateRuntime(file), /owner-only regular file/);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
 
 test("live apply gate rejects an empty or disabled account catalog", () => {
   assert.throws(() => requireEnabledAccount({ accounts: { accounts: {} } }),

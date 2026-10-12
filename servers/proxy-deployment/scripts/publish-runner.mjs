@@ -167,12 +167,13 @@ export async function runPublication({ config, secrets, compiler, store, fetchIm
   });
 }
 
-function decrypt(file) {
-  const result = spawnSync("sops", ["decrypt", "--output-type", "json", file], {
-    encoding: "utf8", maxBuffer: 8 * 1024 * 1024,
-  });
-  if (result.status !== 0) throw new Error("private deployment data unavailable");
-  return JSON.parse(result.stdout);
+export function readPrivateRuntime(file) {
+  const metadata = fs.statSync(file);
+  if (!metadata.isFile() || metadata.uid !== process.getuid() ||
+      (metadata.mode & 0o077) !== 0 || metadata.size > 1024 * 1024) {
+    throw new Error("private runtime must be an owner-only regular file");
+  }
+  return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
 async function main() {
@@ -204,7 +205,7 @@ async function main() {
   }
   const compiler = await import(pathToFileURL(path.join(config.compilerSource, "src/compiler.mjs")).href);
   if (args.includes("--apply")) requireEnabledAccount(loadCatalog(config.catalogDir));
-  const secrets = decrypt(value("--secrets"));
+  const secrets = readPrivateRuntime(value("--secrets"));
   if (secrets.version !== 1) throw new Error("private deployment schema unsupported");
   const live = cloudflareStore({
     accountId: secrets.cloudflare.accountId,

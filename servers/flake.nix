@@ -27,6 +27,11 @@
     # Private remote is fetched at one exact revision from flake.lock.
     proxyStack.url = "git+https://github.com/DotRedstone/proxy-stack.git?ref=main";
     proxyStack.inputs.nixpkgs.follows = "nixpkgs";
+
+    edgeProxyWorker = {
+      url = "git+ssh://git@github.com/DotRedstone/edge-proxy-worker.git?ref=main";
+      flake = false;
+    };
   };
 
   outputs =

@@ -60,12 +60,10 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 ## 回源证明与可信探测
 
 `proxyOriginProof` 与 `proxyPreferredProbe` 通用模块默认关闭；本代理候选在两地主机
-覆盖启用前者，交叉 probe 仍未纳入。
-未合并的 `codex/origin-canary-dryrun` 分支准备 Conduit/Hopper 的 canary 身份、
-现有 CDN TLS 虚拟主机上的精确 `/proof` 路径，以及默认关闭的交叉探测入口；
-该分支的交叉探测部分未纳入本代理候选。预览见该分支的
-`servers/hosts/{conduit,hopper}/proxy/cross-probe.nix`（提交 `197d080`、
-`45ff6c0`）；本候选没有这些主机实例。
+本候选在两地主机覆盖启用 origin-proof；独立分支
+`codex/cross-probe-isolated` 增加默认关闭的交叉探测入口和 DNS-01 证书选项。
+方向、Worker 锁接口缺口、SOPS/TLS/DNS 前提与回退见
+[交叉探测候选审查](./stage1-cross-probe-review.md)。
 
 每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
 提供对应令牌。两地主机分别以 SOPS 保存 `proxy/origin_proof_key` 与
@@ -82,8 +80,9 @@ HMAC 四把密钥互异。每台探测器的 `PROBE_ORIGINS_JSON` 只应包含�
 并与该地区 Worker 条目的 HMAC 及对侧 proof 凭据匹配。绑定缺失或探测失败时
 保留旧池；接口格式见独立项目
 [优选与交付接口](/home/dot/Projects/edge-proxy-worker/docs/preferred-v2.md)。
-已提交的 `servers/flake.lock` 仍引用旧 Worker 源码 `306c249`，尚未锁定新接口，
-也未接真实凭据或发布 Worker。
+已提交的 `servers/flake.lock` 仍引用旧 Worker 源码 `306c249`，其控制 Worker 使用
+单一 `PROBE_URL`，不符合新版双地区 `PROBE_ENDPOINTS_JSON` 契约；尚未锁定新接口、
+接入探测密钥或发布 Worker。
 
 ### Target 历史探测预览（已废弃）
 

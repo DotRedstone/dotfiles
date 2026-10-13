@@ -20,7 +20,7 @@ SOPS 加密后随 Git 配置保存。
 | `hopper` | Oracle A1 应用与存储节点 | 已受管 |
 | `gcp-free` | GCE `e2-micro` 代理节点 | 已有配置，等待恢复可访问地址或确认退役 |
 | `repeater` | 国内服务节点 | 在线 NixOS，待回收源码后收编 |
-| `target` | 国内反代与 EasyTier 节点 | 已受管 |
+| `target` | 国内反代与 EasyTier 节点 | 已受管，计划到期退役 |
 | `beacon` | 未确认角色 | 当前不可达，待盘点 |
 
 `conduit` 与国内 EasyTier 网络隔离。`hopper` 原生运行 OpenList、Navidrome、
@@ -39,8 +39,9 @@ Cloudflare 边缘代理的通用代码位于独立的
 [cloudflare/edge-worker](./cloudflare/edge-worker/README.md) 固定其本机 Git 提交，
 只保存部署参数、SOPS 引用、Mihomo 基线和路由器适配。它独立于 NixOS 主机模块部署，
 密钥只通过 Worker secret 注入。旧部署适配仍从受限 legacy checkout 归档固定提交；
-隔离 canary 的新版源码由 `edgeProxyWorker` 私有 Git SSH 非 Flake 输入锁定，
-已预接入 Target 的默认关闭模块，尚未启用探测服务。两条来源的使用边界见
+隔离 canary 的当前 Flake 修订由 `edgeProxyWorker` 私有 Git SSH 非 Flake 输入锁定，
+曾预接入 Target 的默认关闭模块；该方案已废弃，现网未启用探测服务。两地交叉
+探测预览与来源边界见
 [proxy-deployment](./proxy-deployment/README.md)。现网审计、灰度与清理步骤见
 [docs/cloudflare-edge-migration.md](./docs/cloudflare-edge-migration.md)。
 

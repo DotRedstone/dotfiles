@@ -55,60 +55,42 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 
 ## 回源证明与可信探测
 
-`dot.services.proxyOriginProof` 与 `dot.services.proxyPreferredProbe` 模块均默认关闭；
-main 的主机配置也未启用。未合并的 `codex/origin-canary-dryrun` 分支只在
-Conduit/Hopper 准备 canary 身份与精确 `/proof` 路径。
-前者在 Conduit/Hopper 各自回环地址运行，通过现有 CDN TLS 虚拟主机的专用
-`/proof` 路径访问；Nginx 不注入证明令牌，请求方必须提供
-`X-Origin-Proof-Token`。每地使用独立的 SOPS `proxy/origin_proof_key` 和
-`proxy/origin_proof_token`，由 root 私有环境模板传给服务。后者默认只监听回环，
-需要 SOPS `proxy/probe_env`；默认从 SOPS `proxy/probe_tls_cert` 和
-`proxy/probe_tls_key` 加载证书，Target 可选择运行时 ACME 证书路径。
-`probe_env` 内登记独立请求/响应 HMAC、明确允许的 Cloudflare 公网 CIDR、两地
-`originId`、TLS 主机、专用路径和相应证明凭据。两模块的 `package` 选项须指向
-固定 `edge-proxy-worker` 修订的源码包。`servers/flake.nix` 的非 Flake 输入
-`edgeProxyWorker` 已通过私有 Git SSH 来源锁定在 `306c249`，NAR 散列与原源码树
-一致；Nix 的 `package` 选项接受其顶层 store 路径。main 仅向 Target 传入
-此输入并设置 `package`，探测服务和 TLS 入口仍默认关闭；两地预览分支才向
-Conduit/Hopper 传入。仅锁定和传入输入不会在远端建立持久系统闭包或启动服务。
+main 的 `proxyOriginProof` 与 `proxyPreferredProbe` 模块默认关闭；两地主机尚未启用。
+未合并的 `codex/origin-canary-dryrun` 分支准备 Conduit/Hopper 的 canary 身份、
+现有 CDN TLS 虚拟主机上的精确 `/proof` 路径，以及默认关闭的交叉探测入口；
+该分支未部署。预览见该分支的 `servers/proxy-deployment/README.md` 和
+`servers/hosts/{conduit,hopper}/proxy/cross-probe.nix`（提交 `197d080`、
+`45ff6c0`）；主仓库尚无这些主机实例。
 
-### Target 探测入口准备
+每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
+提供对应令牌。两地主机分别以 SOPS 保存 `proxy/origin_proof_key` 与
+`proxy/origin_proof_token`。交叉探测按被测回源地区命名：LA 候选由 Hopper 的
+`probe-la-v2-canary.bdot.in/probe` 验证，SG 候选由 Conduit 的
+`probe-sg-v2-canary.bdot.in/probe` 验证。两地复用现有 Nginx TCP 443，以独立
+HTTPS 名称反代各自的回环探测服务，不增加公网端口；新名称仍缺 DNS、专用证书
+与两地主机的 `proxy/probe_env`、`proxy/probe_tls_cert`、`proxy/probe_tls_key`。
+现有 CDN 回源证书的 SAN 只覆盖各自旧名称，不能用于新入口。
 
-`hosts/target/probe-tls.nix` 以 `dot.services.targetProbeTls.enable` 控制
-DNS-01 证书和独立 HTTPS 入口，默认关闭。启用时从 SOPS
-`proxy/probe_acme_dns_token` 读取 Cloudflare DNS API token，通过 ACME
-DNS-01 为 `probe-v2-canary.dotdot.ggff.net` 申请证书；探测服务从
-`/var/lib/acme/<domain>/fullchain.pem` 和 `key.pem` 读取证书，仅监听
-`127.0.0.1:18444`。Nginx stream 在 443 透传 TLS，主机防火墙同时开放
-TCP 443。证书申请未完成时，探测服务的 systemd 依赖使其启动失败；Nginx
-仍可能监听 443，但不会提供有效探测响应。启用前须显式设置 ACME 联系邮箱、
-接受 ACME 条款、核对已登记的 `proxy/probe_env`，并核对公网解析和腾讯云安全组。
-未合并的 `codex/target-probe-dryrun` 分支只准备启用声明和 dry-run；main 与
-Target 现网仍关闭该入口。
+独立 `edge-proxy-worker` 已发布 `PROBE_ENDPOINTS_JSON` v1 接口：
+`origins.la` 固定指向 Hopper，`origins.sg` 固定指向 Conduit，两地请求／响应
+HMAC 四把密钥互异。每台探测器的 `PROBE_ORIGINS_JSON` 只应包含对侧被测回源，
+并与该地区 Worker 条目的 HMAC 及对侧 proof 凭据匹配。绑定缺失或探测失败时
+保留旧池；接口格式见独立项目
+[优选与交付接口](/home/dot/Projects/edge-proxy-worker/docs/preferred-v2.md)。
+已提交的 `servers/flake.lock` 仍引用旧 Worker 源码 `306c249`，尚未锁定新接口，
+也未接真实凭据或发布 Worker。
 
-Target 的 `proxy/probe_env` 已加密登记。四个变量为 `PROBE_REQUEST_KEY`、
-`PROBE_RESPONSE_KEY`、`PROBE_ALLOWED_CIDRS_JSON` 和 `PROBE_ORIGINS_JSON`：
-前两项与 Cloudflare canary 密文一致；后者为 LA/SG 各自的 TLS 主机、
-`/proof` 路径、`la-origin` / `sg-origin` 身份和独立证明密钥、访问令牌。
-候选范围取自 2026-10-13 的 [Cloudflare IPv4 列表](https://www.cloudflare.com/ips/)，
-共 15 项，启用前须重新核对。轮换 HMAC 时须同步更新 Worker 与 Target；
-轮换某地证明凭据时须同步更新该地服务与 Target，并确认旧凭据失效。
-main 与两地现网均未启用证明服务，新 Worker 也未部署；密文存在不代表验证链路可用。
+### Target 历史探测预览（已废弃）
 
-DNS-01 token 应只授权 `dotdot.ggff.net` 单一区域的 Zone Read 与 DNS Edit；
-该权限仍可修改此区域内的其他 DNS 记录，因此仅将 token 放在 Target 的
-SOPS 密文中，以 root `0400` 运行时文件交给 ACME 单元。现有广域 Cloudflare
-管理 token 不传给 Target。2026-10-13 创建的 `target-probe-dns01-2026-10-13`
-token 只授予该 zone 的 Zone Read 与 DNS Write；只读 API 检查确认策略资源为
-单一 zone，新 token 的 zone 列表也只返回 `dotdot.ggff.net`。Target 的 SSH
-主机身份已能只读解密更新后的 SOPS 密文。未创建 DNS 记录或证书，也未启用服务。
-
-轮换时先建立同范围的新 token，更新 Target SOPS 密文并只对隔离配置执行
-`nixos-rebuild test`；确认 ACME 续期测试和 HTTPS 探测后再撤销旧 token。
-若尚无到期证书，不以现有证书能提供 HTTPS 作为新 token 可续期的证据。
-回退时关闭 `targetProbeTls` 并恢复前一代系统配置；旧 Worker、KV、订阅及
-其他 Nginx stream 入口保持原路径。关联安全组与 443 放行须另行核对、变更和
-回退，不由 Nix 模块控制。
+Target 将在到期后退役，`codex/target-probe-dryrun` 只保留为未合并、未部署的
+历史预览，不再作为灰度路径。main 的 `hosts/target/probe-tls.nix` 与
+`probe-source.nix` 仍默认关闭；Target 现网没有 ACME、probe 单元或 443 监听。
+`servers/secrets/target.yaml` 中已加密登记 `proxy/probe_env` 与
+`proxy/probe_acme_dns_token`，但运行时未加载。Cloudflare 的
+`target-probe-dns01-2026-10-13` token 原为单一 zone 的 DNS-01 凭据，
+`probe-v2-canary.dotdot.ggff.net` 尚无 DNS 记录。2026-10-13 的只读核对发现
+该 token 可列出一个目标 zone，但现有管理凭据不能读取 token 详情或外部使用记录；
+撤销前仍需确认没有仓库外消费者。本轮不撤销、不修改 SOPS 或主机配置。
 
 `edge-worker-source.json` 与 `scripts/prepare-edge-source.mjs` 保留旧 `4fbe909`
 归档路径作为回退，不属于新输入。该旧提交只在受限 legacy checkout 中，新的
@@ -134,18 +116,18 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
 请求/响应 HMAC；这些值未复制到通用项目或明文配置。仅登记密文不会改变
 运行服务：main 的旧 Xray 账户目录中 `canary.enabled` 仍为 false；两地启用
 配置只存在于未合并预览分支。
-两地主机当前的 SOPS 文件仍缺少 `proxy/delivery_runtime`；Target 已持有
-`proxy/probe_env` 与 DNS-01 token，使用 ACME 证书路径而非 SOPS TLS 证书、私钥。
-两份回源主机密文已用对应 SSH 主机身份只读解密成功；Target 的已登记密文
-也通过相同边界核验。两地证明凭据与 Target 探测环境的对应关系只以哈希、长度
-和变量名核对，尚未验证服务权限或真实回源。
+两地主机当前的 SOPS 文件仍缺少 `proxy/delivery_runtime`、各自的
+`proxy/probe_env` 与专用 TLS 证书／私钥；两份回源主机密文已用对应 SSH
+主机身份只读解密成功，但尚未验证服务权限或真实回源。Target 的历史探测
+密文不迁作两地凭据；新 Worker 四把 HMAC 密钥须分别生成并与对侧配置核对。
 
 进入隔离灰度前，还需完成以下部署侧输入与实机证据：
 
 1. 路由器在实际网络生成两地测量结果，经可信回源探测写入 `owner-campus-canary`
    的两个 v2 池；只有池格式和健康通过才允许发布。
-2. 复核 Target 的 probe HTTPS 域名、证书申请、Cloudflare CIDR、DNS-only 解析
-   和云安全组；核对两地证明服务与新版 Worker 的独立 KV 绑定，并确定私有交付域名。
+2. 复核两地独立 probe 名称、公开信任的 TLS 证书、Cloudflare 代理 DNS、
+   来源限制及各自只含对侧回源的 SOPS 环境；核对新版 Worker 的
+   `PROBE_ENDPOINTS_JSON`、proof 服务和独立 KV 绑定，并确定私有交付域名。
 3. 为指定发布主机准备完整 `proxy/delivery_runtime`，核对两地 UUID 与 SOPS
    一致，并单独审阅将 `servers/flake.lock` 更新到已验编译器修订的差异。
 4. 在两台主机先用 `nixos-rebuild test` 验证 SSH、旧 Xray 身份、旧订阅和新 canary
@@ -167,8 +149,7 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
 回源虚拟主机，不能推断适用于 probe API。
 
 probe 的公网 HTTPS 路由、证书信任、来源限制及新版 Worker 绑定需要单独审阅；
-main 默认关闭时不开放新增防火墙端口，也不覆盖旧代理路由；Target 预览配置
-会增加 TCP 443，腾讯云安全组尚未核对。先在隔离环境验证错误证书、错误
+main 默认关闭时不开放新增防火墙端口，也不覆盖旧代理路由。先在隔离环境验证错误证书、错误
 nonce、错误 `originId`、错误 MAC、候选地址限制与失败保留，再分别执行两台
 服务器的 `nixos-rebuild test` 并确认旧 Xray、SSH 与订阅正常。若新路径异常，
 关闭相应新模块并恢复上一代系统配置；旧订阅、优选池与 Worker 不依赖这些模块。

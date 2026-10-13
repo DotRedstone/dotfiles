@@ -7,13 +7,16 @@
 
 | 层级 | 已确认状态 | 待验证边界 |
 | --- | --- | --- |
-| 独立源码与锁 | `proxy-stack` 独立仓库当前为 `cd6663b`，main 的 `servers/flake.lock` 仍锁 `23a64ff`；脱敏的私有 `edge-proxy-worker` 源码与非 Flake 输入均为 `306c249` | 新编译器尚未更新到服务器锁；远端构建需核对私有仓库读取权限 |
-| main 声明 | Conduit/Hopper 的旧账户与订阅仍在，canary 在旧账户目录中关闭；Target 探测和两地 origin-proof 模块默认关闭 | 声明与密文存在不代表服务已部署 |
-| 独立预览 | `codex/target-probe-dryrun` 准备 Target DNS-01/443；`codex/origin-canary-dryrun` 准备两地 canary Xray 身份与精确 `/proof` 路径；两支均未合并 | 仅通过单机求值与 build dry-run，未执行 `nixos-rebuild test/switch` |
-| Cloudflare | 两个隔离 KV 已创建且 2026-10-13 只读查询均为 0 键；DNS-01 token 已加密写入 Target SOPS；新版控制与交付 Worker 均不存在 | 未创建探测 A 记录、签发证书或发布 v2 池与账户文档；旧 Worker/KV 保留 |
-| 现网 | Conduit/Hopper 当前 Xray、Nginx 运行且旧 `managed:guest` 身份仍在；Target 尚无 443 监听或 ACME/探测单元 | 腾讯云安全组 TCP 443 未核对；路由器活动配置与各组 `now` 未重新取得，真实回源和应用流量未验 |
+| 独立源码与锁 | `proxy-stack` main 为 `cd6663b`、脱敏 v2 分支为 `4179daf`，服务器已提交锁仍为 `23a64ff`；`edge-proxy-worker` main 为 `538d974`，服务器已提交的非 Flake 输入仍锁 `306c249` | 新接口尚未更新到服务器锁；远端构建需核对私有仓库读取权限 |
+| main 声明 | Conduit/Hopper 的旧账户与订阅仍在，canary 在旧账户目录中关闭；两地 origin-proof 与通用 probe 模块默认关闭。Target 的默认关闭探测声明属于已废弃的历史准备 | 声明与密文存在不代表服务已部署 |
+| 独立预览 | `codex/target-probe-dryrun` 未合并且不再推进；`codex/origin-canary-dryrun` 预备两地 canary、`/proof` 和默认关闭的交叉探测入口，均未合并或部署 | 后者通过双架构 Nix 求值及合成启用求值，未执行主机 `nixos-rebuild test/switch` |
+| Cloudflare | 两个隔离 KV 于 2026-10-13 查询均为 0 键；Target DNS-01 token 留在加密 SOPS 中，新版控制与交付 Worker 尚未部署 | Target 旧 probe 与两地新 probe 名称均无 DNS 记录；证书、Worker 绑定与 v2 池未验收，旧 Worker/KV 保留 |
+| 现网 | Conduit/Hopper 的 Xray、Nginx 和旧 `managed:guest` 身份继续运行；Target 无 443、ACME 或 probe 运行单元。路由器 LuCI/Zashboard 已只读取得 34 个组的 `now` | UI 选组不证明真实出口、两地回源和应用流量；新探测服务未运行 |
 
-部署输入、SOPS 键与回退边界以[部署目录](../proxy-deployment/README.md)为准。
+Target 将在到期后退役，双节点 v2 探测改由两地交叉承担。部署输入、预览分支与
+回退边界以[部署目录](../proxy-deployment/README.md)为准；新版 Worker 的
+`PROBE_ENDPOINTS_JSON` 接口见独立项目
+[优选与交付接口](/home/dot/Projects/edge-proxy-worker/docs/preferred-v2.md)。该接口已在独立项目发布，尚未锁定到本仓库或部署。
 
 ## 组件契约与发布物
 
@@ -41,7 +44,8 @@ provider。发布时先写入五份不可变私有文档并验证，再切换 ma
 
 main 的 `servers/flake.lock` 仍指向 `proxy-stack 23a64ff`，工作区另有任务外
 未提交的锁文件改动；旧 `edge-worker` 部署适配仍使用四份 profile KV 键，
-并从受限归档读取 `4fbe909`。新版脱敏源码 `306c249` 是另一条锁定输入，
+并从受限归档读取 `4fbe909`。新版私有源码已发布 `538d974`，服务器仍锁
+`306c249`，这是另一条输入，
 不能直接替换旧适配器的提交。旧 KV、订阅与 Worker 保持原有路径。
 
 部署仓库已增加默认关闭的发布 timer、回源证明与可信探测模块。历史合成检查用
@@ -66,8 +70,8 @@ v2 池，未发布私有文档或改变现网。
   新目录的 canary 仅完成预备登记；旧 `proxy-accounts.json`、旧订阅、旧 Worker
   和路由器配置保留。
 - 三种 Worker 的独立 bundle 可从 `servers#proxyStackWorkerBundles` 的锁定修订构建。
-  配置 Worker、优选控制 Worker 和参数化 CFST 脚本均未安装；优选控制的受信任
-  回源探测服务绑定尚待实现与验收。
+  配置 Worker、优选控制 Worker 和参数化 CFST 脚本均未安装；独立 Worker 项目
+  已在本地实现两地探测绑定，但部署侧尚未锁定该修订或完成运行验收。
 
 `servers/flake.nix` 通过私有 GitHub 仓库引入 `proxy-stack`，`flake.lock` 固定提交。
 构建端须有该私有仓库读取权限；本机曾通过 Git HTTPS 认证确认可读，远端读取
@@ -101,7 +105,8 @@ manifest 鉴权或私有文档交付；main 的 Flake 锁也未更新到该修�
 
 这些结果只证明语法、引用与构建。尚无真实账户凭据的直连/CF TLS 回源、应用登录、
 大文件、订阅刷新或单账户撤销验证。历史核对中路由器只读 SSH 拒绝所用密钥、
-Controller 返回 401；本轮未重新取得活动配置和各组 `now`，因此路由器默认不得切换。
+Controller 返回 401；2026-10-13 后续通过已登录 LuCI/Zashboard 只读取得活动
+配置元数据和 34 个组的 `now`，脱敏基线保存在 Git 外。UI 状态仍不足以允许切换默认组。
 
 ## 发布前检查与回滚
 

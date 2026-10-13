@@ -10,6 +10,7 @@
     ./hysteria2.nix
     ./xray.nix
     ./subscriptions.nix
+    ./canary-origin.nix
     ./gemini.nix
   ];
 }

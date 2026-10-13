@@ -53,7 +53,7 @@
 
       nixosConfigurations = {
         conduit = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit proxyStack; };
+          specialArgs = { inherit proxyStack edgeProxyWorker; };
           modules = [
             disko.nixosModules.disko
             sops-nix.nixosModules.sops
@@ -71,7 +71,7 @@
         };
 
         hopper = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit hermes-agent proxyStack; };
+          specialArgs = { inherit hermes-agent proxyStack edgeProxyWorker; };
           modules = [
             disko.nixosModules.disko
             hermes-agent.nixosModules.default

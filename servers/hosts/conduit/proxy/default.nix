@@ -8,5 +8,6 @@
   imports = [
     ./xray.nix
     ./subscriptions.nix
+    ./canary-origin.nix
   ];
 }

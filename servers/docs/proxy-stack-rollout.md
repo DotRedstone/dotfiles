@@ -5,6 +5,9 @@
 临时 `test`；2026-10-14 另整理出仅含代理行为的
 [源码候选](../proxy-deployment/stage1-proxy-only-review.md)，其 Hopper 整机闭包未经
 批准直接激活。路由器和现用 Cloudflare Worker 未切换到新链路。
+2026-10-14 的独立[Worker 锁与适配候选](../proxy-deployment/stage1-cross-probe-review.md#后续-worker-锁与本地适配候选)
+已将本分支的 `edgeProxyWorker` 锁更新到 `538d974`；下表仍记录 2026-10-13
+基线，不代表本分支的最新锁。
 
 ## 2026-10-13 灰度前基线
 
@@ -19,7 +22,7 @@
 Target 将在到期后退役，双节点 v2 探测改由两地交叉承担。部署输入、预览分支与
 回退边界以[部署目录](../proxy-deployment/README.md)为准；新版 Worker 的
 `PROBE_ENDPOINTS_JSON` 接口见独立项目
-[优选与交付接口](/home/dot/Projects/edge-proxy-worker/docs/preferred-v2.md)。该接口已在独立项目发布，尚未锁定到本仓库或部署。
+[优选与交付接口](/home/dot/Projects/edge-proxy-worker/docs/preferred-v2.md)。该接口已在独立项目发布；本分支已锁定源码，尚未部署。
 
 ## 组件契约与发布物
 
@@ -47,8 +50,8 @@ provider。发布时先写入五份不可变私有文档并验证，再切换 ma
 
 main 的 `servers/flake.lock` 仍指向 `proxy-stack 23a64ff`，工作区另有任务外
 未提交的锁文件改动；旧 `edge-worker` 部署适配仍使用四份 profile KV 键，
-并从受限归档读取 `4fbe909`。新版私有源码已发布 `538d974`，服务器仍锁
-`306c249`，这是另一条输入，
+并从受限归档读取 `4fbe909`。截至 2026-10-13，服务器仍锁
+`306c249`；此隔离分支已单独锁定 `538d974`，这是另一条输入，
 不能直接替换旧适配器的提交。旧 KV、订阅与 Worker 保持原有路径。
 
 部署仓库已增加默认关闭的发布 timer、回源证明与可信探测模块。历史合成检查用

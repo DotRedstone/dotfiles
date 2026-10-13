@@ -53,16 +53,16 @@ JSON 包含 `version: 1`、`preferredReadToken`、每账户 `runtimeByAccount`�
 历史隔离测试使用确定修订的 `proxy-stack cd6663b` 与旧 Worker `4fbe909`，
 合成账户、内存 KV 和本机 Mihomo 数据文件；故障注入覆盖每份文档写入、读回、
 manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此测试不读取生产 KV，
-也不证明 Cloudflare、两地回源或客户端更新已经生效。main 的 `proxyStack`
-仍锁在 `23a64ff`，脱敏的新版 Worker 输入锁在 `306c249`；这组锁定输入尚未
+也不证明 Cloudflare、两地回源或客户端更新已经生效。此隔离分支的 `proxyStack`
+仍锁在 `23a64ff`，新版 Worker 输入锁在 `538d974`；这组锁定输入尚未
 按上述历史组合完成联合运行验证。状态与发布阶段见[发布记录](../docs/proxy-stack-rollout.md)。
 
 ## 回源证明与可信探测
 
-`proxyOriginProof` 与 `proxyPreferredProbe` 通用模块默认关闭；本代理候选在两地主机
-本候选在两地主机覆盖启用 origin-proof；独立分支
+`proxyOriginProof` 与 `proxyPreferredProbe` 通用模块默认关闭；本候选在两地主机
+覆盖启用 origin-proof。独立分支
 `codex/cross-probe-isolated` 增加默认关闭的交叉探测入口和 DNS-01 证书选项。
-方向、Worker 锁接口缺口、SOPS/TLS/DNS 前提与回退见
+方向、原 Worker 锁接口缺口、SOPS/TLS/DNS 前提与回退见
 [交叉探测候选审查](./stage1-cross-probe-review.md)。
 
 每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
@@ -80,9 +80,33 @@ HMAC 四把密钥互异。每台探测器的 `PROBE_ORIGINS_JSON` 只应包含�
 并与该地区 Worker 条目的 HMAC 及对侧 proof 凭据匹配。绑定缺失或探测失败时
 保留旧池；接口格式见独立项目
 [优选与交付接口](/home/dot/Projects/edge-proxy-worker/docs/preferred-v2.md)。
-已提交的 `servers/flake.lock` 仍引用旧 Worker 源码 `306c249`，其控制 Worker 使用
-单一 `PROBE_URL`，不符合新版双地区 `PROBE_ENDPOINTS_JSON` 契约；尚未锁定新接口、
-接入探测密钥或发布 Worker。
+此隔离分支将 `servers/flake.lock` 的 `edgeProxyWorker` 单独锁到 `538d974`，
+控制 Worker 具备双地区 `PROBE_ENDPOINTS_JSON` 契约。探测密钥尚未生成或注入，
+Worker 尚未发布。
+
+## v2 Worker 本地准备
+
+`scripts/prepare-v2-workers.mjs` 从锁定的 Nix 源码读取两个新入口，从本目录
+的目录数据和 `cloudflare-resources.json` 生成独立 KV 的 Wrangler 配置、源码修订记录及
+secret 来源清单。配置只包含公开部署参数；`workers_dev` 关闭且不声明 Route。
+`secret-references.json` 列出需在受限部署环境注入的密钥来源，不含明文。
+
+```bash
+cd /home/dot/.dotfiles
+EDGE_PROXY_WORKER_CHECKOUT=/home/dot/Projects/edge-proxy-worker \
+  node servers/proxy-deployment/scripts/prepare-v2-workers.mjs --dry-run
+node servers/proxy-deployment/scripts/prepare-v2-workers.mjs \
+  --out /path/to/private/output --account-id <32-hex-account-id>
+```
+
+dry run 核对 Worker 锁与 NAR hash，使用相同提交 checkout 的 Wrangler 分别打包
+控制、交付入口，然后删除临时配置；不会读取 SOPS、写 KV 或访问 Cloudflare API。
+`--out` 要求目标目录不存在，写入 `0600` 文件，供受限发布流程审阅；脚本不会
+上传 secret 或部署 Worker。正式发布前仍需在 SOPS 中完成两地四把互异 HMAC
+对应的 `PROBE_ENDPOINTS_JSON`，从 canary 上传密钥组装 `SIGNING_KEYS_JSON`，
+从发布账户令牌生成 `DELIVERY_TOKEN_HASHES_JSON`，并核对 `PREFERRED_READ_TOKEN`。
+私有交付还依赖发布任务的 `proxy/delivery_runtime` 与 manifest；仅有打包成功
+不能证明下载、探测或旧池保留在 Cloudflare 上生效。
 
 ### Target 历史探测预览（已废弃）
 

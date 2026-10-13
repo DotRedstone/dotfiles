@@ -72,3 +72,23 @@ KV 上次有效池保持原字节。
 后续顺序：先审查 `edgeProxyWorker` 精确修订及 adapter，完成合成两地密钥映射；再分别提交两地受限 `proxy/probe_env` 与 DNS-01 token 的密文更新；先签证书但保持入口关闭，验证 SAN、链和续期；之后逐台启用 HTTPS 入口并测试正确/错误签名、nonce、候选地址、TLS 和 proof；最后才申请新增两条 proxied DNS 记录、两条 hostname-scoped Full (strict) 规则，并将新控制 Worker 绑定到专用空 KV。每一步重新核对当前路由、现网和回退闭包。
 
 新增 DNS/规则/Worker 只服务 canary 探测，不切换客户端、旧订阅、旧池或默认路由。失败时先停新 Worker Route/调度，确认新 KV 未替换旧数据；删除新增 DNS 与 hostname-scoped 规则、关闭两地 ingress/probe，再按现场记录回退主机闭包。旧 Worker、旧 KV、旧池、旧订阅及 zone 默认 SSL 设置保持不动。证书和 SOPS 凭据在确认无消费者前保留。
+
+## 后续 Worker 锁与本地适配候选
+
+`codex/preferred-v2-adapter` 从本交叉探测候选另建分支，仅将 Flake 的
+`edgeProxyWorker` 锁从 `306c249` 更新至 `538d974`；`gmail-archiver`
+仍为 `b338d9c`，`proxyStack` 仍为 `23a64ff`。Nix 锁的 NAR hash 与实际
+源码路径核对一致；两地主机继续读取该非 Flake 输入。旧版 `deploy.mjs` 与归档
+`4fbe909` 的 `buildProfiles` 路径不变。
+
+新 `prepare-v2-workers.mjs` 只为 `edge-preferred-v2-canary`、
+`edge-delivery-v2-canary` 生成独立 KV 绑定、公开变量、固定源码与 secret
+来源清单，Wrangler dry run 分别打包两个入口。没有设置 Route 或上传密钥；
+控制 Worker 缺少 `PROBE_ENDPOINTS_JSON`、签名密钥，交付 Worker 缺少令牌
+哈希和 manifest 前不能投入使用。合成测试覆盖 LA/SG 正确探测器、签名上传、
+第二候选失败时旧池保留与交付 token/修订校验；不代表公网链路已验收。
+
+本候选不会改变服务器运行配置或现用流量。若本地评审失败，回退此分支的
+Worker 锁与适配器提交即可；若以后单独部署灰度 Worker，先移除新 Route／
+调度并回退至旧订阅与旧 KV，保留旧 Worker 和旧池，再按部署记录清理两个
+隔离 Worker 与 KV。DNS、证书、SOPS 和主机入口仍需按上文独立验收。

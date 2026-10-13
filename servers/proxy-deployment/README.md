@@ -4,6 +4,10 @@
 审阅后才能发布；在此之前，现用的 `servers/proxy-accounts.json`、
 `servers/clash/router-policy.json` 和订阅保持原有路径。
 
+第 1 阶段的[代理源码独立候选](./stage1-proxy-only-review.md)只启用两地主机的
+canary 与 `/proof`，不含 Hopper Gmail 现网基线。Conduit/Hopper 此前通过
+临时 `test` 验收的是另一个**组合候选**，不能据此直接部署本候选到 Hopper。
+
 - `accounts.json` 登记独立的 `canary` 测试账户；旧 `proxy-accounts.json` 中同名账户
   保持 disabled，现用账户不变。启用前需核对 `primaryOrigin`、两项批准的来源 ID、
   四种节点出口、生命周期元数据以及各自的 SOPS 凭据。
@@ -55,12 +59,13 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 
 ## 回源证明与可信探测
 
-main 的 `proxyOriginProof` 与 `proxyPreferredProbe` 模块默认关闭；两地主机尚未启用。
+`proxyOriginProof` 与 `proxyPreferredProbe` 通用模块默认关闭；本代理候选在两地主机
+覆盖启用前者，交叉 probe 仍未纳入。
 未合并的 `codex/origin-canary-dryrun` 分支准备 Conduit/Hopper 的 canary 身份、
 现有 CDN TLS 虚拟主机上的精确 `/proof` 路径，以及默认关闭的交叉探测入口；
-该分支未部署。预览见该分支的 `servers/proxy-deployment/README.md` 和
+该分支的交叉探测部分未纳入本代理候选。预览见该分支的
 `servers/hosts/{conduit,hopper}/proxy/cross-probe.nix`（提交 `197d080`、
-`45ff6c0`）；主仓库尚无这些主机实例。
+`45ff6c0`）；本候选没有这些主机实例。
 
 每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
 提供对应令牌。两地主机分别以 SOPS 保存 `proxy/origin_proof_key` 与
@@ -114,14 +119,15 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
 `proxy/origin_proof_token`。`servers/secrets/cloudflare.yaml` 的 `canary`
 分支保存独立交付令牌、订阅令牌、两地上传 HMAC、优选池读取令牌以及探测
 请求/响应 HMAC；这些值未复制到通用项目或明文配置。仅登记密文不会改变
-运行服务：main 的旧 Xray 账户目录中 `canary.enabled` 仍为 false；两地启用
-配置只存在于未合并预览分支。
+运行服务：通用旧 Xray 账户目录中 `canary.enabled` 默认为 false；本代理候选
+在两地主机层覆盖启用，实际激活仍取决于完整主机闭包。
 两地主机当前的 SOPS 文件仍缺少 `proxy/delivery_runtime`、各自的
 `proxy/probe_env` 与专用 TLS 证书／私钥；两份回源主机密文已用对应 SSH
-主机身份只读解密成功，但尚未验证服务权限或真实回源。Target 的历史探测
+主机身份只读解密成功。此前组合候选已验收 proof 服务权限与真实回源；
+本独立代理候选未单独执行实机 `test`。Target 的历史探测
 密文不迁作两地凭据；新 Worker 四把 HMAC 密钥须分别生成并与对侧配置核对。
 
-进入隔离灰度前，还需完成以下部署侧输入与实机证据：
+进入后续 v2 探测、交付与路由灰度前，还需完成以下部署侧输入与实机证据：
 
 1. 路由器在实际网络生成两地测量结果，经可信回源探测写入 `owner-campus-canary`
    的两个 v2 池；只有池格式和健康通过才允许发布。
@@ -130,11 +136,13 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
    `PROBE_ENDPOINTS_JSON`、proof 服务和独立 KV 绑定，并确定私有交付域名。
 3. 为指定发布主机准备完整 `proxy/delivery_runtime`，核对两地 UUID 与 SOPS
    一致，并单独审阅将 `servers/flake.lock` 更新到已验编译器修订的差异。
-4. 在两台主机先用 `nixos-rebuild test` 验证 SSH、旧 Xray 身份、旧订阅和新 canary
-   的 REALITY、CF TLS 回源；只对隔离客户端添加新配置，验证三平台交付、
-   provider 更新与单账户撤销。旧 Worker、旧 KV 和路由器默认组继续保留。
+4. 前阶段组合候选已临时 `test` 并验证两地 SSH、旧 Xray 身份、旧订阅和新 canary
+   的 REALITY、CF TLS 回源；后续探测与交付配置仍需分别受控 `test`，只对隔离
+   客户端添加新配置，验证三平台交付、provider 更新与单账户撤销。旧 Worker、
+   旧 KV 和路由器默认组继续保留。
 
-这些条件目前未全部满足，未执行服务器、Cloudflare 或路由器切换。发生问题时
+这些后续条件目前未全部满足。服务器曾执行第 1 阶段组合候选的临时 `test`，
+未持久 `switch`，Cloudflare、DNS、Worker、路由器和 Target 未切换。发生问题时
 保持旧 manifest 与旧订阅，停用 canary 和新模块；如已执行 `nixos-rebuild test`，
 恢复上一代系统配置并验证旧身份与 SSH。任何触及现用入口的切换需另行提交
 可审查的 diff、实测证据和回退命令。
@@ -149,7 +157,7 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
 回源虚拟主机，不能推断适用于 probe API。
 
 probe 的公网 HTTPS 路由、证书信任、来源限制及新版 Worker 绑定需要单独审阅；
-main 默认关闭时不开放新增防火墙端口，也不覆盖旧代理路由。先在隔离环境验证错误证书、错误
+交叉 probe 默认关闭时不开放新增防火墙端口，也不覆盖旧代理路由。先在隔离环境验证错误证书、错误
 nonce、错误 `originId`、错误 MAC、候选地址限制与失败保留，再分别执行两台
 服务器的 `nixos-rebuild test` 并确认旧 Xray、SSH 与订阅正常。若新路径异常，
 关闭相应新模块并恢复上一代系统配置；旧订阅、优选池与 Worker 不依赖这些模块。

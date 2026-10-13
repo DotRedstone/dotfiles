@@ -50,8 +50,11 @@ Cloudflare 边缘代理的通用代码位于独立的
 `flake.lock` 固定其 Git 修订；远程构建端须能读取该私有仓库，发布前还须复核
 访问权限与锁定源码。账户、LA/SG 真实端点、优选来源和客户端网络参数留在
 [proxy-deployment](./proxy-deployment/README.md)；SOPS 密钥仍在本仓库。
-隔离 canary 已登记但旧 Xray 目录仍将其关闭；现有 `clash/router-policy.json`、
-`proxy-accounts.json`、旧 Worker 与订阅保持可用，新编译器尚未向现网发布。
+隔离 canary 已登记，通用账户目录默认关闭；第 1 阶段代理候选只在 Conduit/Hopper
+主机层启用它。该代理候选缺少 Hopper 现网 Gmail 基线，不能直接进行整机 `test`；
+范围与组合门槛见[代理源码独立候选](./proxy-deployment/stage1-proxy-only-review.md)。
+现有 `clash/router-policy.json`、`proxy-accounts.json`、旧 Worker 与订阅保持可用，
+新编译器尚未向现网发布。
 `target` 和 `gcp-free` 没有加入这次双节点代理。
 从**当前锁定修订**本地构建三类 Worker bundle 的命令是：
 

@@ -83,10 +83,10 @@ TCP 443。证书申请未完成时，探测服务的 systemd 依赖使其启动�
 DNS-01 token 应只授权 `dotdot.ggff.net` 单一区域的 Zone Read 与 DNS Edit；
 该权限仍可修改此区域内的其他 DNS 记录，因此仅将 token 放在 Target 的
 SOPS 密文中，以 root `0400` 运行时文件交给 ACME 单元。现有广域 Cloudflare
-管理 token 不传给 Target。当前管理 token 的只读 API 核对显示账户 token
-有效，具有 Account API Tokens Write，且可列出 Zone Read 与 DNS Write
-权限组；这支持创建受限 token 的方案，但不能证明实际创建、范围或授权成功。
-本阶段未创建 token、DNS 记录或证书。
+管理 token 不传给 Target。2026-10-13 创建的 `target-probe-dns01-2026-10-13`
+token 只授予该 zone 的 Zone Read 与 DNS Write；只读 API 检查确认策略资源为
+单一 zone，新 token 的 zone 列表也只返回 `dotdot.ggff.net`。Target 的 SSH
+主机身份已能只读解密更新后的 SOPS 密文。未创建 DNS 记录或证书，也未启用服务。
 
 轮换时先建立同范围的新 token，更新 Target SOPS 密文并只对隔离配置执行
 `nixos-rebuild test`；确认 ACME 续期测试和 HTTPS 探测后再撤销旧 token。

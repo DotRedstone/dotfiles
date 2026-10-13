@@ -21,7 +21,8 @@ Target 元数据返回实例 ID `ins-8ljfjhu7`；须在腾讯云 CVM 控制台�
 并使用“实例端口验通”检查 443。也应确认该实例的公网地址与 SSH 配置一致。
 此处只记录核对对象，不修改安全组。
 
-当前主机无 ACME 单元或证书目录，SOPS 中也未登记探测环境与 TLS 证书。
+当前主机无 ACME 单元或证书目录，SOPS 已登记独立 DNS-01 token，仍缺少探测
+环境及证书运行时。该 token 的范围和启用边界见下述代理部署说明。
 Cloudflare 上拟用于隔离探测的 `probe-v2-canary.dotdot.ggff.net` 尚无 DNS 记录。
 锁定 Worker 源码已在 Flake 中预接入 Target 的默认关闭模块。DNS-01/TLS 入口的
 准备及凭据边界见 [代理部署数据](../proxy-deployment/README.md#target-探测入口准备)。

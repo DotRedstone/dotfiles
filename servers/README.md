@@ -38,8 +38,10 @@ Cloudflare 边缘代理的通用代码位于独立的
 `/home/dot/Projects/edge-proxy-worker` 仓库；本仓库的
 [cloudflare/edge-worker](./cloudflare/edge-worker/README.md) 固定其本机 Git 提交，
 只保存部署参数、SOPS 引用、Mihomo 基线和路由器适配。它独立于 NixOS 主机模块部署，
-密钥只通过 Worker secret 注入。独立项目目前没有远端，跨主机部署需先提供锁定的
-Git 对象。现网审计、灰度与清理步骤见
+密钥只通过 Worker secret 注入。旧部署适配仍从受限 legacy checkout 归档固定提交；
+隔离 canary 的新版源码由 `edgeProxyWorker` 私有 Git SSH 非 Flake 输入锁定，
+尚未接入或启用主机模块。两条来源的使用边界见
+[proxy-deployment](./proxy-deployment/README.md)。现网审计、灰度与清理步骤见
 [docs/cloudflare-edge-migration.md](./docs/cloudflare-edge-migration.md)。
 
 双节点代理的通用编译器、规则与 Xray 模块已拆到独立的

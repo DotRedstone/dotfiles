@@ -61,31 +61,25 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 需要 SOPS `proxy/probe_env`、`proxy/probe_tls_cert` 和 `proxy/probe_tls_key`。
 `probe_env` 内登记独立请求/响应 HMAC、明确允许的 Cloudflare 公网 CIDR、两地
 `originId`、TLS 主机、专用路径和相应证明凭据。两模块的 `package` 选项须指向
-固定 `edge-proxy-worker` 修订的源码包；启用前须核对目标主机上的同一路径与散列。
+固定 `edge-proxy-worker` 修订的源码包。`servers/flake.nix` 的非 Flake 输入
+`edgeProxyWorker` 已通过私有 Git SSH 来源锁定在 `306c249`，NAR 散列与原源码树
+一致；Nix 的 `package` 选项接受其顶层 store 路径。两模块仍默认关闭，主机层也尚未
+把此输入传入模块或设置 `package`。选定 probe 主机后，应只在相关主机传入该输入，
+显式设置 `package`，再分别审查服务与 HTTPS 路由；单独锁定输入不会在远端建立
+持久系统闭包或启动服务。
 
-`edge-worker-source.json` 固定 `edge-proxy-worker 4fbe909` 的完整提交和归档
-NAR 散列。`node scripts/prepare-edge-source.mjs /home/dot/Projects/edge-proxy-worker`
-会从该提交归档、核对散列并加入本机 Nix store；它不读取工作树的未提交文件。
-独立 Worker 项目目前没有远端，另一台机器无法仅凭 dotfiles 重建源码包。
-一次性的隔离验证可由工作站通过现有 Nix SSH 传输链复制该固定 store 路径：
+`edge-worker-source.json` 与 `scripts/prepare-edge-source.mjs` 保留旧 `4fbe909`
+归档路径作为回退，不属于新输入。该旧提交只在受限 legacy checkout 中，新的
+`/home/dot/Projects/edge-proxy-worker` 克隆不包含它。需要复查旧归档时，先按
+[旧 Worker 部署说明](../cloudflare/edge-worker/README.md) 确认受限 checkout，再运行：
 
 ```bash
-edge_source_store=$(node scripts/prepare-edge-source.mjs /home/dot/Projects/edge-proxy-worker)
-nix copy --to ssh://dot@CONDUIT_SSH_TARGET "$edge_source_store"
-nix copy --to ssh://dot@HOPPER_SSH_TARGET "$edge_source_store"
+node scripts/prepare-edge-source.mjs "$EDGE_PROXY_WORKER_LEGACY_REPOSITORY"
 ```
 
-目标账户已是受信任的 Nix 用户；复制后分别在两机用 `nix path-info` 核对同一
-store 路径，再将它显式传给新模块的 `package` 选项。现有 `nixos-rebuild
---target-host` 链也会传输本地构建的闭包；Hopper 的 ARM 构建路径需继续遵循
-服务器迁移文档。已在本机用隔离 file-store 复制并读回该单路径 closure，
-曾通过 Nix SSH 将该固定源码路径复制到 Conduit 与 Hopper，并分别用远端
-`nix path-info` 和 `nix hash path --sri` 核对 NAR 散列一致。由于它未被系统代际
-或 GC root 引用，后续复查时两机均已不再保有该路径；一次性复制不能视作持久来源。
-启用模块时应由实际系统闭包传输并持有源码；若先做不启用服务的测试，可使用有
-记录且可撤销的临时 GC root。新工作站只克隆 dotfiles 时仍无法重建源码。长期
-发布须提供可审查、可跨主机取得的同一 Git 对象或已固定的二进制缓存产物。
-不得只替换旧
+旧路径曾通过 Nix SSH 复制到 Conduit 与 Hopper 并核对 NAR 散列，但未被系统代际
+或 GC root 引用，后续已被回收。启用新模块时应由实际系统闭包传输并持有新输入；
+Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换旧
 `pinned-source.mjs` 的提交号：旧 `deploy.mjs` 仍调用新源码已移除的
 `buildProfiles`。
 

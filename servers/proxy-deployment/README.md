@@ -58,15 +58,42 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 `/proof` 路径访问；Nginx 不注入证明令牌，请求方必须提供
 `X-Origin-Proof-Token`。每地使用独立的 SOPS `proxy/origin_proof_key` 和
 `proxy/origin_proof_token`，由 root 私有环境模板传给服务。后者默认只监听回环，
-需要 SOPS `proxy/probe_env`、`proxy/probe_tls_cert` 和 `proxy/probe_tls_key`。
+需要 SOPS `proxy/probe_env`；默认从 SOPS `proxy/probe_tls_cert` 和
+`proxy/probe_tls_key` 加载证书，Target 可选择运行时 ACME 证书路径。
 `probe_env` 内登记独立请求/响应 HMAC、明确允许的 Cloudflare 公网 CIDR、两地
 `originId`、TLS 主机、专用路径和相应证明凭据。两模块的 `package` 选项须指向
 固定 `edge-proxy-worker` 修订的源码包。`servers/flake.nix` 的非 Flake 输入
 `edgeProxyWorker` 已通过私有 Git SSH 来源锁定在 `306c249`，NAR 散列与原源码树
-一致；Nix 的 `package` 选项接受其顶层 store 路径。两模块仍默认关闭，主机层也尚未
-把此输入传入模块或设置 `package`。选定 probe 主机后，应只在相关主机传入该输入，
-显式设置 `package`，再分别审查服务与 HTTPS 路由；单独锁定输入不会在远端建立
-持久系统闭包或启动服务。
+一致；Nix 的 `package` 选项接受其顶层 store 路径。Target 已单独传入此输入并
+设置 `package`，但探测服务和 TLS 入口仍默认关闭。仅锁定和传入输入不会在远端
+建立持久系统闭包或启动服务。
+
+### Target 探测入口准备
+
+`hosts/target/probe-tls.nix` 以 `dot.services.targetProbeTls.enable` 控制
+DNS-01 证书和独立 HTTPS 入口，默认关闭。启用时从 SOPS
+`proxy/probe_acme_dns_token` 读取 Cloudflare DNS API token，通过 ACME
+DNS-01 为 `probe-v2-canary.dotdot.ggff.net` 申请证书；探测服务从
+`/var/lib/acme/<domain>/fullchain.pem` 和 `key.pem` 读取证书，仅监听
+`127.0.0.1:18444`。Nginx stream 在 443 透传 TLS，主机防火墙同时开放
+TCP 443。证书申请未完成时，探测服务的 systemd 依赖使其启动失败；Nginx
+仍可能监听 443，但不会提供有效探测响应。启用前须显式设置 ACME 联系邮箱、
+接受 ACME 条款、填入完整 `proxy/probe_env`，并核对公网解析和腾讯云安全组。
+
+DNS-01 token 应只授权 `dotdot.ggff.net` 单一区域的 Zone Read 与 DNS Edit；
+该权限仍可修改此区域内的其他 DNS 记录，因此仅将 token 放在 Target 的
+SOPS 密文中，以 root `0400` 运行时文件交给 ACME 单元。现有广域 Cloudflare
+管理 token 不传给 Target。当前管理 token 的只读 API 核对显示账户 token
+有效，具有 Account API Tokens Write，且可列出 Zone Read 与 DNS Write
+权限组；这支持创建受限 token 的方案，但不能证明实际创建、范围或授权成功。
+本阶段未创建 token、DNS 记录或证书。
+
+轮换时先建立同范围的新 token，更新 Target SOPS 密文并只对隔离配置执行
+`nixos-rebuild test`；确认 ACME 续期测试和 HTTPS 探测后再撤销旧 token。
+若尚无到期证书，不以现有证书能提供 HTTPS 作为新 token 可续期的证据。
+回退时关闭 `targetProbeTls` 并恢复前一代系统配置；旧 Worker、KV、订阅及
+其他 Nginx stream 入口保持原路径。关联安全组与 443 放行须另行核对、变更和
+回退，不由 Nix 模块控制。
 
 `edge-worker-source.json` 与 `scripts/prepare-edge-source.mjs` 保留旧 `4fbe909`
 归档路径作为回退，不属于新输入。该旧提交只在受限 legacy checkout 中，新的

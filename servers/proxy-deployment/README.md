@@ -78,7 +78,16 @@ DNS-01 为 `probe-v2-canary.dotdot.ggff.net` 申请证书；探测服务从
 `127.0.0.1:18444`。Nginx stream 在 443 透传 TLS，主机防火墙同时开放
 TCP 443。证书申请未完成时，探测服务的 systemd 依赖使其启动失败；Nginx
 仍可能监听 443，但不会提供有效探测响应。启用前须显式设置 ACME 联系邮箱、
-接受 ACME 条款、填入完整 `proxy/probe_env`，并核对公网解析和腾讯云安全组。
+接受 ACME 条款、核对已登记的 `proxy/probe_env`，并核对公网解析和腾讯云安全组。
+
+Target 的 `proxy/probe_env` 已加密登记。四个变量为 `PROBE_REQUEST_KEY`、
+`PROBE_RESPONSE_KEY`、`PROBE_ALLOWED_CIDRS_JSON` 和 `PROBE_ORIGINS_JSON`：
+前两项与 Cloudflare canary 密文一致；后者为 LA/SG 各自的 TLS 主机、
+`/proof` 路径、`la-origin` / `sg-origin` 身份和独立证明密钥、访问令牌。
+候选范围取自 2026-10-13 的 [Cloudflare IPv4 列表](https://www.cloudflare.com/ips/)，
+共 15 项，启用前须重新核对。轮换 HMAC 时须同步更新 Worker 与 Target；
+轮换某地证明凭据时须同步更新该地服务与 Target，并确认旧凭据失效。
+目前两地证明服务与新 Worker 均未启用，密文存在不代表验证链路可用。
 
 DNS-01 token 应只授权 `dotdot.ggff.net` 单一区域的 Zone Read 与 DNS Edit；
 该权限仍可修改此区域内的其他 DNS 记录，因此仅将 token 放在 Target 的
@@ -118,16 +127,17 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
 分支保存独立交付令牌、订阅令牌、两地上传 HMAC、优选池读取令牌以及探测
 请求/响应 HMAC；这些值未复制到通用项目或明文配置。仅登记密文不会改变
 运行服务：旧 Xray 账户目录中的 `canary.enabled` 仍为 false。
-两地主机当前的 SOPS 文件仍缺少 `proxy/delivery_runtime`，也没有 probe 的
-`proxy/probe_env` 与 TLS 证书、私钥。现有两份主机密文已经在对应主机上使用其
+两地主机当前的 SOPS 文件仍缺少 `proxy/delivery_runtime`；Target 已持有
+`proxy/probe_env` 与 DNS-01 token，使用 ACME 证书路径而非 SOPS TLS 证书、私钥。
+现有两份回源主机密文已经在对应主机上使用其
 SSH 主机身份只读解密成功，但这不验证尚未写入的运行时字段或服务权限。
 
 进入隔离灰度前，还需完成以下部署侧输入与实机证据：
 
 1. 路由器在实际网络生成两地测量结果，经可信回源探测写入 `owner-campus-canary`
    的两个 v2 池；只有池格式和健康通过才允许发布。
-2. 确定 probe 的独立 HTTPS 域名、证书、受限来源和运行主机，向该主机的 SOPS
-   写入完整 `probe_env`；核对新版 Worker 的独立 KV 绑定并确定私有交付域名。
+2. 复核 Target 的 probe HTTPS 域名、证书申请、Cloudflare CIDR、DNS-only 解析
+   和云安全组；核对两地证明服务与新版 Worker 的独立 KV 绑定，并确定私有交付域名。
 3. 为指定发布主机准备完整 `proxy/delivery_runtime`，核对两地 UUID 与 SOPS
    一致，并更新当前仍有用户未提交改动的 `servers/flake.lock` 到已验编译器修订。
 4. 在两台主机先用 `nixos-rebuild test` 验证 SSH、旧 Xray 身份、旧订阅和新 canary

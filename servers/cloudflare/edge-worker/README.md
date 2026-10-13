@@ -3,14 +3,17 @@
 本目录只维护此部署的 Worker 名称、域名、Cloudflare 账号与 SOPS 密钥来源、Mihomo
 基线及路由器适配。协议实现、配置生成器、测试和 npm 依赖由独立项目
 `/home/dot/Projects/edge-proxy-worker` 维护，接口见该项目的 `README.md` 与
-`docs/architecture.md`。`scripts/pinned-source.mjs` 固定完整 Git 提交
-`e84f549df1293117ffcf6e47dcc8ff4e5f5f6b57`。部署脚本用 `git archive` 导出该
+`docs/architecture.md`。`scripts/pinned-source.mjs` 固定旧版完整 Git 提交
+`e84f549df1293117ffcf6e47dcc8ff4e5f5f6b57`。部署时必须通过
+`EDGE_PROXY_WORKER_LEGACY_REPOSITORY` 指向含此提交的受限本地 checkout；新的
+独立项目克隆不包含旧提交。部署脚本用 `git archive` 导出该
 提交到权限受限的临时目录，运行 `npm ci`，再使用其中的 `src/index.ts`、
 `src/preferred-control.ts` 和 `buildProfiles({ baseline, providers })`。工作树中的后续改动
 不会自动进入部署。
 
-目前独立项目只有本机 Git 对象、没有远端。另一台机器必须先取得包含上述提交的仓库，
-并放在适配器所指路径；这套部署尚不能仅凭 dotfiles 在另一台机器复现。修改固定提交时，
+旧提交只保存在受限本地备份中；另一台机器必须先安全取得该旧 Git 对象，并显式
+设置上述环境变量，才能重新部署旧 Worker。不得把旧历史导入新的独立项目远端。
+修改固定提交时，
 先检查独立项目接口和版本，再更新适配器引用并重新验证。Mihomo 基线保存在
 `servers/clash/router-policy.json`，私有 provider URL、账号、令牌与密钥保存在
 `servers/secrets/cloudflare.yaml` 的 SOPS 密文中，不进入独立项目。
@@ -22,6 +25,8 @@ Age 身份。独立项目先运行 `npm ci && npm run check`；这里的部署�
 
 ```bash
 cd /home/dot/.dotfiles/servers/cloudflare/edge-worker
+export EDGE_PROXY_WORKER_LEGACY_REPOSITORY=/home/dot/Documents/Codex/edge-worker-release.zdIsNs2I/legacy-original-checkout
+git -C "$EDGE_PROXY_WORKER_LEGACY_REPOSITORY" rev-parse --verify e84f549df1293117ffcf6e47dcc8ff4e5f5f6b57^{commit}
 node --check scripts/pinned-source.mjs
 node --check scripts/deploy.mjs
 node scripts/deploy.mjs --dry-run
@@ -35,6 +40,10 @@ Worker；因此不证明真实 binding、Secret 或客户端连接可用。脚�
 ```bash
 node scripts/deploy.mjs
 ```
+
+以上备份目录的父目录仅允许所有者访问。实际部署前应重新核对旧提交和 dry run；
+若备份被移动，更新环境变量指向同一旧提交。省略环境变量时适配器会拒绝执行，
+不会从新的独立项目克隆中猜测旧来源。
 
 实际部署会查询或创建 `edge-proxy-next-state` KV，将四份私有配置写入
 `clash/config/<profile>`，然后部署 `edge-proxy-next` 和 `edge-preferred-control`。

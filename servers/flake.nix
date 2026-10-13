@@ -42,6 +42,7 @@
       gmail-archiver,
       sops-nix,
       proxyStack,
+      edgeProxyWorker,
       ...
     }:
     {
@@ -81,10 +82,11 @@
         };
 
         target = nixpkgs.lib.nixosSystem {
-          specialArgs = { proxyStack = null; };
+          specialArgs = { proxyStack = null; inherit edgeProxyWorker; };
           modules = [
             sops-nix.nixosModules.sops
             ./hosts/target
+            ./hosts/target/probe-source.nix
           ];
         };
       };

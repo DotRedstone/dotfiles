@@ -11,6 +11,7 @@
     ./xray.nix
     ./subscriptions.nix
     ./canary-origin.nix
+    ./cross-probe.nix
     ./gemini.nix
   ];
 }

@@ -23,11 +23,11 @@
     "edgeProxyWorker": {
       "flake": false,
       "locked": {
-        "lastModified": 1791729844,
-        "narHash": "sha256-i4UmPWjk8LMzenI6N1SPCGdSQxGFEBG9zHVDHUIR+Fs=",
+        "lastModified": 1791887845,
+        "narHash": "sha256-8IzmqzVJrw/oMnT0+/E2tc1lj96QLDImdKmkFuy5f3I=",
         "ref": "main",
-        "rev": "306c249ec62b525de85c0152423bf2b8bc195fae",
-        "revCount": 13,
+        "rev": "538d974998f217a7a10cd8a178b62e82d44fcb89",
+        "revCount": 15,
         "type": "git",
         "url": "ssh://git@github.com/DotRedstone/edge-proxy-worker.git"
       },

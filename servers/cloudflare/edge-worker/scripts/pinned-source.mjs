@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
-export const sourceRepository = "/home/dot/Projects/edge-proxy-worker";
+export const sourceRepository = process.env.EDGE_PROXY_WORKER_LEGACY_REPOSITORY;
 export const sourceCommit = "e84f549df1293117ffcf6e47dcc8ff4e5f5f6b57";
 
 function run(command, arguments_, options = {}) {
@@ -18,6 +18,9 @@ function run(command, arguments_, options = {}) {
 }
 
 export function preparePinnedSource(temporaryDirectory) {
+  if (!sourceRepository || !path.isAbsolute(sourceRepository)) {
+    throw new Error("set EDGE_PROXY_WORKER_LEGACY_REPOSITORY to the restricted legacy checkout");
+  }
   const resolved = run("git", [
     "-C",
     sourceRepository,

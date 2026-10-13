@@ -46,14 +46,18 @@ JSON 包含 `version: 1`、`preferredReadToken`、每账户 `runtimeByAccount`�
 真实值只进入加密文件；目录和示例不记录其正文。控制面、交付 Worker 使用独立 KV，
 旧 `clash/config/<profile>` 和旧优选池继续由既有 Worker 管理。
 
-隔离测试使用确定修订的 `proxy-stack cd6663b` 与 `edge-proxy-worker 4fbe909`，
+历史隔离测试使用确定修订的 `proxy-stack cd6663b` 与旧 Worker `4fbe909`，
 合成账户、内存 KV 和本机 Mihomo 数据文件；故障注入覆盖每份文档写入、读回、
 manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此测试不读取生产 KV，
-也不证明 Cloudflare、两地回源或客户端更新已经生效。
+也不证明 Cloudflare、两地回源或客户端更新已经生效。main 的 `proxyStack`
+仍锁在 `23a64ff`，脱敏的新版 Worker 输入锁在 `306c249`；这组锁定输入尚未
+按上述历史组合完成联合运行验证。状态与发布阶段见[发布记录](../docs/proxy-stack-rollout.md)。
 
 ## 回源证明与可信探测
 
-`dot.services.proxyOriginProof` 与 `dot.services.proxyPreferredProbe` 均默认关闭。
+`dot.services.proxyOriginProof` 与 `dot.services.proxyPreferredProbe` 模块均默认关闭；
+main 的主机配置也未启用。未合并的 `codex/origin-canary-dryrun` 分支只在
+Conduit/Hopper 准备 canary 身份与精确 `/proof` 路径。
 前者在 Conduit/Hopper 各自回环地址运行，通过现有 CDN TLS 虚拟主机的专用
 `/proof` 路径访问；Nginx 不注入证明令牌，请求方必须提供
 `X-Origin-Proof-Token`。每地使用独立的 SOPS `proxy/origin_proof_key` 和
@@ -64,9 +68,9 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 `originId`、TLS 主机、专用路径和相应证明凭据。两模块的 `package` 选项须指向
 固定 `edge-proxy-worker` 修订的源码包。`servers/flake.nix` 的非 Flake 输入
 `edgeProxyWorker` 已通过私有 Git SSH 来源锁定在 `306c249`，NAR 散列与原源码树
-一致；Nix 的 `package` 选项接受其顶层 store 路径。Target 已单独传入此输入并
-设置 `package`，但探测服务和 TLS 入口仍默认关闭。仅锁定和传入输入不会在远端
-建立持久系统闭包或启动服务。
+一致；Nix 的 `package` 选项接受其顶层 store 路径。main 仅向 Target 传入
+此输入并设置 `package`，探测服务和 TLS 入口仍默认关闭；两地预览分支才向
+Conduit/Hopper 传入。仅锁定和传入输入不会在远端建立持久系统闭包或启动服务。
 
 ### Target 探测入口准备
 
@@ -79,6 +83,8 @@ DNS-01 为 `probe-v2-canary.dotdot.ggff.net` 申请证书；探测服务从
 TCP 443。证书申请未完成时，探测服务的 systemd 依赖使其启动失败；Nginx
 仍可能监听 443，但不会提供有效探测响应。启用前须显式设置 ACME 联系邮箱、
 接受 ACME 条款、核对已登记的 `proxy/probe_env`，并核对公网解析和腾讯云安全组。
+未合并的 `codex/target-probe-dryrun` 分支只准备启用声明和 dry-run；main 与
+Target 现网仍关闭该入口。
 
 Target 的 `proxy/probe_env` 已加密登记。四个变量为 `PROBE_REQUEST_KEY`、
 `PROBE_RESPONSE_KEY`、`PROBE_ALLOWED_CIDRS_JSON` 和 `PROBE_ORIGINS_JSON`：
@@ -87,7 +93,7 @@ Target 的 `proxy/probe_env` 已加密登记。四个变量为 `PROBE_REQUEST_KE
 候选范围取自 2026-10-13 的 [Cloudflare IPv4 列表](https://www.cloudflare.com/ips/)，
 共 15 项，启用前须重新核对。轮换 HMAC 时须同步更新 Worker 与 Target；
 轮换某地证明凭据时须同步更新该地服务与 Target，并确认旧凭据失效。
-目前两地证明服务与新 Worker 均未启用，密文存在不代表验证链路可用。
+main 与两地现网均未启用证明服务，新 Worker 也未部署；密文存在不代表验证链路可用。
 
 DNS-01 token 应只授权 `dotdot.ggff.net` 单一区域的 Zone Read 与 DNS Edit；
 该权限仍可修改此区域内的其他 DNS 记录，因此仅将 token 放在 Target 的
@@ -126,11 +132,13 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
 `proxy/origin_proof_token`。`servers/secrets/cloudflare.yaml` 的 `canary`
 分支保存独立交付令牌、订阅令牌、两地上传 HMAC、优选池读取令牌以及探测
 请求/响应 HMAC；这些值未复制到通用项目或明文配置。仅登记密文不会改变
-运行服务：旧 Xray 账户目录中的 `canary.enabled` 仍为 false。
+运行服务：main 的旧 Xray 账户目录中 `canary.enabled` 仍为 false；两地启用
+配置只存在于未合并预览分支。
 两地主机当前的 SOPS 文件仍缺少 `proxy/delivery_runtime`；Target 已持有
 `proxy/probe_env` 与 DNS-01 token，使用 ACME 证书路径而非 SOPS TLS 证书、私钥。
-现有两份回源主机密文已经在对应主机上使用其
-SSH 主机身份只读解密成功，但这不验证尚未写入的运行时字段或服务权限。
+两份回源主机密文已用对应 SSH 主机身份只读解密成功；Target 的已登记密文
+也通过相同边界核验。两地证明凭据与 Target 探测环境的对应关系只以哈希、长度
+和变量名核对，尚未验证服务权限或真实回源。
 
 进入隔离灰度前，还需完成以下部署侧输入与实机证据：
 
@@ -139,7 +147,7 @@ SSH 主机身份只读解密成功，但这不验证尚未写入的运行时字�
 2. 复核 Target 的 probe HTTPS 域名、证书申请、Cloudflare CIDR、DNS-only 解析
    和云安全组；核对两地证明服务与新版 Worker 的独立 KV 绑定，并确定私有交付域名。
 3. 为指定发布主机准备完整 `proxy/delivery_runtime`，核对两地 UUID 与 SOPS
-   一致，并更新当前仍有用户未提交改动的 `servers/flake.lock` 到已验编译器修订。
+   一致，并单独审阅将 `servers/flake.lock` 更新到已验编译器修订的差异。
 4. 在两台主机先用 `nixos-rebuild test` 验证 SSH、旧 Xray 身份、旧订阅和新 canary
    的 REALITY、CF TLS 回源；只对隔离客户端添加新配置，验证三平台交付、
    provider 更新与单账户撤销。旧 Worker、旧 KV 和路由器默认组继续保留。
@@ -150,15 +158,17 @@ SSH 主机身份只读解密成功，但这不验证尚未写入的运行时字�
 可审查的 diff、实测证据和回退命令。
 
 现有 LA/SG CDN 域名与各自 Nginx TLS 虚拟主机可承载独立的 proof 精确路径，
-不要求修改旧 WS 路由。只读 Cloudflare 清单确认旧 `edge-proxy-next-state` KV、
-`edge-proxy-next` 和 `edge-preferred-control` 仍存在。两个新版隔离 KV 已创建且
-读回为空，ID 和预留 Worker 名称见 `cloudflare-resources.json`；新 Worker 尚未
-部署，未设置路由。旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2
-池或账户文档。probe 的公开 HTTPS 名称、证书与访问路由没有可核验的现成部署
-绑定；现有 CDN 证书只声明给各自回源虚拟主机，不能推断适用于 probe API。
+不要求修改旧 WS 路由。2026-10-13 的只读 Cloudflare 核对确认旧
+`edge-proxy-next-state` KV、`edge-proxy-next` 和 `edge-preferred-control` 保留；
+两个新版隔离 KV 已创建且均为 0 键，ID 与预留 Worker 名称见
+`cloudflare-resources.json`。新版控制与交付 Worker 均不存在，也未设置新路由。
+旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2 池或账户文档。probe 的
+公开 HTTPS 名称、证书与访问路由尚无实机部署；现有 CDN 证书只声明给各自
+回源虚拟主机，不能推断适用于 probe API。
 
 probe 的公网 HTTPS 路由、证书信任、来源限制及新版 Worker 绑定需要单独审阅；
-当前模块既不开放防火墙，也不覆盖旧代理路由。先在隔离环境验证错误证书、错误
+main 默认关闭时不开放新增防火墙端口，也不覆盖旧代理路由；Target 预览配置
+会增加 TCP 443，腾讯云安全组尚未核对。先在隔离环境验证错误证书、错误
 nonce、错误 `originId`、错误 MAC、候选地址限制与失败保留，再分别执行两台
 服务器的 `nixos-rebuild test` 并确认旧 Xray、SSH 与订阅正常。若新路径异常，
 关闭相应新模块并恢复上一代系统配置；旧订阅、优选池与 Worker 不依赖这些模块。

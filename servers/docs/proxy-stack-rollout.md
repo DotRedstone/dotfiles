@@ -1,12 +1,24 @@
 # 双节点代理分阶段发布记录
 
-本页记录 2026-10-11 的本地实施状态。它不是现网发布令。`conduit`、`hopper`、
-路由器和 Cloudflare 均未因本次工作执行服务切换。
+本页保留 2026-10-11 的本地验证记录，并记录 2026-10-13 的交接状态；它不是
+现网发布令。服务器、路由器和现用 Cloudflare Worker 均未切换到新链路。
+
+## 2026-10-13 状态
+
+| 层级 | 已确认状态 | 待验证边界 |
+| --- | --- | --- |
+| 独立源码与锁 | `proxy-stack` 独立仓库当前为 `cd6663b`，main 的 `servers/flake.lock` 仍锁 `23a64ff`；脱敏的私有 `edge-proxy-worker` 源码与非 Flake 输入均为 `306c249` | 新编译器尚未更新到服务器锁；远端构建需核对私有仓库读取权限 |
+| main 声明 | Conduit/Hopper 的旧账户与订阅仍在，canary 在旧账户目录中关闭；Target 探测和两地 origin-proof 模块默认关闭 | 声明与密文存在不代表服务已部署 |
+| 独立预览 | `codex/target-probe-dryrun` 准备 Target DNS-01/443；`codex/origin-canary-dryrun` 准备两地 canary Xray 身份与精确 `/proof` 路径；两支均未合并 | 仅通过单机求值与 build dry-run，未执行 `nixos-rebuild test/switch` |
+| Cloudflare | 两个隔离 KV 已创建且 2026-10-13 只读查询均为 0 键；DNS-01 token 已加密写入 Target SOPS；新版控制与交付 Worker 均不存在 | 未创建探测 A 记录、签发证书或发布 v2 池与账户文档；旧 Worker/KV 保留 |
+| 现网 | Conduit/Hopper 当前 Xray、Nginx 运行且旧 `managed:guest` 身份仍在；Target 尚无 443 监听或 ACME/探测单元 | 腾讯云安全组 TCP 443 未核对；路由器活动配置与各组 `now` 未重新取得，真实回源和应用流量未验 |
+
+部署输入、SOPS 键与回退边界以[部署目录](../proxy-deployment/README.md)为准。
 
 ## 组件契约与发布物
 
-下表是部署侧的责任边界。跨项目接口的字段、版本兼容期和确定修订须由各项目定版，
-定版前不把新账户写入生产目录，也不更新部署锁。
+下表是部署侧的责任边界。跨项目接口的字段、版本兼容期和确定修订须由各项目定版；
+新账户须经隔离验证后才能进入现网。
 
 | 所有者 | 输入与接口 | 发布物 | 部署侧责任 |
 | --- | --- | --- | --- |
@@ -19,7 +31,7 @@
 两项目应先确定配置数据的唯一编译入口和 Worker 运行时的唯一源码，再由部署仓库
 锁定兼容的修订；不能只凭构建成功推断两者的接口可互换。
 
-`proxy-stack` 已在修订 `4643491` 固定这条边界，其主要接口见该项目的
+`proxy-stack` 曾在修订 `4643491` 固定这条边界，其主要接口见该项目的
 `docs/contracts.md`、`schema/measurement.schema.json`、`schema/pool-v2.schema.json`
 和 `schema/delivery-manifest.schema.json`。部署侧在受限环境使用同一固定编译器，
 为每个账户预编译 router、desktop、mobile 三份配置及 `la-cf`、`sg-cf` 两份
@@ -27,21 +39,22 @@ provider。发布时先写入五份不可变私有文档并验证，再切换 ma
 令牌及 manifest 授权，原样返回文档，不在请求时编译或改写规则。每账户独立令牌和
 两台 Xray 身份由 SOPS 与受限运行时提供，生成文件及令牌不得进入 Git 或 Nix store。
 
-当前 `servers/flake.lock` 仍指向旧编译器修订，且有任务外未提交改动；
-`edge-proxy-worker` 的现行固定部署适配仍使用旧的四份 profile KV 键。两端的
-修订与交付接口都对齐后，再单独审阅锁定和适配变更。旧 KV、订阅与 Worker 在此期间
-保持原有路径。
+main 的 `servers/flake.lock` 仍指向 `proxy-stack 23a64ff`，工作区另有任务外
+未提交的锁文件改动；旧 `edge-worker` 部署适配仍使用四份 profile KV 键，
+并从受限归档读取 `4fbe909`。新版脱敏源码 `306c249` 是另一条锁定输入，
+不能直接替换旧适配器的提交。旧 KV、订阅与 Worker 保持原有路径。
 
-部署仓库已增加默认关闭的发布 timer、回源证明与可信探测模块。发布核心用
+部署仓库已增加默认关闭的发布 timer、回源证明与可信探测模块。历史合成检查用
 `proxy-stack cd6663b` 和 `edge-proxy-worker 4fbe909` 完成合成账户的跨仓库检查：
 三平台配置通过 Mihomo 静态检查，五份文档经内存 KV 由 Worker 原样交付，
-故障注入保持旧 manifest 可读。实际 `servers/flake.lock` 仍是旧修订，
+故障注入保持旧 manifest 可读。这不是当前两项 Flake 锁定输入的联合运行测试；
+`servers/flake.lock` 中的 `proxyStack` 仍是旧修订，
 `servers/cloudflare/edge-worker/scripts/deploy.mjs` 仍调用旧固定 Worker 的
 `buildProfiles`；升级必须同时改造该适配器，不能仅替换固定提交。
 受限任务的输入、SOPS 键和隔离验收见 [部署目录](../proxy-deployment/README.md)。
-新模块尚未启用。部署目录现已登记独立的 `canary`，旧 Xray 目录同名账户保持
-disabled；两地 UUID 与控制令牌只新增在 SOPS 密文中。未生成真实 v2 池，
-未发布私有文档或改变现网。
+main 的新模块尚未启用。部署目录已登记独立的 `canary`，旧 Xray 目录同名账户
+保持 disabled；两地 UUID、证明凭据与控制令牌只新增在 SOPS 密文中。未生成真实
+v2 池，未发布私有文档或改变现网。
 
 ## 本地变更
 
@@ -57,10 +70,12 @@ disabled；两地 UUID 与控制令牌只新增在 SOPS 密文中。未生成真
   回源探测服务绑定尚待实现与验收。
 
 `servers/flake.nix` 通过私有 GitHub 仓库引入 `proxy-stack`，`flake.lock` 固定提交。
-构建端须有该私有仓库读取权限；本机通过 Git HTTPS 认证已确认可读。只更新
-`proxyStack` input，保留现有 `gmail-archiver` 锁文件改动。
+构建端须有该私有仓库读取权限；本机曾通过 Git HTTPS 认证确认可读，远端读取
+能力仍须在部署前核对。
 
-## 已完成的本地验证
+## 历史本地验证与当前检查
+
+下列是 2026-10-11 的本地验证结果，不代表当前锁与新源码已完成联合验收：
 
 ```text
 proxy-stack: node --test test/*.test.mjs                 10/10 通过
@@ -76,16 +91,23 @@ servers: nix build path:./servers#proxyStackWorkerBundles --no-link  三 bundle 
 通过；`test/render-deployment-fixture.mjs` 用合成凭据与池生成 router、desktop、mobile
 三份配置及两地 CF provider；三份 `mihomo -t` 均通过。检查在自动清理的临时目录
 运行，复用了本机已有 GeoSite/GeoIP 数据以避免在线下载。它仍未测试 Worker 的
-manifest 鉴权或私有文档交付；当前 Flake 锁也未更新到该修订。
+manifest 鉴权或私有文档交付；main 的 Flake 锁也未更新到该修订。
+
+2026-10-13 重新执行 `nix flake check path:./servers --all-systems --option substituters ''`
+通过四主机求值和两架构 Worker bundle 的 derivation 检查。
+此前 Hopper/Hermes 的无效 store source 曾使完整检查失败；该错误本轮未复现，
+源路径现已可读。此结果未构建 Hopper 系统或 ARM Worker bundle，也不证明
+远端服务可用。
 
 这些结果只证明语法、引用与构建。尚无真实账户凭据的直连/CF TLS 回源、应用登录、
-大文件、订阅刷新或单账户撤销验证。路由器只读 SSH 拒绝当前密钥；Controller 返回 401，
-现用策略组的 `now` 未能保存，因此路由器默认不得切换。
+大文件、订阅刷新或单账户撤销验证。历史核对中路由器只读 SSH 拒绝所用密钥、
+Controller 返回 401；本轮未重新取得活动配置和各组 `now`，因此路由器默认不得切换。
 
 ## 发布前检查与回滚
 
-1. **锁与身份准备**：确认远程构建端的私有仓库读取权限；在 SOPS 建立隔离测试身份的两台独立
-   UUID、订阅令牌、REALITY 客户端参数与 WebSocket 路径。构建端只能读锁定修订。
+1. **锁与身份准备**：确认远程构建端的私有仓库读取权限；核对 SOPS 中已有的两台
+   canary UUID、订阅令牌与证明凭据，并补齐发布所需的 REALITY 客户端参数与
+   WebSocket 路径。构建端只能读锁定修订。
    回滚：将 `proxyStack` 锁回前一已验修订；首次引入时撤销 input 并恢复旧模块导入。
 2. **受限灰度**：先在两台服务器 `nixos-rebuild test`，保持现有 SSH 会话与旧订阅；
    核对 Xray 监听、旧账户继续可用、测试账户两地 REALITY 和 CF 回源。受信任探测
@@ -98,15 +120,15 @@ manifest 鉴权或私有文档交付；当前 Flake 锁也未更新到该修订�
    登录/令牌刷新/进服，最后才把 `🚀 主线路` 选到两地优选。回滚：恢复旧订阅与
    配置备份、原策略组选项；读取运行时 `now`，确认出口与 DNS 恢复。
 
-每一步发布前还需附具体 diff、目标 Worker/主机、访问方式、影响面与最终回滚命令。
-未获得单阶段发布审阅前，不执行 Cloudflare、服务器或路由器变更。
+后续涉及 Cloudflare Worker/DNS、主机服务或路由器的发布步骤，须先附具体 diff、
+目标、访问方式、影响面与回滚命令，再分别审阅与执行。
 
 ## 阶段验收条件
 
 | 阶段 | 进入下一阶段前的证据 | 失败时的保留与回退 |
 | --- | --- | --- |
 | 基线 | 保存旧订阅、定时任务、测速脚本、优选池与 Mihomo 各组运行时 `now` 的脱敏摘要；核对两台 Xray、Worker 和 EasyTier 的实际状态 | 未取得的实机证据标为未知；不改变旧链路 |
-| 接口定版 | 记录 `proxy-stack`、`cf-optimizer`、`edge-proxy-worker` 的修订、schema 版本、输入输出及兼容期；合成账户和来源通过跨仓库检查 | 保持当前锁与空新账户目录，不发布不兼容产物 |
+| 接口定版 | 记录 `proxy-stack`、`cf-optimizer`、`edge-proxy-worker` 的修订、schema 版本、输入输出及兼容期；合成账户和来源通过跨仓库检查 | 保持当前锁和已登记但未发布的 canary 目录，不发布不兼容产物 |
 | 本地隔离 | router、desktop、mobile 完整配置均通过 `validate` 与 `mihomo -t`；两节点 Nix 求值通过，私有内容不进入 Git 或 Nix store | 删除临时生成物；旧配置与旧订阅继续运行 |
 | 单账户灰度 | 两台服务器各自验证 REALITY 与 CF TLS 回源、旧身份持续可用；新账户的订阅更新、撤销、DNS 和应用流量经实机验证 | `nixos-rebuild test` 回退到上一代；停用新账户入口，保留旧身份 |
 | 优选来源 | 校验签名与批准仓库的来源隔离、回源健康、失败保留和过期处理；路由器测速进程正常退出且不停止 OpenClash | 不替换旧定时任务；恢复上一份有效池 |

@@ -4,7 +4,7 @@
 # Scope: Host
 # ---
 
-{ config, ... }: {
+{ config, lib, ... }: {
   dot.services = {
     xrayNode = {
       enable = true;
@@ -17,10 +17,10 @@
       # Grey-release identity; the established Reality client remains unchanged.
       realityVisionEnable = true;
     };
-
     xrayCdnWebSocket = {
       enable = true;
       serverName = "la-cdn.bdot.in";
     };
   };
+  dot.proxyAccounts.accounts.rotation.enabled = lib.mkForce true;
 }

@@ -10,6 +10,11 @@
       "enabled": false,
       "quotaGiB": 1,
       "expiresAt": null
+    },
+    "rotation": {
+      "enabled": false,
+      "quotaGiB": 1,
+      "expiresAt": null
     }
   }
 }

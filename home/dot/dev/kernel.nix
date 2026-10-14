@@ -103,6 +103,7 @@ in
     gzip
     bzip2
     file
+    dtc
 
     # [Virtualization]
     qemu

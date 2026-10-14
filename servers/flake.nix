@@ -25,7 +25,7 @@
     gmail-archiver.inputs.nixpkgs.follows = "nixpkgs";
 
     # Private remote is fetched at one exact revision from flake.lock.
-    proxyStack.url = "git+https://github.com/DotRedstone/proxy-stack.git?ref=main";
+    proxyStack.url = "git+https://github.com/DotRedstone/proxy-stack.git?ref=codex/sanitized-v2&rev=5393d0e1bffd3406b62b09269b54fd7434778f3e";
     proxyStack.inputs.nixpkgs.follows = "nixpkgs";
 
     edgeProxyWorker = {

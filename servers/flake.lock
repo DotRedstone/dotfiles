@@ -190,16 +190,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1791714053,
-        "narHash": "sha256-z5TAaph++AEXturBY6K6vnObUeHgUuBrPn3KqsMoFLI=",
-        "ref": "main",
-        "rev": "23a64ff95ce9fc14239ea7f950f62be897dd8384",
-        "revCount": 6,
+        "lastModified": 1791971629,
+        "narHash": "sha256-0XNue1CC3fs0kTAsQB/zSs64Su+8y/UQ2poi+0F1E+g=",
+        "ref": "codex/sanitized-v2",
+        "rev": "5393d0e1bffd3406b62b09269b54fd7434778f3e",
+        "revCount": 11,
         "type": "git",
         "url": "https://github.com/DotRedstone/proxy-stack.git"
       },
       "original": {
-        "ref": "main",
+        "ref": "codex/sanitized-v2",
+        "rev": "5393d0e1bffd3406b62b09269b54fd7434778f3e",
         "type": "git",
         "url": "https://github.com/DotRedstone/proxy-stack.git"
       }

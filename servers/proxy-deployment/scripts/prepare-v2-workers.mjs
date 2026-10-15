@@ -128,7 +128,13 @@ function main() {
       if (!fs.existsSync(wrangler)) throw new Error("run npm ci in edge-proxy-worker first");
       for (const name of ["preferred-v2", "delivery-v2"]) {
         run(wrangler, ["deploy", "--dry-run", "--config", path.join(output, `${name}.json`)],
-          { cwd: checkout, stdio: "inherit", timeout: 60000 });
+          {
+            cwd: checkout,
+            stdio: "inherit",
+            timeout: 60000,
+            // Banner 的在线版本检查可能在本机 DNS 代理上挂起；打包无需该请求。
+            env: { ...process.env, WRANGLER_HIDE_BANNER: "true", WRANGLER_SEND_METRICS: "false" },
+          });
       }
       process.stdout.write("v2 Wrangler dry-run passed for both locked entrypoints\n");
     } else {

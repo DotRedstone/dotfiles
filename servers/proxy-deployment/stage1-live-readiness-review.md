@@ -131,6 +131,34 @@ Nix 实际只传输 6 条新路径；目标端 `nix-store --realise --dry-run` �
 Hopper 下一次临时 `test` 的固定时刻回退、验收与无带外恢复风险见
 [Hopper rotation 临时测试交接](./hopper-rotation-test-handoff.md)。
 
+### Conduit 持久化前只读核对
+
+2026-10-15 复核：Conduit current 仍为已验收的 `fkq5h093…` 临时闭包，booted 为
+`8alf4971…`，系统 profile 第 20 代为
+`/nix/store/92j5wm1b6jzjkv8rrx7xj9nahggqkglm-nixos-system-conduit-26.11.20260831.34ab990`。
+当前候选 deriver `5fa287a1…` 与本地求值一致，目标 NAR hash 仍为上文记录值，
+`nix store verify --no-trust` 退出码为 0。`sshd`、Nginx、Xray、`proxy-origin-proof`
+均 active；运行凭据与 SOPS 渲染逐字节一致，三条旧订阅均为 HTTP 200 且正文不变。
+Hopper 的新候选尚未激活，因此这里没有执行 Conduit 持久 `switch`。
+
+若后续获准持久化，应先保存并再次确认上述 profile 第 20 代路径，为恢复旧启动配置
+准备独立的固定时刻回退保护；然后才可对当前已验收候选执行
+`nixos-rebuild --no-reexec switch --store-path`。SSH 仍可用时的最小手动恢复命令拟为：
+
+```bash
+sudo nixos-rebuild --no-reexec switch --store-path \
+  /nix/store/92j5wm1b6jzjkv8rrx7xj9nahggqkglm-nixos-system-conduit-26.11.20260831.34ab990
+```
+
+该命令尚未执行，也未验证失联时可完成恢复；执行后还须核对 current/profile、Xray
+运行凭据、旧身份与旧订阅。服务商救援入口在迁移文档中有说明，但本阶段未验证可用。
+在固定时刻回退方案实测且获得单独授权前，不以当前 `test` 的成功代替持久切换验收。
+
+路由器 Mihomo 控制端口可达，但只读 `/proxies` 请求返回 401；仓库内现用
+`clash/router-policy.json`、移动热点策略及待发布 router profile 均未保存控制器
+secret，本机也无运行中的 Mihomo 控制器。现阶段无法核实路由器各组的实际 `now`；
+源码里的 `DIRECT` 规则不能替代该运行态证据。
+
 后续每次激活前必须逐项核对并记录 **精确 Git HEAD → `flake.lock` 输入 revision/NAR →
 求值 `drvPath` → `toplevel outPath` → 目标 store deriver/NAR hash → 目标端完整 store
 verify**。所有值必须对应同一候选，目标 current/profile 必须仍与现场基线吻合；

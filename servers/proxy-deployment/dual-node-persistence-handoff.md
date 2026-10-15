@@ -1,7 +1,7 @@
 # 双节点持久切换交接
 
-状态：2026-10-16。Conduit 的 rotation 候选已完成持久 `switch`；Hopper 仍只经过
-临时 `test`，尚未持久切换。临时验收证据分别见
+状态：2026-10-16。Conduit 与 Hopper 的 rotation 候选均已完成持久 `switch`。
+临时验收证据分别见
 [第 1 阶段现场核对](./stage1-live-readiness-review.md) 与
 [Hopper 临时测试交接](./hopper-rotation-test-handoff.md)。
 
@@ -22,7 +22,7 @@ Conduit 使用 BIOS GRUB，Hopper 使用 UEFI systemd-boot。旧启动闭包与�
 profile 不是同一路径，回退必须明确恢复上述旧 profile，不能用
 `/run/booted-system` 代替。两台 SSH 均曾偶发超时，Hopper 没有已验证带外入口。
 临时 systemd timer 不跨重启；切换后如 PID 1、网络或主机失效，也无法保证其运行。
-Conduit 持久切换已完成；两台真实回退分支、Hopper 持久切换及失联恢复仍未实测。
+两台持久切换已完成；真实回退分支、失联恢复与重启后的启动行为仍未实测。
 
 ## Conduit 持久切换现场记录
 
@@ -62,6 +62,50 @@ active，失败单元数为 0，SSH、Nginx、Xray 和 proof 在切换后的错�
 proof 的 200/404 与 HMAC、旧 Reality、新 rotation、旧 Vision 和旧 CDN 的真实
 HTTPS 出口在观察结束时再次通过。该观察不替代重启后的启动验证。
 
+## Hopper 持久切换现场记录
+
+2026-10-16 在 Hopper 上重新核对主机名、直连与经 Conduit 跳转的两条 SSH
+路径。切换前 current 为 `fznhzd6b…` 临时候选，booted 为 `k69xg4y5…`，
+系统 profile 为 `w0aqhcla…`；systemd-boot 默认项仍指旧 profile，候选 entry
+尚不存在。候选 deriver `zih3d013…` 与当前 Flake 求值一致，NAR hash 为
+`sha256-UaZ+LG6l9SLA32o0PeK2lXSLa/L8RiIrHELzW7nkV2I=`，NAR size
+`365744`；候选和旧 profile 的 `nix store verify --no-trust` 通过。回退脚本
+SHA-256 为下文记录值、权限为 root:root 0700，旧 profile 的切换工具与历史
+profile 链接存在；切换前无回退 marker 或 timer。
+
+切换前 SSH、Nginx、Xray、origin-proof、Gmail 和订阅检查服务 active，Xray
+运行凭据与 SOPS 渲染配置逐字节相同，旧 primary、Vision、WebSocket、
+`guest`、`canary` 及新 `rotation` UUID 与 SOPS 一致。五条旧订阅均 HTTP 200
+且正文与 SOPS 一致，proof 在固定源站和现有 CDN HTTPS 路径上的有效、无效
+令牌分别返回 200、404，有效响应 nonce、originId 和 HMAC 正确。Gmail
+`/health` 与带凭据的只读 `/api/assignments` 均返回 200。从 Warden 运行临时
+Xray 客户端，经旧 Reality、新 rotation、旧 Vision 和旧 CDN 各访问两个真实
+HTTPS 回显，八次出口均为 Hopper 的声明地址；临时客户端已清理。
+
+目标机先安装固定时刻 20 分钟回退 timer，读回 `ActiveState=active`、
+`AccuracyUSec=1s`、`Persistent=no`、预期 `ExecStart`，剩余 1188 秒后才
+创建 root:root 0600 marker。只在 Hopper 执行一次精确候选的
+`nixos-rebuild --no-reexec switch --store-path`，退出码为 0。切换后
+current 与系统 profile 均为 `fznhzd6b…`，未重启的 booted 仍为
+`k69xg4y5…`；systemd-boot 默认 entry 的 `init=` 指向候选。上述服务、
+运行凭据、旧和新身份、五条旧订阅、proof、Gmail 及八次真实 HTTPS 出口
+再次通过，双 SSH 路径仍可重连。
+
+验收完成时 timer 尚余 1112 秒，超过 4 分钟门槛。先停止 timer 并读回
+`LoadState=not-found`、`ActiveState=inactive`，再删除 marker。即时复核
+current/profile、booted、默认启动项、旧 profile 链接、六个关键服务和
+运行凭据均符合预期，失败单元数为 0。公网 CDN 路径的 proof 在本次
+检查中通过；本次未重启，真实回退分支与重启后的启动行为仍未验证。
+
+清理回退保护后的观察从 2026-10-15 17:26:10 UTC 至 17:36:37 UTC，历时
+10 分 27 秒。末次复核确认 current/profile、旧 booted、systemd-boot 默认项与
+旧 profile 链接仍符合预期；marker 缺失、timer inactive，六个关键服务均
+active，失败单元数为 0，相关服务在观察期内无错误级 journal。Xray 运行
+凭据仍与渲染配置一致，旧和新 UUID 仍与 SOPS 一致；五条旧订阅 HTTP 200
+且正文不变，proof 的 200/404 与 HMAC、Gmail 健康及只读 API、四条路径
+各两次真实 HTTPS 出口再次通过，经 Conduit 跳转的 SSH 也能重连。该观察
+不替代真实回退或重启后的启动验证。
+
 ## 一次性回退保护
 
 [回退脚本](./scripts/dual-node-persistence-rollback.sh) 仅接受表中两台主机、
@@ -85,11 +129,11 @@ timer 到期也会恢复旧运行闭包；这是本次窗口的保守回退边�
 
 ## 逐机执行与验收
 
-以下 Conduit 切换命令是已执行操作的留档，不得重复运行。Hopper 仍须按独立窗口
-重新核对现场状态与回退保护；Conduit 的成功不代替 Hopper 验收。
+以下两台切换命令均为已执行操作的留档，不得重复运行。每次切换都独立核对了
+现场状态与回退保护；Conduit 的成功不代替 Hopper 验收。
 
 只在已 SSH 登录的**目标主机**执行命令。原定顺序为先 Conduit，完成验收并观察至少
-10 分钟，再对 Hopper 重复；Conduit 阶段现已完成。每台切换前重新核对表中
+10 分钟，再对 Hopper 重复；两台现已分别完成。每台切换前重新核对表中
 current、boot、profile、候选 store、
 旧订阅、运行凭据和 SSH；确认没有其他 marker/timer。保留第二条 SSH 会话。
 

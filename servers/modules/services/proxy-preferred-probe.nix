@@ -11,6 +11,7 @@
 
 let
   cfg = config.dot.services.proxyPreferredProbe;
+  ingressEnabled = config.dot.services.proxyProbeIngress.enable;
 in
 {
   options.dot.services.proxyPreferredProbe = {
@@ -52,15 +53,20 @@ in
       mode = "0400";
       restartUnits = [ "proxy-preferred-probe.service" ];
     };
+    # 仅启用 HTTPS 入口时与 Nginx 共享证书；回环探测保持 root-only。
     sops.secrets."proxy/probe_tls_cert" = lib.mkIf (cfg.tlsCertificateFile == null) {
       owner = "root";
-      mode = "0400";
-      restartUnits = [ "proxy-preferred-probe.service" ];
+      group = if ingressEnabled then config.services.nginx.group else "root";
+      mode = if ingressEnabled then "0440" else "0400";
+      restartUnits = [ "proxy-preferred-probe.service" ]
+        ++ lib.optionals ingressEnabled [ "nginx.service" ];
     };
     sops.secrets."proxy/probe_tls_key" = lib.mkIf (cfg.tlsKeyFile == null) {
       owner = "root";
-      mode = "0400";
-      restartUnits = [ "proxy-preferred-probe.service" ];
+      group = if ingressEnabled then config.services.nginx.group else "root";
+      mode = if ingressEnabled then "0440" else "0400";
+      restartUnits = [ "proxy-preferred-probe.service" ]
+        ++ lib.optionals ingressEnabled [ "nginx.service" ];
     };
 
     systemd.services.proxy-preferred-probe = {

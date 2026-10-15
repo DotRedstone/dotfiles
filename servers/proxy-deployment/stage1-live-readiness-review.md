@@ -186,7 +186,18 @@ verify**。所有值必须对应同一候选，目标 current/profile 必须仍�
 和 preview 均关闭，没有可供本阶段验收的公网入口。Cloudflare canary SOPS
 密文已包含 `probe_endpoints_json`：两地区 URL 为预定 probe 名称，四把 HMAC
 密钥互异且长度均为 64。密文存在及 Worker secret 绑定不能证明值一致或探测
-可用；两台主机 SOPS 仍缺 `proxy/probe_env`、DNS-01 token 与交付运行时。
+可用。重新按 `proxy` 嵌套字段解密核对后，两台 SOPS 均已有 `probe_env` 和
+专用 TLS 全链／私钥；Conduit 有 `delivery_runtime`，Hopper 无此项。此前按
+带斜杠的顶层键检查得出的“缺少 probe 输入”结论无效。
+
+运行 `node servers/proxy-deployment/scripts/check-probe-inputs.mjs`，两台输入均通过
+锁定 probe 实现的配置校验：Hopper 只允许 `la`，Conduit 只允许 `sg`；各自的
+请求/响应密钥与 Cloudflare 对应地区一致，proof 凭据来自对侧主机；专用证书
+覆盖相应 probe 名称、私钥匹配、链可由本机系统 CA 验证，有效期至 2027-01-12。
+没有 `proxy/probe_acme_dns_token`，当前静态证书路径不启用 ACME；续期方式仍需
+在证书到期前确定。两台合成求值仅打开 probe ingress 时，均能生成顶层
+derivation 并引用已有三项 SOPS 输入，ACME 仍关闭；这不证明目标机渲染、
+Nginx TLS、probe 服务或公网流量已通过。
 
 `cf-optimizer` 已可在本机生成 SDK-free 的 arm64 后端和 `all` 架构 LuCI IPK
 候选；本轮归档结构、ELF 架构、依赖声明及权限检查通过。未获得目标 Kwrt 的
@@ -198,12 +209,12 @@ verify**。所有值必须对应同一候选，目标 current/profile 必须仍�
 | 顺序 | 完成条件与可执行检查 | 影响与回退 |
 | --- | --- | --- |
 | 0. 固定基线 | 保存两台当前、开机、profile 闭包的受限现场记录，解释三者差异；复核 Hopper Gmail 现网基线、SSH 保活、旧 Xray 身份和订阅。对本分支形成包含现网基线的整机候选 | 仅核对时无流量影响；闭包来源不清时停止发布 |
-| 1. 私有输入与密钥 | 在两构建端证明固定 Worker/编译器修订可读或由本机传输固定闭包；核对 NAR hash。分别准备两地 `probe_env`、DNS-01 最小权限 token、四把互异 HMAC，确保 Hopper 仅允许 `la`、Conduit 仅允许 `sg`，并准备交付运行时及令牌哈希 | 仅增加受限输入；不复用旧单对探测密钥。失败时保留旧 SOPS 路径，停止后续阶段 |
-| 2. 先签证书 | 仅开启两地 DNS-01 证书选项，probe/ingress 保持关闭；验证证书 SAN、公开信任链、续期、Nginx 可读权限与两地 SOPS 分离 | 仅 ACME DNS TXT 临时记录和证书状态受影响；签发失败时关闭新 ACME 选项，不动旧 CDN 证书与 vhost |
+| 1. 私有输入与密钥 | 在两构建端证明固定 Worker/编译器修订可读或由本机传输固定闭包；核对 NAR hash。复核已有两地 `probe_env`、静态证书、四把互异 HMAC 和对侧 proof 映射；确定单主机 publisher 并验收其交付运行时与令牌哈希 | 只读检查无流量影响；映射不符时停止后续阶段，不覆盖旧 SOPS 路径 |
+| 2. 证书就绪 | 使用已有静态证书时，先在目标机只读核对 SOPS 渲染、证书名称、公开信任链、有效期及 Nginx 可读权限；probe/ingress 保持关闭。到期前另定续期方式；若改用 DNS-01，需另备限权 token 并分阶段验收 | 本轮只读检查无流量影响；证书不符时停在入口激活前，不动旧 CDN 证书与 vhost |
 | 3. 逐台试入口 | 先在一台执行受控 `nixos-rebuild test`，确认 loopback probe、443 专用 vhost、SNI/证书、错误签名、nonce、候选范围、proof 后再测另一台；旧 Nginx/Xray/SSH 同时检查 | 新 hostname 的 443 路由出现，旧路径应保持；失败时停新 probe/ingress、恢复上一代临时配置，核对旧订阅和 SSH |
 | 4. 开 DNS 与严格回源 | 在 `sites` zone 先建仅匹配两个新 hostname 的 `strict` Configuration Rules，再核对源站证书与现时 IP，新增两条 proxied A/AAAA；从权威 NS TCP、Cloudflare Trace 和外部 HTTPS 验证两地路由 | 仅新 probe 子域受影响；失败时移除新 DNS/精确规则并关闭新 ingress。不得改变 `flexible` zone 默认设置或旧记录 |
-| 5. 新控制 Worker | 审阅 `prepare-v2-workers.mjs` 产物、独立 `PREFERRED_V2_STATE` KV、两地区 `PROBE_ENDPOINTS_JSON`、签名密钥及受限 Route；先做无写探测与错误注入，再以隔离来源上传真实测量 | 仅隔离 Worker/KV 写入；任一探测失败应保留该 KV 旧池。失败时停新 Route/调度，保留旧 Worker/KV 和订阅 |
-| 6. 测量与交付 | 取得匹配 Kwrt 的 SDK 并生成/验收 IPK，确认路由器真实网络两地测量；只有两地有效池后才启用单主机 publisher，写完并读回五份私有文档后切换 manifest；再部署 `DELIVERY_STATE` Worker 与受限入口，测试三平台下载、provider、单账户停用 | 仅 canary 客户端接入；失败时停 publisher/新 Route，恢复上一个 manifest，隔离 KV 可留待审计；旧订阅、旧池和路由器默认组继续可用 |
+| 5. 隔离 Worker 入口 | 审阅已部署 Worker 的版本、独立 KV、secret 绑定及受限 Route；确认运行 secret 与加密输入一致。先做无写探测与错误注入，再以隔离来源上传真实测量 | 仅隔离 Worker/KV 写入；任一探测失败应保留该 KV 旧池。失败时停新 Route/调度，保留旧 Worker/KV 和订阅 |
+| 6. 测量与交付 | SDK-free IPK 仅通过本机归档检查，仍须在目标 Kwrt 验证 opkg、依赖、LuCI/rpcd、真实网络两地测量与并行旧任务；只有两地有效池后才启用单主机 publisher，写完并读回五份私有文档后切换 manifest；为已部署交付 Worker 配置受限入口，测试三平台下载、provider、单账户停用 | 仅 canary 客户端接入；失败时停 publisher/新 Route，恢复上一个 manifest，隔离 KV 可留待审计；旧订阅、旧池和路由器默认组继续可用 |
 
 所有阶段执行前重新读取 Cloudflare 与主机状态。尤其第 4 阶段的 zone 默认
 `flexible` 不能作为受信任回源证据；Cloudflare 的 [加密模式说明](https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/)

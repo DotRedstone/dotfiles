@@ -74,9 +74,10 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 `proxy/origin_proof_token`。交叉探测按被测回源地区命名：LA 候选由 Hopper 的
 `probe-la-v2-canary.bdot.in/probe` 验证，SG 候选由 Conduit 的
 `probe-sg-v2-canary.bdot.in/probe` 验证。两地复用现有 Nginx TCP 443，以独立
-HTTPS 名称反代各自的回环探测服务，不增加公网端口；新名称仍缺 DNS、专用证书
-与两地主机的 `proxy/probe_env`、`proxy/probe_tls_cert`、`proxy/probe_tls_key`。
-现有 CDN 回源证书的 SAN 只覆盖各自旧名称，不能用于新入口。
+HTTPS 名称反代各自的回环探测服务，不增加公网端口。两台 SOPS 已有各自的
+`proxy/probe_env` 与专用 TLS 证书／私钥；两个新名称仍缺公网 DNS 和逐名称
+`strict` 规则，probe 与 ingress 均默认关闭。现有 CDN 回源证书的 SAN 只覆盖
+各自旧名称，不能用于新入口。
 
 独立 `edge-proxy-worker` 已发布 `PROBE_ENDPOINTS_JSON` v1 接口：
 `origins.la` 固定指向 Hopper，`origins.sg` 固定指向 Conduit，两地请求／响应
@@ -153,12 +154,17 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
 请求/响应 HMAC；这些值未复制到通用项目或明文配置。仅登记密文不会改变
 运行服务：通用旧 Xray 账户目录中 `canary.enabled` 默认为 false；本代理候选
 在两地主机层覆盖启用，实际激活仍取决于完整主机闭包。
-两地主机当前的 SOPS 文件仍缺少 `proxy/delivery_runtime`、各自的
-`proxy/probe_env` 与专用 TLS 证书／私钥；两份回源主机密文已用对应 SSH
-主机身份只读解密成功。此前组合候选已验收 proof 服务权限与真实回源；
-本独立代理候选未单独执行实机 `test`。Target 的历史探测
-密文不迁作两地凭据；Cloudflare canary 密文已有双地区探测所需四把互异
-HMAC 密钥，但仍须与两台待创建的 `proxy/probe_env` 逐项核对。
+两地主机 SOPS 已有各自的 `proxy/probe_env` 与静态 TLS 全链／私钥；
+Conduit 已有 `proxy/delivery_runtime`，Hopper 尚无此项，发布主机归属仍需
+核对。两份回源主机密文已用对应 SSH 主机身份只读解密成功。此前组合候选
+已验收 proof 服务权限与真实回源；本独立代理候选未单独执行实机 `test`。
+Target 的历史探测密文不迁作两地凭据；Cloudflare canary 密文已有双地区探测所需四把互异
+HMAC 密钥。
+
+执行 `node servers/proxy-deployment/scripts/check-probe-inputs.mjs` 可只读核对两台
+环境与 Cloudflare 双地区配置、对侧 proof 凭据以及专用 TLS 的名称、私钥和
+公开信任链；2026-10-16 本地检查通过。证书有效期至 2027-01-12，后续
+需安排续期。现有 probe 配置和证书仍未经目标机渲染或运行验收。
 
 进入后续 v2 探测、交付与路由灰度前，还需完成以下部署侧输入与实机证据：
 

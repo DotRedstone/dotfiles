@@ -71,6 +71,43 @@ marker 不存在。Hopper 顶层已完成求值，未构建完整 ARM 闭包。�
 创建 marker、执行 `test`/`switch`、修改 DNS/Worker/路由器或撤销旧身份；待主会话复核
 Reality 旧订阅兼容边界后再决定下一步。
 
+### 2026-10-15 Conduit 双身份临时验收
+
+在主会话复核正确候选与旧订阅边界后，使用同一已核对的 Git HEAD
+`3b4d6013888ceb1e3176973c8569c7c6e03e7eed` 对 Conduit 执行临时
+`nixos-rebuild --no-reexec test --store-path`。候选运行闭包为
+`/nix/store/fkq5h093an3qjynycv13awr76fdlra20-nixos-system-conduit-26.11.20260831.34ab990`；
+系统 profile 和 `/run/booted-system` 仍指向此前闭包，因此这不是持久 `switch`，重启后
+将回到旧 profile。
+
+临时验收确认 Xray 的 `LoadCredential` 运行配置与 SOPS 渲染配置逐字节一致，并同时含旧
+Reality primary、旧 Vision、`managed:guest`、`managed:canary` 与新
+`managed:rotation`。WebSocket、Reality、CDN 三条旧订阅均返回 HTTP 200，响应正文与本机
+SOPS 密文解码所得订阅正文一致；`/proof` 的有效与无效访问令牌分别返回 200 和 404。
+用临时 Xray 客户端分别经旧 Reality primary 与新 rotation 实际访问外网回显服务，两者
+均成功，出口 IP 均与 Conduit 直连出口一致。临时客户端进程和文件已清理。
+
+验收成功后取消并清理回退 timer 与 marker；复核 timer `LoadState=not-found`、回退
+service `Result=success` 且退出码为 0、marker 不存在。Conduit 的 `sshd`、Nginx、Xray
+和 `proxy-origin-proof` 均 active。当前仍运行临时测试闭包；本记录不构成持久切换或
+Hopper 激活许可。Hopper 未执行 `test`/`switch`，也未安装回退 timer；本阶段没有改动
+DNS、Worker、路由器或撤销旧身份。
+
+### Hopper ARM 候选构建结果
+
+同一 HEAD 的 Hopper 候选求值结果为
+`/nix/store/zih3d013lk3rd391j0wqk9s9gxk4arwh-nixos-system-hopper-26.11.20260831.34ab990.drv`
+→ `/nix/store/fznhzd6b9fxyc42zphwlq7sznp5045b6-nixos-system-hopper-26.11.20260831.34ab990`。
+与上一双身份候选相比，完整引用闭包只有 6 个旧路径与 6 个新路径不同；但本机 x86
+构建因 ARM 平台不匹配而失败，转用 Hopper 单并发远程构建后，15 分钟仍未完成并超时。
+目标端未找到新候选输出，旧候选输出仍在 store 中。超时后确认 Hopper 的
+`/run/current-system`、`/run/booted-system` 与系统 profile 仍分别指向原有闭包，
+`sshd`、Nginx、Xray、`proxy-origin-proof`、`gmail-archiver` 均 active，回退 timer
+不存在且 marker 缺失；旧订阅在构建前均已核对为 5/5 HTTP 200 且与当前 SOPS 内容一致。
+该次构建没有完成目标 store 完整性验证，因此不能作为 Hopper 激活候选。未执行 Hopper
+`test`/`switch`，也未改动 DNS、Worker、路由器或旧身份；远程构建可能留下未引用的部分
+store 路径，未做清理。
+
 后续每次激活前必须逐项核对并记录 **精确 Git HEAD → `flake.lock` 输入 revision/NAR →
 求值 `drvPath` → `toplevel outPath` → 目标 store deriver/NAR hash → 目标端完整 store
 verify**。所有值必须对应同一候选，目标 current/profile 必须仍与现场基线吻合；

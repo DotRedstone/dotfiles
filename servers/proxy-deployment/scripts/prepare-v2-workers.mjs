@@ -16,6 +16,7 @@ const expectedHash = "sha256-8IzmqzVJrw/oMnT0+/E2tc1lj96QLDImdKmkFuy5f3I=";
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { encoding: "utf8", ...options });
+  if (result.error) throw new Error(`${command} failed: ${result.error.message}`);
   if (result.status !== 0) throw new Error(`${command} failed: ${result.stderr || result.stdout}`);
   return result.stdout?.trim() ?? "";
 }
@@ -127,7 +128,7 @@ function main() {
       if (!fs.existsSync(wrangler)) throw new Error("run npm ci in edge-proxy-worker first");
       for (const name of ["preferred-v2", "delivery-v2"]) {
         run(wrangler, ["deploy", "--dry-run", "--config", path.join(output, `${name}.json`)],
-          { cwd: checkout, stdio: "inherit" });
+          { cwd: checkout, stdio: "inherit", timeout: 60000 });
       }
       process.stdout.write("v2 Wrangler dry-run passed for both locked entrypoints\n");
     } else {

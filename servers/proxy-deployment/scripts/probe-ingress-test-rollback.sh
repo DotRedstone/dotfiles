@@ -6,25 +6,45 @@ case "$(/run/current-system/sw/bin/hostname)" in
     old=/nix/store/fkq5h093an3qjynycv13awr76fdlra20-nixos-system-conduit-26.11.20260831.34ab990
     candidate=/nix/store/n2hdcalpxvl9zk85kap8z7nparmm8l3g-nixos-system-conduit-26.11.20260831.34ab990
     boot=/nix/store/8alf4971c77zpy5rb6rbdzbik12617pa-nixos-system-conduit-26.11.20260831.34ab990
-    profile=/nix/store/92j5wm1b6jzjkv8rrx7xj9nahggqkglm-nixos-system-conduit-26.11.20260831.34ab990
+    profile=$old
     ;;
   hopper)
     old=/nix/store/fznhzd6b9fxyc42zphwlq7sznp5045b6-nixos-system-hopper-26.11.20260831.34ab990
     candidate=/nix/store/zylxw91hy1kyj12wi74m03as3ha9al41-nixos-system-hopper-26.11.20260831.34ab990
     boot=/nix/store/k69xg4y5d9qvp7w37p98q6vbfl0i1kgn-nixos-system-hopper-26.11.20260831.34ab990
-    profile=/nix/store/w0aqhcla0ip3vp4mcwf6i8nvpdih575v-nixos-system-hopper-26.11.20260831.34ab990
+    profile=$old
     ;;
   *) echo 'rollback refused: unexpected host' >&2; exit 1 ;;
 esac
 
 readlink="$old/sw/bin/readlink"
 systemctl="$old/sw/bin/systemctl"
+awk="$old/sw/bin/awk"
+grep="$old/sw/bin/grep"
 marker=/run/stage1-probe-ingress-rollback.marker
 current=$("$readlink" -f /run/current-system)
 
+check_default_boot() {
+  case "$(/run/current-system/sw/bin/hostname)" in
+    conduit)
+      "$awk" '/^menuentry "NixOS"/{inside=1} /^submenu "NixOS/{inside=0} inside && /init=/{print; exit}' \
+        /boot/grub/grub.cfg | "$grep" -Fq "init=$profile/init"
+      ;;
+    hopper)
+      # shellcheck disable=SC2016
+      entry=$("$awk" '$1 == "default" { print $2; exit }' /boot/loader/loader.conf)
+      case "$entry" in
+        ''|*/*|*..*) return 1 ;;
+      esac
+      "$grep" -Fq "init=$profile/init" "/boot/loader/entries/$entry"
+      ;;
+  esac
+}
+
 if [ "$("$readlink" -f /run/booted-system)" != "$boot" ] ||
-   [ "$("$readlink" -f /nix/var/nix/profiles/system)" != "$profile" ]; then
-  echo 'rollback refused: boot or profile differs from the recorded baseline' >&2
+   [ "$("$readlink" -f /nix/var/nix/profiles/system)" != "$profile" ] ||
+   ! check_default_boot; then
+  echo 'rollback refused: booted system, profile, or default entry differs from baseline' >&2
   exit 1
 fi
 if [ ! -e "$marker" ]; then
@@ -35,15 +55,25 @@ if [ ! -e "$marker" ]; then
   echo 'rollback refused: marker absent and current system changed' >&2
   exit 1
 fi
+if [ "$current" = "$old" ]; then
+  echo 'rollback skipped: rotation already running; marker retained for acceptance'
+  exit 0
+fi
 if [ "$current" = "$candidate" ] && [ -x "$old/bin/switch-to-configuration" ]; then
   "$old/bin/switch-to-configuration" test
-elif [ "$current" != "$old" ]; then
+else
   echo 'rollback refused: unexpected current system or missing old switch script' >&2
   exit 1
 fi
 
 if [ "$("$readlink" -f /run/current-system)" != "$old" ]; then
   echo 'rollback failed: current system differs from old closure' >&2
+  exit 1
+fi
+if [ "$("$readlink" -f /run/booted-system)" != "$boot" ] ||
+   [ "$("$readlink" -f /nix/var/nix/profiles/system)" != "$profile" ] ||
+   ! check_default_boot; then
+  echo 'rollback failed: booted system, profile, or default entry changed' >&2
   exit 1
 fi
 for unit in sshd.service nginx.service xray.service proxy-origin-proof.service; do

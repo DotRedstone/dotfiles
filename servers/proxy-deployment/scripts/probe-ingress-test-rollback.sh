@@ -4,7 +4,7 @@ set -eu
 case "$(/run/current-system/sw/bin/hostname)" in
   conduit)
     old=/nix/store/fkq5h093an3qjynycv13awr76fdlra20-nixos-system-conduit-26.11.20260831.34ab990
-    candidate=/nix/store/n2hdcalpxvl9zk85kap8z7nparmm8l3g-nixos-system-conduit-26.11.20260831.34ab990
+    candidate=/nix/store/k0hcr1aw9d17p2vsp2p00c9yn42gvb4v-nixos-system-conduit-26.11.20260831.34ab990
     boot=/nix/store/8alf4971c77zpy5rb6rbdzbik12617pa-nixos-system-conduit-26.11.20260831.34ab990
     profile=$old
     ;;

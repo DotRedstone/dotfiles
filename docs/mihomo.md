@@ -2,12 +2,15 @@
 
 Warden 不再运行 FlClash。Mihomo 是受 NixOS 管理、默认不随开机拉起的本机核心；
 Noctalia 通过独立项目 [`DotRedstone/noctalia-mihomo-control`](https://github.com/DotRedstone/noctalia-mihomo-control)
-的固定版本 `v0.1.0` 控制其状态栏入口、生命周期、代理组选择、延迟测试、模式切换和
-实时流量显示。
+的固定提交 `b675f266`（v0.2.0）控制其状态栏入口、生命周期、代理组选择、延迟测试、
+模式切换、实时流量和可选的本地配置管理。
 
-系统模块另提供 `mihomo-profile-helper`，实现独立插件 v0.2 的配置管理协议。当前 Flake
-仍固定在 v0.1.0，因此仅构建宿主 helper 不会在面板显示配置管理入口；发布并固定审核过的
-v0.2 提交后，才在插件设置中填写 `command -v mihomo-profile-helper` 返回的绝对路径。
+系统模块提供 `mihomo-profile-helper`，实现插件的配置管理协议。部署 NixOS 与 Home
+Manager 后，在 Noctalia 插件设置中把 `profile_helper_path` 填为
+`command -v mihomo-profile-helper` 返回的绝对路径；`helper_path` 继续指向独立的
+`mihomo-lifecycle`。插件源由启动同步脚本按固定 store 路径更新；重启 Noctalia 后用
+`noctalia msg plugins source list` 核对 `nmc path` 已指向新 store 路径。两个设置未填写时，
+对应的高权限操作不会显示。
 
 ## 安全边界
 
@@ -45,10 +48,10 @@ helper 将活动文件与选择 ID 持久写入；若服务正在运行，则重
 `/var/lib/mihomo/backups/`；若切换及回退都失败，先检查 `mihomo.service` 与
 `profile-transaction`，不要重复切换。
 
-当前交付只验证源码、合成配置和系统 dry run。要使桌面功能生效，还需审核插件 v0.2
-提交、发布固定版本、更新本 Flake 的 `noctalia-mihomo-control` 引用与锁文件，分别完成
-NixOS 与 Home Manager 构建，然后按主机变更流程切换系统、切换 Home Manager 并重启
-Noctalia。实际运行时的配置切换与流量需要单独验收。
+本 Flake 锁定的 `rev` 为 `b675f266ee0f6c3aa192b6e44c079a5899c3bd6a`；构建检查
+只证明源码与包可生成。要使桌面功能生效，仍需按主机变更流程切换 NixOS、切换 Home
+Manager、重启 Noctalia，再填写上述设置。实际 Polkit 授权、运行态切换、失败回退与
+应用流量需要部署后单独验收。
 
 ## 从旧 FlClash 导入
 

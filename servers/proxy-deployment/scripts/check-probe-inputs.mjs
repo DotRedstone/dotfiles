@@ -13,6 +13,7 @@ const servers = path.resolve(directory, "..");
 const lock = JSON.parse(fs.readFileSync(path.join(servers, "flake.lock"), "utf8"));
 const expectedWorker = "538d974998f217a7a10cd8a178b62e82d44fcb89";
 const expectedHash = "sha256-8IzmqzVJrw/oMnT0+/E2tc1lj96QLDImdKmkFuy5f3I=";
+let failurePhase = "locked source";
 
 function command(program, args) {
   const result = spawnSync(program, args, { encoding: "utf8", maxBuffer: 20 * 1024 * 1024 });
@@ -84,6 +85,7 @@ async function main() {
   assert.equal(command("nix", ["hash", "path", source]), expectedHash);
   const { configFromEnvironment } = await import(pathToFileURL(path.join(source, "probe/server.mjs")));
 
+  failurePhase = "encrypted inputs";
   const cloudflare = decrypt("cloudflare");
   const endpoints = JSON.parse(cloudflare.canary.probe_endpoints_json);
   assert.equal(endpoints.version, 1);
@@ -96,6 +98,7 @@ async function main() {
   const secrets = Object.fromEntries(Object.keys(hosts).map((host) => [host, decrypt(host)]));
   const keys = [];
   for (const [host, { origin, other, name }] of Object.entries(hosts)) {
+    failurePhase = `${host} mapping`;
     const proxy = secrets[host].proxy;
     const environment = parseEnvironment(proxy.probe_env);
     const config = configFromEnvironment(environment);
@@ -113,15 +116,18 @@ async function main() {
       `${host}: proof key mismatch`);
     assert.ok(target.accessToken === secrets[other].proxy.origin_proof_token,
       `${host}: proof token mismatch`);
+    failurePhase = `${host} certificate`;
     certificate(host, name, proxy.probe_tls_cert, proxy.probe_tls_key);
     keys.push(config.requestKey, config.responseKey);
     process.stdout.write(`${host}: probe input, cross-origin proof, and TLS chain passed\n`);
   }
+  failurePhase = "cross-region keys";
   assert.equal(new Set(keys).size, 4, "probe HMAC keys must be distinct");
   process.stdout.write("dual-region probe input check passed\n");
 }
 
-main().catch((error) => {
-  process.stderr.write(`probe input check failed: ${error.message}\n`);
+main().catch(() => {
+  // 第三方解析器的异常可能包含解密正文；只打印固定阶段名称。
+  process.stderr.write(`probe input check failed: ${failurePhase}\n`);
   process.exitCode = 1;
 });

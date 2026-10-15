@@ -107,9 +107,9 @@ node servers/proxy-deployment/scripts/prepare-v2-workers.mjs \
 dry run 核对 Worker 锁与 NAR hash，使用相同提交 checkout 的 Wrangler 分别打包
 控制、交付入口，然后删除临时配置；不会读取 SOPS、写 KV 或访问 Cloudflare API。
 每个 Wrangler 子进程最多等待 60 秒；超时会报错，不能把已打印的打包输出
-视为双入口检查通过。2026-10-16 本机控制入口完成打包输出后未退出，触发
-超时；离线配置与独立 KV、secret 引用检查已通过，交付入口的 Wrangler
-dry run 尚未得到完成证据。
+视为双入口检查通过。脚本关闭 Wrangler banner 的在线版本检查和遥测，避免
+本机 DNS 代理导致打包完成后进程仍等待网络；2026-10-16 两个锁定入口的
+Wrangler dry run 均完成并返回 0。离线配置与独立 KV、secret 引用检查也通过。
 `--out` 要求目标目录不存在，写入 `0600` 文件，供受限发布流程审阅；脚本不会
 上传 secret 或部署 Worker。正式发布前仍需核对 SOPS 中已有的两地四把互异
 HMAC 与 `PROBE_ENDPOINTS_JSON` 的运行绑定，从 canary 上传密钥组装 `SIGNING_KEYS_JSON`，

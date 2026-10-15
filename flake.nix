@@ -19,7 +19,7 @@
     # [Desktop]
     noctalia.url = "github:noctalia-dev/noctalia-shell";
     noctalia-mihomo-control = {
-      url = "github:DotRedstone/noctalia-mihomo-control/v0.1.0";
+      url = "github:DotRedstone/noctalia-mihomo-control/b675f266ee0f6c3aa192b6e44c079a5899c3bd6a";
       flake = false;
     };
     silent-sddm.url = "github:uiriansan/SilentSDDM";

@@ -2,8 +2,15 @@
 
 Warden 不再运行 FlClash。Mihomo 是受 NixOS 管理、默认不随开机拉起的本机核心；
 Noctalia 通过独立项目 [`DotRedstone/noctalia-mihomo-control`](https://github.com/DotRedstone/noctalia-mihomo-control)
-的固定版本 `v0.1.0` 控制其状态栏入口、生命周期、代理组选择、延迟测试、模式切换和
-实时流量显示。
+的固定提交 `b675f266`（v0.2.0）控制其状态栏入口、生命周期、代理组选择、延迟测试、
+模式切换、实时流量和可选的本地配置管理。
+
+系统模块提供 `mihomo-profile-helper`，实现插件的配置管理协议。部署 NixOS 与 Home
+Manager 后，在 Noctalia 插件设置中把 `profile_helper_path` 填为
+`command -v mihomo-profile-helper` 返回的绝对路径；`helper_path` 继续指向独立的
+`mihomo-lifecycle`。插件源由启动同步脚本按固定 store 路径更新；重启 Noctalia 后用
+`noctalia msg plugins source list` 核对 `nmc path` 已指向新 store 路径。两个设置未填写时，
+对应的高权限操作不会显示。
 
 ## 安全边界
 
@@ -15,6 +22,36 @@ Noctalia 通过独立项目 [`DotRedstone/noctalia-mihomo-control`](https://gith
 - 配置和 provider 缓存位于 `/var/lib/mihomo`，由 impermanence 持久化，权限为 root-only。
 - `mihomo-profile-import` 只接受**未定义** `external-controller` 或 `secret` 的配置，避免
   悄悄覆盖一个已经审计过的控制面。
+- `mihomo-profile-helper` 仅接受 `list`、`import <本地绝对路径>` 和
+  `activate <ID>`；Polkit 只授权用户 `dot` 执行固定的 root helper。来源必须是
+  `/home/dot/Downloads/` 下由 `dot` 拥有的普通文件，不能经过符号链接、硬链接或
+  `..`，大小不超过 2 MiB，且不能由组或其他用户写入。其他路径、URL 和订阅下载不在
+  该接口范围。导入的内容、provider URL 和令牌只保存在 root-only 的
+  `/var/lib/mihomo`，不写入 Nix store、Git 或成功输出。
+- 新导入配置必须有本机代理端口，不能自行设置 controller/secret、TUN、局域网监听、
+  外部 UI 或任意顶层选项。helper 固定附加 `127.0.0.1:9090` 控制器。含这些功能的
+  既有配置不会被新导入策略悄悄改写；如需迁移，应先单独审核配置。
+
+## 配置库与切换
+
+部署新的系统模块后，可先用 `mihomo-profile-helper list` 核对已有配置的元数据。首次
+读取会把现有 `/var/lib/mihomo/config.yaml` 登记为 `legacy`，不会重启服务。插件 v0.2
+启用后，面板导入只新增条目，不改变活动配置，也不启动或重启 Mihomo。切换选择后，
+helper 将活动文件与选择 ID 持久写入；若服务正在运行，则重启并检查 loopback API 与
+代理端口。失败时用私有备份恢复旧文件和选择，并尝试恢复服务；服务原本停止时保持停止。
+中断后的下一次 helper 调用会优先处理未完成的事务。配置库最多 100 项，列表只返回
+名称和不透明 ID。
+
+旧的 `mihomo-profile-import` 继续作为手工恢复入口，保留原有备份与回退行为；它直接
+替换当前配置并重启服务。随后调用新 helper 时，外部改动会登记为“手工恢复配置”，
+使面板所示活动条目与文件一致。恢复前应保存旧配置和服务状态，并核查
+`/var/lib/mihomo/backups/`；若切换及回退都失败，先检查 `mihomo.service` 与
+`profile-transaction`，不要重复切换。
+
+本 Flake 锁定的 `rev` 为 `b675f266ee0f6c3aa192b6e44c079a5899c3bd6a`；构建检查
+只证明源码与包可生成。要使桌面功能生效，仍需按主机变更流程切换 NixOS、切换 Home
+Manager、重启 Noctalia，再填写上述设置。实际 Polkit 授权、运行态切换、失败回退与
+应用流量需要部署后单独验收。
 
 ## 从旧 FlClash 导入
 

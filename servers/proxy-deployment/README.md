@@ -68,6 +68,8 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 [v2 隔离发布前置核对](./stage1-live-readiness-review.md)。
 两台组合候选临时验收后的系统持久化范围、逐机回退与启动项核对见
 [双节点持久切换交接](./dual-node-persistence-handoff.md)。
+两地 probe ingress 的离线候选身份、服务差异和逐机临时测试门槛见
+[probe ingress 临时测试交接](./probe-ingress-temporary-test-handoff.md)。
 
 每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
 提供对应令牌。两地主机分别以 SOPS 保存 `proxy/origin_proof_key` 与

@@ -1,8 +1,8 @@
 # 双节点 probe ingress 持久切换交接
 
-状态：准备阶段。两台 probe ingress 已分别通过临时 `test`，临时验收范围见
-[临时测试交接](./probe-ingress-temporary-test-handoff.md)。本文与配套脚本仅准备后续
-逐机持久 `switch`；没有安装远端脚本、timer 或 marker，也没有执行持久切换。
+状态：2026-10-16。两台 probe ingress 已分别通过临时 `test` 和持久 `switch`，
+即时验收通过；Hopper 的 10 分钟观察仍待 05:00:35 CST 后由主会话复核。
+临时验收范围见[临时测试交接](./probe-ingress-temporary-test-handoff.md)。
 Cloudflare、DNS、路由器和旧订阅不在此切换范围内。
 
 ## 精确闭包与影响
@@ -12,12 +12,18 @@ Cloudflare、DNS、路由器和旧订阅不在此切换范围内。
 | Conduit | `/nix/store/fkq5h093an3qjynycv13awr76fdlra20-nixos-system-conduit-26.11.20260831.34ab990` | `/nix/store/73qxjfv9l6fjp73fvqpi31a02gnnvwd4-nixos-system-conduit-26.11.20260831.34ab990` | `/nix/store/8alf4971c77zpy5rb6rbdzbik12617pa-nixos-system-conduit-26.11.20260831.34ab990` |
 | Hopper | `/nix/store/fznhzd6b9fxyc42zphwlq7sznp5045b6-nixos-system-hopper-26.11.20260831.34ab990` | `/nix/store/irwzjkl39v1ra9la699smvymkxpbgzz8-nixos-system-hopper-26.11.20260831.34ab990` | `/nix/store/k69xg4y5d9qvp7w37p98q6vbfl0i1kgn-nixos-system-hopper-26.11.20260831.34ab990` |
 
-当前临时测试状态应为 current 指向 probe，系统 profile 与默认启动项仍指向
-rotation，`/run/booted-system` 仍是表中旧闭包。后续 `switch` 会把 profile 和
-默认启动项改为 probe，并可能重跑激活脚本、重启服务。临时 `test` 的流量验收
-不能证明持久切换、重启或真实回退分支。Conduit 使用 GRUB，Hopper 使用
+持久切换后，两台 current、系统 profile 与默认启动项均指向各自 probe 候选；
+`/run/booted-system` 仍是表中旧闭包，尚未重启。源码提交 `55479d9` 在两台
+`cross-probe.nix` 明确启用入口；普通 `servers/flake.nix` 求值分别精确得到表中
+Conduit `73qxjfv…` 与 Hopper `irwzjkl…` 输出路径。求值匹配不代替切换后的
+服务与流量验收，也不证明重启或真实回退分支。Conduit 使用 GRUB，Hopper 使用
 systemd-boot；Hopper 无已验证的带外控制台，timer 不跨重启，失联后不能保证
 自动恢复。
+
+两机持久切换的即时验收均通过：current/profile/default 与候选一致，旧代理、
+订阅及服务和新 probe 入口保持可用；一次性回退 timer 已停止，marker 已清除。
+Conduit 的切换后观察已完成；Hopper 的 10 分钟观察结论尚待上述时刻后复核，
+不能将即时验收写成观察完成。两机均未重启，重启后启动行为仍未验证。
 
 ## 一次性回退保护
 
@@ -41,9 +47,10 @@ origin-proof、订阅检查服务与 Hopper Gmail；确认 probe 停止、Xray �
 no-op 模拟已通过；模拟使用假 current/profile/default/booted 和 inactive timer，
 没有访问或更改远端主机。真实回退、失联恢复及重启后的默认启动行为未验证。
 
-## 后续逐机窗口
+## 逐机执行与后续核对
 
-先 Conduit，完成持久切换、验收和至少 10 分钟观察，再处理 Hopper。每台开始前
+以下是本次逐机持久切换的保护与验收步骤留档，不得据此重复运行已完成的
+`switch`。当时先 Conduit、后 Hopper；每台开始前
 重新核对 Git 源码、候选 deriver/outPath、目标 store 完整性、表中三种闭包、
 默认启动项、旧服务/订阅、运行凭据、SSH 双路径和回退脚本 SHA/权限；确认无
 其他 marker/timer。目标机安装脚本到
@@ -60,5 +67,5 @@ no-op 模拟已通过；模拟使用假 current/profile/default/booted 和 inact
 4 分钟前完成。SSH 退出码 255 只能触发重连与状态核对。任何路径、服务、证书、
 旧订阅、代理出口或剩余时间不达标时保留 timer/marker；可登录时执行本脚本或
 等待固定时刻回退，并完整复核 rotation。只有全部验收通过，才停止 timer、
-确认 inactive、删除 marker，再复核 profile/default、服务和订阅。持久 `switch`
-之后不以重启测试代替回退保护。
+确认 inactive、删除 marker，再复核 profile/default、服务和订阅。后续仍需完成
+Hopper 观察结论；重启测试不能替代本次回退保护，且本次未执行重启。

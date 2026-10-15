@@ -59,8 +59,8 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 
 ## 回源证明与可信探测
 
-`proxyOriginProof` 与 `proxyPreferredProbe` 通用模块默认关闭；本候选在两地主机
-覆盖启用 origin-proof。独立分支
+`proxyOriginProof` 与 `proxyPreferredProbe` 通用模块默认关闭；两地主机已明确启用
+origin-proof 和 probe ingress。独立分支
 `codex/cross-probe-isolated` 增加默认关闭的交叉探测入口和 DNS-01 证书选项。
 方向、原 Worker 锁接口缺口、SOPS/TLS/DNS 前提与回退见
 [交叉探测候选审查](./stage1-cross-probe-review.md)。
@@ -68,8 +68,9 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 [v2 隔离发布前置核对](./stage1-live-readiness-review.md)。
 两台组合候选临时验收后的系统持久化范围、逐机回退与启动项核对见
 [双节点持久切换交接](./dual-node-persistence-handoff.md)。
-两地 probe ingress 的离线候选身份、服务差异和逐机临时测试门槛见
-[probe ingress 临时测试交接](./probe-ingress-temporary-test-handoff.md)。
+两地 probe ingress 的临时验收见
+[临时测试交接](./probe-ingress-temporary-test-handoff.md)，持久切换状态和回退边界见
+[持久切换交接](./probe-ingress-persistence-handoff.md)。
 
 每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
 提供对应令牌。两地主机分别以 SOPS 保存 `proxy/origin_proof_key` 与
@@ -78,7 +79,7 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 `probe-sg-v2-canary.bdot.in/probe` 验证。两地复用现有 Nginx TCP 443，以独立
 HTTPS 名称反代各自的回环探测服务，不增加公网端口。两台 SOPS 已有各自的
 `proxy/probe_env` 与专用 TLS 证书／私钥；两个新名称仍缺公网 DNS 和逐名称
-`strict` 规则，probe 与 ingress 均默认关闭。现有 CDN 回源证书的 SAN 只覆盖
+`strict` 规则，两地主机已启用 probe 与 ingress。现有 CDN 回源证书的 SAN 只覆盖
 各自旧名称，不能用于新入口。
 
 独立 `edge-proxy-worker` 已发布 `PROBE_ENDPOINTS_JSON` v1 接口：
@@ -168,7 +169,7 @@ HMAC 密钥。
 公开信任链；2026-10-16 本地检查通过。证书有效期至 2027-01-12，后续
 需安排续期。Conduit 已在目标机受限临时目录验证 probe 输入与证书，过程见
 [probe ingress 临时测试交接](./probe-ingress-temporary-test-handoff.md)；两地 probe
-均未完成运行验收。
+均已完成临时验收和持久切换即时验收，Hopper 10 分钟观察仍待复核。
 
 进入后续 v2 探测、交付与路由灰度前，还需完成以下部署侧输入与实机证据：
 
@@ -186,7 +187,8 @@ HMAC 密钥。
 
 这些后续条件目前未全部满足。两地主机的第 1 阶段 rotation 组合候选已持久
 `switch`。Conduit 的首次 probe ingress `test` 因上游证书链校验失败已回退；
-两台的修正候选均已完成受控临时测试和至少 10 分钟观察。Cloudflare 的两个
+两台的修正候选均已完成受控临时测试与持久切换即时验收；Hopper 持久切换后的
+10 分钟观察仍待复核。Cloudflare 的两个
 新 probe hostname strict 规则已存在，但新 probe DNS、路由器和 Target
 未切换。发生问题时保持旧 manifest 与旧订阅，停用 canary 和新模块；如已执行
 `nixos-rebuild test`，
@@ -200,11 +202,11 @@ HMAC 密钥。
 所需 secret，但 `workers.dev` 均关闭，两个 probe 名称没有 DNS、Route 或
 Custom Domain。资源 ID 与 Worker 名称见 `cloudflare-resources.json`。
 旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2 池或账户文档。probe 的
-源站 HTTPS 入口已在两台主机临时运行并通过源站路径验收；公开 DNS 尚未发布，
-系统 profile 与默认启动项仍为 rotation。probe 使用各自独立证书，不能复用
+源站 HTTPS 入口已在两台主机持久切换并通过即时验收；公开 DNS 尚未发布，
+系统 profile 与默认启动项均为 probe 候选，尚未重启。probe 使用各自独立证书，不能复用
 现有 CDN 证书的适用性判断。
 
-后续先按[持久切换交接](./probe-ingress-persistence-handoff.md)逐台固定启动配置，
+后续先按[持久切换交接](./probe-ingress-persistence-handoff.md)完成 Hopper 观察复核，
 再验收 Cloudflare 严格回源规则与新 DNS、来源限制和新版 Worker 绑定。交叉
 probe 不开放新增防火墙端口，也不覆盖旧代理路由。新路径异常时恢复 rotation
 闭包并验证旧 Xray、SSH 与订阅；旧订阅、优选池和 Worker 不依赖新入口。

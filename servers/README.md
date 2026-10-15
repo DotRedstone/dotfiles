@@ -40,7 +40,8 @@ Cloudflare 边缘代理的通用代码位于独立的
 只保存部署参数、SOPS 引用、Mihomo 基线和路由器适配。它独立于 NixOS 主机模块部署，
 密钥只通过 Worker secret 注入。旧部署适配仍从受限 legacy checkout 归档固定提交；
 隔离 canary 的当前 Flake 修订由 `edgeProxyWorker` 私有 Git SSH 非 Flake 输入锁定，
-曾预接入 Target 的默认关闭模块；该方案已废弃，现网未启用探测服务。两地交叉
+曾预接入 Target 的默认关闭模块；该方案已废弃，Target 现网未启用探测服务。
+Conduit/Hopper 已启用独立 probe ingress。两地交叉
 探测预览与来源边界见
 [proxy-deployment](./proxy-deployment/README.md)。现网审计、灰度与清理步骤见
 [docs/cloudflare-edge-migration.md](./docs/cloudflare-edge-migration.md)。

@@ -78,8 +78,10 @@ origin-proof 和 probe ingress。独立分支
 `probe-la-v2-canary.bdot.in/probe` 验证，SG 候选由 Conduit 的
 `probe-sg-v2-canary.bdot.in/probe` 验证。两地复用现有 Nginx TCP 443，以独立
 HTTPS 名称反代各自的回环探测服务，不增加公网端口。两台 SOPS 已有各自的
-`proxy/probe_env` 与专用 TLS 证书／私钥；两个新名称仍缺公网 DNS 和逐名称
-`strict` 规则，两地主机已启用 probe 与 ingress。现有 CDN 回源证书的 SAN 只覆盖
+`proxy/probe_env` 与专用 TLS 证书／私钥；两地主机已启用 probe 与 ingress。
+`bdot.in` 的两个精确 probe hostname Configuration Rules 已创建，
+`action_parameters.ssl` 均为 `strict`，zone 默认仍为 `flexible`。两个新名称仍无
+DNS 记录，Cloudflare 公网回源尚未验收。现有 CDN 回源证书的 SAN 只覆盖
 各自旧名称，不能用于新入口。
 
 独立 `edge-proxy-worker` 已发布 `PROBE_ENDPOINTS_JSON` v1 接口：
@@ -188,8 +190,7 @@ HMAC 密钥。
 这些后续条件目前未全部满足。两地主机的第 1 阶段 rotation 组合候选已持久
 `switch`。Conduit 的首次 probe ingress `test` 因上游证书链校验失败已回退；
 两台的修正候选均已完成受控临时测试与持久切换即时验收；Hopper 持久切换后的
-10 分钟观察仍待复核。Cloudflare 的两个
-新 probe hostname strict 规则已存在，但新 probe DNS、路由器和 Target
+10 分钟观察仍待复核。新 probe DNS、路由器和 Target
 未切换。发生问题时保持旧 manifest 与旧订阅，停用 canary 和新模块；如已执行
 `nixos-rebuild test`，
 恢复上一代系统配置并验证旧身份与 SSH。任何触及现用入口的切换需另行提交
@@ -207,6 +208,6 @@ Custom Domain。资源 ID 与 Worker 名称见 `cloudflare-resources.json`。
 现有 CDN 证书的适用性判断。
 
 后续先按[持久切换交接](./probe-ingress-persistence-handoff.md)完成 Hopper 观察复核，
-再验收 Cloudflare 严格回源规则与新 DNS、来源限制和新版 Worker 绑定。交叉
+再以公网路径验收已创建的严格回源规则、新 DNS、来源限制和新版 Worker 绑定。交叉
 probe 不开放新增防火墙端口，也不覆盖旧代理路由。新路径异常时恢复 rotation
 闭包并验证旧 Xray、SSH 与订阅；旧订阅、优选池和 Worker 不依赖新入口。

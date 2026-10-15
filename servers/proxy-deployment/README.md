@@ -166,7 +166,9 @@ HMAC 密钥。
 执行 `node servers/proxy-deployment/scripts/check-probe-inputs.mjs` 可只读核对两台
 环境与 Cloudflare 双地区配置、对侧 proof 凭据以及专用 TLS 的名称、私钥和
 公开信任链；2026-10-16 本地检查通过。证书有效期至 2027-01-12，后续
-需安排续期。现有 probe 配置和证书仍未经目标机渲染或运行验收。
+需安排续期。Conduit 已在目标机受限临时目录验证 probe 输入与证书，过程见
+[probe ingress 临时测试交接](./probe-ingress-temporary-test-handoff.md)；两地 probe
+均未完成运行验收。
 
 进入后续 v2 探测、交付与路由灰度前，还需完成以下部署侧输入与实机证据：
 
@@ -182,9 +184,10 @@ HMAC 密钥。
    客户端添加新配置，验证三平台交付、provider 更新与单账户撤销。旧 Worker、
    旧 KV 和路由器默认组继续保留。
 
-这些后续条件目前未全部满足。服务器曾执行第 1 阶段组合候选的临时 `test`，
-未持久 `switch`，Cloudflare、DNS、Worker、路由器和 Target 未切换。发生问题时
-保持旧 manifest 与旧订阅，停用 canary 和新模块；如已执行 `nixos-rebuild test`，
+这些后续条件目前未全部满足。两地主机的第 1 阶段 rotation 组合候选已持久
+`switch`，probe ingress 尚未执行 `test`；Cloudflare、DNS、路由器和 Target
+未切换。发生问题时保持旧 manifest 与旧订阅，停用 canary 和新模块；如已执行
+`nixos-rebuild test`，
 恢复上一代系统配置并验证旧身份与 SSH。任何触及现用入口的切换需另行提交
 可审查的 diff、实测证据和回退命令。
 

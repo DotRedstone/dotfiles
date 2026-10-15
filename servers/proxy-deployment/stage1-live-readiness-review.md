@@ -1,8 +1,8 @@
 # 双节点 v2 隔离发布前置核对
 
-状态：2026-10-14，只读核对 `codex/preferred-v2-adapter`。本分支工作树干净；
-旧订阅、旧 Worker、旧 KV、主机配置、Cloudflare、DNS 和路由器均未修改。
-本记录描述当前可见状态及后续操作门槛，不是发布许可。探测方向与模块接口见
+状态：2026-10-15。表格记录 2026-10-14 的只读快照；之后 Conduit 临时测试、自动回退
+和正确双身份候选闭包准备见下方增量。本记录描述已核对状态及后续操作门槛，不是发布许可。
+旧 Worker、旧 KV、Cloudflare、DNS 和路由器均未修改。探测方向与模块接口见
 [交叉探测候选审查](./stage1-cross-probe-review.md)，部署输入见[本目录入口](./README.md)。
 
 ## 当前状态
@@ -28,6 +28,53 @@
 另有 `IP_UPDATE_KEY`、`PREFERRED_ENDPOINTS_TOKEN` Secret。旧主 Worker 的
 `DOH_URL`、`PUBLIC_HOST`、`SITE_NAME` 为普通变量；两者的 compatibility date
 均为 `2026-09-01`。未读取变量或 Secret 的值。
+
+### 2026-10-15 Conduit 轮换候选修正与目标 store 准备
+
+此前 Conduit 临时 `test` 误用了不含轮换账户的闭包
+`/nix/store/vva6zja3bhd6mdc62vmq6kjx1dwvr7yd-nixos-system-conduit-26.11.20260831.34ab990`
+（deriver `1921siaa5050zkfjh34y2pjk55cg89x9`）。20 分钟 timer 后通过旧闭包
+`switch-to-configuration test` 自动回退成功；journal 记录 service 成功结束，current
+恢复为测试前的 `/nix/store/ajayszz54z693qsrmvr6jc77n94gmcrp-nixos-system-conduit-26.11.20260831.34ab990`，
+marker 已清除，timer/service 已清理。回退后 sshd、Nginx、Xray、订阅检查及
+`proxy-origin-proof` active；旧 Reality、`guest`、`canary` 身份存在，三条订阅与模板
+逐字节一致，proof 正确/错误令牌分别返回 200/404；Hopper current 与服务状态未变。
+
+提交 `78a1742` 的闭包 `k97d7qm…` 虽含 rotation，但 Reality 订阅把旧 primary UUID
+换成 rotation。该闭包已复制到 Conduit store，**只作为历史候选留存，禁止激活**。
+窄化后的提交 `e08492a` 仅恢复 Conduit、Hopper 两份 SOPS 中的 Reality 订阅正文；
+服务端 rotation 密钥与启用项、原 primary/vision 密钥继续保留。该阶段不把新 UUID
+发布到任何既有订阅。
+
+以功能提交 `e08492a` 求值时，锁定 `proxyStack` revision
+`5393d0e1bffd3406b62b09269b54fd7434778f3e`（NAR
+`sha256-0XNue1CC3fs0kTAsQB/zSs64Su+8y/UQ2poi+0F1E+g=`），Worker revision
+`538d974998f217a7a10cd8a178b62e82d44fcb89`（NAR
+`sha256-8IzmqzVJrw/oMnT0+/E2tc1lj96QLDImdKmkFuy5f3I=`）。Conduit top-level deriver 为
+`/nix/store/5fa287a1bi8minfp3jz046sl88w38k3f-nixos-system-conduit-26.11.20260831.34ab990.drv`，
+输出为 `/nix/store/fkq5h093an3qjynycv13awr76fdlra20-nixos-system-conduit-26.11.20260831.34ab990`；
+完整闭包构建成功，4 个 derivation 完成，闭包约 1.93 GB。SOPS manifest 含
+`xray/managed_rotation_uuid`；Conduit 与 Hopper Xray 模板均含旧 primary、vision、
+`managed:guest`、`managed:canary` 和 `managed:rotation`。两地 SOPS 解密检查确认新
+rotation 密钥与旧 identity 保留。
+
+订阅逐字节对照共 8 条：Conduit 3/3、Hopper 5/5 的正文和路径均与各自主机当前
+运行模板相同；检查覆盖 WebSocket、Reality、CDN，以及 Hopper 的 Hysteria2 和 guest。
+Xray 26.3.27 使用两地候选模板和各自主机 SOPS 值分别运行 `xray run -test`，均通过。
+解密值仅经内存管道进入 `/run/user` 下的 0600 临时配置与日志，检查后删除；未写入
+Nix store、文档或命令输出。
+
+Conduit 完整闭包已复制到目标 store。目标端 deriver 与本机相同，NAR hash 为
+`sha256-tBwD+MPIpQUnmXgcr13/wOPYLiA1gYHcHW1kXl79Y8Q=`，NAR size `253760`；远端
+`nix store verify --no-trust` 通过。复制后 current 仍为旧闭包；timer 不存在且
+marker 不存在。Hopper 顶层已完成求值，未构建完整 ARM 闭包。本轮没有安装 timer、
+创建 marker、执行 `test`/`switch`、修改 DNS/Worker/路由器或撤销旧身份；待主会话复核
+Reality 旧订阅兼容边界后再决定下一步。
+
+后续每次激活前必须逐项核对并记录 **精确 Git HEAD → `flake.lock` 输入 revision/NAR →
+求值 `drvPath` → `toplevel outPath` → 目标 store deriver/NAR hash → 目标端完整 store
+verify**。所有值必须对应同一候选，目标 current/profile 必须仍与现场基线吻合；
+不得用分支名、缩写路径或历史候选标识代替该链。任何一项不匹配时停止激活。
 
 ## 依赖顺序、影响与回退
 

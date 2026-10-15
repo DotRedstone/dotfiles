@@ -128,6 +128,8 @@ Nix 实际只传输 6 条新路径；目标端 `nix-store --realise --dry-run` �
 `proxy-origin-proof`、`gmail-archiver` 均 active，回退 timer 不存在且 marker 缺失。
 本次仅增加 Nix store 内容，未激活候选或改动公网入口。候选输出未添加 GC root；后续
 使用前须重新确认路径仍在目标 store，并复核当前运行基线与密钥。
+Hopper 下一次临时 `test` 的固定时刻回退、验收与无带外恢复风险见
+[Hopper rotation 临时测试交接](./hopper-rotation-test-handoff.md)。
 
 后续每次激活前必须逐项核对并记录 **精确 Git HEAD → `flake.lock` 输入 revision/NAR →
 求值 `drvPath` → `toplevel outPath` → 目标 store deriver/NAR hash → 目标端完整 store

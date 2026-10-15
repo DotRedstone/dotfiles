@@ -2,7 +2,7 @@
 
 状态：2026-10-16。两台 rotation 候选已持久切换，观察结果见
 [双节点持久切换交接](./dual-node-persistence-handoff.md)。Conduit 首次 probe ingress
-`test` 因 Nginx 校验上游证书链失败而回退；下表为再次修正后**尚未激活**的候选。
+`test` 因 Nginx 校验上游证书链失败而回退；下表的修正候选随后完成临时 `test`。
 Hopper 原候选因证书访问权限不足禁止激活，须另行重建。两台均未对 probe
 候选执行 `switch`。本轮没有修改 DNS、Cloudflare、路由器或旧订阅。
 
@@ -26,7 +26,7 @@ Conduit 修正候选的 deriver、outPath 在本地重新求值与目标机一�
 `proxy/probe_env`、`proxy/probe_tls_cert`、`proxy/probe_tls_key` 三项运行 secret，
 重启 `nginx.service` 并启动 `proxy-preferred-probe.service`；current/profile 仍为
 持久 rotation 闭包，probe 仍 inactive。Hopper 表中路径仅为原候选的历史锚点，
-不得按表激活。Conduit 的新构建与 dry run 不能证明 Nginx、TLS 路由或探测已运行。
+不得按表激活。下述现场记录说明 Conduit 新候选的实际运行验收范围。
 
 ### Conduit 证书权限修正
 
@@ -39,7 +39,7 @@ root:nginx 0440 访问边界。Conduit 目标机使用自身 SSH 身份在受限
 解密候选 store 中的密文，验证 probe 环境只指向对侧 `sg-origin`、专用证书覆盖
 `probe-sg-v2-canary.bdot.in`、证书链受系统 CA 信任、有效期及私钥配对均正确；
 临时材料已清理。首次 `test` 已证明 Nginx 能读取证书、probe 能在回环提供
-可信 TLS，但未通过 Nginx 上游验证；新候选仍待受控 `test` 验证。
+可信 TLS，但未通过 Nginx 上游验证；修正后的运行结果见下文。
 
 ### Conduit 首次测试与证书链深度修正
 
@@ -63,9 +63,39 @@ Vision、CDN、WebSocket 的真实 HTTPS 出口和旧 proof 的合法/非法 HMA
 01:54:03 CST 停止 timer、确认 inactive 后删除 marker。首次候选 `k0hcr1aw…`
 禁止再次激活。
 
+### Conduit 修正候选临时测试
+
+2026-10-16 01:59:28 CST 为 `44yhk9j…` → `73qxjfv…` 建立截止 02:19:28 CST
+的固定回退 timer，读回 active、`AccuracyUSec=1s`、`Persistent=no`、精确脚本
+`ExecStart` 和剩余 20 分钟后，设置 root:root 0600 marker 并执行一次精确候选的
+`nixos-rebuild --no-reexec test --store-path`，退出 0。current 变为 probe 候选；
+profile、GRUB 默认项仍为持久 rotation，booted 为旧闭包。SSH、Nginx、Xray、
+订阅检查、origin-proof、probe 均 active；probe 仅监听 `127.0.0.1:18444`。
+证书与私钥为 root:nginx 0440，可由 Nginx 读取；probe 环境为 root:root 0400，
+Nginx 不可读取。Xray 运行凭据与渲染配置逐字节一致，旧身份保持不变。
+
+Conduit 回环及自身公网 IP、新名称 SNI 的无签名 `/probe` 均通过公开 CA 验证并
+返回 404；Hopper 到 Conduit 公网 IP 的同项检查也通过。经 Hopper 外部 TCP
+路径发送合法签名，得到 200，响应字段和 HMAC 校验通过；错误签名、过期时间戳、
+越界地址分别返回 404、404、422。对侧 SG origin 的 proof HMAC 返回 200。
+三条旧订阅从 Conduit 本机及 Hopper 外部公网路径均为 HTTP 200，正文与 SOPS
+原文逐字节一致；旧 Reality、rotation Reality、Vision、CDN、WebSocket 五路
+真实 HTTPS 出口和旧 proof 200/404 均通过。Nginx/probe 近期无错误日志。
+Warden 直连 Conduit 公网 IP 与新 SNI 在 TLS 握手处收到 reset；这一单独
+客户端路径未通过，Hopper 外部源站路径通过，不能据此声称所有网络均可达。
+
+02:03:19 CST 停止 timer 前剩余 969 秒，确认 inactive 后删除 marker；本次仅
+临时 `test`，未执行持久 `switch` 或重启。以该时刻为观察起点，至 02:13:44 CST
+满 10 分 25 秒后最终复核：current 仍为 probe 候选，profile/GRUB 默认项仍为
+rotation，booted 未变；上述六项服务 active、Xray 运行凭据仍匹配、timer inactive、
+marker 不存在，Nginx/probe 无错误日志。Hopper 外部公网路径的新 SNI、合法签名
+200/响应验签与三类拒绝再次通过；三条旧订阅在观察结束后仍为 200 且正文不变，
+旧五路 HTTPS 出口与 proof 于观察末复测通过。临时运行态已验收，持久启动行为
+没有改变。
+
 ## 逐机测试前置条件
 
-先对 Conduit 修正候选完成验收并观察至少 10 分钟。Hopper 须另行重建有效候选、
+Conduit 修正候选已完成验收并观察超过 10 分钟。Hopper 须另行重建有效候选、
 更新回退脚本并完成独立前置核对后才能进入测试窗口。每台均要保留两条
 SSH 会话，核对另一条重连路径；Hopper 没有已验证带外控制台，失联后的 timer
 不能保证可执行，重启也不会延续临时 timer。任一时刻只能有一台处于本测试窗口。

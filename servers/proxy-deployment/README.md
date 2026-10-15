@@ -85,8 +85,9 @@ HMAC 四把密钥互异。每台探测器的 `PROBE_ORIGINS_JSON` 只应包含�
 保留旧池；接口格式见独立项目
 [优选与交付接口](/home/dot/Projects/edge-proxy-worker/docs/preferred-v2.md)。
 此隔离分支将 `servers/flake.lock` 的 `edgeProxyWorker` 单独锁到 `538d974`，
-控制 Worker 具备双地区 `PROBE_ENDPOINTS_JSON` 契约。探测密钥尚未生成或注入，
-Worker 尚未发布。
+控制 Worker 具备双地区 `PROBE_ENDPOINTS_JSON` 契约。加密输入、Worker 和公网
+入口的实况见下方[canary 凭据与启用门槛](#canary-凭据与启用门槛)；源码锁定
+本身不证明隔离探测已可访问。
 
 ## v2 Worker 本地准备
 
@@ -105,9 +106,13 @@ node servers/proxy-deployment/scripts/prepare-v2-workers.mjs \
 
 dry run 核对 Worker 锁与 NAR hash，使用相同提交 checkout 的 Wrangler 分别打包
 控制、交付入口，然后删除临时配置；不会读取 SOPS、写 KV 或访问 Cloudflare API。
+每个 Wrangler 子进程最多等待 60 秒；超时会报错，不能把已打印的打包输出
+视为双入口检查通过。2026-10-16 本机控制入口完成打包输出后未退出，触发
+超时；离线配置与独立 KV、secret 引用检查已通过，交付入口的 Wrangler
+dry run 尚未得到完成证据。
 `--out` 要求目标目录不存在，写入 `0600` 文件，供受限发布流程审阅；脚本不会
-上传 secret 或部署 Worker。正式发布前仍需在 SOPS 中完成两地四把互异 HMAC
-对应的 `PROBE_ENDPOINTS_JSON`，从 canary 上传密钥组装 `SIGNING_KEYS_JSON`，
+上传 secret 或部署 Worker。正式发布前仍需核对 SOPS 中已有的两地四把互异
+HMAC 与 `PROBE_ENDPOINTS_JSON` 的运行绑定，从 canary 上传密钥组装 `SIGNING_KEYS_JSON`，
 从发布账户令牌生成 `DELIVERY_TOKEN_HASHES_JSON`，并核对 `PREFERRED_READ_TOKEN`。
 私有交付还依赖发布任务的 `proxy/delivery_runtime` 与 manifest；仅有打包成功
 不能证明下载、探测或旧池保留在 Cloudflare 上生效。
@@ -152,7 +157,8 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
 `proxy/probe_env` 与专用 TLS 证书／私钥；两份回源主机密文已用对应 SSH
 主机身份只读解密成功。此前组合候选已验收 proof 服务权限与真实回源；
 本独立代理候选未单独执行实机 `test`。Target 的历史探测
-密文不迁作两地凭据；新 Worker 四把 HMAC 密钥须分别生成并与对侧配置核对。
+密文不迁作两地凭据；Cloudflare canary 密文已有双地区探测所需四把互异
+HMAC 密钥，但仍须与两台待创建的 `proxy/probe_env` 逐项核对。
 
 进入后续 v2 探测、交付与路由灰度前，还需完成以下部署侧输入与实机证据：
 
@@ -175,10 +181,11 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
 可审查的 diff、实测证据和回退命令。
 
 现有 LA/SG CDN 域名与各自 Nginx TLS 虚拟主机可承载独立的 proof 精确路径，
-不要求修改旧 WS 路由。2026-10-13 的只读 Cloudflare 核对确认旧
+不要求修改旧 WS 路由。2026-10-16 的只读 Cloudflare 核对确认旧
 `edge-proxy-next-state` KV、`edge-proxy-next` 和 `edge-preferred-control` 保留；
-两个新版隔离 KV 已创建且均为 0 键，ID 与预留 Worker 名称见
-`cloudflare-resources.json`。新版控制与交付 Worker 均不存在，也未设置新路由。
+两个新版隔离 KV 均为 0 键；新版控制与交付 Worker 已部署，绑定各自 KV 和
+所需 secret，但 `workers.dev` 均关闭，两个 probe 名称没有 DNS、Route 或
+Custom Domain。资源 ID 与 Worker 名称见 `cloudflare-resources.json`。
 旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2 池或账户文档。probe 的
 公开 HTTPS 名称、证书与访问路由尚无实机部署；现有 CDN 证书只声明给各自
 回源虚拟主机，不能推断适用于 probe API。

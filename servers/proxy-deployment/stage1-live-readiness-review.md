@@ -173,6 +173,26 @@ secret，本机也无运行中的 Mihomo 控制器。现阶段无法核实路由
 verify**。所有值必须对应同一候选，目标 current/profile 必须仍与现场基线吻合；
 不得用分支名、缩写路径或历史候选标识代替该链。任何一项不匹配时停止激活。
 
+### 2026-10-16 隔离控制面只读更新
+
+此前表格是 2026-10-14 快照。2026-10-16 从两套 Cloudflare 账户分别只读核对：
+`sites` 令牌可读取 `bdot.in` zone、DNS、规则与路由；`proxy` 令牌可读取 Worker
+和 KV。两者读取各自账户资源均返回 200，未验证写权限；`/user/tokens/verify`
+对两枚令牌均返回 401，因此不能以该端点推断资源读取权限。两个新 probe 名称
+仍无 DNS 记录，zone 只有原有一条 Worker Route，未发现 probe Custom Domain。
+
+`edge-preferred-v2-canary` 与 `edge-delivery-v2-canary` 现均有部署，分别绑定目录中
+指定的独立 KV 及所需 secret；两个隔离 KV 均为 0 键。两 Worker 的 `workers.dev`
+和 preview 均关闭，没有可供本阶段验收的公网入口。Cloudflare canary SOPS
+密文已包含 `probe_endpoints_json`：两地区 URL 为预定 probe 名称，四把 HMAC
+密钥互异且长度均为 64。密文存在及 Worker secret 绑定不能证明值一致或探测
+可用；两台主机 SOPS 仍缺 `proxy/probe_env`、DNS-01 token 与交付运行时。
+
+`cf-optimizer` 已可在本机生成 SDK-free 的 arm64 后端和 `all` 架构 LuCI IPK
+候选；本轮归档结构、ELF 架构、依赖声明及权限检查通过。未获得目标 Kwrt 的
+包安装、依赖解析或 LuCI/rpcd 运行证据，不能将该候选称为路由器可安装版本。
+路由器 Mihomo `/proxies` 本轮只读请求仍返回 401，组 `now` 未知。
+
 ## 依赖顺序、影响与回退
 
 | 顺序 | 完成条件与可执行检查 | 影响与回退 |

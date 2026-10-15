@@ -93,7 +93,7 @@ service `Result=success` 且退出码为 0、marker 不存在。Conduit 的 `ssh
 Hopper 激活许可。Hopper 未执行 `test`/`switch`，也未安装回退 timer；本阶段没有改动
 DNS、Worker、路由器或撤销旧身份。
 
-### Hopper ARM 候选构建结果
+### Hopper ARM 候选首次构建结果
 
 同一 HEAD 的 Hopper 候选求值结果为
 `/nix/store/zih3d013lk3rd391j0wqk9s9gxk4arwh-nixos-system-hopper-26.11.20260831.34ab990.drv`
@@ -107,6 +107,27 @@ DNS、Worker、路由器或撤销旧身份。
 该次构建没有完成目标 store 完整性验证，因此不能作为 Hopper 激活候选。未执行 Hopper
 `test`/`switch`，也未改动 DNS、Worker、路由器或旧身份；远程构建可能留下未引用的部分
 store 路径，未做清理。
+
+### Hopper ARM 候选原生构建复核
+
+首次超时后确认 Hopper 没有残留构建进程；后续原生构建也未受锁阻塞。上一候选的推导
+引用闭包仍完整保留 19,907 条路径。将同一 HEAD 的顶层 `.drv` 复制到 Hopper 时，
+Nix 实际只传输 6 条新路径；目标端 `nix-store --realise --dry-run` 只列出 5 个待构建推导。随后在 Hopper
+本机执行 `nix-store --realise`，约 5 秒完成，输出为
+`/nix/store/fznhzd6b9fxyc42zphwlq7sznp5045b6-nixos-system-hopper-26.11.20260831.34ab990`。
+该路径的 deriver 是上述 `zih3d013…` 顶层 `.drv`，NAR hash 为
+`sha256-UaZ+LG6l9SLA32o0PeK2lXSLa/L8RiIrHELzW7nkV2I=`，NAR size 为 `365744`。
+目标端对 6,381 条运行闭包路径执行 `nix store verify --recursive --no-trust` 内容扫描，
+未报错误；顶层内容校验和递归闭包有效性校验的退出码均为 0。`flake.lock` 的
+`proxyStack` 与 Worker revision/NAR 仍为上文记录的固定值；从候选 HEAD 到本记录提交
+仅有本文档变化，再次求值所得 `.drv` 路径不变。
+
+构建后再次请求 Hopper 的 Hysteria2、WebSocket、Reality、CDN 与 guest 五条旧订阅：
+均为 HTTP 200，正文分别与当前 SOPS 内容逐字节一致。`/run/current-system`、
+`/run/booted-system` 和系统 profile 仍分别为原有闭包；`sshd`、Nginx、Xray、
+`proxy-origin-proof`、`gmail-archiver` 均 active，回退 timer 不存在且 marker 缺失。
+本次仅增加 Nix store 内容，未激活候选或改动公网入口。候选输出未添加 GC root；后续
+使用前须重新确认路径仍在目标 store，并复核当前运行基线与密钥。
 
 后续每次激活前必须逐项核对并记录 **精确 Git HEAD → `flake.lock` 输入 revision/NAR →
 求值 `drvPath` → `toplevel outPath` → 目标 store deriver/NAR hash → 目标端完整 store

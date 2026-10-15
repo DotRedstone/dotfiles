@@ -185,7 +185,8 @@ HMAC 密钥。
    旧 KV 和路由器默认组继续保留。
 
 这些后续条件目前未全部满足。两地主机的第 1 阶段 rotation 组合候选已持久
-`switch`，probe ingress 尚未执行 `test`；Cloudflare、DNS、路由器和 Target
+`switch`。Conduit 的首次 probe ingress `test` 因上游证书链校验失败已回退，
+修正候选仍待受控测试；Hopper 尚未测试。Cloudflare、DNS、路由器和 Target
 未切换。发生问题时保持旧 manifest 与旧订阅，停用 canary 和新模块；如已执行
 `nixos-rebuild test`，
 恢复上一代系统配置并验证旧身份与 SSH。任何触及现用入口的切换需另行提交

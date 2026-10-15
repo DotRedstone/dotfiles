@@ -1,9 +1,9 @@
 # 双节点 probe ingress 持久切换交接
 
 状态：2026-10-16。两台 probe ingress 已分别通过临时 `test` 和持久 `switch`，
-即时验收通过；Hopper 的 10 分钟观察仍待 05:00:35 CST 后由主会话复核。
+即时验收通过；Hopper 在 2026-10-16 05:00:35 CST 后完成 10 分钟观察。
 临时验收范围见[临时测试交接](./probe-ingress-temporary-test-handoff.md)。
-Cloudflare、DNS、路由器和旧订阅不在此切换范围内。
+Cloudflare 与 DNS 在持久切换后独立发布；路由器和旧订阅未切换。
 
 ## 精确闭包与影响
 
@@ -22,8 +22,20 @@ systemd-boot；Hopper 无已验证的带外控制台，timer 不跨重启，失�
 
 两机持久切换的即时验收均通过：current/profile/default 与候选一致，旧代理、
 订阅及服务和新 probe 入口保持可用；一次性回退 timer 已停止，marker 已清除。
-Conduit 的切换后观察已完成；Hopper 的 10 分钟观察结论尚待上述时刻后复核，
-不能将即时验收写成观察完成。两机均未重启，重启后启动行为仍未验证。
+Conduit 与 Hopper 的切换后观察均已完成。Hopper 观察末 current/profile/default
+仍为 `irwzjkl…`，booted 仍为旧闭包，timer 与 marker 均不存在；七项服务 active，
+Xray 运行凭据与渲染配置一致，五条旧订阅正文逐字节一致，Gmail `/health`
+返回 200。本机签名探测返回 200 且响应 HMAC 正确；错误签名、过期时间戳、
+越界地址分别返回 404、404、422。Conduit 到 Hopper 公网源站的新 SNI
+通过 TLS 信任校验，无签名请求返回 404；Nginx 与 probe 无错误日志。
+两机均未重启，重启后启动行为仍未验证。
+
+随后独立发布了两条 proxied DNS A 记录，既有精确 hostname `strict` 规则保持不变。
+公网路径验收中，权威 NS 返回 Cloudflare IP，两地经 Cloudflare HTTPS
+的签名请求均返回 200、响应 HMAC 正确，错误签名、过期时间戳、越界地址分别
+返回 404、404、422，无签名 GET 返回 404，TLS 校验错误为 0。DNS 记录身份、
+zone 默认模式与旧 Route 边界见[代理部署数据](./README.md#回源证明与可信探测)。
+这些检查不证明后续 Worker、路由器测量或交付已生效。
 
 ## 一次性回退保护
 
@@ -67,5 +79,5 @@ no-op 模拟已通过；模拟使用假 current/profile/default/booted 和 inact
 4 分钟前完成。SSH 退出码 255 只能触发重连与状态核对。任何路径、服务、证书、
 旧订阅、代理出口或剩余时间不达标时保留 timer/marker；可登录时执行本脚本或
 等待固定时刻回退，并完整复核 rotation。只有全部验收通过，才停止 timer、
-确认 inactive、删除 marker，再复核 profile/default、服务和订阅。后续仍需完成
-Hopper 观察结论；重启测试不能替代本次回退保护，且本次未执行重启。
+确认 inactive、删除 marker，再复核 profile/default、服务和订阅。上述观察已
+完成；重启测试不能替代本次回退保护，且本次未执行重启。

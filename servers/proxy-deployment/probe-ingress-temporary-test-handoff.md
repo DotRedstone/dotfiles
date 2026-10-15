@@ -3,11 +3,13 @@
 状态：2026-10-16。两台 rotation 候选已持久切换，观察结果见
 [双节点持久切换交接](./dual-node-persistence-handoff.md)。Conduit 首次 probe ingress
 `test` 因 Nginx 校验上游证书链失败而回退；下表的修正候选随后完成临时 `test`。
-Hopper 原候选因证书访问权限不足禁止激活，须另行重建。两台均未对 probe
+Hopper 原候选因证书访问权限不足禁止激活；修正候选已在 ARM 目标机构建，
+尚未执行临时 `test`。两台均未对 probe
 候选执行 `switch`。本轮没有修改 DNS、Cloudflare、路由器或旧订阅。
 
 原始源码锚点为 `99bfdc1f7e754f16e706cf2046f3d27702fb3975`。Conduit 当前修正
-锚点为 `765ab49f5a32c647f6a2112db66dfc3aca0eae1d`；在对应源码上仅通过
+锚点为 `765ab49f5a32c647f6a2112db66dfc3aca0eae1d`；Hopper 修正候选也基于
+该源码，两台均仅通过
 `extendModules` 将 `dot.services.proxyProbeIngress.enable` 设为 true，ACME 仍关闭。
 回退脚本及本文的后续提交不改变候选 Nix 输入。入口与密钥边界见
 [代理部署数据](./README.md#回源证明与可信探测)。
@@ -17,7 +19,7 @@ Hopper 原候选因证书访问权限不足禁止激活，须另行重建。两�
 | 主机 | 顶层 deriver | 顶层 outPath | 持久 rotation 运行闭包与系统 profile | 当前 booted |
 | --- | --- | --- | --- | --- |
 | Conduit | `/nix/store/44yhk9j85q4kavjpp09wwfb7iskzpbxf-nixos-system-conduit-26.11.20260831.34ab990.drv` | `/nix/store/73qxjfv9l6fjp73fvqpi31a02gnnvwd4-nixos-system-conduit-26.11.20260831.34ab990` | `/nix/store/fkq5h093an3qjynycv13awr76fdlra20-nixos-system-conduit-26.11.20260831.34ab990` | `/nix/store/8alf4971c77zpy5rb6rbdzbik12617pa-nixos-system-conduit-26.11.20260831.34ab990` |
-| Hopper | `/nix/store/1fkrcil5czvvq63azxfp67q37ivlslh8-nixos-system-hopper-26.11.20260831.34ab990.drv` | `/nix/store/zylxw91hy1kyj12wi74m03as3ha9al41-nixos-system-hopper-26.11.20260831.34ab990` | `/nix/store/fznhzd6b9fxyc42zphwlq7sznp5045b6-nixos-system-hopper-26.11.20260831.34ab990` | `/nix/store/k69xg4y5d9qvp7w37p98q6vbfl0i1kgn-nixos-system-hopper-26.11.20260831.34ab990` |
+| Hopper | `/nix/store/2am5m5hiz4b3h1p4pyknmhif5h7ipxbg-nixos-system-hopper-26.11.20260831.34ab990.drv` | `/nix/store/irwzjkl39v1ra9la699smvymkxpbgzz8-nixos-system-hopper-26.11.20260831.34ab990` | `/nix/store/fznhzd6b9fxyc42zphwlq7sznp5045b6-nixos-system-hopper-26.11.20260831.34ab990` | `/nix/store/k69xg4y5d9qvp7w37p98q6vbfl0i1kgn-nixos-system-hopper-26.11.20260831.34ab990` |
 
 Conduit 修正候选的 deriver、outPath 在本地重新求值与目标机一致；目标 NAR hash
 为 `sha256-GgIDnTofFa1gvwG5pBdvB4oKBiBo7MuPyXh8jhSoczI=`、NAR size 为
@@ -25,8 +27,14 @@ Conduit 修正候选的 deriver、outPath 在本地重新求值与目标机一�
 `sudo <outPath>/bin/switch-to-configuration dry-activate` 退出 0，预计新增
 `proxy/probe_env`、`proxy/probe_tls_cert`、`proxy/probe_tls_key` 三项运行 secret，
 重启 `nginx.service` 并启动 `proxy-preferred-probe.service`；current/profile 仍为
-持久 rotation 闭包，probe 仍 inactive。Hopper 表中路径仅为原候选的历史锚点，
-不得按表激活。下述现场记录说明 Conduit 新候选的实际运行验收范围。
+持久 rotation 闭包，probe 仍 inactive。Hopper 修正候选在目标 ARM 机原生构建，
+deriver 与表中一致，NAR hash 为
+`sha256-o2UjFfXd//U42mUDRFv78rOTkuHPr8ZTRf+55Zo+yQI=`、NAR size 为
+`365744`，目标 `nix store verify --no-trust` 退出 0。目标 `dry-activate`
+退出 0，预计新增同样三项 probe secret、重启 Nginx 并启动 probe；证书和私钥
+声明为 root:nginx 0440，`proxy_ssl_verify_depth 2` 只作用于 `/probe` 上游。
+旧 Hopper `1fkrcil…` → `zylxw91…` 缺证书权限修正，已作废，禁止激活。
+下述现场记录说明 Conduit 新候选的实际运行验收范围。
 
 ### Conduit 证书权限修正
 
@@ -95,13 +103,13 @@ marker 不存在，Nginx/probe 无错误日志。Hopper 外部公网路径的新
 
 ## 逐机测试前置条件
 
-Conduit 修正候选已完成验收并观察超过 10 分钟。Hopper 须另行重建有效候选、
-更新回退脚本并完成独立前置核对后才能进入测试窗口。每台均要保留两条
+Conduit 修正候选已完成验收并观察超过 10 分钟。Hopper 有效候选及回退脚本
+已准备，仍须完成独立前置核对后才能进入测试窗口。每台均要保留两条
 SSH 会话，核对另一条重连路径；Hopper 没有已验证带外控制台，失联后的 timer
 不能保证可执行，重启也不会延续临时 timer。任一时刻只能有一台处于本测试窗口。
 
-1. Conduit 从修正源码重新求值，确认 deriver、outPath、目标 store 校验及三条
-   系统闭包与表一致；Hopper 须使用另行记录的新锚点。确认默认启动项精确指向
+1. 从修正源码重新求值，确认本机 deriver、outPath、目标 store 校验及三条
+   系统闭包与表一致。确认默认启动项精确指向
    rotation、无其他回退 timer/marker。
    `booted` 旧闭包不是本次临时测试的回退目标；回退目标是持久 rotation 闭包。
    检查旧 SSH、Nginx、Xray、origin-proof、Hopper Gmail，以及
@@ -112,11 +120,13 @@ SSH 会话，核对另一条重连路径；Hopper 没有已验证带外控制台
    origin。当前静态证书有效期至 2027-01-12；续期尚未确定。任何渲染或权限
    不符合预期时停止，不以 `dry-activate` 的“would add secrets”代替此检查。
 3. 核对 [回退脚本](./scripts/probe-ingress-test-rollback.sh) 的 SHA-256 为
-   `f58b2abf8db0e7354edc4460b875967592b2ce920c5c2d5a7af4fead6add986e`，
+   `f2c2ff0bad50d862eaf6e9f337d9f104d23df97d30a2f038ba1af1e423725349`，
    安装在目标 `/run/stage1-probe-ingress-rollback.sh`，归属 root、权限 0700。
    marker 缺失且 current/profile/default boot 为 rotation、booted 为表中旧闭包时，
-   脚本无变更返回 0；Conduit 已安装新版脚本，目标 SHA 与源码一致、root:root
-   0700，并直接演练此分支；Hopper 尚未用新版脚本复验。
+   脚本无变更返回 0；Hopper 已安装新版脚本，目标 SHA 与源码一致、root:root
+   0700，并直接演练此分支。Conduit 当前运行 probe 候选、marker 缺失，
+   因 current 不等于 rotation，新脚本的无 marker 演练按预期拒绝；不应为演练
+   停止已验 probe。Conduit 原脚本已在其 rotation 基线完成过 no-op 演练。
    marker 存在且 current 为 probe 候选时，调用 rotation 闭包的 `test`；marker
    存在但 rotation 本已运行时不切换，保留 marker 待人工验收。Conduit 首次
    候选已验证真实回退分支；新版候选、断线和重启恢复尚未验证。

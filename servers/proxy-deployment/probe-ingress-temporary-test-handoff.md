@@ -3,8 +3,8 @@
 状态：2026-10-16。两台 rotation 候选已持久切换，观察结果见
 [双节点持久切换交接](./dual-node-persistence-handoff.md)。Conduit 首次 probe ingress
 `test` 因 Nginx 校验上游证书链失败而回退；下表的修正候选随后完成临时 `test`。
-Hopper 原候选因证书访问权限不足禁止激活；修正候选已在 ARM 目标机构建，
-尚未执行临时 `test`。两台均未对 probe
+Hopper 原候选因证书访问权限不足禁止激活；修正候选已在 ARM 目标机构建并
+完成临时 `test`。两台均未对 probe
 候选执行 `switch`。本轮没有修改 DNS、Cloudflare、路由器或旧订阅。
 
 原始源码锚点为 `99bfdc1f7e754f16e706cf2046f3d27702fb3975`。Conduit 当前修正
@@ -101,10 +101,45 @@ marker 不存在，Nginx/probe 无错误日志。Hopper 外部公网路径的新
 旧五路 HTTPS 出口与 proof 于观察末复测通过。临时运行态已验收，持久启动行为
 没有改变。
 
+### Hopper 修正候选临时测试
+
+Hopper 在目标 ARM 机核对修正候选、旧 rotation/current/profile/default boot、两条
+SSH 路径、五条旧订阅、Gmail、proof 与静态证书。目标机在受限临时目录从 SOPS
+渲染 probe 输入：证书链与私钥匹配、覆盖 `probe-la-v2-canary.bdot.in`，环境只含
+对侧 `la` origin；临时材料已清理。第一次 `test` 在固定 20 分钟 timer 与
+root-only marker 保护下激活 `irwzjkl…`，两地主机间的新 SNI、合法签名 200
+和错误签名、过期、越界拒绝均通过；旧五条订阅、Gmail、proof 和代理出口亦通过。
+协调窗口未在截止前清除保护，02:46:35 CST 定时器按设计自动运行回退脚本，
+02:46:41 CST 将 current 恢复至持久 rotation `fznhzd6b…`，停止 probe 并删除三项
+probe secret；profile 与默认启动项始终指向 rotation。回退后重新核对六项核心
+服务、五条订阅 HTTP 200 且正文一致、Gmail `/health` 200、proof 合法响应验签
+与无凭据拒绝、Xray 运行凭据和两条 SSH 路径；随后删除保留的 marker。本次
+自动回退是保护到期，不是 probe 验收失败，也不构成持续运行观察。
+
+04:20:53 CST 重建固定 20 分钟 timer，核对精确 ExecStart、`AccuracyUSec=1s`
+和 `Persistent=no` 后设置 root-only marker。04:21 CST 再次对同一候选执行精确
+`nixos-rebuild --no-reexec test --store-path`，退出 0。current 为 probe，profile
+和 systemd-boot 默认项仍为 rotation，booted 仍是表中旧闭包；六项旧服务和
+probe active，probe 只监听 `127.0.0.1:18444`，证书/私钥 root:nginx 0440，
+环境 root:root 0400。经 Conduit 公网路径用新 SNI 验证公开 CA 信任与 404；
+在 Hopper 的新 Nginx 路由上合法签名请求返回 200 且响应 HMAC、nonce、origin
+正确，错误签名、过期、越界地址分别返回 404、404、422。五条旧订阅 HTTP 200
+且正文逐字节一致，旧 proof 合法响应验签及无凭据 404、Gmail `/health` 200、
+Xray 运行凭据与渲染配置一致。Xray 主进程在两次切换及回退中未重启；
+Nginx/probe 在本次窗口没有错误级 journal。Warden 直连新 SNI 的 TLS 连接
+被重置，Conduit 外部路径通过，不能称所有来源均可达。验收后停止 timer，
+确认 inactive，再删除 marker；本次仍未执行持久 `switch` 或重启。timer 在
+04:23:46 CST 停止，以此为观察起点，至 04:34:33 CST 满 10 分 47 秒后复核：
+current 仍是 probe，profile、默认启动项和 booted 不变；七项相关服务 active，
+timer inactive、marker 不存在，Nginx/probe 观察期无错误级 journal，Xray
+进程未更换。五条旧订阅再次为 HTTP 200 且正文一致，Gmail `/health` 200，
+proof 合法响应验签及无凭据拒绝通过；新 Nginx 路由的签名探测、三类拒绝与
+Conduit 外部路径的可信 TLS 再次通过。此次观察只证明临时运行态持续可用。
+
 ## 逐机测试前置条件
 
 Conduit 修正候选已完成验收并观察超过 10 分钟。Hopper 有效候选及回退脚本
-已准备，仍须完成独立前置核对后才能进入测试窗口。每台均要保留两条
+也已完成本节的前置核对和临时测试；以下保留测试时使用的操作边界。每台均要保留两条
 SSH 会话，核对另一条重连路径；Hopper 没有已验证带外控制台，失联后的 timer
 不能保证可执行，重启也不会延续临时 timer。任一时刻只能有一台处于本测试窗口。
 

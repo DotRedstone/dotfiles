@@ -185,8 +185,9 @@ HMAC 密钥。
    旧 KV 和路由器默认组继续保留。
 
 这些后续条件目前未全部满足。两地主机的第 1 阶段 rotation 组合候选已持久
-`switch`。Conduit 的首次 probe ingress `test` 因上游证书链校验失败已回退，
-修正候选已完成受控临时测试；Hopper 尚未测试。Cloudflare、DNS、路由器和 Target
+`switch`。Conduit 的首次 probe ingress `test` 因上游证书链校验失败已回退；
+两台的修正候选均已完成受控临时测试和至少 10 分钟观察。Cloudflare 的两个
+新 probe hostname strict 规则已存在，但新 probe DNS、路由器和 Target
 未切换。发生问题时保持旧 manifest 与旧订阅，停用 canary 和新模块；如已执行
 `nixos-rebuild test`，
 恢复上一代系统配置并验证旧身份与 SSH。任何触及现用入口的切换需另行提交
@@ -199,11 +200,11 @@ HMAC 密钥。
 所需 secret，但 `workers.dev` 均关闭，两个 probe 名称没有 DNS、Route 或
 Custom Domain。资源 ID 与 Worker 名称见 `cloudflare-resources.json`。
 旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2 池或账户文档。probe 的
-公开 HTTPS 名称、证书与访问路由尚无实机部署；现有 CDN 证书只声明给各自
-回源虚拟主机，不能推断适用于 probe API。
+源站 HTTPS 入口已在两台主机临时运行并通过源站路径验收；公开 DNS 尚未发布，
+系统 profile 与默认启动项仍为 rotation。probe 使用各自独立证书，不能复用
+现有 CDN 证书的适用性判断。
 
-probe 的公网 HTTPS 路由、证书信任、来源限制及新版 Worker 绑定需要单独审阅；
-交叉 probe 默认关闭时不开放新增防火墙端口，也不覆盖旧代理路由。先在隔离环境验证错误证书、错误
-nonce、错误 `originId`、错误 MAC、候选地址限制与失败保留，再分别执行两台
-服务器的 `nixos-rebuild test` 并确认旧 Xray、SSH 与订阅正常。若新路径异常，
-关闭相应新模块并恢复上一代系统配置；旧订阅、优选池与 Worker 不依赖这些模块。
+后续先按[持久切换交接](./probe-ingress-persistence-handoff.md)逐台固定启动配置，
+再验收 Cloudflare 严格回源规则与新 DNS、来源限制和新版 Worker 绑定。交叉
+probe 不开放新增防火墙端口，也不覆盖旧代理路由。新路径异常时恢复 rotation
+闭包并验证旧 Xray、SSH 与订阅；旧订阅、优选池和 Worker 不依赖新入口。

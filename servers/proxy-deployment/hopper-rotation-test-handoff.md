@@ -1,8 +1,8 @@
 # Hopper rotation 临时测试交接
 
-状态：2026-10-15。本文只覆盖 Hopper 已构建候选的临时 `test`。尚未执行候选激活、
-持久 `switch`、DNS/Worker/路由器变更或旧身份撤销。Conduit 仍运行此前的临时测试闭包；
-不能把两台主机的构建结果视为双节点部署完成。阶段证据见
+状态：2026-10-15。Hopper 候选已通过临时 `test` 和运行态验收；尚未执行持久
+`switch`、DNS/Worker/路由器变更或旧身份撤销。Conduit 仍运行此前的临时测试闭包；
+两台主机的临时运行状态不等于双节点持久部署完成。阶段证据见
 [第 1 阶段现场核对](./stage1-live-readiness-review.md)。
 
 ## 精确候选与现场边界
@@ -17,9 +17,9 @@
   候选输出：`/nix/store/fznhzd6b9fxyc42zphwlq7sznp5045b6-nixos-system-hopper-26.11.20260831.34ab990`。
   目标端 deriver 与求值一致，NAR `sha256-UaZ+LG6l9SLA32o0PeK2lXSLa/L8RiIrHELzW7nkV2I=`，
   NAR size `365744`；目标顶层内容与递归闭包有效性校验退出码均为 0。
-- 当前运行闭包：`/nix/store/dv9bxyww51y3mxv55vbvrsn8qhv6gnp1-nixos-system-hopper-26.11.20260831.34ab990`。
+- 激活前运行闭包：`/nix/store/dv9bxyww51y3mxv55vbvrsn8qhv6gnp1-nixos-system-hopper-26.11.20260831.34ab990`。
   启动闭包为 `k69xg4y5…`，系统 profile 为 `w0aqhcla0…`；三者不同，后两者在本次
-  临时 `test` 中不得改变。失败回退应回到当前运行闭包 `dv9bxyww…`，不能误用启动闭包。
+  临时 `test` 中不得改变。失败回退应回到激活前运行闭包 `dv9bxyww…`，不能误用启动闭包。
 - 候选加密 `hopper.yaml` 在目标 store 与本地文件的 SHA-256 均为
   `f577f7d9677954ce0c89222cc08ee771ae78a6032cc4a42bc3c281354401f907`；本地
   SOPS 解密确认旧 UUID、rotation UUID、Reality 密钥与 WebSocket 路径均存在。声明式
@@ -57,7 +57,28 @@ journal 确认它在预定秒执行且成功。随后以同样固定时刻 timer
 服务成功退出、timer 自动卸载，current 与 marker 均未改变。这只证明调度与 no-op
 分支，不证明真实回退或主机失联恢复。
 
-## 获得风险授权后的单机执行顺序
+## 临时测试结果
+
+2026-10-15 在 Hopper 安装固定时刻、20 分钟后的回退 timer，并创建 root-only marker
+后，执行一次 `nixos-rebuild --no-reexec test --store-path`。激活命令的 SSH 连接随后
+超时并返回 255；重新登录确认 `/run/current-system` 为候选 `fznhzd6b…`，启动闭包
+`k69xg4y5…` 与系统 profile `w0aqhcla0…` 未改变。`sshd`、Nginx、Xray、
+`proxy-origin-proof`、Gmail 及订阅检查服务均 active；Xray 运行凭据与 SOPS 渲染配置
+逐字节一致，旧 Reality、Vision、WebSocket、guest/canary 和新 rotation 身份均已加载。
+
+五条旧订阅均返回 HTTP 200，正文与各自 SOPS 文件逐字节一致；`/proof` 的有效令牌
+返回 200、缺失令牌返回 404，响应 HMAC 与密钥计算结果相同。Gmail `/health` 与带
+凭据的只读 `/api/assignments` 均返回 200。从 Conduit 的独立客户端测试 Hopper
+新 rotation Reality：两个 HTTPS 目标各两次均为 200；旧 Reality、Vision 和 CDN
+WebSocket：各对两个 HTTPS 目标测试一次，均为 200。Conduit 的临时客户端及配置
+已清理。
+
+验收完成时距离固定回退时刻仍有 288 秒，随后停止 timer 并清除 marker；复核
+timer inactive、marker 缺失、当前仍为候选，关键服务与凭据正常。`/run` 回退脚本
+暂留至本次窗口结束。此次为临时 `test`，重启后的旧启动项选择和持久 `switch`
+仍未验证。
+
+## 单机临时测试执行顺序（本轮已执行）
 
 1. 重新核对 Git/Flake/目标 store/密钥文件/旧订阅及三种系统闭包；任何路径或 hash
    不符时停止。保持另一路经 Conduit 的 SSH 会话；核对没有现存的回退 marker/timer。
@@ -128,4 +149,4 @@ timer/marker；等待 timer 的 journal 与现场状态。若 PID 1 或网络完
 也无法运行，目前没有已验证的带外恢复路径。
 
 本交接不授权持久 `switch`、公网 DNS/Cloudflare 发布、路由器主组切换、Target 变更或
-撤销任何旧身份。真实 Hopper 临时激活仍需在无已验证带外恢复入口的风险下取得明确授权。
+撤销任何旧身份。再次激活或持久化前须重新核对当时的运行闭包和恢复路径。

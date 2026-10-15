@@ -128,8 +128,17 @@ Nix 实际只传输 6 条新路径；目标端 `nix-store --realise --dry-run` �
 `proxy-origin-proof`、`gmail-archiver` 均 active，回退 timer 不存在且 marker 缺失。
 本次仅增加 Nix store 内容，未激活候选或改动公网入口。候选输出未添加 GC root；后续
 使用前须重新确认路径仍在目标 store，并复核当前运行基线与密钥。
-Hopper 下一次临时 `test` 的固定时刻回退、验收与无带外恢复风险见
+Hopper 后续临时 `test` 的固定时刻回退、验收与无带外恢复风险见
 [Hopper rotation 临时测试交接](./hopper-rotation-test-handoff.md)。
+
+### Hopper rotation 临时测试完成
+
+2026-10-15 后续执行了 Hopper 候选的临时 `test`。当前运行闭包为 `fznhzd6b…`，
+启动闭包和系统 profile 保持旧值；回退 timer 已停止、marker 已清除。旧订阅、旧身份、
+新 rotation、proof、Gmail 与从 Conduit 发出的实际代理请求均通过本轮验收。
+执行顺序、具体证据和重启风险见
+[Hopper rotation 临时测试交接](./hopper-rotation-test-handoff.md)。尚未执行持久
+`switch` 或修改 DNS、Worker、路由器和旧身份。
 
 ### Conduit 持久化前只读核对
 
@@ -139,7 +148,7 @@ Hopper 下一次临时 `test` 的固定时刻回退、验收与无带外恢复�
 当前候选 deriver `5fa287a1…` 与本地求值一致，目标 NAR hash 仍为上文记录值，
 `nix store verify --no-trust` 退出码为 0。`sshd`、Nginx、Xray、`proxy-origin-proof`
 均 active；运行凭据与 SOPS 渲染逐字节一致，三条旧订阅均为 HTTP 200 且正文不变。
-Hopper 的新候选尚未激活，因此这里没有执行 Conduit 持久 `switch`。
+当时 Hopper 的新候选尚未激活，因此这里没有执行 Conduit 持久 `switch`。
 
 若后续获准持久化，应先保存并再次确认上述 profile 第 20 代路径，为恢复旧启动配置
 准备独立的固定时刻回退保护；然后才可对当前已验收候选执行

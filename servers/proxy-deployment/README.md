@@ -66,6 +66,8 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 [交叉探测候选审查](./stage1-cross-probe-review.md)。
 两地实机、Cloudflare、密钥与路由器的只读前置状态及逐阶段回退见
 [v2 隔离发布前置核对](./stage1-live-readiness-review.md)。
+两台组合候选临时验收后的系统持久化范围、逐机回退与启动项核对见
+[双节点持久切换交接](./dual-node-persistence-handoff.md)。
 
 每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
 提供对应令牌。两地主机分别以 SOPS 保存 `proxy/origin_proof_key` 与

@@ -11,8 +11,8 @@ const servers = path.resolve(directory, "..");
 const lock = JSON.parse(fs.readFileSync(path.join(servers, "flake.lock"), "utf8"));
 const worker = lock.nodes.edgeProxyWorker.locked;
 const compiler = lock.nodes.proxyStack.locked.rev;
-const expectedWorker = "538d974998f217a7a10cd8a178b62e82d44fcb89";
-const expectedHash = "sha256-8IzmqzVJrw/oMnT0+/E2tc1lj96QLDImdKmkFuy5f3I=";
+const expectedWorker = "ca217085f94dfec9e4d2512dbe78a98689fd721b";
+const expectedHash = "sha256-urg8FU+nzmLNscBv937ExvVrx9wIo/qzu1qlDKBaTGk=";
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { encoding: "utf8", ...options });

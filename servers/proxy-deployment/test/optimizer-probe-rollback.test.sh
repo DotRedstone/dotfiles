@@ -20,8 +20,10 @@ sed -e 's#IFS= read -r node < /proc/sys/kernel/hostname#node=conduit#' \
   "$source_script" > "$fixture/rollback.sh"
 chmod 0700 "$fixture/rollback.sh"
 sed 's/^node=conduit$/node=hopper/' "$fixture/rollback.sh" > "$fixture/hopper-rollback.sh"
+grep -Fq 'candidate=/nix/store/89vwm78ydgckkv0jqw0sfdgg08hg2ggw-nixos-system-hopper-26.11.20260831.34ab990' \
+  "$source_script"
 if "$fixture/hopper-rollback.sh" test >/dev/null 2>&1; then
-  echo 'unverified Hopper candidate unexpectedly accepted' >&2
+  echo 'Hopper without its old closure unexpectedly accepted' >&2
   exit 1
 fi
 for command in readlink awk grep cmp cat; do
@@ -129,4 +131,4 @@ for mode in test switch; do
   "$fixture/rollback.sh" "$mode" >/dev/null
   assert_old
 done
-printf 'optimizer rollback fixture passed: no-op, identity refusals, Hopper guard, test and switch recovery\n'
+printf 'optimizer rollback fixture passed: no-op, identity refusals, Hopper path, test and switch recovery\n'

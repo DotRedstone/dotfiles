@@ -21,8 +21,8 @@ case "$node" in
     ;;
   hopper)
     old=/nix/store/irwzjkl39v1ra9la699smvymkxpbgzz8-nixos-system-hopper-26.11.20260831.34ab990
-    # 构建完成后填入经目标机校验的精确 outPath；占位状态禁止执行。
-    candidate=HOPPER_CANDIDATE_NOT_VERIFIED
+    # 目标 ARM 主机原生构建的顶层 outPath；激活前仍须复核目标 store 与当前状态。
+    candidate=/nix/store/89vwm78ydgckkv0jqw0sfdgg08hg2ggw-nixos-system-hopper-26.11.20260831.34ab990
     booted=/nix/store/k69xg4y5d9qvp7w37p98q6vbfl0i1kgn-nixos-system-hopper-26.11.20260831.34ab990
     subscription_host=sg-node.540123.xyz
     subscription_names='hysteria2 websocket reality cdn guest'

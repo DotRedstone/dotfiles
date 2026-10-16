@@ -14,8 +14,9 @@ canary 与 `/proof`，不含 Hopper Gmail 现网基线。Conduit/Hopper 此前�
 - `nodes.json` 记录两处现有的公开节点端点和 Cloudflare 名称。REALITY 客户端参数
   与 WebSocket 路径属于私有运行时输入，不写入本文件。
 - `preferred-sources.json` 登记路由器现用的两处独立 CloudflareST 来源。
-  `owner-campus-canary` 是两地 `signed-upload` 的隔离登记，尚无实测结果或已验证
-  v2 池。GitHub 来源需核对 owner、ref 和 path，并验证对应回源健康状态。
+  `owner-campus-canary` 是两地 `signed-upload` 的隔离登记；路由器已实测并上传
+  两份 v2 池，结果见[控制 Worker 交接](./control-worker-canary-handoff.md)。
+  GitHub 来源需核对 owner、ref 和 path，并验证对应回源健康状态。
 - `owned-domains.json` 仅保存直连规则所需的自有域名后缀和节点 IP。
 - `cloudflare-resources.json` 固定隔离灰度的两个 KV ID、各自的 binding、Worker
   名称与入口；这些是部署专属的公开标识，不包含令牌或私有运行时值。
@@ -54,8 +55,9 @@ JSON 包含 `version: 1`、`preferredReadToken`、每账户 `runtimeByAccount`�
 合成账户、内存 KV 和本机 Mihomo 数据文件；故障注入覆盖每份文档写入、读回、
 manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此测试不读取生产 KV，
 也不证明 Cloudflare、两地回源或客户端更新已经生效。此隔离分支的 `proxyStack`
-已锁在 `5393d0e`，新版 Worker 输入锁在 `ca21708`；这组锁定输入尚未
-按上述历史组合完成联合运行验证。状态与发布阶段见[发布记录](../docs/proxy-stack-rollout.md)。
+已锁在 `5393d0e`，新版 Worker 输入锁在 `052a959`；实际隔离发布见
+[交付 Worker 交接](./delivery-worker-canary-handoff.md)。历史合成测试不等于
+此次云端验收。状态与发布阶段见[发布记录](../docs/proxy-stack-rollout.md)。
 
 ## 回源证明与可信探测
 
@@ -116,16 +118,16 @@ HMAC 四把密钥互异。每台探测器的 `PROBE_ORIGINS_JSON` 只应包含�
 并与该地区 Worker 条目的 HMAC 及对侧 proof 凭据匹配。绑定缺失或探测失败时
 保留旧池；接口格式见独立项目
 [优选与交付接口](/home/dot/Projects/edge-proxy-worker/docs/preferred-v2.md)。
-此隔离分支将 `servers/flake.lock` 的 `edgeProxyWorker` 锁到 `ca21708`，
-控制 Worker 具备双地区 `PROBE_ENDPOINTS_JSON` 契约。公网控制入口、绑定与
-尚未建立的池见[控制 Worker 隔离发布交接](./control-worker-canary-handoff.md)；
-源码锁定本身不证明隔离探测已可访问。
+此隔离分支将 `servers/flake.lock` 的 `edgeProxyWorker` 锁到 `052a959`，
+控制 Worker 具备双地区 `PROBE_ENDPOINTS_JSON` 契约。公网控制入口、绑定、
+两地已验证池与实机验收见[控制 Worker 隔离发布交接](./control-worker-canary-handoff.md)。
 
 ## v2 Worker 本地准备
 
 `scripts/prepare-v2-workers.mjs` 从锁定的 Nix 源码读取两个新入口，从本目录
 的目录数据和 `cloudflare-resources.json` 生成独立 KV 的 Wrangler 配置、源码修订记录及
-secret 来源清单。配置只包含公开部署参数；`workers_dev` 关闭且不声明 Route。
+secret 来源清单。配置只包含公开部署参数；`workers_dev` 关闭，交付入口使用
+独立 Custom Domain，控制入口由受限部署配置绑定独立 Custom Domain。
 `secret-references.json` 列出需在受限部署环境注入的密钥来源，不含明文。
 
 ```bash
@@ -186,8 +188,8 @@ Hopper 的 ARM 构建路径继续遵循服务器迁移文档。不得只替换�
 运行服务：通用旧 Xray 账户目录中 `canary.enabled` 默认为 false；本代理候选
 在两地主机层覆盖启用，实际激活仍取决于完整主机闭包。
 两地主机 SOPS 已有各自的 `proxy/probe_env` 与静态 TLS 全链／私钥；
-Conduit 已有 `proxy/delivery_runtime`，Hopper 尚无此项，发布主机归属仍需
-核对。两份回源主机密文已用对应 SSH 主机身份只读解密成功。此前组合候选
+Conduit 已有 JSON 格式的 `proxy/delivery_runtime` 并作为指定发布主机；
+Hopper 无此项。两份回源主机密文已用对应 SSH 主机身份只读解密成功。此前组合候选
 已验收 proof 服务权限与真实回源；本独立代理候选未单独执行实机 `test`。
 Target 的历史探测密文不迁作两地凭据；Cloudflare canary 密文已有双地区探测所需四把互异
 HMAC 密钥。
@@ -197,44 +199,47 @@ HMAC 密钥。
 公开信任链；2026-10-16 本地检查通过。证书有效期至 2027-01-12，后续
 需安排续期。Conduit 已在目标机受限临时目录验证 probe 输入与证书，过程见
 [probe ingress 临时测试交接](./probe-ingress-temporary-test-handoff.md)；两地 probe
-均已完成临时验收、持久切换和 10 分钟观察。
+均已完成此前的临时验收和持久切换。2026-10-16 新增公开测速入口与轮换后的
+回源 proof 凭据也已逐机持久切换；实时测量和池写入见
+[控制 Worker 交接](./control-worker-canary-handoff.md)。两台尚未重启。
 
 进入后续 v2 探测、交付与路由灰度前，还需完成以下部署侧输入与实机证据：
 
-1. 路由器在实际网络生成两地测量结果，经可信回源探测写入 `owner-campus-canary`
-   的两个 v2 池；只有池格式和健康通过才允许发布。
-2. 复核两地独立 probe 名称、公开信任的 TLS 证书、Cloudflare 代理 DNS、
-   来源限制及各自只含对侧回源的 SOPS 环境；核对新版 Worker 的
-   `PROBE_ENDPOINTS_JSON`、proof 服务和独立 KV 绑定，并确定私有交付域名。
-3. 为指定发布主机准备完整 `proxy/delivery_runtime`，核对两地 UUID 与 SOPS
-   一致，并单独审阅将 `servers/flake.lock` 更新到已验编译器修订的差异。
-4. 前阶段组合候选已临时 `test` 并验证两地 SSH、旧 Xray 身份、旧订阅和新 canary
-   的 REALITY、CF TLS 回源；后续探测与交付配置仍需分别受控 `test`，只对隔离
-   客户端添加新配置，验证三平台交付、provider 更新与单账户撤销。旧 Worker、
+1. 两地直连测量、跨地证明与隔离 v2 池已验收；路由器已安装故障关闭的出口
+   校验并自动错峰刷新。代理规则后续重载时仍须确认 `nobody` 直连规则，
+   旧池与旧 CloudflareST 保留可回退。
+2. 两地独立 probe 名称、TLS、代理 DNS、SOPS 环境、proof 服务、控制与交付
+   Worker 绑定已核对；交付域名和隔离 KV 的实测见
+   [交付 Worker 交接](./delivery-worker-canary-handoff.md)。
+3. Conduit 的 `proxy/delivery_runtime` 已核对，发布 timer 已持久启用，手动
+   触发与首次自动触发均通过；路由器定时刷新已实测。
+4. 前阶段组合候选已验证两地 SSH、旧 Xray 身份、旧订阅和新 canary
+   的 REALITY、CF TLS 回源；隔离 Mihomo 进程已验证四类出口。后续只对隔离
+   客户端添加新配置，验证三平台长期导入、provider 更新与单账户撤销。旧 Worker、
    旧 KV 和路由器默认组继续保留。
 
-这些后续条件目前未全部满足。两地主机的第 1 阶段 rotation 组合候选已持久
-`switch`。Conduit 的首次 probe ingress `test` 因上游证书链校验失败已回退；
-两台的修正候选均已完成受控临时测试、持久切换与 10 分钟观察；新 probe DNS
-已发布并通过公网入口验收，路由器和 Target 未切换。发生问题时保持旧 manifest
-与旧订阅，按[持久切换交接](./probe-ingress-persistence-handoff.md)恢复 rotation
-闭包并验证旧身份与 SSH。任何触及现用入口的切换需另行提交
+这些后续条件目前未全部满足。两地主机的第 1 阶段 rotation、私有 probe ingress
+及新增公开测速入口均已持久切换；新 probe DNS 和两地路由器直连测量已通过
+隔离验收。Target 与路由器默认代理组未切换。发生问题时保留旧 manifest、
+旧订阅和旧 Worker；不要恢复已轮换的 origin proof 凭据。任何触及现用入口的
+切换需另行提交
 可审查的 diff、实测证据和回退命令。
 
 现有 LA/SG CDN 域名与各自 Nginx TLS 虚拟主机可承载独立的 proof 精确路径，
 不要求修改旧 WS 路由。2026-10-16 的只读 Cloudflare 核对确认旧
 `edge-proxy-next-state` KV、`edge-proxy-next` 和 `edge-preferred-control` 保留；
-两个新版隔离 KV 均为 0 键；新版控制与交付 Worker 已部署，绑定各自 KV 和
+新版控制 KV 已有两地隔离池，交付 KV 已有 canary manifest；新版控制与交付
+Worker 已部署，绑定各自 KV 和
 所需 secret，`workers.dev` 均关闭。两个 probe 名称已有上述 DNS；控制 Worker
-已添加独立 Custom Domain，交付 Worker 尚无公网域名。资源 ID 与 Worker 名称见
+和交付 Worker 已添加各自的独立 Custom Domain。资源 ID 与 Worker 名称见
 `cloudflare-resources.json`，控制入口的实测状态见
-[控制 Worker 隔离发布交接](./control-worker-canary-handoff.md)。
+[控制 Worker 隔离发布交接](./control-worker-canary-handoff.md)，交付入口见
+[交付 Worker 交接](./delivery-worker-canary-handoff.md)。
 旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2 池或账户文档。probe 的
-源站 HTTPS 入口已在两台主机持久切换并通过观察及公网路径验收；
-系统 profile 与默认启动项均为 probe 候选，尚未重启。probe 使用各自独立证书，不能复用
+源站 HTTPS 入口与公开测速路径已在两台主机持久切换并通过实机验收；
+系统 profile 与默认启动项均为新候选，尚未重启。probe 使用各自独立证书，不能复用
 现有 CDN 证书的适用性判断。
 
-后续仍需安排静态证书续期，并验收来源限制、新版 Worker 绑定、路由器测量与
-配置交付。交叉
-probe 不开放新增防火墙端口，也不覆盖旧代理路由。新路径异常时恢复 rotation
-闭包并验证旧 Xray、SSH 与订阅；旧订阅、优选池和 Worker 不依赖新入口。
+后续仍需安排静态证书续期和客户端验收。交叉 probe 不开放新增
+防火墙端口，也不覆盖旧代理路由。新路径异常时停用隔离上传并保留上次有效池，
+验证旧 Xray、SSH 与订阅；不得用含旧 proof 凭据的闭包作为日常回退目标。

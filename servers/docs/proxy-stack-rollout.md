@@ -1,10 +1,12 @@
 # 双节点代理分阶段发布记录
 
 本页保留 2026-10-11 的本地验证记录，并记录 2026-10-13 的交接状态；它不是
-现网发布令。当前两地 probe ingress 的持久切换与公网验收见
-[持久切换交接](../proxy-deployment/probe-ingress-persistence-handoff.md)，隔离控制
-Worker 的发布与剩余接口缺口见
-[控制 Worker 交接](../proxy-deployment/control-worker-canary-handoff.md)。下文带历史
+现网发布令。此前两地 probe ingress 的持久切换与公网验收见
+[持久切换交接](../proxy-deployment/probe-ingress-persistence-handoff.md)；新增公开测速
+入口、轮换后的回源凭据、路由器直连测量与隔离控制 Worker 状态见
+[控制 Worker 交接](../proxy-deployment/control-worker-canary-handoff.md)；交付 Worker、
+Conduit 定时发布与隔离客户端验收见
+[交付 Worker 交接](../proxy-deployment/delivery-worker-canary-handoff.md)。下文带历史
 日期的锁、Cloudflare 和现网表格仅记录当时状态。
 
 2026-10-13 Conduit/Hopper 曾用含 Hopper Gmail 基线的组合候选完成
@@ -13,7 +15,7 @@ Worker 的发布与剩余接口缺口见
 批准直接激活。路由器和现用 Cloudflare Worker 未切换到新链路。
 2026-10-14 的独立[Worker 锁与适配候选](../proxy-deployment/stage1-cross-probe-review.md#后续-worker-锁与本地适配候选)
 曾将本分支的 `edgeProxyWorker` 锁更新到 `538d974`；当前锁已更新到
-`ca21708`。下表仍记录 2026-10-13 基线，不代表本分支的最新锁。
+`052a959`。下表仍记录 2026-10-13 基线，不代表本分支的最新锁。
 
 ## 2026-10-13 灰度前基线
 

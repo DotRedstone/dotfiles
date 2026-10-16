@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "accounts": {
+    "canary": {
+      "enabled": true,
+      "primaryOrigin": "la",
+      "sourceIdByOrigin": { "la": "owner-campus-canary", "sg": "owner-campus-canary" },
+      "allowedExits": ["la-direct", "la-cf", "sg-direct", "sg-cf"],
+      "quotaGiB": 1,
+      "expiresAt": null
+    }
+  }
+}

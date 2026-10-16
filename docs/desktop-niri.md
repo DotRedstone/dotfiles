@@ -31,7 +31,7 @@ Niri 启动时会通过 `spawn-at-startup` 执行以下序列：
 | `Mod + I` | 切换 Noctalia 控制中心 |
 | `Mod + P` | 切换电源菜单 |
 | `Print` | 全屏截图并存入剪贴板 |
-| `Mod + Shift + S` | 区域截图并存入剪贴板 |
+| `Mod + Shift + S` | 冻结画面后选取区域；详见下文 |
 
 ### 窗口管理
 | 按键 | 功能 |
@@ -43,6 +43,31 @@ Niri 启动时会通过 `spawn-at-startup` 执行以下序列：
 | `Mod + L / J / K` | 向右/下/上切换焦点 |
 | `Mod + Shift + L/J/K` | 向右/下/上移动窗口 |
 | `Mod + - / =` | 缩小/放大窗口宽度 |
+
+## 截图与文字识别
+
+| 按键 | 用法 |
+| --- | --- |
+| `Mod + Shift + W` | 截取当前聚焦窗口；Niri 将图片复制到剪贴板并保存到其截图目录。 |
+| `Mod + Shift + S` / `Mod + Shift + A` | 选择当前画面的区域并复制到剪贴板，不冻结画面。 |
+| `Print` | 截取当前桌面并复制到剪贴板。多屏时包含整个桌面。 |
+| `Mod + Shift + P` | 冻结画面并打开 Noctalia 标注编辑器。`B` 为画笔，`C` 为裁剪，`Ctrl + C` 复制，`Ctrl + S` 保存。 |
+| `Mod + Shift + O` | 选择区域，用本地 Tesseract 识别简体中文和英文，并将文字复制到剪贴板。取消选择不会改动剪贴板。 |
+
+### 长内容
+
+网页长截图使用 Zen Browser 的页面截图：在网页内按 `Ctrl + Shift + S`，选择
+“保存完整页面”，再复制或下载图片。此操作针对网页，不保证页面内独立滚动区域、
+动态加载内容或其他应用的长视图完整；保存后检查图片的顶部、中部和底部。
+参考 [Zen 快捷键](https://docs.zen-browser.app/user-manual/shortcuts) 与
+[Firefox 页面截图说明](https://support.mozilla.org/en-US/kb/take-screenshots-firefox)。
+
+当前没有任意应用通用的滚动长截图快捷键。Niri 和 `grim` 捕获已显示的画面；
+文档和 PDF 优先使用应用自身的导出或打印功能，终端内容优先保存文本日志。
+无导出功能的视图可分段保存可见画面，并检查各段是否覆盖所需内容。
+
+OCR 的 PNG 临时文件位于运行时目录，命令结束后删除；识别在本机完成。`fel/ocr`
+插件保持禁用，当前快捷键直接使用声明式的中英 Tesseract 语言包。
 
 ### 工作区
 | 按键 | 功能 |

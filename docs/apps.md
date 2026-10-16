@@ -33,8 +33,9 @@
 
 ## 系统实用工具
 
-- **Nautilus**: 默认 GUI 文件管理器。
-- **Clipper**: 集成在 Noctalia Shell 中的剪贴板管理器，可通过 `Mod+B` 调出。
+- **Dolphin**: 图形文件管理器；模块位于 `home/dot/dolphin/`，目录打开方式的
+  声明位于 `home/dot/default-apps/default.nix`。实际默认关联需在应用 Home Manager
+  配置后确认。
 
 相关链接：
 - [微信集成](./wechat.md)

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "origins": {
+    "la": {
+      "direct": { "server": "107.174.1.97", "port": 20002, "serverName": "www.nvidia.com" },
+      "cf": { "host": "la-cdn.bdot.in", "port": 443 }
+    },
+    "sg": {
+      "direct": { "server": "140.245.62.36", "port": 20002, "serverName": "www.nvidia.com" },
+      "cf": { "host": "sg-cdn.bdot.in", "port": 443 }
+    }
+  }
+}

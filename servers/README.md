@@ -20,7 +20,7 @@ SOPS 加密后随 Git 配置保存。
 | `hopper` | Oracle A1 应用与存储节点 | 已受管 |
 | `gcp-free` | GCE `e2-micro` 代理节点 | 已有配置，等待恢复可访问地址或确认退役 |
 | `repeater` | 国内服务节点 | 在线 NixOS，待回收源码后收编 |
-| `target` | 国内反代与 EasyTier 节点 | 已受管 |
+| `target` | 国内反代与 EasyTier 节点 | 已受管，计划到期退役 |
 | `beacon` | 未确认角色 | 当前不可达，待盘点 |
 
 `conduit` 与国内 EasyTier 网络隔离。`hopper` 原生运行 OpenList、Navidrome、
@@ -34,10 +34,37 @@ RustFS、MySQL、PostgreSQL、MongoDB、Redis、Nginx、Xray、Komari 与 Hermes
 `hopper` 的 ARM64、OCI 网络、数据恢复和两阶段接管说明见
 [docs/hopper-migration.md](./docs/hopper-migration.md)。
 
-Cloudflare 边缘代理与优选 IP 订阅代码位于
-[cloudflare/edge-worker](./cloudflare/edge-worker/README.md)，它独立于 NixOS 主机
-模块部署，密钥只通过 Worker secret 注入。现网审计、灰度与清理步骤见
+Cloudflare 边缘代理的通用代码位于独立的
+`/home/dot/Projects/edge-proxy-worker` 仓库；本仓库的
+[cloudflare/edge-worker](./cloudflare/edge-worker/README.md) 固定其本机 Git 提交，
+只保存部署参数、SOPS 引用、Mihomo 基线和路由器适配。它独立于 NixOS 主机模块部署，
+密钥只通过 Worker secret 注入。旧部署适配仍从受限 legacy checkout 归档固定提交；
+隔离 canary 的当前 Flake 修订由 `edgeProxyWorker` 私有 Git SSH 非 Flake 输入锁定，
+曾预接入 Target 的默认关闭模块；该方案已废弃，Target 现网未启用探测服务。
+Conduit/Hopper 已启用独立 probe ingress。两地交叉
+探测预览与来源边界见
+[proxy-deployment](./proxy-deployment/README.md)。现网审计、灰度与清理步骤见
 [docs/cloudflare-edge-migration.md](./docs/cloudflare-edge-migration.md)。
+
+双节点代理的通用编译器、规则与 Xray 模块已拆到独立的
+`/home/dot/Projects/proxy-stack` Flake，并发布在私有 GitHub 仓库。
+`flake.lock` 固定其 Git 修订；远程构建端须能读取该私有仓库，发布前还须复核
+访问权限与锁定源码。账户、LA/SG 真实端点、优选来源和客户端网络参数留在
+[proxy-deployment](./proxy-deployment/README.md)；SOPS 密钥仍在本仓库。
+隔离 canary 已登记，通用账户目录默认关闭；第 1 阶段代理候选只在 Conduit/Hopper
+主机层启用它。该代理候选缺少 Hopper 现网 Gmail 基线，不能直接进行整机 `test`；
+范围与组合门槛见[代理源码独立候选](./proxy-deployment/stage1-proxy-only-review.md)。
+现有 `clash/router-policy.json`、`proxy-accounts.json`、旧 Worker 与订阅保持可用，
+新编译器尚未向现网发布。
+`target` 和 `gcp-free` 没有加入这次双节点代理。
+从**当前锁定修订**本地构建三类 Worker bundle 的命令是：
+
+```bash
+nix build path:/home/dot/.dotfiles/servers#proxyStackWorkerBundles --no-link --print-out-paths
+```
+
+此命令不解密 SOPS、不发布 Cloudflare。控制 Worker 还需要受信任的回源探测服务绑定；
+配置 Worker 还需要独立的私有部署包和测试账户。完成这些验收后才能提出灰度发布。
 
 Hopper 同时提供一个有界的官方 Nix 二进制缓存中继：它按需从
 `cache.nixos.org` 下载并缓存在新加坡本地磁盘，其他受管主机优先命中该中继，

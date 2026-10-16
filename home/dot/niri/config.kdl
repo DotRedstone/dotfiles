@@ -193,13 +193,24 @@ binds {
     Mod+Shift+Equal hotkey-overlay-title="窗口高+" { set-window-height "+10%"; }
 
     // Screenshots
-    // Niri captures a frozen frame before opening its interactive region picker.
-    Mod+Shift+S hotkey-overlay-title="冻结区域截图" {
-        screenshot;
+    Mod+Shift+S hotkey-overlay-title="区域截图" {
+        spawn "sh" "-c" "grim -g \"$(slurp)\" - | wl-copy";
     }
 
     Mod+Shift+A hotkey-overlay-title="区域截图" {
         spawn "sh" "-c" "grim -g \"$(slurp)\" - | wl-copy";
+    }
+
+    Mod+Shift+W hotkey-overlay-title="窗口截图" {
+        screenshot-window;
+    }
+
+    Mod+Shift+P hotkey-overlay-title="冻结画面标注" {
+        spawn "noctalia" "msg" "screenshot-annotate";
+    }
+
+    Mod+Shift+O hotkey-overlay-title="区域文字识别" {
+        spawn "niri-ocr";
     }
 
     Print hotkey-overlay-title="全屏截图" {

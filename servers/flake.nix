@@ -23,6 +23,15 @@
 
     gmail-archiver.url = "github:DotRedstone/gmail-archiver";
     gmail-archiver.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Private remote is fetched at one exact revision from flake.lock.
+    proxyStack.url = "git+https://github.com/DotRedstone/proxy-stack.git?ref=codex/sanitized-v2&rev=5393d0e1bffd3406b62b09269b54fd7434778f3e";
+    proxyStack.inputs.nixpkgs.follows = "nixpkgs";
+
+    edgeProxyWorker = {
+      url = "git+ssh://git@github.com/DotRedstone/edge-proxy-worker.git?ref=main";
+      flake = false;
+    };
   };
 
   outputs =
@@ -32,11 +41,19 @@
       hermes-agent,
       gmail-archiver,
       sops-nix,
+      proxyStack,
+      edgeProxyWorker,
       ...
     }:
     {
+      packages = {
+        x86_64-linux.proxyStackWorkerBundles = proxyStack.checks.x86_64-linux.workerBundles;
+        aarch64-linux.proxyStackWorkerBundles = proxyStack.checks.aarch64-linux.workerBundles;
+      };
+
       nixosConfigurations = {
         conduit = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit proxyStack edgeProxyWorker; };
           modules = [
             disko.nixosModules.disko
             sops-nix.nixosModules.sops
@@ -45,6 +62,7 @@
         };
 
         gcp-free = nixpkgs.lib.nixosSystem {
+          specialArgs = { proxyStack = null; };
           modules = [
             disko.nixosModules.disko
             sops-nix.nixosModules.sops
@@ -53,7 +71,7 @@
         };
 
         hopper = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit hermes-agent; };
+          specialArgs = { inherit hermes-agent proxyStack edgeProxyWorker; };
           modules = [
             disko.nixosModules.disko
             hermes-agent.nixosModules.default
@@ -64,9 +82,12 @@
         };
 
         target = nixpkgs.lib.nixosSystem {
+          specialArgs = { proxyStack = null; inherit edgeProxyWorker; };
           modules = [
             sops-nix.nixosModules.sops
             ./hosts/target
+            ./hosts/target/probe-source.nix
+            ./hosts/target/probe-tls.nix
           ];
         };
       };

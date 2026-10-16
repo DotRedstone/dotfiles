@@ -72,6 +72,22 @@ origin-proof 和 probe ingress。独立分支
 [临时测试交接](./probe-ingress-temporary-test-handoff.md)，持久切换状态和回退边界见
 [持久切换交接](./probe-ingress-persistence-handoff.md)。
 
+同一专用 HTTPS 虚拟主机还声明了供 `cf-optimizer` 使用的公开
+`GET /probe/uncached?nonce=<32 位小写十六进制数>` 精确路径：
+
+| 回源目标 | 主机 | `X-CF-Optimizer-Origin` |
+| --- | --- | --- |
+| `la` | Hopper 的 `probe-la-v2-canary.bdot.in` | `cf-opt-la-v1` |
+| `sg` | Conduit 的 `probe-sg-v2-canary.bdot.in` | `cf-opt-sg-v1` |
+
+有效请求由 Nginx 直接返回 4096 字节静态正文、`Cache-Control: no-store,
+max-age=0`，并原样回显 `X-CF-Optimizer-Nonce`。其他方法返回 405；缺失、
+重复或格式错误的查询参数返回 400。`/probe` 的签名接口仍由原回环服务处理；
+公开测速路径不提供可信回源证明。此处只声明源站行为，部署后仍须分别核对
+两地 TLS/SNI、经 Cloudflare 的实际非缓存回源和 `cf-optimizer` 在接入网络上的
+测量；响应头本身不能证明请求到达了目标源站。回退时撤销各主机
+`cross-probe.nix` 中的 marker 配置并重新激活旧闭包，保留签名 `/probe`。
+
 每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
 提供对应令牌。两地主机分别以 SOPS 保存 `proxy/origin_proof_key` 与
 `proxy/origin_proof_token`。交叉探测按被测回源地区命名：LA 候选由 Hopper 的

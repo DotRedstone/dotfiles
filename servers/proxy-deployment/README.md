@@ -54,7 +54,7 @@ JSON 包含 `version: 1`、`preferredReadToken`、每账户 `runtimeByAccount`�
 合成账户、内存 KV 和本机 Mihomo 数据文件；故障注入覆盖每份文档写入、读回、
 manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此测试不读取生产 KV，
 也不证明 Cloudflare、两地回源或客户端更新已经生效。此隔离分支的 `proxyStack`
-仍锁在 `23a64ff`，新版 Worker 输入锁在 `538d974`；这组锁定输入尚未
+已锁在 `5393d0e`，新版 Worker 输入锁在 `ca21708`；这组锁定输入尚未
 按上述历史组合完成联合运行验证。状态与发布阶段见[发布记录](../docs/proxy-stack-rollout.md)。
 
 ## 回源证明与可信探测
@@ -100,10 +100,10 @@ HMAC 四把密钥互异。每台探测器的 `PROBE_ORIGINS_JSON` 只应包含�
 并与该地区 Worker 条目的 HMAC 及对侧 proof 凭据匹配。绑定缺失或探测失败时
 保留旧池；接口格式见独立项目
 [优选与交付接口](/home/dot/Projects/edge-proxy-worker/docs/preferred-v2.md)。
-此隔离分支将 `servers/flake.lock` 的 `edgeProxyWorker` 单独锁到 `538d974`，
-控制 Worker 具备双地区 `PROBE_ENDPOINTS_JSON` 契约。加密输入、Worker 和公网
-入口的实况见下方[canary 凭据与启用门槛](#canary-凭据与启用门槛)；源码锁定
-本身不证明隔离探测已可访问。
+此隔离分支将 `servers/flake.lock` 的 `edgeProxyWorker` 锁到 `ca21708`，
+控制 Worker 具备双地区 `PROBE_ENDPOINTS_JSON` 契约。公网控制入口、绑定与
+尚未建立的池见[控制 Worker 隔离发布交接](./control-worker-canary-handoff.md)；
+源码锁定本身不证明隔离探测已可访问。
 
 ## v2 Worker 本地准备
 
@@ -209,8 +209,10 @@ HMAC 密钥。
 不要求修改旧 WS 路由。2026-10-16 的只读 Cloudflare 核对确认旧
 `edge-proxy-next-state` KV、`edge-proxy-next` 和 `edge-preferred-control` 保留；
 两个新版隔离 KV 均为 0 键；新版控制与交付 Worker 已部署，绑定各自 KV 和
-所需 secret，但 `workers.dev` 均关闭；两个 probe 名称已有上述 DNS，未新增
-Worker Route 或 Custom Domain。资源 ID 与 Worker 名称见 `cloudflare-resources.json`。
+所需 secret，`workers.dev` 均关闭。两个 probe 名称已有上述 DNS；控制 Worker
+已添加独立 Custom Domain，交付 Worker 尚无公网域名。资源 ID 与 Worker 名称见
+`cloudflare-resources.json`，控制入口的实测状态见
+[控制 Worker 隔离发布交接](./control-worker-canary-handoff.md)。
 旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2 池或账户文档。probe 的
 源站 HTTPS 入口已在两台主机持久切换并通过观察及公网路径验收；
 系统 profile 与默认启动项均为 probe 候选，尚未重启。probe 使用各自独立证书，不能复用

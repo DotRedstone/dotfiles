@@ -11,8 +11,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const directory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const servers = path.resolve(directory, "..");
 const lock = JSON.parse(fs.readFileSync(path.join(servers, "flake.lock"), "utf8"));
-const expectedWorker = "ca217085f94dfec9e4d2512dbe78a98689fd721b";
-const expectedHash = "sha256-urg8FU+nzmLNscBv937ExvVrx9wIo/qzu1qlDKBaTGk=";
+const expectedWorker = "052a959dad36e4ea23ca45a1885c657761a5903c";
+const expectedHash = "sha256-dlZaqcG6ap80iBw5ZC9pdwcVFgaNW/fA5ikhNqYz4Ww=";
 let failurePhase = "locked source";
 
 function command(program, args) {

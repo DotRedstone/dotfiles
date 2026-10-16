@@ -50,6 +50,62 @@ max-age=0`，内容大小与 SHA-256 摘要分别核对。随机无效令牌返�
 这验证了 canary 的四类出口可用；尚未验证路由器、桌面和移动端长期导入、
 provider 自动更新、故障切换或账户撤销。
 
+## 2026-10-17 客户端隔离灰度
+
+Warden 使用 [`scripts/prepare-desktop-canary.py`](./scripts/prepare-desktop-canary.py)
+从本仓库的 Conduit SOPS 密文读取 canary 交付运行时，在进程内取得交付地址，
+下载 desktop 配置及 LA/SG provider。脚本将端口改为仅本机使用的
+`127.0.0.1:17890` 与 `127.0.0.1:19090`，关闭 TUN、DNS、LAN 监听，
+使用本机已有 Geo 数据离线静态检查后原子写入
+`~/.local/state/mihomo-v2-canary/config.yaml`，目录和文件权限分别为
+`0700`、`0600`。令牌和配置正文不进入命令参数、Git 或输出。
+同一脚本加 `--profile router` 准备路由器候选，改用 `17891`、`19091`。
+
+```bash
+python3 servers/proxy-deployment/scripts/prepare-desktop-canary.py
+python3 servers/proxy-deployment/scripts/prepare-desktop-canary.py --profile router
+```
+
+Warden 以独立的临时 `proxy-v2-canary.service` 运行该配置；系统现用
+`mihomo.service` 保持 inactive。桌面 canary 加载新发布池 LA 6、SG 5；
+两份 provider 主动更新 API 均返回 204。临时切到各地 CF 组时，经
+`127.0.0.1:17890` 访问出口身份服务均匹配对应服务器，随后将模式恢复为
+`rule`。约五分钟后两份 provider 自行刷新，数量仍为 LA 6、SG 5。
+隔离进程不接管桌面默认路由，也不替换 Noctalia 的现有控制器。
+
+路由器把候选放在 `/root/proxy-v2-canary`，使用只读链接复用现有
+`/etc/openclash/GeoIP.dat`、`GeoSite.dat`，以 `clash_meta -t` 静态检查后
+单独运行。配置只监听回环的 `17891`、`19091`，无 TUN、DNS 和 LAN 入口。
+两份 provider 加载 LA 6、SG 5，主动更新均返回 204；分别选择 LA/SG
+直连与 CF 自动组，通过该端口访问出口身份服务均匹配对应服务器。
+恢复实例 `rule` 模式后，两份 provider 在约五分钟后自行刷新，节点数仍为
+LA 6、SG 5。路由器当时可用内存约 45 MiB，隔离进程占约 88 MiB；完成这轮
+验收后已停止该进程，可用内存回升约 135 MiB。OpenClash 活动配置路径仍为
+`/etc/openclash/config/config.yaml`，其 SHA-256 在测试前后均为
+`77f17fffe1b2c26ea930422695f4c578faf355153ae0bc14d045f7d70366e841`；
+旧订阅、默认组和扫描 cron 未改。
+
+两台隔离实例的 provider 声明 `interval: 300`，均已证实自动刷新。
+Warden 的 transient user unit 与路由器
+独立进程均不保证重启后自启，且未接管系统流量。回退只需停止
+`proxy-v2-canary.service` 或结束 `/root/proxy-v2-canary/pid` 所记进程；
+不要删除 OpenClash 活动配置或旧订阅。移动端没有设备访问入口，尚未导入：
+在客户端添加独立的 `mobile/mihomo.yaml` 订阅、保持旧配置默认，核对两份
+provider 更新和 LA/SG 实际出口，再测试断开优选时的 fallback；完成前不宣称
+移动端验收。
+
+```bash
+systemctl --user stop proxy-v2-canary.service
+# 在路由器执行：
+kill "$(cat /root/proxy-v2-canary/pid)"
+```
+
+扩大灰度前，先保存 OpenClash 活动配置及相关代理组的 `now`，并准备限时自动恢复
+原配置与选组；逐项核对入口、两地出口、DNS、常用应用及旧订阅。交付的原始
+router profile 与活动配置顶层字段集合相同，但 OpenClash 启动时还会将所选配置
+加工到 `/etc/openclash/` 下并调整防火墙和 DNS；独立进程验收不能证明该转换兼容。
+当前未改变 OpenClash 的 `config_path` 或默认代理组。
+
 ## 后续运行与回退
 
 只有路由器能持续从正常出口刷新两地池，15 分钟发布 timer 才能持续生成新

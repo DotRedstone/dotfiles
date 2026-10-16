@@ -58,22 +58,23 @@ provider。发布时先写入五份不可变私有文档并验证，再切换 ma
 两台 Xray 身份由 SOPS 与受限运行时提供，生成文件及令牌不得进入 Git 或 Nix store。
 
 2026-10-13 的 main 锁指向 `proxy-stack 23a64ff`，当时主工作区另有任务外
-未提交的锁文件改动。此隔离分支当前锁定 `proxy-stack 5393d0e` 和
-`edge-proxy-worker ca21708`。旧 `edge-worker` 部署适配仍使用四份 profile KV
+未提交的锁文件改动。随后隔离分支曾锁定 `proxy-stack 5393d0e` 和
+`edge-proxy-worker ca21708`；当前锁与部署版本以本页开头的交接记录为准。
+旧 `edge-worker` 部署适配仍使用四份 profile KV
 键，并从受限归档读取 `4fbe909`；不能将新版 Worker 源码直接替换到该适配器。
 旧 KV、订阅与 Worker 保持原有路径。
 
 部署仓库已增加默认关闭的发布 timer、回源证明与可信探测模块。历史合成检查用
 `proxy-stack cd6663b` 和 `edge-proxy-worker 4fbe909` 完成合成账户的跨仓库检查：
 三平台配置通过 Mihomo 静态检查，五份文档经内存 KV 由 Worker 原样交付，
-故障注入保持旧 manifest 可读。这不是当前两项 Flake 锁定输入的联合运行测试；
-`servers/flake.lock` 中的 `proxyStack` 仍是旧修订，
+故障注入保持旧 manifest 可读。这是当时修订的合成测试；
+2026-10-13 的 `servers/flake.lock` 中 `proxyStack` 仍是旧修订，
 `servers/cloudflare/edge-worker/scripts/deploy.mjs` 仍调用旧固定 Worker 的
 `buildProfiles`；升级必须同时改造该适配器，不能仅替换固定提交。
 受限任务的输入、SOPS 键和隔离验收见 [部署目录](../proxy-deployment/README.md)。
-通用模块默认关闭；本代理候选只在两地主机覆盖启用 canary 与 `/proof`。
-两地 UUID、证明凭据与控制令牌仍只保存在 SOPS 密文中。未生成真实 v2 池，
-未发布私有文档或改变路由器、Worker 默认路径。
+当时通用模块默认关闭，本代理候选只在两地主机覆盖启用 canary 与 `/proof`。
+两地 UUID、证明凭据与控制令牌仍只保存在 SOPS 密文中。当时尚未生成真实 v2 池
+或发布私有文档；当前隔离池与交付状态以上述交接为准，旧默认路径仍保留。
 
 ## 2026-10-13 本地变更记录
 

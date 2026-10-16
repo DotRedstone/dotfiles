@@ -12,6 +12,8 @@
 let
   cfg = config.dot.services.proxyProbeIngress;
   probe = config.dot.services.proxyPreferredProbe;
+  optimizerBody = pkgs.writeText "cf-optimizer-probe.txt"
+    (lib.concatStrings (lib.replicate 256 "0123456789abcdef"));
   acmeCert = config.security.acme.certs.${cfg.serverName};
   certFile = if probe.tlsCertificateFile != null then probe.tlsCertificateFile
     else config.sops.secrets."proxy/probe_tls_cert".path;
@@ -25,6 +27,11 @@ in
       type = lib.types.str;
       default = "";
       description = "Dedicated, Cloudflare-proxied probe hostname with a matching certificate.";
+    };
+    optimizerMarker = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = "Fixed origin marker for the public cf-optimizer probe; empty disables it.";
     };
     acme = {
       enable = lib.mkEnableOption "DNS-01 certificate preparation before exposing the probe ingress";
@@ -83,6 +90,8 @@ in
           message = "probe ingress reuses the existing CDN Nginx listener"; }
         { assertion = cfg.serverName != config.dot.services.xrayCdnWebSocket.serverName;
           message = "probe ingress must not replace the existing CDN virtual host"; }
+        { assertion = cfg.optimizerMarker == "" || builtins.match "[a-z0-9-]+" cfg.optimizerMarker != null;
+          message = "cf-optimizer origin marker must contain only lowercase letters, digits and hyphens"; }
       ];
 
       dot.services.proxyPreferredProbe.enable = true;
@@ -107,6 +116,20 @@ in
             proxy_ssl_verify on;
             proxy_ssl_verify_depth 2;
             proxy_ssl_trusted_certificate ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt;
+          '';
+        };
+        locations."=/probe/uncached" = lib.mkIf (cfg.optimizerMarker != "") {
+          extraConfig = ''
+            # 仅接受 cf-optimizer 的单个随机 nonce，避免参数歧义和缓存复用。
+            if ($request_method != GET) { return 405; }
+            if ($args !~ "^nonce=[0-9a-f]{32}$") { return 400; }
+            default_type text/plain;
+            gzip off;
+            max_ranges 0;
+            add_header Cache-Control "no-store, max-age=0" always;
+            add_header X-CF-Optimizer-Origin "${cfg.optimizerMarker}" always;
+            add_header X-CF-Optimizer-Nonce $arg_nonce always;
+            alias ${optimizerBody};
           '';
         };
       };

@@ -5,7 +5,7 @@
 # ---
 # Notes:
 # - Some monitors retain HDMI hotplug while powered off, so Niri cannot observe that state as a disconnect.
-# - A retained HDMI hotplug plus three failed DDC reads is treated as an externally powered-off monitor.
+# - A retained HDMI hotplug plus failed or standby/off DDC reads is treated as an externally powered-off monitor.
 # - The raw Niri IPC path preserves unique workspace IDs, unlike CLI indices which may overlap across outputs.
 
 { pkgs, ... }:
@@ -24,8 +24,8 @@ let
     SOURCE_OUTPUT = "HDMI-A-1"
     FALLBACK_OUTPUT = "eDP-1"
     DDCUTIL = "${pkgs.ddcutil}/bin/ddcutil"
-    DDC_FAILURE_LIMIT = 3
-    DDC_POLL_SECONDS = 4
+    DDC_FAILURE_LIMIT = 2
+    DDC_POLL_SECONDS = 3
 
     ddc_failures = 0
     ddc_unavailable = False
@@ -79,10 +79,29 @@ let
                 continue
         return buses
 
+    def is_dpm_on(output_text):
+        text = output_text.lower()
+        for line in text.splitlines():
+            parts = line.strip().split()
+            if len(parts) >= 4 and parts[0] == "vcp" and parts[1] in ("d6", "0xd6"):
+                val = parts[-1]
+                if val == "x01":
+                    return True
+                if val in ("x02", "x03", "x04", "x05"):
+                    return False
+        if "dpm: on" in text:
+            return True
+        if any(s in text for s in ("dpm: off", "dpm: standby", "dpm: suspend")):
+            return False
+        return None
+
     def ddc_display_state():
         buses = ddc_bus_numbers()
         if not buses:
             return None
+
+        saw_on = False
+        saw_off = False
 
         for bus in buses:
             try:
@@ -91,7 +110,7 @@ let
                     capture_output=True,
                     check=False,
                     text=True,
-                    timeout=3,
+                    timeout=2,
                 )
             except (OSError, subprocess.TimeoutExpired):
                 continue
@@ -99,13 +118,17 @@ let
             if result.returncode != 0:
                 continue
 
-            # VCP D6 reports display power mode. Unknown but successful replies
-            # are treated as available to avoid moving workspaces on a parser mismatch.
-            reply = f"{result.stdout}\n{result.stderr}".lower()
-            if any(state in reply for state in ("dpm: off", "dpm: standby", "dpm: suspend")):
-                return False
-            return True
+            dpm = is_dpm_on(f"{result.stdout}\n{result.stderr}")
+            if dpm is True:
+                saw_on = True
+                break
+            elif dpm is False:
+                saw_off = True
 
+        if saw_on:
+            return True
+        if saw_off:
+            return False
         return False
 
     def monitor_ddc_power():
@@ -123,11 +146,15 @@ let
             return
 
         ddc_failures += 1
-        if ddc_failures < DDC_FAILURE_LIMIT or ddc_unavailable:
+        if ddc_failures < DDC_FAILURE_LIMIT:
+            if ddc_unavailable:
+                move_external_workspaces(force=True)
             return
 
-        ddc_unavailable = True
-        print("niri-output-fallback: HDMI DDC failed three times; moving workspaces", file=sys.stderr)
+        if not ddc_unavailable:
+            ddc_unavailable = True
+            print(f"niri-output-fallback: HDMI DDC offline ({ddc_failures} checks); moving workspaces", file=sys.stderr)
+
         move_external_workspaces(force=True)
 
     if "--force" in sys.argv[1:]:
@@ -161,7 +188,7 @@ let
 
     while True:
         try:
-            move_external_workspaces()
+            move_external_workspaces(force=ddc_unavailable)
             monitor_ddc_power()
             for event in event_stream():
                 if event is None:
@@ -173,7 +200,7 @@ let
 
                 # Niri reports an output disconnect through the workspace state.
                 time.sleep(0.15)
-                move_external_workspaces()
+                move_external_workspaces(force=ddc_unavailable)
                 monitor_ddc_power()
         except (OSError, RuntimeError, ValueError, KeyError) as error:
             print(f"niri-output-fallback: {error}", file=sys.stderr)

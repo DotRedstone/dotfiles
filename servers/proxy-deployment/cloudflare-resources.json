@@ -12,6 +12,7 @@
   "delivery": {
     "workerName": "edge-delivery-v2-canary",
     "entrypoint": "src/delivery.ts",
+    "customDomain": "delivery-v2-canary.dotdot.ggff.net",
     "kv": {
       "title": "edge-proxy-v2-canary-delivery",
       "binding": "DELIVERY_STATE",

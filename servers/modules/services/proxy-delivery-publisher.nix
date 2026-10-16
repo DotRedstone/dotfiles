@@ -13,13 +13,27 @@ let
   cfg = config.dot.services.proxyDeliveryPublisher;
   lock = builtins.fromJSON (builtins.readFile ../../flake.lock);
   revision = lock.nodes.proxyStack.locked.rev;
-  runner = ../../proxy-deployment/scripts/publish-runner.mjs;
+  runner = pkgs.runCommand "proxy-delivery-publisher-runner" { } ''
+    mkdir -p "$out"
+    cp ${../../proxy-deployment/scripts/publish-runner.mjs} "$out/publish-runner.mjs"
+    cp ${../../proxy-deployment/scripts/publish-core.mjs} "$out/publish-core.mjs"
+  '';
+  inputs = pkgs.runCommand "proxy-delivery-publisher-inputs" { } ''
+    mkdir -p "$out/catalog/profiles"
+    for name in accounts nodes preferred-sources owned-domains; do
+      cp ${../../proxy-deployment}/"$name".json "$out/catalog/";
+    done
+    for name in router desktop mobile; do
+      cp ${../../proxy-deployment}/profiles/"$name".json "$out/catalog/profiles/";
+    done
+    cp ${../../flake.lock} "$out/flake.lock"
+  '';
   settings = pkgs.writeText "proxy-delivery-publisher.json" (builtins.toJSON {
     version = 1;
-    catalogDir = toString ../../proxy-deployment;
-    compilerSource = toString proxyStack.outPath;
+    catalogDir = "${inputs}/catalog";
+    compilerSource = "${proxyStack.outPath}";
     compilerRevision = revision;
-    flakeLockPath = toString ../../flake.lock;
+    flakeLockPath = "${inputs}/flake.lock";
     preferredBaseUrl = cfg.preferredBaseUrl;
     maxPoolAgeSeconds = cfg.maxPoolAgeSeconds;
     mihomoBin = "${pkgs.mihomo}/bin/mihomo";
@@ -70,6 +84,7 @@ in
 
     systemd.services.proxy-delivery-publish = {
       description = "Publish validated proxy profiles to isolated delivery KV";
+      path = [ pkgs.util-linux pkgs.nix ];
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -79,7 +94,7 @@ in
         ProtectSystem = "strict";
         ReadWritePaths = [ "/run/lock" ];
         NoNewPrivileges = true;
-        ExecStart = ''${pkgs.nodejs}/bin/node ${runner} --config ${settings} --secrets ${config.sops.secrets."proxy/delivery_runtime".path} --apply'';
+        ExecStart = ''${pkgs.nodejs}/bin/node ${runner}/publish-runner.mjs --config ${settings} --secrets ${config.sops.secrets."proxy/delivery_runtime".path} --apply'';
       };
     };
 

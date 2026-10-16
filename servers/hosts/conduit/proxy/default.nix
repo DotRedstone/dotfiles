@@ -10,5 +10,6 @@
     ./subscriptions.nix
     ./canary-origin.nix
     ./cross-probe.nix
+    ./publisher.nix
   ];
 }

@@ -44,6 +44,9 @@ function prepare(output, accountId, source) {
       resources.delivery.kv.binding !== "DELIVERY_STATE") {
     throw new Error("v2 Workers require separate KV namespaces");
   }
+  if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(resources.delivery.customDomain)) {
+    throw new Error("delivery Worker requires a fixed custom domain");
+  }
   const main = (entrypoint) => {
     const file = path.join(source, entrypoint);
     if (!fs.existsSync(file)) throw new Error(`missing locked Worker entrypoint: ${entrypoint}`);
@@ -79,6 +82,7 @@ function prepare(output, accountId, source) {
   };
   const delivery = {
     ...base(resources.delivery),
+    routes: [{ pattern: resources.delivery.customDomain, custom_domain: true }],
     vars: { EXPECTED_COMPILER_REVISION: compiler },
   };
   const references = {

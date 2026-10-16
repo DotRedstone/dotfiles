@@ -1,11 +1,12 @@
 # ---
-# Module: Netease Cloud Music
-# Description: Netease Cloud Music GTK client (Rust/GTK4)
+# Module: NetEase Music Switchboard
+# Description: Unified entry point for NetEase Cloud Music GUI and TUI clients
 # Scope: Home Manager
 # ---
 
-{ pkgs, ... }: {
-  home.packages = [
-    pkgs.netease-cloud-music-gtk
+{ ... }: {
+  imports = [
+    ./gtk.nix
+    ./tui.nix
   ];
 }

@@ -280,6 +280,23 @@
         "type": "github"
       }
     },
+    "noctalia-media-lyrics": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792217526,
+        "narHash": "sha256-WNArqfsRocFWMOyJJ7yz12zHs0wB5Yk5Hu4hM1FS2Gc=",
+        "owner": "DotRedstone",
+        "repo": "noctalia-media-lyrics",
+        "rev": "f416b54a22b5d5a8ecee23934872bce79f615adf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "DotRedstone",
+        "ref": "v1.3.0",
+        "repo": "noctalia-media-lyrics",
+        "type": "github"
+      }
+    },
     "noctalia-mihomo-control": {
       "flake": false,
       "locked": {
@@ -307,6 +324,7 @@
         "nixpkgs": "nixpkgs_2",
         "nixvim": "nixvim",
         "noctalia": "noctalia",
+        "noctalia-media-lyrics": "noctalia-media-lyrics",
         "noctalia-mihomo-control": "noctalia-mihomo-control",
         "silent-sddm": "silent-sddm",
         "sops-nix": "sops-nix",

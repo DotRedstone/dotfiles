@@ -22,6 +22,10 @@
       url = "github:DotRedstone/noctalia-mihomo-control/v0.1.0";
       flake = false;
     };
+    noctalia-media-lyrics = {
+      url = "github:DotRedstone/noctalia-media-lyrics/v1.3.0";
+      flake = false;
+    };
     silent-sddm.url = "github:uiriansan/SilentSDDM";
     silent-sddm.inputs.nixpkgs.follows = "nixpkgs";
     niri.url = "github:YaLTeR/niri";

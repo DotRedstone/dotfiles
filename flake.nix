@@ -23,7 +23,7 @@
       flake = false;
     };
     noctalia-media-lyrics = {
-      url = "github:DotRedstone/noctalia-media-lyrics/v1.3.0";
+      url = "github:DotRedstone/noctalia-media-lyrics/v1.3.1";
       flake = false;
     };
     silent-sddm.url = "github:uiriansan/SilentSDDM";

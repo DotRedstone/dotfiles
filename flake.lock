@@ -283,16 +283,16 @@
     "noctalia-media-lyrics": {
       "flake": false,
       "locked": {
-        "lastModified": 1792217526,
-        "narHash": "sha256-WNArqfsRocFWMOyJJ7yz12zHs0wB5Yk5Hu4hM1FS2Gc=",
+        "lastModified": 1792221424,
+        "narHash": "sha256-R+Qi+5iyyXAEAoNA5hF7jNLnYhux6Wy0DaaRFeoIQx4=",
         "owner": "DotRedstone",
         "repo": "noctalia-media-lyrics",
-        "rev": "f416b54a22b5d5a8ecee23934872bce79f615adf",
+        "rev": "25dd2d0d4847be26a3fdc779eee89e3c909f49a6",
         "type": "github"
       },
       "original": {
         "owner": "DotRedstone",
-        "ref": "v1.3.0",
+        "ref": "v1.3.1",
         "repo": "noctalia-media-lyrics",
         "type": "github"
       }

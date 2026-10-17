@@ -1,2 +1,5 @@
 [shell]
 launch_apps_as_systemd_services = true
+
+[shell.panel]
+transparency_mode = "glass"

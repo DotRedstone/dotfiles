@@ -37,7 +37,8 @@ Warden 回到 LAN。LAN 终端实际流量仍待本地复验。
   日志记录 `old OpenClash source and core restored`。当前 UCI 路径为旧源，
   SHA-256 仍为 `77f17fffe1b2c26ea930422695f4c578faf355153ae0bc14d045f7d70366e841`；
   core 与 dnsmasq 运行，回退 marker 和专用 cron 行均已清除。旧订阅文件仍在；
-  回退后 DNS/旧代理和 31 个 Selector `now` 与备份快照一致。新 profile 文件及备份
+  当前经认证 Controller API 读取 35 个代理组状态；回退后比对备份快照确认的
+  31 个 Selector `now` 一致。新 profile 文件及备份
   保留在路由器上供后续复核。
 - 2026-10-18 只读检查确认脚本所用的 `/bin/stat`、`/usr/bin/sha256sum`、
   `/usr/bin/logger`、`/bin/pidof` 等绝对命令路径均存在。`/root` 位于可写的

@@ -1,7 +1,7 @@
 # 双节点 v2 隔离发布前置核对
 
-状态：2026-10-15。表格记录 2026-10-14 的只读快照；之后 Conduit 临时测试、自动回退
-和正确双身份候选闭包准备见下方增量。本记录描述已核对状态及后续操作门槛，不是发布许可。
+状态：2026-10-18。表格记录 2026-10-14 的只读快照；之后的临时测试、自动回退
+和私有 overlay 候选核对见下方增量。本记录描述已核对状态及后续操作门槛，不是发布许可。
 旧 Worker、旧 KV、Cloudflare、DNS 和路由器均未修改。探测方向与模块接口见
 [交叉探测候选审查](./stage1-cross-probe-review.md)，部署输入见[本目录入口](./README.md)。
 
@@ -203,6 +203,28 @@ Nginx TLS、probe 服务或公网流量已通过。
 候选；本轮归档结构、ELF 架构、依赖声明及权限检查通过。未获得目标 Kwrt 的
 包安装、依赖解析或 LuCI/rpcd 运行证据，不能将该候选称为路由器可安装版本。
 路由器 Mihomo `/proxies` 本轮只读请求仍返回 401，组 `now` 未知。
+
+### 2026-10-18 私有 overlay 锁定输入与临时验收
+
+本机私有 overlay 将公开 `servers` 输入固定到 PR #2 的提交 `f635367`；
+`nix flake check --no-build` 对 Conduit、Hopper、Target 均通过。三台候选的
+求值与构建 dry run 通过；这些结果不等于目标运行态验收。
+
+Conduit 候选闭包 `2m5nydnm…` 在本机构建并复制到目标 store。与当时运行的
+`lgacjf7m…` 比较，系统 `/etc` 只改变发布器 service unit 的 store 路径；
+遮蔽 store 哈希后，unit 设置相同。先安装并演练每分钟检查的固定时刻回退，
+再执行 `nixos-rebuild --no-reexec test --store-path`。候选运行期间，SSH、Nginx、
+Xray、proof、probe、发布器 timer 和回退 timer 均为 active；订阅检查验证 4 个
+端点，发布器 `--check` 验证 1 个账户、5 份文档，未写入 KV。随后主动触发
+回退，`/run/current-system` 与 system profile 均恢复为 `lgacjf7m…`，
+`/run/booted-system` 保持原值 `8alf4971…`。回退 service 成功退出，marker 清除，
+临时 timer 已卸载；关键服务仍为 active。未做持久 `switch`。
+
+Hopper 通过 `ssh-ng://hopper` 在目标 store 构建该锁定输入，得到的闭包为
+`x19gwa1s…`，与目标当时的 `/run/current-system` 和 system profile 完全相同，
+且 `switch-to-configuration` 可执行。因此本轮没有重复执行 Hopper `test`，
+也没有安装回退 timer。其启动闭包仍为较早的 `k69xg4y5…`；两机下次启动
+状态均未因本轮临时测试改变。旧订阅、旧 Worker/KV、DNS 和路由器均未切换。
 
 ## 依赖顺序、影响与回退
 

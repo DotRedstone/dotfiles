@@ -17,8 +17,8 @@ Nix 选项。独立私有 Flake 通过公开的 `lib.mkConduit`、`lib.mkHopper`
 3. 在有定时回退保护的维护窗口逐机执行 `nixos-rebuild test`，实测 TLS、
    回源证明、SSH 和旧订阅；验收后再 `switch`。保留旧闭包和受限输入。
 4. 公开主机模块已去除这些部署字面量，直接以公开 Flake 构建两地主机不再
-   提供目标输出。私有 overlay 尚未成为现网构建入口；完成逐机验收后再处理
-   已公开的 Git 历史及远端缓存。
+   提供目标输出。实际私有 overlay 已用于 Conduit 临时测试并回退，尚未用于
+   本轮持久切换；公开历史及远端缓存仍待单独处理。
 
 合成原型可在 dotfiles worktree 中执行以下只求值检查；它不部署主机：
 

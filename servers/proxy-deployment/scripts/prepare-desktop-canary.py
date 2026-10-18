@@ -29,9 +29,7 @@ def load_runtime(profile):
     try:
         runtime = json.loads(result.stdout)
         accounts = runtime["runtimeByAccount"]
-        if len(accounts) != 1:
-            raise ValueError("canary 账户数量不符")
-        account = next(iter(accounts.values()))
+        account = accounts["canary"]
         origin = account["deliveryBaseUrl"].rstrip("/")
         token = account["deliveryToken"]
         if not origin.startswith("https://") or not token:

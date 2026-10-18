@@ -1,7 +1,7 @@
 # v2 交付 Worker 隔离发布交接
 
-状态：2026-10-16。本记录只说明 canary 账户的独立配置交付。现用订阅、旧 Worker、
-旧 KV 和路由器默认代理组未切换。
+状态：截至 2026-10-18，独立交付已包含 canary 和限期 test 账户。现用订阅、旧
+Worker、旧 KV 和路由器默认代理组未切换；下文按时间记录验收。
 
 ## 云端与运行时
 
@@ -126,6 +126,29 @@ GLOBAL 组选择。声明的 300 秒更新周期内，两份 provider 的 `updat
 Mihomo 仍 inactive。受限候选文件以 `0600` 留在独立状态目录以供复查。
 本轮没有修改桌面默认路由、旧订阅、路由器配置或其默认代理组；隔离测试
 不覆盖桌面应用的默认代理行为、OpenClash 转换或移动端导入。
+
+## 2026-10-18 限期 test 订阅
+
+Conduit 的私有 overlay 锁定公开修订 `81b67a6`，持久切换到闭包 `yp02ysc…`；
+当前系统、profile 和 GRUB 配置均指向该候选，启动闭包仍为切换前版本，未重启。
+SOPS 受限运行时增加独立 test 交付令牌，canary 的账户声明和运行时字段逐项未变。
+首次 `--apply` 因发布入口错误地读取不存在的公开 `accounts.json` 而失败，
+manifest 未变；恢复旧 Worker 映射及 Conduit 旧闭包后修复入口、重建并重新验收。
+修复后的发布器返回 `published: 2 accounts, 10 documents`，主动再次运行同一
+systemd 服务返回 `unchanged: 0 accounts, 0 documents`，退出状态为成功。
+
+旧 canary 与 test 的 router、desktop、mobile 下载均返回 HTTP 200；test 的
+LA/SG provider 分别返回 6/7 个节点，随机错误令牌返回 404。发布器对每份文档
+执行 Mihomo 静态检查、写入后读回；下载验收不等于其他设备已导入或实际走通出口。
+正常 15 分钟 timer 已恢复，临时回退及 timer 自动恢复任务已停止。
+
+test 的交付到期时间为 `2026-10-25T03:12:40Z`。到期后 Worker 拒绝新下载；
+已导入配置不会自动失效。本次快速方案复用 canary 的两地 Xray UUID，因此无法
+只在源站撤销 test 的既有节点访问。提前停用需先移除 Worker 的 test 令牌映射，
+再以保留 disabled 账户记录的 manifest 停用该账户；直接删除账户会触发发布器
+的删除保护。回退到旧单账号闭包前，先停止 timer，并确认线上 manifest 与
+Worker 映射均已恢复为单账号；若 canary 此后发生正常更新，须重新取得当前备份，
+不能覆盖为本次发布前的旧快照。受限导入与撤销说明留在本机私有状态目录。
 
 ## 后续运行与回退
 

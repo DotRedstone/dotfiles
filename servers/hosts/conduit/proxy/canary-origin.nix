@@ -14,6 +14,5 @@
     enable = true;
     package = edgeProxyWorker;
     serverName = config.dot.services.xrayCdnWebSocket.serverName;
-    originId = "la-origin";
   };
 }

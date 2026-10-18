@@ -9,6 +9,5 @@
 { edgeProxyWorker, ... }: {
   dot.services.proxyPreferredProbe.package = edgeProxyWorker;
   dot.services.proxyProbeIngress.enable = true;
-  dot.services.proxyProbeIngress.serverName = "probe-sg-v2-canary.bdot.in";
   dot.services.proxyProbeIngress.optimizerMarker = "cf-opt-sg-v1";
 }

@@ -45,39 +45,40 @@
       edgeProxyWorker,
       ...
     }:
+    let
+      mkConduit = privateModules: nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit proxyStack edgeProxyWorker; };
+        modules = [
+          disko.nixosModules.disko
+          sops-nix.nixosModules.sops
+          ./hosts/conduit
+        ] ++ privateModules;
+      };
+      mkHopper = privateModules: nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit hermes-agent proxyStack edgeProxyWorker; };
+        modules = [
+          disko.nixosModules.disko
+          hermes-agent.nixosModules.default
+          gmail-archiver.nixosModules.default
+          sops-nix.nixosModules.sops
+          ./hosts/hopper
+        ] ++ privateModules;
+      };
+    in
     {
+      lib = { inherit mkConduit mkHopper; };
       packages = {
         x86_64-linux.proxyStackWorkerBundles = proxyStack.checks.x86_64-linux.workerBundles;
         aarch64-linux.proxyStackWorkerBundles = proxyStack.checks.aarch64-linux.workerBundles;
       };
 
       nixosConfigurations = {
-        conduit = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit proxyStack edgeProxyWorker; };
-          modules = [
-            disko.nixosModules.disko
-            sops-nix.nixosModules.sops
-            ./hosts/conduit
-          ];
-        };
-
         gcp-free = nixpkgs.lib.nixosSystem {
           specialArgs = { proxyStack = null; };
           modules = [
             disko.nixosModules.disko
             sops-nix.nixosModules.sops
             ./hosts/gcp-free
-          ];
-        };
-
-        hopper = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit hermes-agent proxyStack edgeProxyWorker; };
-          modules = [
-            disko.nixosModules.disko
-            hermes-agent.nixosModules.default
-            gmail-archiver.nixosModules.default
-            sops-nix.nixosModules.sops
-            ./hosts/hopper
           ];
         };
 

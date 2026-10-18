@@ -40,10 +40,14 @@ CloudflareST --SNI sg-cdn.bdot.in--> sg pool --> 新加坡优选 provider
 
 ```bash
 cd /home/dot/.dotfiles/servers/cloudflare/edge-worker
-npm run check
-npm run deploy:dry-run
-npm run deploy
+node scripts/deploy.mjs --dry-run
+# 验证固定源码与灰度回退路径后，另行执行实际部署：
+node scripts/deploy.mjs
 ```
+
+通用配置生成器的检查在独立项目执行 `npm run check`。上述 dry run 只完成本地打包，
+不验证 Cloudflare KV、Secret 或真实客户端；固定提交和依赖条件见
+[`../cloudflare/edge-worker/README.md`](../cloudflare/edge-worker/README.md)。
 
 修改路由器活动配置前必须创建备份。OpenClash 的活动配置与 provider 缓存由路由器管理；
 不要通过 Mihomo Controller 覆盖整份配置。出现问题时，恢复对应

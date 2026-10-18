@@ -34,7 +34,7 @@
 
 ## 回滚与风险提示
 
-- **引导回滚**: 若系统更新后无法启动，请在引导菜单（systemd-boot）中选择旧的 Generatios。
+- **引导回滚**: 若系统更新后无法启动，在 systemd-boot 引导菜单中选择上一代配置。
 - **Impermanence 风险**: 在修改 `persistence.nix` 之前，务必通过 `dry-run` 确认挂载点逻辑正确。若错误配置了持久化路径，可能会导致 `/persist` 目录权限混乱。
 
 相关链接：

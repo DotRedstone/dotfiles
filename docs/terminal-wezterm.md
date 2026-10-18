@@ -1,12 +1,12 @@
 # 终端 (WezTerm)
 
-WezTerm 是系统的默认终端，通过 GPU 加速提供极致的渲染性能，并支持高度灵活的 Lua 配置。
+WezTerm 是系统的默认终端，使用 GPU 渲染，并通过 Lua 模块维护终端行为与外观。
 
 ## 核心特性
 
 - **渲染后端**: 强制启用 `WebGpu` 模式，并设为 `HighPerformance`。
 - **Wayland 支持**: 原生支持 Wayland 协议。
-- **高刷优化**: `animation_fps` 设置为 `165`，完美匹配显示器硬件规格。
+- **动画帧率**: `animation_fps` 设置为 `165`，与此主机的高刷新率显示器配合使用。
 - **字体栈**:
   1. `Maple Mono NF`
   2. `Noto Sans CJK SC` (中文回退)

@@ -1,8 +1,9 @@
 # Cloudflare 节点原子化迁移
 
-这份记录描述 2026-09-06 的现网审计结果，以及如何把路由器、Cloudflare Worker
-和优选 IP 链路迁移到仓库中的最小实现。文中不保存任何 Token、UUID、密码、订阅
-路径或旧 Worker 源码。
+这份记录描述 2026-09-06 的现网审计与灰度过程。Worker 通用实现现由独立
+`edge-proxy-worker` 仓库维护；当前部署命令和固定源码版本见
+[`../cloudflare/edge-worker/README.md`](../cloudflare/edge-worker/README.md)。文中不保存
+任何 Token、UUID、密码、订阅路径或旧 Worker 源码。
 
 ## 现网结构
 
@@ -77,21 +78,14 @@ OpenClash subscription ----------+
 
 ### 1. 本地验证
 
-```bash
-cd /home/dot/.dotfiles/servers/cloudflare/edge-worker
-npm ci
-npm run check
-npx wrangler deploy src/index.ts \
-  --name edge-proxy-next \
-  --compatibility-date 2026-09-01 \
-  --dry-run
-```
+独立项目执行 `npm ci && npm run check`；部署适配在
+`servers/cloudflare/edge-worker/` 执行 `node scripts/deploy.mjs --dry-run`。具体依赖、
+验证边界及实际部署命令以部署适配 README 为准。
 
 ### 2. 新建而不是覆盖
 
-新建 KV namespace、新 Worker `edge-proxy-next` 和测试自定义域名。复制
-`wrangler.example.jsonc` 为已忽略的 `wrangler.jsonc`，填入账号 ID、KV ID 和测试
-域名。旧 Worker、旧 KV 和旧域名均保持不动。
+当时新建了 KV namespace、新 Worker `edge-proxy-next` 和测试自定义域名。当前这些
+部署参数由 dotfiles 适配器与 SOPS 管理；旧 Worker、旧 KV 和旧域名在灰度期间保留。
 
 ### 3. 生成全新秘密
 

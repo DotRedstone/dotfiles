@@ -1,6 +1,6 @@
-# Chrome Noctalia Native Theme Injector
+# Chrome Noctalia 主题注入
 
-此模块用于将 Noctalia 生成的颜色直接强制注入到 Chrome 的底层配置文件中。
+此模块将 Noctalia 生成的颜色写入 Chrome 的 Preferences 文件。
 
 ## 工作原理
 1. Noctalia 的 `user-templates.toml` 会根据 `colors.json.template` 模板生成 `~/.cache/chrome-noctalia-theme/colors.json` 文件。

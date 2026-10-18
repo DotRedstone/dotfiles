@@ -1,11 +1,11 @@
 # 微信通知桥 (WeChat Notify Bridge)
 
-WeChat UOS 在 Linux 环境下的原生通知系统非常不可靠，经常出现漏发或无法唤起桌面通知 daemon 的情况。
+WeChat UOS 的原生通知在此桌面环境下可能漏发，因此使用用户级通知桥补充系统通知。
 
 ## 桥接原理
 
-为了解决此问题，本系统引入了一个通知桥：
-1. **监听**: 监控微信的消息数据库（SQLite）。
+通知桥按以下步骤处理新消息：
+1. **监听**: 监控微信的本地 SQLCipher 数据库。
 2. **解密**: 获取 SQLCipher 密钥（WeChat 在运行时会将其缓存在内存中）。
 3. **分发**: 提取新消息内容并调用 `notify-send` 触发系统通知。
 
@@ -19,4 +19,4 @@ WeChat UOS 在 Linux 环境下的原生通知系统非常不可靠，经常出�
 ## 与 QQ 的区别
 
 - **Linux QQ**: 已经能够正常调用 D-Bus 接口 `org.freedesktop.Notifications.Notify` 发送通知。
-- **策略**: 既然 QQ 已经原生支持，则**不需要**也不应该为 QQ 编写数据库桥接工具。应优先使用 Freedesktop/Portal 标准接口。
+- **策略**: QQ 优先使用原生 Freedesktop/Portal 通知接口，不增加数据库桥接工具。

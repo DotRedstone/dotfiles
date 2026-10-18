@@ -4,9 +4,10 @@
 # Scope: Host
 # ---
 
-{ ... }: {
+{ config, lib, ... }: {
   dot.services.xrayNode = {
     enable = true;
+    managedAccounts = config.dot.proxyAccounts.accounts;
     webSocketPort = 20001;
     webSocketClientCount = 2;
     realityPort = 20002;
@@ -17,4 +18,5 @@
     # separately selectable Vision path for long-lived transfers.
     realityVisionEnable = true;
   };
+  dot.proxyAccounts.accounts.rotation.enabled = lib.mkForce true;
 }

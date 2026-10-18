@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "sourceId": "sample-net",
+      "type": "router-cfst",
+      "origin": "region-a",
+      "accessNetwork": "sample-access"
+    },
+    {
+      "sourceId": "sample-net",
+      "type": "router-cfst",
+      "origin": "region-b",
+      "accessNetwork": "sample-access"
+    },
+    {
+      "sourceId": "sample-net",
+      "type": "signed-upload",
+      "origin": "la",
+      "accessNetwork": "sample-access"
+    },
+    {
+      "sourceId": "sample-net",
+      "type": "signed-upload",
+      "origin": "sg",
+      "accessNetwork": "sample-access"
+    }
+  ]
+}

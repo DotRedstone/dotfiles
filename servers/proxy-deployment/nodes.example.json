@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "origins": {
+    "region-a": {
+      "direct": { "server": "198.51.100.10", "port": 443, "serverName": "a.example.test" },
+      "cf": { "host": "a.example.test", "port": 443 }
+    },
+    "region-b": {
+      "direct": { "server": "203.0.113.10", "port": 443, "serverName": "b.example.test" },
+      "cf": { "host": "b.example.test", "port": 443 }
+    }
+  }
+}

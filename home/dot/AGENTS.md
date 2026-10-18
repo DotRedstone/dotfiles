@@ -1,4 +1,4 @@
-# Home Manager Agent Guide
+# Home Manager Agent 协作指南
 
 本目录管理用户 `dot` 的 Home Manager 配置。根目录 `AGENTS.md` 的全部规则仍然
 有效；本文件只补充用户层的路由和边界。

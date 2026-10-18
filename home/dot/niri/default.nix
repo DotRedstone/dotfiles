@@ -7,6 +7,7 @@
 { ... }: {
   imports = [
     ./packages.nix
+    ./screenshot.nix
     ./links.nix
     ./shortcuts.nix
     ./output-fallback.nix

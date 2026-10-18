@@ -105,6 +105,8 @@ kill "$(cat /root/proxy-v2-canary/pid)"
 router profile 与活动配置顶层字段集合相同，但 OpenClash 启动时还会将所选配置
 加工到 `/etc/openclash/` 下并调整防火墙和 DNS；独立进程验收不能证明该转换兼容。
 当前未改变 OpenClash 的 `config_path` 或默认代理组。
+默认入口的源配置转换、限时回退脚本与执行门槛见
+[路由器默认入口切换审查](./router-default-cutover-review.md)。
 
 ## 后续运行与回退
 

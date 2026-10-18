@@ -66,6 +66,8 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 已锁在 `5393d0e`，新版 Worker 输入锁在 `052a959`；实际隔离发布见
 [交付 Worker 交接](./delivery-worker-canary-handoff.md)。历史合成测试不等于
 此次云端验收。状态与发布阶段见[发布记录](../docs/proxy-stack-rollout.md)。
+独立 router 账号的两地身份、交付发布、出口验收与回退边界见
+[生产账号交接](./router-production-handoff.md)。
 
 ## 回源证明与可信探测
 

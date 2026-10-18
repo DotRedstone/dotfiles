@@ -19,7 +19,7 @@ in
     enable = lib.mkEnableOption "Target preferred probe DNS-01 and TLS ingress";
     domain = lib.mkOption {
       type = lib.types.str;
-      default = "probe-v2-canary.dotdot.ggff.net";
+      default = "";
       description = "Dedicated public name for the isolated probe.";
     };
     contactEmail = lib.mkOption {
@@ -31,6 +31,7 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = [
+      { assertion = cfg.domain != ""; message = "Target probe TLS ingress requires a private domain input"; }
       { assertion = cfg.contactEmail != ""; message = "Target probe ACME contact email is required"; }
       { assertion = config.security.acme.acceptTerms;
         message = "Target probe ACME terms must be accepted explicitly"; }

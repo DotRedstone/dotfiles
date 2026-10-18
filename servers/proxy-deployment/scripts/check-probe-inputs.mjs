@@ -89,12 +89,11 @@ async function main() {
   const cloudflare = decrypt("cloudflare");
   const endpoints = JSON.parse(cloudflare.canary.probe_endpoints_json);
   assert.equal(endpoints.version, 1);
-  assert.deepEqual(Object.keys(endpoints.origins).sort(), ["la", "sg"]);
+  const originIds = JSON.parse(cloudflare.canary.origin_ids_json);
+  const hosts = JSON.parse(cloudflare.canary.probe_hosts_json);
+  assert.deepEqual(Object.keys(endpoints.origins).sort(), Object.keys(originIds).sort());
+  assert.deepEqual(Object.keys(hosts).sort(), ["conduit", "hopper"]);
   const nodes = JSON.parse(fs.readFileSync(path.join(directory, "nodes.json"), "utf8"));
-  const hosts = {
-    conduit: { origin: "sg", other: "hopper", name: "probe-sg-v2-canary.bdot.in" },
-    hopper: { origin: "la", other: "conduit", name: "probe-la-v2-canary.bdot.in" },
-  };
   const secrets = Object.fromEntries(Object.keys(hosts).map((host) => [host, decrypt(host)]));
   const keys = [];
   for (const [host, { origin, other, name }] of Object.entries(hosts)) {
@@ -110,7 +109,7 @@ async function main() {
     const target = config.origins[origin];
     assert.equal(target.host, nodes.origins[origin].cf.host);
     assert.equal(target.port, 443);
-    assert.equal(target.originId, `${origin}-origin`);
+    assert.equal(target.originId, originIds[origin]);
     assert.equal(target.path, "/proof");
     assert.ok(target.proofKey === secrets[other].proxy.origin_proof_key,
       `${host}: proof key mismatch`);

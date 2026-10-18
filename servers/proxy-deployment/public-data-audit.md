@@ -21,13 +21,17 @@
 - `origin/main` 早已包含节点地址和自有域名；本 PR 的 `nodes.json` 与
   `owned-domains.json` 仍引用这些既有公开值。它们不是凭据，移除当前 HEAD
   不能撤回旧历史中的披露。
-- 两地主机的 `cross-probe.nix`、目标主机的 `probe-tls.nix` 及
-  `scripts/check-probe-inputs.mjs` 仍包含此次 PR 新增的证书/探测名称。
-  这些值参与 Nix 求值和证书名称校验，需单独迁入受限部署输入并验证构建、
-  DNS、TLS 和实机回源后再删除公开字面量。
+- 目标主机默认关闭的 `probe-tls.nix` 已将探测域名默认值清空，并在启用时
+  要求提供受限输入；`scripts/check-probe-inputs.mjs` 从 Cloudflare SOPS 读取
+  探测名称和 origin 身份映射，实测检查仍通过。
+- 两地主机的 `cross-probe.nix` 仍包含当前探测证书名称。这些值参与 Nix
+  求值、Nginx 与证书配置；[私有 overlay 合成原型](../private-overlay.example/README.md)
+  已证明三个主机可以纯求值追加覆盖模块。只有私有 overlay 已固定实际输入、
+  完成构建及运行验收后，才可删除公开主机模块中的当前字面量。
 - 两地主机的 `canary-origin.nix` 与相关交接记录仍使用当前部署的 origin
   身份标签。这是路由/证明身份元数据，不是凭据；后续应随受信任 origin
-  目录一起迁移，保持现有身份继续可读。
+  目录一起迁移，保持现有身份继续可读。私有 overlay 原型可覆盖这两项，
+  但当前未迁移现用主机。
 - 现有脚本与部署参数仍围绕两地当前 origin ID。通用契约后续应接受受信任
   节点目录提供的 ID 集合，保持现有两地键和旧 v1 数据可读；此项由各独立
   项目另行验证，不在当前隐私修补中修改或部署。

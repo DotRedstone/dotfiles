@@ -44,7 +44,7 @@ deriver 与表中一致，NAR hash 为
 同时重启 Nginx 与 probe；仅启用回环 probe 时保持 root:root 0400，
 `proxy/probe_env` 在两种情形下均保持 root:root 0400。现有 CDN 凭据使用同一
 root:nginx 0440 访问边界。Conduit 目标机使用自身 SSH 身份在受限 `/run` 临时目录
-解密候选 store 中的密文，验证 probe 环境只指向对侧 `sg-origin`、专用证书覆盖
+解密候选 store 中的密文，验证 probe 环境只指向对侧 `ORIGIN_ID_SG`、专用证书覆盖
 `host-2.example.test`、证书链受系统 CA 信任、有效期及私钥配对均正确；
 临时材料已清理。首次 `test` 已证明 Nginx 能读取证书、probe 能在回环提供
 可信 TLS，但未通过 Nginx 上游验证；修正后的运行结果见下文。

@@ -9,8 +9,8 @@ DNS-01 证书选项。该候选没有改 `servers/flake.lock`、Hopper Gmail、S
 
 | 测量池的 `origin` | 执行探测的主机 | HTTPS 探测地址 | 被测回源身份与 TLS 名称 |
 | --- | --- | --- | --- |
-| `la` | Hopper | `host-1.example.test/probe` | `la-origin`；LA CDN 回源的现有 TLS 主机名 |
-| `sg` | Conduit | `host-2.example.test/probe` | `sg-origin`；SG CDN 回源的现有 TLS 主机名 |
+| `la` | Hopper | `host-1.example.test/probe` | `ORIGIN_ID_LA`；LA CDN 回源的现有 TLS 主机名 |
+| `sg` | Conduit | `host-2.example.test/probe` | `ORIGIN_ID_SG`；SG CDN 回源的现有 TLS 主机名 |
 
 方向与 `edge-proxy-worker/docs/preferred-v2.md` 的 `origins.la/sg` 契约一致：
 `la` 探测器固定在 Hopper，`sg` 探测器固定在 Conduit。候选 Nix 模块只设置

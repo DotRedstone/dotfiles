@@ -24,7 +24,8 @@ canary 与 `/proof`，不含 Hopper Gmail 现网基线。Conduit/Hopper 此前�
 - `owned-domains.json` 仅保存直连规则所需的自有域名后缀和节点 IP。
 - `cloudflare-resources.example.json` 展示合成 Worker 资源。实际资源映射保存在
   Cloudflare SOPS 的 `canary.resources_json`；origin 与探测身份映射保存在
-  `canary.origin_ids_json`，不进入公开目录。
+  `canary.origin_ids_json`，两地主机的探测名称映射保存在
+  `canary.probe_hosts_json`，不进入公开目录。
 - `profiles/` 分别保存路由器、桌面和移动端的网络行为。路由器配置保留现有的
   TUN、DNS、端口与控制器参数用于测试，尚未安装到路由器。
 

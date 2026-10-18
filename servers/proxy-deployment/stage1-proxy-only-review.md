@@ -10,7 +10,7 @@
 `edgeProxyWorker` 输入传给 Conduit/Hopper；两地 `proxy/default.nix` 分别引入
 同目录的 `canary-origin.nix`。主机模块把既有账户目录中的 `canary.enabled`
 覆盖为 true，在现有 CDN TLS 虚拟主机启用精确 `=/proof` 路径与仅监听回环的
-origin-proof 服务。Conduit 使用 `la-origin`，Hopper 使用 `sg-origin`。
+origin-proof 服务。Conduit 使用 `ORIGIN_ID_LA`，Hopper 使用 `ORIGIN_ID_SG`。
 旧 `guest`、订阅、Nginx 其他路由、Worker、路由器策略和 Target 不在本次 diff 中。
 `servers/flake.lock` 与已提交 `main` 逐字节相同。
 

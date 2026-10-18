@@ -108,6 +108,25 @@ router profile 与活动配置顶层字段集合相同，但 OpenClash 启动时
 默认入口的源配置转换、限时回退脚本与执行门槛见
 [路由器默认入口切换审查](./router-default-cutover-review.md)。
 
+## 2026-10-18 Warden 隔离复测
+
+Warden 原有的 transient canary 自 10 月 17 日持续运行，其 provider 日志出现过
+TLS 握手超时。先停止旧 unit，再从现有隔离交付端点重新生成 desktop 候选；
+`prepare-desktop-canary.py` 的 Mihomo 静态检查通过。短时复测 unit 仅监听
+`127.0.0.1:17890` 和 `127.0.0.1:19090`，TUN、DNS 与 LAN 监听均关闭；
+系统 `mihomo.service` 保持 inactive。
+
+两份 provider 主动刷新均返回 204，加载 LA 7、SG 6 项。隔离核心临时选取
+LA/SG 的直连与 CF 组，经显式 HTTP 代理请求 HTTPS 测试端点，四组命令均成功，
+TLS 已建立且出口地址分别与各自节点直连出口一致；之后恢复 `rule` 模式与原
+GLOBAL 组选择。声明的 300 秒更新周期内，两份 provider 的 `updatedAt`
+分别推进至 11:05 和 11:06 CST，数量仍为 LA 7、SG 6。
+
+复测结束后已停止新旧两个 transient unit；回环测试端口均不再监听，系统
+Mihomo 仍 inactive。受限候选文件以 `0600` 留在独立状态目录以供复查。
+本轮没有修改桌面默认路由、旧订阅、路由器配置或其默认代理组；隔离测试
+不覆盖桌面应用的默认代理行为、OpenClash 转换或移动端导入。
+
 ## 后续运行与回退
 
 只有路由器能持续从正常出口刷新两地池，15 分钟发布 timer 才能持续生成新

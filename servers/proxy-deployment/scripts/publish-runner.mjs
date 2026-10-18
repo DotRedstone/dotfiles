@@ -201,9 +201,11 @@ async function main() {
     throw new Error("compiler source does not match the deployment lock hash");
   }
   const compiler = await import(pathToFileURL(path.join(config.compilerSource, "src/compiler.mjs")).href);
-  if (args.includes("--apply")) requireEnabledAccount(loadCatalog(config.catalogDir));
   const secrets = readPrivateRuntime(value("--secrets"));
   if (secrets.version !== 1) throw new Error("private deployment schema unsupported");
+  if (args.includes("--apply")) {
+    requireEnabledAccount(loadCatalog(config.catalogDir, secrets.deploymentCatalog));
+  }
   const live = cloudflareStore({
     accountId: secrets.cloudflare.accountId,
     namespaceId: secrets.cloudflare.deliveryNamespaceId,

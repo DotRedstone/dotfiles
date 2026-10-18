@@ -28,6 +28,7 @@ test("loads deployment identities from private runtime without public account fi
     const loaded = loadCatalog(directory, privateCatalog);
     assert.deepEqual(loaded.accounts, privateCatalog.accounts);
     assert.deepEqual(loaded.sources, privateCatalog.sources);
+    assert.doesNotThrow(() => requireEnabledAccount(loaded));
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }

@@ -9,8 +9,8 @@ DNS-01 证书选项。该候选没有改 `servers/flake.lock`、Hopper Gmail、S
 
 | 测量池的 `origin` | 执行探测的主机 | HTTPS 探测地址 | 被测回源身份与 TLS 名称 |
 | --- | --- | --- | --- |
-| `la` | Hopper | `probe-la-v2-canary.bdot.in/probe` | `la-origin`；LA CDN 回源的现有 TLS 主机名 |
-| `sg` | Conduit | `probe-sg-v2-canary.bdot.in/probe` | `sg-origin`；SG CDN 回源的现有 TLS 主机名 |
+| `la` | Hopper | `host-1.example.test/probe` | `la-origin`；LA CDN 回源的现有 TLS 主机名 |
+| `sg` | Conduit | `host-2.example.test/probe` | `sg-origin`；SG CDN 回源的现有 TLS 主机名 |
 
 方向与 `edge-proxy-worker/docs/preferred-v2.md` 的 `origins.la/sg` 契约一致：
 `la` 探测器固定在 Hopper，`sg` 探测器固定在 Conduit。候选 Nix 模块只设置
@@ -46,7 +46,7 @@ Cloudflare Trace 和真实 canary 请求排除 wildcard/Custom Domain 冲突或�
 递归；旧 Route 和旧 KV 均保留。
 
 2026-10-14 直接查询 Cloudflare DNS-over-HTTPS 时，这两个新名称均为 `NXDOMAIN`；
-本机系统解析器却把它们映射到 `198.18.0.0/15` 测试地址，该结果不是公网记录，
+本机系统解析器却把它们映射到 `198.51.100.10/15` 测试地址，该结果不是公网记录，
 不用于配置 DNS。域名、规则、源站 IP、CAA 与 Route 在实施前仍需从权威控制面复核。
 
 **当前 Worker 锁不能与双地区控制契约配套。** 此候选继承 `edgeProxyWorker`
@@ -57,8 +57,8 @@ Cloudflare Trace 和真实 canary 请求排除 wildcard/Custom Domain 冲突或�
 `origin-proof/server.mjs` 文件相同，但这不消除控制 Worker 的接口差异。
 下一步须审查并锁定双地区 Worker 修订，确认 Nix adapter/构建路径兼容；不能只凭
 探测器脚本相同或本地测试通过就更新锁。新控制 Worker 使用独立资源
-`edge-preferred-v2-canary` 和 KV `edge-proxy-v2-canary-preferred`
-（binding `PREFERRED_V2_STATE`，ID `e9ba26a96324492abee40b945754443f`）；不得复用旧 Worker/KV。写池前必须完成真实端到端
+`CONTROL_WORKER_NAME` 和 KV `CONTROL_KV_TITLE`
+（binding `PREFERRED_V2_STATE`，ID `CONTROL_KV_ID`）；不得复用旧 Worker/KV。写池前必须完成真实端到端
 探测；任一来源、候选、HMAC、TLS、nonce、originId 或 proof 失败时拒绝整批写入，
 KV 上次有效池保持原字节。
 
@@ -81,8 +81,8 @@ KV 上次有效池保持原字节。
 源码路径核对一致；两地主机继续读取该非 Flake 输入。旧版 `deploy.mjs` 与归档
 `4fbe909` 的 `buildProfiles` 路径不变。
 
-新 `prepare-v2-workers.mjs` 只为 `edge-preferred-v2-canary`、
-`edge-delivery-v2-canary` 生成独立 KV 绑定、公开变量、固定源码与 secret
+新 `prepare-v2-workers.mjs` 只为 `CONTROL_WORKER_NAME`、
+`DELIVERY_WORKER_NAME` 生成独立 KV 绑定、公开变量、固定源码与 secret
 来源清单，Wrangler dry run 分别打包两个入口。没有设置 Route 或上传密钥；
 控制 Worker 缺少 `PROBE_ENDPOINTS_JSON`、签名密钥，交付 Worker 缺少令牌
 哈希和 manifest 前不能投入使用。合成测试覆盖 LA/SG 正确探测器、签名上传、

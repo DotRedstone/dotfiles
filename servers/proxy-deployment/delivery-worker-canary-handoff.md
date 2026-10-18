@@ -5,10 +5,10 @@
 
 ## 云端与运行时
 
-`edge-delivery-v2-canary` 已部署版本
-`340ed294-1394-48fc-a07b-9d963a0e5046`，使用独立 Custom Domain
-`delivery-v2-canary.dotdot.ggff.net` 和 `DELIVERY_STATE` KV
-`83b95ccf208f4c5e9a645df1c0200997`。`workers.dev` 关闭。交付令牌仅以
+`DELIVERY_WORKER_NAME` 已部署版本
+`WORKER_VERSION_ID`，使用独立 Custom Domain
+`delivery.example.test` 和 `DELIVERY_STATE` KV
+`DELIVERY_KV_ID`。`workers.dev` 关闭。交付令牌仅以
 SHA-256 映射形式注入 Worker Secret；明文令牌、Cloudflare API token 与客户端
 凭据只留在 SOPS 运行时中。
 

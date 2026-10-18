@@ -45,7 +45,7 @@ deriver 与表中一致，NAR hash 为
 `proxy/probe_env` 在两种情形下均保持 root:root 0400。现有 CDN 凭据使用同一
 root:nginx 0440 访问边界。Conduit 目标机使用自身 SSH 身份在受限 `/run` 临时目录
 解密候选 store 中的密文，验证 probe 环境只指向对侧 `sg-origin`、专用证书覆盖
-`probe-sg-v2-canary.bdot.in`、证书链受系统 CA 信任、有效期及私钥配对均正确；
+`host-2.example.test`、证书链受系统 CA 信任、有效期及私钥配对均正确；
 临时材料已清理。首次 `test` 已证明 Nginx 能读取证书、probe 能在回环提供
 可信 TLS，但未通过 Nginx 上游验证；修正后的运行结果见下文。
 
@@ -105,7 +105,7 @@ marker 不存在，Nginx/probe 无错误日志。Hopper 外部公网路径的新
 
 Hopper 在目标 ARM 机核对修正候选、旧 rotation/current/profile/default boot、两条
 SSH 路径、五条旧订阅、Gmail、proof 与静态证书。目标机在受限临时目录从 SOPS
-渲染 probe 输入：证书链与私钥匹配、覆盖 `probe-la-v2-canary.bdot.in`，环境只含
+渲染 probe 输入：证书链与私钥匹配、覆盖 `host-1.example.test`，环境只含
 对侧 `la` origin；临时材料已清理。第一次 `test` 在固定 20 分钟 timer 与
 root-only marker 保护下激活 `irwzjkl…`，两地主机间的新 SNI、合法签名 200
 和错误签名、过期、越界拒绝均通过；旧五条订阅、Gmail、proof 和代理出口亦通过。

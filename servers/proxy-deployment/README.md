@@ -1,29 +1,35 @@
 # 代理部署数据
 
-本目录保存独立 `proxy-stack` Flake 所需的部署侧非密钥输入。新端点完成隔离测试和
+本目录保存独立 `proxy-stack` Flake 所需的公开目录结构与合成示例。新端点完成隔离测试和
 审阅后才能发布；在此之前，现用的 `servers/proxy-accounts.json`、
 `servers/clash/router-policy.json` 和订阅保持原有路径。
+本目录交接记录中的 `example.test` 域名及大写资源标识是脱敏占位符，
+不代表当前部署值；实际映射只从对应 SOPS 受限输入读取。
+公开 HEAD、既有 main 与已推送历史的边界见[部署数据审计](./public-data-audit.md)。
 
 第 1 阶段的[代理源码独立候选](./stage1-proxy-only-review.md)只启用两地主机的
 canary 与 `/proof`，不含 Hopper Gmail 现网基线。Conduit/Hopper 此前通过
 临时 `test` 验收的是另一个**组合候选**，不能据此直接部署本候选到 Hopper。
 
-- `accounts.json` 登记独立的 `canary` 测试账户；旧 `proxy-accounts.json` 中同名账户
-  保持 disabled，现用账户不变。启用前需核对 `primaryOrigin`、两项批准的来源 ID、
-  四种节点出口、生命周期元数据以及各自的 SOPS 凭据。
+- `accounts.example.json` 展示合成账户结构；真实账户和来源映射保存在 Conduit
+  的 SOPS `proxy/delivery_runtime.deploymentCatalog`。旧 `proxy-accounts.json` 中
+  同名账户保持 disabled，现用账户不变。
 - `nodes.json` 记录两处现有的公开节点端点和 Cloudflare 名称。REALITY 客户端参数
-  与 WebSocket 路径属于私有运行时输入，不写入本文件。
-- `preferred-sources.json` 登记路由器现用的两处独立 CloudflareST 来源。
-  `owner-campus-canary` 是两地 `signed-upload` 的隔离登记；路由器已实测并上传
+  与 WebSocket 路径属于私有运行时输入，不写入本文件。`nodes.example.json`
+  使用文档专用地址和合成 origin ID；既有公开节点值的后续迁移见审计记录。
+- `preferred-sources.example.json` 展示合成来源；实际来源清单保存在 Cloudflare
+  SOPS 的 `canary.sources_json` 和 Conduit 受限运行时中。路由器已实测并上传
   两份 v2 池，结果见[控制 Worker 交接](./control-worker-canary-handoff.md)。
   GitHub 来源需核对 owner、ref 和 path，并验证对应回源健康状态。
 - `owned-domains.json` 仅保存直连规则所需的自有域名后缀和节点 IP。
-- `cloudflare-resources.json` 固定隔离灰度的两个 KV ID、各自的 binding、Worker
-  名称与入口；这些是部署专属的公开标识，不包含令牌或私有运行时值。
+- `cloudflare-resources.example.json` 展示合成 Worker 资源。实际资源映射保存在
+  Cloudflare SOPS 的 `canary.resources_json`；origin 与探测身份映射保存在
+  `canary.origin_ids_json`，不进入公开目录。
 - `profiles/` 分别保存路由器、桌面和移动端的网络行为。路由器配置保留现有的
   TUN、DNS、端口与控制器参数用于测试，尚未安装到路由器。
 
-使用锁定版本编译器的 `validate` 命令检查本目录。生成的私有 YAML、token、
+使用锁定版本编译器的 `validate` 命令检查由受限输入组装的目录；公开示例只用于
+结构检查。生成的私有 YAML、token、
 UUID、路径密钥与优选池快照不得进入 Git 或 Nix store。通用规则和编译器的
 维护说明见独立项目 `/home/dot/Projects/proxy-stack/README.md`。
 
@@ -45,7 +51,8 @@ Mihomo 静态检查。它先写五份不可变文档并逐项读回，最后单�
 
 受限运行时由 SOPS 的 `proxy/delivery_runtime` 提供 JSON；sops-nix 将其解密为
 `root` 所有、`0400` 的运行时文件，发布任务直接读取该文件，不再次调用 `sops`。
-JSON 包含 `version: 1`、`preferredReadToken`、每账户 `runtimeByAccount`，以及
+JSON 包含 `version: 1`、`preferredReadToken`、`preferredBaseUrl`、
+`deploymentCatalog`、每账户 `runtimeByAccount`，以及
 `cloudflare.accountId`、`deliveryNamespaceId`、`apiToken`。每账户运行时包含独立
 `deliveryToken`、`deliveryBaseUrl`、两地 UUID、REALITY 公钥与 short ID、WS 路径。
 真实值只进入加密文件；目录和示例不记录其正文。控制面、交付 Worker 使用独立 KV，
@@ -79,8 +86,8 @@ origin-proof 和 probe ingress。独立分支
 
 | 回源目标 | 主机 | `X-CF-Optimizer-Origin` |
 | --- | --- | --- |
-| `la` | Hopper 的 `probe-la-v2-canary.bdot.in` | `cf-opt-la-v1` |
-| `sg` | Conduit 的 `probe-sg-v2-canary.bdot.in` | `cf-opt-sg-v1` |
+| `la` | Hopper 的 `host-1.example.test` | `cf-opt-la-v1` |
+| `sg` | Conduit 的 `host-2.example.test` | `cf-opt-sg-v1` |
 
 有效请求由 Nginx 直接返回 4096 字节静态正文、`Cache-Control: no-store,
 max-age=0`，并原样回显 `X-CF-Optimizer-Nonce`。其他方法返回 405；缺失、
@@ -93,15 +100,15 @@ max-age=0`，并原样回显 `X-CF-Optimizer-Nonce`。其他方法返回 405；�
 每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
 提供对应令牌。两地主机分别以 SOPS 保存 `proxy/origin_proof_key` 与
 `proxy/origin_proof_token`。交叉探测按被测回源地区命名：LA 候选由 Hopper 的
-`probe-la-v2-canary.bdot.in/probe` 验证，SG 候选由 Conduit 的
-`probe-sg-v2-canary.bdot.in/probe` 验证。两地复用现有 Nginx TCP 443，以独立
+`host-1.example.test/probe` 验证，SG 候选由 Conduit 的
+`host-2.example.test/probe` 验证。两地复用现有 Nginx TCP 443，以独立
 HTTPS 名称反代各自的回环探测服务，不增加公网端口。两台 SOPS 已有各自的
 `proxy/probe_env` 与专用 TLS 证书／私钥；两地主机已启用 probe 与 ingress。
 `bdot.in` 的两个精确 probe hostname Configuration Rules 已创建，
 `action_parameters.ssl` 均为 `strict`，zone 默认仍为 `flexible`。2026-10-16
-新增两条 proxied A：`probe-la-v2-canary.bdot.in` 指向 Hopper
+新增两条 proxied A：`host-1.example.test` 指向 Hopper
 `140.245.62.36`（记录 ID `15c9ca4f22287430e5c790f68ce72f9c`）；
-`probe-sg-v2-canary.bdot.in` 指向 Conduit `107.174.1.97`（记录 ID
+`host-2.example.test` 指向 Conduit `107.174.1.97`（记录 ID
 `97b0e18c9b1bdf92c9c3b6e11d07505b`）。原有 `bdot.in/*` Worker Route 未改。
 现有 CDN 回源证书的 SAN 只覆盖
 各自旧名称，不能用于新入口。
@@ -124,9 +131,10 @@ HMAC 四把密钥互异。每台探测器的 `PROBE_ORIGINS_JSON` 只应包含�
 
 ## v2 Worker 本地准备
 
-`scripts/prepare-v2-workers.mjs` 从锁定的 Nix 源码读取两个新入口，从本目录
-的目录数据和 `cloudflare-resources.json` 生成独立 KV 的 Wrangler 配置、源码修订记录及
-secret 来源清单。配置只包含公开部署参数；`workers_dev` 关闭，交付入口使用
+`scripts/prepare-v2-workers.mjs` 从锁定的 Nix 源码读取两个新入口；正式准备时
+从 SOPS 读取受限 Worker 资源与来源，`--dry-run` 使用本目录的合成示例。
+脚本生成独立 KV 的 Wrangler 配置、源码修订记录及 secret 来源清单。输出目录
+仅供受限部署使用；`workers_dev` 关闭，交付入口使用
 独立 Custom Domain，控制入口由受限部署配置绑定独立 Custom Domain。
 `secret-references.json` 列出需在受限部署环境注入的密钥来源，不含明文。
 
@@ -159,9 +167,10 @@ Target 将在到期后退役，`codex/target-probe-dryrun` 只保留为未合并
 `servers/secrets/target.yaml` 中已加密登记 `proxy/probe_env` 与
 `proxy/probe_acme_dns_token`，但运行时未加载。Cloudflare 的
 `target-probe-dns01-2026-10-13` token 原为单一 zone 的 DNS-01 凭据，
-`probe-v2-canary.dotdot.ggff.net` 尚无 DNS 记录。2026-10-13 的只读核对发现
+`host-3.example.test` 尚无 DNS 记录。2026-10-13 的只读核对发现
 该 token 可列出一个目标 zone，但现有管理凭据不能读取 token 详情或外部使用记录；
-撤销前仍需确认没有仓库外消费者。本轮不撤销、不修改 SOPS 或主机配置。
+撤销前仍需确认没有仓库外消费者；本次代理部署数据脱敏不修改 Target 的
+SOPS 项或主机配置。
 
 `edge-worker-source.json` 与 `scripts/prepare-edge-source.mjs` 保留旧 `4fbe909`
 归档路径作为回退，不属于新输入。该旧提交只在受限 legacy checkout 中，新的
@@ -232,7 +241,7 @@ HMAC 密钥。
 Worker 已部署，绑定各自 KV 和
 所需 secret，`workers.dev` 均关闭。两个 probe 名称已有上述 DNS；控制 Worker
 和交付 Worker 已添加各自的独立 Custom Domain。资源 ID 与 Worker 名称见
-`cloudflare-resources.json`，控制入口的实测状态见
+Cloudflare SOPS `canary.resources_json`，控制入口的实测状态见
 [控制 Worker 隔离发布交接](./control-worker-canary-handoff.md)，交付入口见
 [交付 Worker 交接](./delivery-worker-canary-handoff.md)。
 旧 KV 和旧 Worker 需作为回退保留，不能拿来存 v2 池或账户文档。probe 的

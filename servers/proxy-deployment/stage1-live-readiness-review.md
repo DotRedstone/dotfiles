@@ -10,12 +10,12 @@
 | 对象 | 只读结果 | 发布含义 |
 | --- | --- | --- |
 | Cloudflare 账户边界 | `bdot.in` zone 在 `sites` 账户；现用与预留 Worker/KV 在另一个 `proxy` 账户 | DNS/证书规则和 Worker/KV 要分别核对权限，不能假定同一 token 可管理两侧 |
-| 新 probe DNS | zone API 无两名的 A/AAAA；两台委派 NS 的 TCP 权威查询均为 NXDOMAIN。本机 UDP DNS 被中间层改写，非权威响应不用于发布 | `probe-la-v2-canary.bdot.in`、`probe-sg-v2-canary.bdot.in` 尚未开放 |
+| 新 probe DNS | zone API 无两名的 A/AAAA；两台委派 NS 的 TCP 权威查询均为 NXDOMAIN。本机 UDP DNS 被中间层改写，非权威响应不用于发布 | `host-1.example.test`、`host-2.example.test` 尚未开放 |
 | 证书与规则 | Universal 边缘证书处于 active，覆盖 `*.bdot.in`；zone 无 CAA 记录。zone 默认 SSL 模式为 `flexible`，现有 Configuration Rules 与 Origin Rules 均无规则 | 边缘证书不替代两台源站的公开可信证书；必须先为两个精确 hostname 准备源站证书与 `strict` 配置规则，不能改 zone 默认模式 |
 | 路由占用 | zone Worker Route 只有 `bdot.in/*` 指向既有站点 Worker；两个账户的 Worker Custom Domains 与 zone Custom Hostnames 均无新 probe 名称 | 新子域暂未被这些对象占用；发布前仍须用 Trace 和真实请求排除规则冲突及同 zone fetch 递归 |
 | 旧入口 | `la-cdn`、`sg-cdn` 的现用 A 记录均为 proxied，目标与部署目录中的节点目录相符 | 新 DNS 应重新核对届时的源站地址，不复用本次快照作写入依据 |
-| 旧 Worker/KV | `edge-proxy-next` 当前 100% 版本 `b976e719-fff2-42e1-b26c-3d653cd9f3f1`；`edge-preferred-control` 当前 100% 版本 `2d3d75dd-367d-4525-aa52-66b0d195aa56`。二者 `EDGE_STATE` 均指向 `edge-proxy-next-state`（`edc5684b06104774931e664f9d761349`），该 KV 可列出 7 个键 | 不覆盖旧 Worker、旧 KV、旧绑定或订阅；上述版本号只标识 Cloudflare 当前部署，不能推断其源码 Git 修订 |
-| 隔离资源 | `edge-proxy-v2-canary-preferred` 和 `edge-proxy-v2-canary-delivery` 两个独立 KV 已存在、各 0 键；`edge-preferred-v2-canary` 与 `edge-delivery-v2-canary` Worker 均不存在 | 新控制与交付只能绑定各自隔离 KV；发布配置尚无 Route 与 secret |
+| 旧 Worker/KV | `edge-proxy-next` 当前 100% 版本 `WORKER_VERSION_ID`；`edge-preferred-control` 当前 100% 版本 `WORKER_VERSION_ID`。二者 `EDGE_STATE` 均指向 `edge-proxy-next-state`（`edc5684b06104774931e664f9d761349`），该 KV 可列出 7 个键 | 不覆盖旧 Worker、旧 KV、旧绑定或订阅；上述版本号只标识 Cloudflare 当前部署，不能推断其源码 Git 修订 |
+| 隔离资源 | `CONTROL_KV_TITLE` 和 `DELIVERY_KV_TITLE` 两个独立 KV 已存在、各 0 键；`CONTROL_WORKER_NAME` 与 `DELIVERY_WORKER_NAME` Worker 均不存在 | 新控制与交付只能绑定各自隔离 KV；发布配置尚无 Route 与 secret |
 | 两台主机 | Conduit/Hopper 均运行 NixOS `26.11.20260831.34ab990`，Nginx、Xray、`proxy-origin-proof` active，443 均有监听；新 `proxy-preferred-probe` 与交付 timer inactive，新 probe vhost 不在当前 Nginx 配置中 | 当前服务不等于本分支的声明式候选；应逐台核对 SSH、旧身份与旧订阅后才做未来 `test` |
 | 闭包 | 两台的 `/run/current-system`、`/run/booted-system`、system profile 三者两两不同 | 先查明当前临时激活配置与下次启动代际；不能从现有 profile 推断运行状态，也不能直接对 Hopper 做整机切换 |
 | SOPS | 两地主机密文及运行时均有 `proxy/origin_proof_key`、`proxy/origin_proof_token`。两地均缺 `proxy/probe_env`、`proxy/probe_tls_cert`、`proxy/probe_tls_key`、`proxy/probe_acme_dns_token`、`proxy/delivery_runtime`。Cloudflare canary 有上传密钥和优选读取令牌，只有历史单对 probe HMAC；无两地区 `probe_endpoints_json` 或交付令牌哈希 | 四把互异 probe HMAC、两机各自仅含获准回源的环境、DNS-01 凭据和交付运行时尚须在受限环境准备。选 ACME 时证书／私钥来自 ACME，后两项 SOPS TLS 键不必同时配置；本记录不含密钥内容 |
@@ -181,7 +181,7 @@ verify**。所有值必须对应同一候选，目标 current/profile 必须仍�
 对两枚令牌均返回 401，因此不能以该端点推断资源读取权限。两个新 probe 名称
 仍无 DNS 记录，zone 只有原有一条 Worker Route，未发现 probe Custom Domain。
 
-`edge-preferred-v2-canary` 与 `edge-delivery-v2-canary` 现均有部署，分别绑定目录中
+`CONTROL_WORKER_NAME` 与 `DELIVERY_WORKER_NAME` 现均有部署，分别绑定目录中
 指定的独立 KV 及所需 secret；两个隔离 KV 均为 0 键。两 Worker 的 `workers.dev`
 和 preview 均关闭，没有可供本阶段验收的公网入口。Cloudflare canary SOPS
 密文已包含 `probe_endpoints_json`：两地区 URL 为预定 probe 名称，四把 HMAC

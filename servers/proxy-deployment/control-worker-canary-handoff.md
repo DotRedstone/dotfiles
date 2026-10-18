@@ -1,6 +1,6 @@
 # v2 控制 Worker 隔离发布交接
 
-状态：2026-10-16。本记录覆盖隔离控制 Worker 与路由器 `owner-campus-canary`
+状态：2026-10-16。本记录覆盖隔离控制 Worker 与路由器 `SOURCE_ID`
 来源的实机验收。旧 Worker、旧 KV、旧订阅、CloudflareST 定时任务和路由器默认代理组
 仍保持原状；私有配置已由独立交付 Worker 发布，客户端默认配置尚未切换。
 
@@ -11,10 +11,10 @@
 类型和 53 项测试通过；`check-probe-inputs.mjs` 与两个入口的 Wrangler dry run
 通过。这些检查不代替云端验收。
 
-隔离控制 Worker `edge-preferred-v2-canary` 已上传版本
-`86ab23f5-5d21-4549-9c0c-ddfe24f1ca91`，入口为
-`preferred-v2-canary.dotdot.ggff.net`。它绑定独立 `PREFERRED_V2_STATE` KV
-`e9ba26a96324492abee40b945754443f`，保留三项 Secret：
+隔离控制 Worker `CONTROL_WORKER_NAME` 已上传版本
+`WORKER_VERSION_ID`，入口为
+`control.example.test`。它绑定独立 `PREFERRED_V2_STATE` KV
+`CONTROL_KV_ID`，保留三项 Secret：
 `SIGNING_KEYS_JSON`、`PREFERRED_READ_TOKEN`、`PROBE_ENDPOINTS_JSON`。
 `workers.dev`、预览入口和 Cron 均关闭。交付 Worker 的独立域名与发布状态见
 [交付 Worker 交接](./delivery-worker-canary-handoff.md)。
@@ -43,8 +43,8 @@ cron 进程与两条任务仍在，旧任务未修改。
 
 | 被测回源 | 路由器测得 | 可信跨地验证后写入 KV | 隔离来源 |
 | --- | ---: | ---: | --- |
-| LA | 8 | 5 | `owner-campus-canary/la` |
-| SG | 8 | 6 | `owner-campus-canary/sg` |
+| LA | 8 | 5 | `SOURCE_ID/la` |
+| SG | 8 | 6 | `SOURCE_ID/sg` |
 
 读接口返回两份 v2 池，`validatedAt` 分别为
 `2026-10-16T12:00:29.760Z` 与 `2026-10-16T12:05:40.682Z`。未通过回源验证的

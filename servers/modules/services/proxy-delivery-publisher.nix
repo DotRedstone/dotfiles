@@ -20,7 +20,7 @@ let
   '';
   inputs = pkgs.runCommand "proxy-delivery-publisher-inputs" { } ''
     mkdir -p "$out/catalog/profiles"
-    for name in accounts nodes preferred-sources owned-domains; do
+    for name in nodes owned-domains; do
       cp ${../../proxy-deployment}/"$name".json "$out/catalog/";
     done
     for name in router desktop mobile; do
@@ -34,7 +34,6 @@ let
     compilerSource = "${proxyStack.outPath}";
     compilerRevision = revision;
     flakeLockPath = "${inputs}/flake.lock";
-    preferredBaseUrl = cfg.preferredBaseUrl;
     maxPoolAgeSeconds = cfg.maxPoolAgeSeconds;
     mihomoBin = "${pkgs.mihomo}/bin/mihomo";
     geoSitePath = cfg.geoSitePath;
@@ -45,12 +44,6 @@ in
 {
   options.dot.services.proxyDeliveryPublisher = {
     enable = lib.mkEnableOption "the isolated proxy delivery publisher";
-    preferredBaseUrl = lib.mkOption {
-      type = lib.types.str;
-      default = "";
-      example = "https://preferred.example.test";
-      description = "HTTPS address of the new preferred-v2 control Worker.";
-    };
     maxPoolAgeSeconds = lib.mkOption {
       type = lib.types.int;
       default = 3600;
@@ -71,8 +64,6 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [
       { assertion = proxyStack != null; message = "proxy delivery needs the locked proxyStack input"; }
-      { assertion = lib.hasPrefix "https://" cfg.preferredBaseUrl;
-        message = "proxy delivery needs a private HTTPS preferred-v2 endpoint"; }
       { assertion = cfg.geoSitePath != "" && cfg.geoIpPath != "";
         message = "proxy delivery needs local GeoSite and GeoIP files"; }
     ];

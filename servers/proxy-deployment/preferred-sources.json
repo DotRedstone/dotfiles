@@ -1,9 +1,0 @@
-{
-  "version": 1,
-  "sources": [
-    { "sourceId": "owner-telecom-campus", "type": "router-cfst", "origin": "la", "accessNetwork": "校园电信" },
-    { "sourceId": "owner-telecom-campus", "type": "router-cfst", "origin": "sg", "accessNetwork": "校园电信" },
-    { "sourceId": "owner-campus-canary", "type": "signed-upload", "origin": "la", "accessNetwork": "校园电信" },
-    { "sourceId": "owner-campus-canary", "type": "signed-upload", "origin": "sg", "accessNetwork": "校园电信" }
-  ]
-}

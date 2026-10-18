@@ -25,14 +25,37 @@ function read(name) {
   return JSON.parse(fs.readFileSync(path.join(directory, name), "utf8"));
 }
 
+function readResources(dryRun) {
+  if (dryRun) return read("cloudflare-resources.example.json");
+  const raw = run("sops", ["-d", "--extract", '["canary"]["resources_json"]',
+    path.join(servers, "secrets", "cloudflare.yaml")]);
+  return JSON.parse(raw);
+}
+
+function readSources(dryRun) {
+  if (dryRun) return read("preferred-sources.example.json");
+  const raw = run("sops", ["-d", "--extract", '["canary"]["sources_json"]',
+    path.join(servers, "secrets", "cloudflare.yaml")]);
+  return JSON.parse(raw);
+}
+
+function readOriginIds(dryRun, nodes) {
+  if (dryRun) {
+    return Object.fromEntries(Object.keys(nodes.origins).map((id) => [id, `${id}-origin`]));
+  }
+  const raw = run("sops", ["-d", "--extract", '["canary"]["origin_ids_json"]',
+    path.join(servers, "secrets", "cloudflare.yaml")]);
+  return JSON.parse(raw);
+}
+
 function write(destination, value) {
   fs.writeFileSync(destination, `${JSON.stringify(value, null, 2)}\n`, { mode: 0o600, flag: "wx" });
 }
 
-function prepare(output, accountId, source) {
-  const resources = read("cloudflare-resources.json");
-  const sources = read("preferred-sources.json");
-  const nodes = read("nodes.json");
+function prepare(output, accountId, source, dryRun) {
+  const resources = readResources(dryRun);
+  const sources = readSources(dryRun);
+  const nodes = read(dryRun ? "nodes.example.json" : "nodes.json");
   if (resources.version !== 1 || sources.version !== 1 || nodes.version !== 1) {
     throw new Error("unsupported deployment catalog");
   }
@@ -46,6 +69,13 @@ function prepare(output, accountId, source) {
   }
   if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(resources.delivery.customDomain)) {
     throw new Error("delivery Worker requires a fixed custom domain");
+  }
+  const origins = Object.keys(nodes.origins);
+  const originIds = readOriginIds(dryRun, nodes);
+  if (origins.length === 0 || origins.some((id) => !originIds[id]) ||
+      Object.keys(originIds).some((id) => !nodes.origins[id]) ||
+      sources.sources.some((item) => !nodes.origins[item.origin])) {
+    throw new Error("inconsistent deployment origin catalog");
   }
   const main = (entrypoint) => {
     const file = path.join(source, entrypoint);
@@ -67,7 +97,7 @@ function prepare(output, accountId, source) {
   };
   const publicNodes = {
     version: 1,
-    origins: Object.fromEntries(["la", "sg"].map((origin) => [
+    origins: Object.fromEntries(origins.map((origin) => [
       origin, { cf: nodes.origins[origin].cf },
     ])),
   };
@@ -76,7 +106,7 @@ function prepare(output, accountId, source) {
     vars: {
       APPROVED_SOURCES_JSON: JSON.stringify(approved),
       PUBLIC_NODES_JSON: JSON.stringify(publicNodes),
-      EXPECTED_ORIGIN_IDS_JSON: JSON.stringify({ la: "la-origin", sg: "sg-origin" }),
+      EXPECTED_ORIGIN_IDS_JSON: JSON.stringify(originIds),
       MAX_MEASUREMENT_AGE_SECONDS: "3600",
     },
   };
@@ -122,7 +152,7 @@ function main() {
   const output = dryRun ? fs.mkdtempSync(path.join(os.tmpdir(), "preferred-v2-workers-")) : path.resolve(args[outputIndex + 1]);
   try {
     if (!dryRun) fs.mkdirSync(output, { mode: 0o700 });
-    prepare(output, accountId, source);
+    prepare(output, accountId, source, dryRun);
     if (dryRun) {
       const checkout = process.env.EDGE_PROXY_WORKER_CHECKOUT;
       if (!checkout || run("git", ["-C", checkout, "rev-parse", "HEAD"]) !== expectedWorker) {

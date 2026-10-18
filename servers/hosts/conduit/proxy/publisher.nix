@@ -23,7 +23,6 @@ in
 {
   dot.services.proxyDeliveryPublisher = {
     enable = true;
-    preferredBaseUrl = "https://preferred-v2-canary.dotdot.ggff.net";
     geoSitePath = toString geoSite;
     geoIpPath = toString geoIp;
   };

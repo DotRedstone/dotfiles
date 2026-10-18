@@ -11,12 +11,8 @@
 
   outputs = { public, ... }: {
     nixosConfigurations = {
-      conduit = public.nixosConfigurations.conduit.extendModules {
-        modules = [ ./conduit.nix ];
-      };
-      hopper = public.nixosConfigurations.hopper.extendModules {
-        modules = [ ./hopper.nix ];
-      };
+      conduit = public.lib.mkConduit [ ./conduit.nix ];
+      hopper = public.lib.mkHopper [ ./hopper.nix ];
       target = public.nixosConfigurations.target.extendModules {
         modules = [ ./target.nix ];
       };

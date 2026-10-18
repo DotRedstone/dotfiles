@@ -112,11 +112,15 @@ nix build \
   path:/home/dot/.dotfiles/servers#nixosConfigurations.gcp-free.config.system.build.toplevel
 ```
 
-`conduit` 的镜像接管配置仍可单独构建：
+`conduit` 与 `hopper` 的证书名称、回源身份需由独立私有部署 Flake 提供。
+公开 Flake 只导出 `lib.mkConduit`、`lib.mkHopper` 构造器，不再提供两台
+可直接部署的 `nixosConfigurations`。合成结构和迁移说明见
+[私有 overlay 示例](./private-overlay.example/README.md)。
+在实际私有仓库固定公开 Flake 修订并核对受限输入后，才可从私有入口构建：
 
 ```bash
 nix build \
-  path:/home/dot/.dotfiles/servers#nixosConfigurations.conduit.config.system.build.toplevel
+  path:/path/to/private-overlay#nixosConfigurations.conduit.config.system.build.toplevel
 ```
 
 `hopper` 是 `aarch64-linux`。x86_64 工作站只能评估配置；完整构建需要 ARM

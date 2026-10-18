@@ -1,5 +1,9 @@
 # RackNerd 洛杉矶节点原子化迁移到 NixOS
 
+当前 Conduit 构建入口已迁至独立私有 overlay；下文公开 Flake 的历史命令
+仅用于理解当时迁移过程。再次构建须使用
+[私有 overlay 示例](../private-overlay.example/README.md)所述受限入口。
+
 本文对应主机 `conduit`（公网地址 `107.174.1.97`）。它记录了从 Ubuntu、
 1Panel 和 Docker 迁移到原生 NixOS 的实机过程，也可以作为以后重装同一台
 机器的操作手册。

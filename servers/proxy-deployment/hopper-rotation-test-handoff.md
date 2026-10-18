@@ -1,5 +1,8 @@
 # Hopper rotation 临时测试交接
 
+本文保留当时的公开 Flake 命令作为历史证据。当前 Hopper 构建入口已迁至
+[私有 overlay](../private-overlay.example/README.md)，不得直接重用下文命令。
+
 状态：2026-10-15。Hopper 候选已通过临时 `test` 和运行态验收；尚未执行持久
 `switch`、DNS/Worker/路由器变更或旧身份撤销。Conduit 仍运行此前的临时测试闭包；
 两台主机的临时运行状态不等于双节点持久部署完成。阶段证据见

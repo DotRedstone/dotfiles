@@ -56,6 +56,11 @@ JSON 包含 `version: 1`、`preferredReadToken`、`preferredBaseUrl`、
 `deploymentCatalog`、每账户 `runtimeByAccount`，以及
 `cloudflare.accountId`、`deliveryNamespaceId`、`apiToken`。每账户运行时包含独立
 `deliveryToken`、`deliveryBaseUrl`、两地 UUID、REALITY 公钥与 short ID、WS 路径。
+`sharedEdgeSourceIds` 必须在受限运行时显式列出使用同一次本地 Cloudflare 边缘测速的
+来源；没有共享来源时使用空数组。对登记来源，发布器要求两地池具有相同的来源、
+接入与出口网络及 `collectedAt`，共同候选的速度和相对顺序一致；两地兼容过滤可
+产生不同子序列。检查在写入任何交付 KV 文档之前执行；`collectedAt` 是操作性
+同源约束，不是扫描的密码学证明。
 真实值只进入加密文件；目录和示例不记录其正文。控制面、交付 Worker 使用独立 KV，
 旧 `clash/config/<profile>` 和旧优选池继续由既有 Worker 管理。
 

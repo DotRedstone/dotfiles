@@ -113,6 +113,11 @@ test("pool response is limited while reading the stream", async () => {
   assert.ok(reads <= 3);
 });
 
+test("publisher requires an explicit shared edge source declaration", async () => {
+  await assert.rejects(runPublication({ config: {}, secrets: {}, compiler: {}, store: {} }),
+    /must declare shared edge sources/);
+});
+
 const realValidationReady = [
   "PROXY_STACK_SOURCE", "MIHOMO_BIN", "GEOSITE_PATH", "GEOIP_PATH",
 ].every((name) => process.env[name]);
@@ -170,6 +175,7 @@ test("enabled synthetic account runs Mihomo validation before isolated KV publis
       },
       secrets: {
         preferredReadToken: token, preferredBaseUrl: "https://preferred.example.test",
+        sharedEdgeSourceIds: [],
         deploymentCatalog: { accounts: data["accounts.json"], sources: data["preferred-sources.json"] },
         runtimeByAccount: { sample: {
         accountId: "sample", deliveryBaseUrl: "https://config.example",

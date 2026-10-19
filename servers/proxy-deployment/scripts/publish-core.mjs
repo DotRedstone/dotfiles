@@ -45,6 +45,34 @@ function poolFor(catalog, account, origin, pools, compiler, now, maxPoolAgeSecon
   return pool;
 }
 
+function validateSharedEdgePools(account, pools, sharedEdgeSourceIds) {
+  const sourceId = account.sourceIdByOrigin.la;
+  if (!sharedEdgeSourceIds.includes(sourceId) &&
+      !sharedEdgeSourceIds.includes(account.sourceIdByOrigin.sg)) return;
+  if (sourceId !== account.sourceIdByOrigin.sg ||
+      pools.la.sourceId !== sourceId || pools.sg.sourceId !== sourceId ||
+      pools.la.accessNetwork !== pools.sg.accessNetwork ||
+      pools.la.egressNetwork !== pools.sg.egressNetwork ||
+      pools.la.collectedAt !== pools.sg.collectedAt) {
+    throw new Error("shared edge pools have different scan provenance");
+  }
+  const la = new Map(pools.la.candidates.map((item) => [item.address, item]));
+  const sg = new Map(pools.sg.candidates.map((item) => [item.address, item]));
+  const laOverlap = pools.la.candidates.filter((item) => sg.has(item.address));
+  const sgOverlap = pools.sg.candidates.filter((item) => la.has(item.address));
+  // 同次扫描的两个兼容子序列可无交集；collectedAt 是操作性同源约束，
+  // 不能替代扫描 ID 或密码学证明。
+  if (laOverlap.some((item, index) =>
+        item.address !== sgOverlap[index].address ||
+        item.downloadMBps === undefined ||
+        item.downloadMBps !== sg.get(item.address).downloadMBps)) {
+    throw new Error("shared edge pools disagree on common candidates");
+  }
+  if ([...la.values(), ...sg.values()].some((item) => item.downloadMBps === undefined)) {
+    throw new Error("shared edge pool candidate lacks measured speed");
+  }
+}
+
 function documentsFor({ accountId, account, catalog, runtime, pools, compiler, release }) {
   const prefix = `accounts/${accountId}/${release}`;
   const profiles = Object.fromEntries(
@@ -95,13 +123,27 @@ export async function publish({
   store,
   validateDocument,
   maxPoolAgeSeconds,
+  sharedEdgeSourceIds = [],
   now = new Date(),
 }) {
   if (!/^[0-9a-f]{40}$/.test(compilerRevision)) throw new Error("invalid compiler revision");
   if (!Number.isInteger(maxPoolAgeSeconds) || maxPoolAgeSeconds < 60) {
     throw new Error("invalid pool freshness policy");
   }
+  if (!Array.isArray(sharedEdgeSourceIds) ||
+      sharedEdgeSourceIds.some((id) => typeof id !== "string" ||
+        !/^[a-z0-9][a-z0-9-]{1,63}$/.test(id)) ||
+      new Set(sharedEdgeSourceIds).size !== sharedEdgeSourceIds.length) {
+    throw new Error("invalid shared edge source list");
+  }
   compiler.validateCatalog(catalog);
+  for (const sourceId of sharedEdgeSourceIds) {
+    if (!["la", "sg"].every((origin) => catalog.sources.sources.some(
+      (source) => source.sourceId === sourceId && source.origin === origin,
+    ))) {
+      throw new Error("shared edge source is absent from approved origins");
+    }
+  }
   if (Object.values(catalog.accounts.accounts).some((account) => account.enabled) &&
       typeof validateDocument !== "function") {
     throw new Error("static document validator required");
@@ -137,6 +179,7 @@ export async function publish({
           catalog, account, origin, pools, compiler, now, maxPoolAgeSeconds,
         )]),
       );
+      validateSharedEdgePools(account, accountPools, sharedEdgeSourceIds);
     }
     const release = digest({
       compilerRevision,

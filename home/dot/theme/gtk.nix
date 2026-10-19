@@ -19,6 +19,18 @@
 
     gtk3.extraConfig = {
       gtk-application-prefer-dark-theme = 1;
+      gtk-xft-antialias = 1;
+      gtk-xft-hinting = 1;
+      gtk-xft-hintstyle = "hintslight";
+      gtk-xft-rgba = "rgb";
+    };
+
+    gtk4.extraConfig = {
+      gtk-application-prefer-dark-theme = 1;
+      gtk-xft-antialias = 1;
+      gtk-xft-hinting = 1;
+      gtk-xft-hintstyle = "hintslight";
+      gtk-xft-rgba = "rgb";
     };
 
     iconTheme = { 
@@ -47,6 +59,8 @@
       font-name = "Maple Mono NF 11";
       document-font-name = "Maple Mono NF 11";
       monospace-font-name = "Maple Mono NF 11";
+      font-antialiasing = "rgba";
+      font-hinting = "slight";
     };
   };
 }

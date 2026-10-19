@@ -23,6 +23,16 @@
 
     fontconfig = {
       enable = true;
+      antialias = true;
+      subpixel = {
+        rgba = "rgb";
+        lcdfilter = "default";
+      };
+      hinting = {
+        enable = true;
+        style = "slight";
+        autohint = false;
+      };
       defaultFonts = {
         sansSerif = [ "Inter" "FZYJHK B" "Noto Sans CJK SC" ];
         serif     = [ "FZYJHK B" "Noto Serif CJK SC" ];

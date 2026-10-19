@@ -50,6 +50,7 @@
     ./piclist
     ./rustdesk
     ./codex
+    ./workbuddy
     ./downloads
 
     # --- Development ---

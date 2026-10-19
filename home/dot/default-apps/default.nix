@@ -10,12 +10,16 @@
     BROWSER = "zen";
     DEFAULT_BROWSER = "zen";
     FILEMANAGER = "dolphin";
+    GTK_USE_PORTAL = "1";
+    QT_USE_PORTAL = "1";
   };
 
   systemd.user.sessionVariables = {
     BROWSER = "zen";
     DEFAULT_BROWSER = "zen";
     FILEMANAGER = "dolphin";
+    GTK_USE_PORTAL = "1";
+    QT_USE_PORTAL = "1";
   };
 
   # [Desktop Entries]

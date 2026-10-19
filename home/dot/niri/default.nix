@@ -15,7 +15,9 @@
 
   # [Session Variables]
   home.sessionVariables = {
+    GTK_USE_PORTAL = "1";
     NIXOS_OZONE_WL = "1";
+    QT_USE_PORTAL = "1";
     XDG_CURRENT_DESKTOP = "niri";
     XDG_SESSION_DESKTOP = "niri";
     XDG_SESSION_TYPE = "wayland";

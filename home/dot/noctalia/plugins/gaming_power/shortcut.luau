@@ -3,7 +3,7 @@
 
 local mode = noctalia.state.get("mode") or "balanced"
 local busy = false
-local cycle = { "power-saver", "balanced", "performance" }
+local cycle = { "balanced", "performance", "power-saver" }
 
 local function commandAvailable()
   return noctalia.commandExists("gaming-power-mode")
@@ -16,8 +16,6 @@ local function labelFor(currentMode)
     return "性能模式"
   elseif currentMode == "balanced-performance" then
     return "均衡性能"
-  elseif currentMode == "full-speed" then
-    return "满速模式"
   elseif currentMode == "unknown" then
     return "性能调度"
   end
@@ -29,8 +27,6 @@ local function iconFor(currentMode)
     return "leaf", "battery"
   elseif currentMode == "performance" then
     return "bolt", "cpu"
-  elseif currentMode == "full-speed" then
-    return "flame", "zap"
   end
   return "gauge", "battery-2"
 end
@@ -40,7 +36,7 @@ local function render()
   local primaryIcon, fallbackIcon = iconFor(mode)
   shortcut.setLabel(if busy then "切换中..." else labelFor(mode))
   shortcut.setIcon(primaryIcon, fallbackIcon)
-  shortcut.setActive(mode == "performance" or mode == "full-speed" or mode == "power-saver" or mode == "low-power")
+  shortcut.setActive(mode == "performance")
   shortcut.setEnabled(available and not busy)
 end
 
@@ -55,9 +51,7 @@ noctalia.state.watch("mode", applyMode)
 render()
 
 local function stateForTarget(target)
-  if target == "full-speed" then
-    return "full-speed"
-  elseif target == "performance" then
+  if target == "performance" then
     return "performance"
   elseif target == "power-saver" or target == "low-power" then
     return "power-saver"
@@ -104,9 +98,5 @@ function onClick()
 end
 
 function onRightClick()
-  if mode == "full-speed" then
-    setMode("balanced")
-  else
-    setMode("full-speed")
-  end
+  setMode("balanced")
 end

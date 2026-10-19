@@ -1,17 +1,16 @@
 --!nonstrict
--- Track the real platform power profile so the Control Center tile mirrors
--- changes made by GameMode or the standalone gaming-power-mode command.
+-- Track system power profile so the Control Center tile mirrors
+-- changes made by Noctalia's built-in power settings, GameMode, or CLI.
 
 noctalia.setUpdateInterval(2000)
 
 local lastMode = nil
+local querying = false
 
 local function normalize(raw)
   local value = noctalia.string.trim(raw or "")
   if value == "performance" then
     return "performance"
-  elseif value == "full-speed" or value == "max" then
-    return "full-speed"
   elseif value == "balanced-performance" then
     return "balanced-performance"
   elseif value == "balanced" then
@@ -22,33 +21,31 @@ local function normalize(raw)
   return nil
 end
 
-local function rememberedMode()
-  return normalize(noctalia.readFile("/run/user/1000/gaming-power-mode/state"))
-end
-
-local function detectMode()
-  local remembered = rememberedMode()
-  local platformMode = normalize(noctalia.readFile("/sys/firmware/acpi/platform_profile"))
-
-  if remembered == "full-speed" and (platformMode == nil or platformMode == "performance") then
-    return "full-speed"
-  elseif platformMode then
-    return platformMode
-  end
-
-  return remembered or "unknown"
-end
-
-local function publish()
-  local mode = detectMode()
-  if mode ~= lastMode then
+local function setModeIfChanged(mode)
+  if mode and mode ~= lastMode then
     lastMode = mode
     noctalia.state.set("mode", mode)
   end
 end
 
-function update()
-  publish()
+local function poll()
+  if querying then
+    return
+  end
+  querying = true
+  noctalia.runAsync("powerprofilesctl get", function(result)
+    querying = false
+    if result.exitCode == 0 then
+      setModeIfChanged(normalize(result.stdout))
+    else
+      local fallback = normalize(noctalia.readFile("/sys/firmware/acpi/platform_profile"))
+      setModeIfChanged(fallback or "balanced")
+    end
+  end, 2000)
 end
 
-publish()
+function update()
+  poll()
+end
+
+poll()

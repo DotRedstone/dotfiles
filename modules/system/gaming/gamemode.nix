@@ -166,7 +166,7 @@ let
     }
 
     static void usage(void) {
-      fprintf(stderr, "Usage: gaming-power-mode-root [power-saver|balanced|balanced-performance|performance|full-speed]\n");
+      fprintf(stderr, "Usage: gaming-power-mode-root [power-saver|balanced|balanced-performance|performance]\n");
     }
 
     int main(int argc, char **argv) {
@@ -184,43 +184,41 @@ let
       if (strcmp(mode, "power-saver") == 0 ||
           strcmp(mode, "low-power") == 0 ||
           strcmp(mode, "quiet") == 0) {
-        int profile_status = set_platform_profile("low-power");
+        set_platform_profile("low-power");
         set_policy_value("scaling_available_governors", "scaling_governor", "powersave");
         set_policy_value("energy_performance_available_preferences", "energy_performance_preference", "power");
         set_energy_bias("15");
         set_intel_pstate_power_saver();
-        return profile_status == 0 ? 0 : 1;
+        return 0;
       }
 
       if (strcmp(mode, "balanced-performance") == 0 ||
           strcmp(mode, "balance-performance") == 0) {
-        int profile_status = set_platform_profile("balanced-performance");
-        set_policy_value("scaling_available_governors", "scaling_governor", "performance");
+        set_platform_profile("balanced-performance");
+        set_policy_value("scaling_available_governors", "scaling_governor", "powersave");
         set_policy_value("energy_performance_available_preferences", "energy_performance_preference", "balance_performance");
         set_energy_bias("4");
         set_intel_pstate_performance();
-        return profile_status == 0 ? 0 : 1;
+        return 0;
       }
 
       if (strcmp(mode, "start") == 0 ||
-          strcmp(mode, "performance") == 0 ||
-          strcmp(mode, "full-speed") == 0 ||
-          strcmp(mode, "max") == 0) {
-        int profile_status = set_platform_profile("performance");
-        set_policy_value("scaling_available_governors", "scaling_governor", "performance");
+          strcmp(mode, "performance") == 0) {
+        set_platform_profile("performance");
+        set_policy_value("scaling_available_governors", "scaling_governor", "powersave");
         set_policy_value("energy_performance_available_preferences", "energy_performance_preference", "performance");
         set_energy_bias("0");
         set_intel_pstate_performance();
-        return profile_status == 0 ? 0 : 1;
+        return 0;
       }
 
       if (strcmp(mode, "end") == 0 || strcmp(mode, "balanced") == 0) {
-        int profile_status = set_platform_profile("balanced");
+        set_platform_profile("balanced");
         set_policy_value("scaling_available_governors", "scaling_governor", "powersave");
         set_policy_value("energy_performance_available_preferences", "energy_performance_preference", "balance_performance");
         set_energy_bias("6");
         set_intel_pstate_balanced();
-        return profile_status == 0 ? 0 : 1;
+        return 0;
       }
 
       fprintf(stderr, "Unknown mode: %s\n", mode);
@@ -289,7 +287,7 @@ let
         # limits can remain from the preceding mode (for example, low power
         # with Turbo still disabled).
         if [ -n "$profile" ] && command -v powerprofilesctl >/dev/null 2>&1; then
-          powerprofilesctl set "$profile" >/dev/null 2>&1 || log "powerprofilesctl could not set $profile"
+          powerprofilesctl set "$profile" >/dev/null 2>&1 || true
         fi
 
         if [ "$current" = "$platform_profile" ]; then
@@ -343,14 +341,8 @@ let
           set_power_profile balanced
           write_state balanced
           ;;
-        full-speed|max)
-          set_fan_mode full-speed
-          set_system_mode full-speed
-          set_power_profile performance
-          write_state full-speed
-          ;;
         *)
-          echo "Usage: gaming-power-mode [power-saver|balanced|balanced-performance|performance|full-speed]" >&2
+          echo "Usage: gaming-power-mode [power-saver|balanced|balanced-performance|performance]" >&2
           exit 64
           ;;
       esac

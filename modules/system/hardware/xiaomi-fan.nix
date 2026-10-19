@@ -26,7 +26,7 @@ let
     };
 
     static void usage(void) {
-      fprintf(stderr, "Usage: xiaomi-fan-mode-root [quiet|balanced|performance|full-speed]\n");
+      fprintf(stderr, "Usage: xiaomi-fan-mode-root [quiet|balanced|performance]\n");
     }
 
     static const struct fan_mode *resolve_mode(const char *arg) {
@@ -42,10 +42,6 @@ let
         "performance",
         "\\\\_SB.PC00.WMID.WMAA 1 1 {0x00,0xFB,0x00,0x08,0x03,0x00,0x00,0x00,0x00,0x00}"
       };
-      static const struct fan_mode full_speed = {
-        "full-speed",
-        "\\\\_SB.PC00.WMID.WMAA 1 1 {0x00,0xFB,0x00,0x08,0x04,0x00,0x00,0x00,0x00,0x00}"
-      };
 
       if (strcmp(arg, "quiet") == 0 || strcmp(arg, "low-power") == 0) {
         return &quiet;
@@ -55,9 +51,6 @@ let
       }
       if (strcmp(arg, "performance") == 0 || strcmp(arg, "berserk") == 0) {
         return &performance;
-      }
-      if (strcmp(arg, "full-speed") == 0 || strcmp(arg, "max") == 0) {
-        return &full_speed;
       }
       return NULL;
     }
@@ -171,7 +164,7 @@ let
 
   xiaomiFanMode = pkgs.writeShellScriptBin "xiaomi-fan-mode" ''
     if [ "$#" -ne 1 ]; then
-      echo "Usage: xiaomi-fan-mode [quiet|balanced|performance|full-speed]" >&2
+      echo "Usage: xiaomi-fan-mode [quiet|balanced|performance]" >&2
       exit 1
     fi
 
@@ -186,6 +179,39 @@ let
     echo "Missing /run/wrappers/bin/xiaomi-fan-mode-root; rebuild the system first." >&2
     exit 1
   '';
+
+  xiaomiFanPowerSync = pkgs.writeShellScriptBin "xiaomi-fan-power-sync" ''
+    set -u
+
+    apply_profile() {
+      profile="$1"
+      case "$profile" in
+        performance)
+          ${xiaomiFanModeRoot}/bin/xiaomi-fan-mode-root performance >/dev/null 2>&1 || true
+          ;;
+        power-saver)
+          ${xiaomiFanModeRoot}/bin/xiaomi-fan-mode-root quiet >/dev/null 2>&1 || true
+          ;;
+        balanced|*)
+          ${xiaomiFanModeRoot}/bin/xiaomi-fan-mode-root balanced >/dev/null 2>&1 || true
+          ;;
+      esac
+    }
+
+    # Initial sync on service start
+    current_profile="$(${pkgs.systemd}/bin/busctl get-property org.freedesktop.UPower.PowerProfiles /net/hadess/PowerProfiles net.hadess.PowerProfiles ActiveProfile 2>/dev/null | ${pkgs.coreutils}/bin/cut -d'"' -f2 || true)"
+    if [ -n "$current_profile" ]; then
+      apply_profile "$current_profile"
+    fi
+
+    # Monitor D-Bus property changes from power-profiles-daemon
+    ${pkgs.coreutils}/bin/stdbuf -oL ${pkgs.dbus}/bin/dbus-monitor --system "type='signal',path='/net/hadess/PowerProfiles',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged'" 2>/dev/null | \
+    while read -r line; do
+      if [[ "$line" =~ variant[[:space:]]+string[[:space:]]+\"([^\"]+)\" ]]; then
+        apply_profile "''${BASH_REMATCH[1]}"
+      fi
+    done
+  '';
 in
 {
   security.wrappers.xiaomi-fan-mode-root = {
@@ -194,6 +220,19 @@ in
     group = "root";
     setuid = true;
     permissions = "u+rx,g+rx,o+rx";
+  };
+
+  systemd.services.xiaomi-fan-power-sync = {
+    description = "Synchronize Xiaomi fan thermal mode with system power profile";
+    after = [ "power-profiles-daemon.service" ];
+    wants = [ "power-profiles-daemon.service" ];
+    wantedBy = [ "graphical.target" ];
+    serviceConfig = {
+      Type = "simple";
+      Restart = "always";
+      RestartSec = "5s";
+      ExecStart = "${xiaomiFanPowerSync}/bin/xiaomi-fan-power-sync";
+    };
   };
 
   environment.systemPackages = [

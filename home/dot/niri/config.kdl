@@ -327,3 +327,15 @@ window-rule {
         saturation 1.1
     }
 }
+
+// [Layer Rules]
+layer-rule {
+    match namespace="^noctalia-panel$"
+
+    background-effect {
+        blur true
+        xray true
+        noise 0.01
+        saturation 1.1
+    }
+}

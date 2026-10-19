@@ -12,6 +12,12 @@
     FILEMANAGER = "dolphin";
   };
 
+  systemd.user.sessionVariables = {
+    BROWSER = "zen";
+    DEFAULT_BROWSER = "zen";
+    FILEMANAGER = "dolphin";
+  };
+
   # [Desktop Entries]
   # Provide zen.desktop alias pointing to zen %U for tools that look for generic zen.desktop
   xdg.desktopEntries.zen = {
@@ -75,10 +81,24 @@
       "x-scheme-handler/clash-verge" = [ "clash-verge.desktop" ];
       "x-scheme-handler/codex" = [ "chatgpt.desktop" ];
     };
+
+    associations.added = {
+      "inode/directory" = [ "org.kde.dolphin.desktop" ];
+      "x-scheme-handler/file" = [ "org.kde.dolphin.desktop" ];
+    };
+
+    associations.removed = {
+      "inode/directory" = [
+        "code.desktop"
+        "yazi.desktop"
+        "kitty-open.desktop"
+        "org.pwmt.zathura-cb.desktop"
+      ];
+    };
   };
 
   # [Portal Cache Cleanup]
-  # Ensure portal PermissionStore never retains stale Chrome overrides for PDF or HTML
+  # Ensure portal PermissionStore never retains stale overrides
   home.activation.cleanPortalUsedApps = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if command -v gdbus >/dev/null 2>&1; then
       ${pkgs.glib}/bin/gdbus call --session --dest org.freedesktop.impl.portal.PermissionStore \
@@ -90,6 +110,9 @@
       ${pkgs.glib}/bin/gdbus call --session --dest org.freedesktop.impl.portal.PermissionStore \
         --object-path /org/freedesktop/impl/portal/PermissionStore \
         --method org.freedesktop.impl.portal.PermissionStore.Delete 'desktop-used-apps' 'application/xhtml+xml' 2>/dev/null || true
+      ${pkgs.glib}/bin/gdbus call --session --dest org.freedesktop.impl.portal.PermissionStore \
+        --object-path /org/freedesktop/impl/portal/PermissionStore \
+        --method org.freedesktop.impl.portal.PermissionStore.Delete 'desktop-used-apps' 'inode/directory' 2>/dev/null || true
     fi
   '';
 }

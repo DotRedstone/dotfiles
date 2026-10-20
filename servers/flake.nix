@@ -25,11 +25,11 @@
     gmail-archiver.inputs.nixpkgs.follows = "nixpkgs";
 
     # Private remote is fetched at one exact revision from flake.lock.
-    proxyStack.url = "git+https://github.com/DotRedstone/proxy-stack.git?ref=codex/sanitized-v2&rev=5393d0e1bffd3406b62b09269b54fd7434778f3e";
+    proxyStack.url = "git+https://github.com/DotRedstone/proxy-stack.git?ref=codex/reusable-release&rev=b5eef6670d0e2792beae65b31039503a83784db0";
     proxyStack.inputs.nixpkgs.follows = "nixpkgs";
 
     edgeProxyWorker = {
-      url = "git+ssh://git@github.com/DotRedstone/edge-proxy-worker.git?ref=main";
+      url = "git+ssh://git@github.com/DotRedstone/edge-proxy-worker.git?ref=codex/public-speed-transition-20261018&rev=ad806d4f7f0737c8c079e91403620671b504f868";
       flake = false;
     };
   };

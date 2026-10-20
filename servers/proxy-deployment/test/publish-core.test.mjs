@@ -86,6 +86,80 @@ function newer(input) {
   return changed;
 }
 
+function sharedEdgeFixture() {
+  const input = fixture();
+  const candidate = (address, downloadMBps) => ({
+    address, port: 443, latencyMs: 42, lossRate: 0, downloadMBps,
+  });
+  const [a, b, c] = [
+    candidate("198.51.100.1", 5),
+    candidate("203.0.113.1", 4),
+    candidate("203.0.113.2", 3),
+  ];
+  input.pools["sample-net/la"].candidates = [a, b];
+  input.pools["sample-net/sg"].candidates = [structuredClone(b), c];
+  return input;
+}
+
+test("shared edge source accepts compatible ordered sublists", async () => {
+  const store = new MemoryStore();
+  const result = await run(sharedEdgeFixture(), store, { sharedEdgeSourceIds: ["sample-net"] });
+  assert.equal(result.published, true);
+  assert.equal(store.puts.at(-1), manifestKey);
+});
+
+test("shared edge gate rejects mixed scans, speed drift, and reversed ranking before KV writes", async () => {
+  const changes = [
+    (input) => { input.pools["sample-net/sg"].collectedAt = "2026-10-11T00:01:00Z"; },
+    (input) => { input.pools["sample-net/sg"].candidates[0].downloadMBps = 3.9; },
+    (input) => {
+      const a = input.pools["sample-net/la"].candidates;
+      input.pools["sample-net/sg"].candidates = [...a].reverse();
+    },
+  ];
+  for (const change of changes) {
+    const input = sharedEdgeFixture();
+    change(input);
+    const store = new MemoryStore();
+    await assert.rejects(run(input, store, { sharedEdgeSourceIds: ["sample-net"] }),
+      /shared edge pools/);
+    assert.equal(store.puts.length, 0);
+  }
+});
+
+test("shared edge source accepts disjoint compatible sublists from one scan", async () => {
+  const input = sharedEdgeFixture();
+  input.pools["sample-net/sg"].candidates.shift();
+  const store = new MemoryStore();
+  assert.equal((await run(input, store, { sharedEdgeSourceIds: ["sample-net"] })).published, true);
+});
+
+test("shared edge gate does not constrain an unregistered source", async () => {
+  const input = sharedEdgeFixture();
+  const independent = fixture(["independent"]);
+  input.catalog.accounts.accounts.independent = independent.catalog.accounts.accounts.independent;
+  input.catalog.accounts.accounts.independent.sourceIdByOrigin = { la: "other-net", sg: "other-net" };
+  input.runtimeByAccount.independent = independent.runtimeByAccount.independent;
+  input.runtimeByAccount.independent.deliveryToken = "B".repeat(40);
+  for (const origin of ["la", "sg"]) {
+    input.catalog.sources.sources.push({
+      sourceId: "other-net", type: "signed-upload", origin, accessNetwork: "sample-access",
+    });
+    input.pools[`other-net/${origin}`] = {
+      ...independent.pools[`sample-net/${origin}`], sourceId: "other-net",
+    };
+  }
+  const store = new MemoryStore();
+  assert.equal((await run(input, store, { sharedEdgeSourceIds: ["sample-net"] })).published, true);
+});
+
+test("shared edge source registration rejects an unknown source before KV writes", async () => {
+  const store = new MemoryStore();
+  await assert.rejects(run(fixture(), store, { sharedEdgeSourceIds: ["other-net"] }),
+    /absent from approved origins/);
+  assert.equal(store.puts.length, 0);
+});
+
 test("writes five immutable documents before the manifest and skips unchanged inputs", async () => {
   const store = new MemoryStore();
   const result = await run(fixture(), store);

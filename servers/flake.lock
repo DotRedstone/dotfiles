@@ -23,16 +23,17 @@
     "edgeProxyWorker": {
       "flake": false,
       "locked": {
-        "lastModified": 1792132892,
-        "narHash": "sha256-dlZaqcG6ap80iBw5ZC9pdwcVFgaNW/fA5ikhNqYz4Ww=",
-        "ref": "main",
-        "rev": "052a959dad36e4ea23ca45a1885c657761a5903c",
-        "revCount": 21,
+        "lastModified": 1792302449,
+        "narHash": "sha256-quUz8e0jdxYZjdHjB/gE8hFhOmFedhp/INyg8GBovWk=",
+        "ref": "codex/public-speed-transition-20261018",
+        "rev": "ad806d4f7f0737c8c079e91403620671b504f868",
+        "revCount": 7,
         "type": "git",
         "url": "ssh://git@github.com/DotRedstone/edge-proxy-worker.git"
       },
       "original": {
-        "ref": "main",
+        "ref": "codex/public-speed-transition-20261018",
+        "rev": "ad806d4f7f0737c8c079e91403620671b504f868",
         "type": "git",
         "url": "ssh://git@github.com/DotRedstone/edge-proxy-worker.git"
       }
@@ -190,17 +191,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1791971629,
-        "narHash": "sha256-0XNue1CC3fs0kTAsQB/zSs64Su+8y/UQ2poi+0F1E+g=",
-        "ref": "codex/sanitized-v2",
-        "rev": "5393d0e1bffd3406b62b09269b54fd7434778f3e",
-        "revCount": 11,
+        "lastModified": 1792302459,
+        "narHash": "sha256-o1q2wXa8Kha3j8a10yiYPDrf3Ybb4QJHfd/qvMU51u4=",
+        "ref": "codex/reusable-release",
+        "rev": "b5eef6670d0e2792beae65b31039503a83784db0",
+        "revCount": 2,
         "type": "git",
         "url": "https://github.com/DotRedstone/proxy-stack.git"
       },
       "original": {
-        "ref": "codex/sanitized-v2",
-        "rev": "5393d0e1bffd3406b62b09269b54fd7434778f3e",
+        "ref": "codex/reusable-release",
+        "rev": "b5eef6670d0e2792beae65b31039503a83784db0",
         "type": "git",
         "url": "https://github.com/DotRedstone/proxy-stack.git"
       }

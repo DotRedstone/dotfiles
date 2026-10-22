@@ -12,6 +12,7 @@
     ./firewall.nix
     ./easytier.nix
     ./todesk.nix
+    ./kdeconnect.nix
     ./sshd.nix
   ];
 }

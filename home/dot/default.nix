@@ -51,6 +51,7 @@
     ./rustdesk
     ./codex
     ./workbuddy
+    ./kdeconnect
     ./downloads
 
     # --- Development ---

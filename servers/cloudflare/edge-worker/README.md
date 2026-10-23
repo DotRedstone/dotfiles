@@ -52,11 +52,13 @@ Wrangler 会继承线上已有 Secret。执行前记录当前部署版本以便�
 不会从新的独立项目克隆中猜测旧来源。
 
 实际部署会查询或创建 `edge-proxy-next-state` KV，将四份私有配置写入
-`clash/config/<profile>`，然后部署 `edge-proxy-next` 和 `edge-preferred-control`。
-它可能改变现有灰度链路，须先复核固定源码、KV、测试域名和回退路径；本次迁移未执行。
-Cloudflare 运行时验证还需分别检查配置下载、优选池更新、WS、XHTTP、Trojan、DNS
-UDP 与客户端选择。旧 Worker、旧 KV 和旧 provider 在灰度期间保留，出现问题时将
-OpenClash 选择组切回旧 provider；如需恢复旧部署脚本，可回退本目录迁移提交。
+`clash/config/<profile>`，然后部署 `edge-proxy-next-recovery` 和
+`edge-preferred-control`。主 Worker 同时绑定自定义域名，并确保同域名的
+`/*` Worker Route 指向该服务。原 `edge-proxy-next` 服务保留，但本次修复前的
+自定义域名请求返回 522，不能视为可用回退。2026-10-24 已验证主域名的扫描路径、
+订阅、优选池和配置下载；WS、XHTTP、Trojan、DNS UDP 与客户端选择仍需真实客户端验收。
+改动链路前应记录当前域名绑定、Route 和 Worker 部署版本；若新部署异常，先恢复
+这些记录中的映射，再按实际健康状态选择旧 provider。
 
 ## 绑定与路由器
 
@@ -68,6 +70,9 @@ OpenClash 选择组切回旧 provider；如需恢复旧部署脚本，可回退�
 `DEFAULT_PREFERRED_POOL` 设置为 `la`。这保持现有 `la`、`sg` 路径与
 `preferred-endpoints-v2:<pool>` KV 键，并让无 pool 的兼容路径和订阅继续使用 `la`。
 两侧绑定必须相同；修改池名时还需核对路由器上传路径与已有 KV 数据。
+同域名 Worker Route 是本次恢复实际流量所需的接入路径；部署脚本会在
+Wrangler 发布主 Worker 后核对或修正该 Route。仅恢复自定义域名绑定不能证明
+主域名可用，应同时验证 Route 的目标和线上响应。
 具体接口及签名格式见独立项目 README。`scripts/router-cfst.sh` 是此部署的路由器
 CloudflareST 适配模板，私有密钥只保留在路由器的 `/root/cfst/edge.env`（`0600`）。
 `node scripts/show-clash-profile-urls.mjs` 会输出含私有 token 的下载地址，只能在受信任

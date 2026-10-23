@@ -70,3 +70,19 @@ CloudflareST 适配模板，私有密钥只保留在路由器的 `/root/cfst/edg
 历史灰度记录与路由器回退路径见
 [`../../docs/cloudflare-edge-migration.md`](../../docs/cloudflare-edge-migration.md) 和
 [`../../docs/mihomo-profiles.md`](../../docs/mihomo-profiles.md)。
+
+## 未知路径入口防护
+
+[`waf-path-guard.json`](./waf-path-guard.json) 定义主 Worker 自定义域名的 WAF 规则：
+只允许现有代理传输、订阅、优选池、配置和签名上传的路径前缀进入 Worker，
+其余路径由 Cloudflare 在 Worker 运行前拦截并返回 403。当前账号不支持 WAF
+自定义响应，因此不能将拦截结果伪装成 404。前缀内仍由 Worker
+校验令牌、方法和签名。该规则不会保护单独开放的 `workers.dev` 入口；
+在确认旧订阅、管理回退和客户端不再依赖该入口之前，不关闭它。
+
+启用前须只读核对该域名的实际 Worker 绑定、现有 WAF 规则和合法客户端路径；
+有请求分析权限时还应核对路径分布。部署后验证合法请求和扫描路径，并在具备
+用量数据时比较 Worker 调用量。若误拦，在
+Cloudflare 的 WAF 自定义规则中停用 `edge-proxy-next: 拦截未知路径` 即可回退，
+旧 Worker、KV 和订阅不需改动。此文件不会由旧版 `deploy.mjs` 自动发布，
+WAF 规则须独立核对和管理。

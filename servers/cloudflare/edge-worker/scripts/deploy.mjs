@@ -26,7 +26,7 @@ const baselinePath = path.resolve(
   "clash",
   "router-policy.json",
 );
-const workerName = "edge-proxy-next";
+const workerName = "edge-proxy-next-recovery";
 const preferredControlWorkerName = "edge-preferred-control";
 const namespaceTitle = "edge-proxy-next-state";
 const publicHost = "edge-next.dotdot.ggff.net";
@@ -95,6 +95,34 @@ async function ensureNamespace(credentials, allowCreate = true) {
     },
   );
   return created.id;
+}
+
+async function ensureWorkerRoute(credentials) {
+  const domains = await cloudflareApi(
+    credentials,
+    `/accounts/${credentials.account_id}/workers/domains`,
+  );
+  const domain = domains.find((item) => item.hostname === publicHost);
+  if (!domain || domain.service !== workerName) {
+    throw new Error(
+      `custom domain ${publicHost} is not attached to ${workerName}`,
+    );
+  }
+  const routeBase = `/zones/${domain.zone_id}/workers/routes`;
+  const pattern = `${publicHost}/*`;
+  const matches = (await cloudflareApi(credentials, routeBase)).filter(
+    (route) => route.pattern === pattern,
+  );
+  if (matches.length > 1) throw new Error(`duplicate Worker route: ${pattern}`);
+  if (matches[0]?.script === workerName) return;
+  await cloudflareApi(
+    credentials,
+    matches.length === 1 ? `${routeBase}/${matches[0].id}` : routeBase,
+    {
+      method: matches.length === 1 ? "PUT" : "POST",
+      body: JSON.stringify({ pattern, script: workerName }),
+    },
+  );
 }
 
 async function putNamespaceValue(credentials, namespaceId, key, value) {
@@ -250,6 +278,7 @@ async function main() {
       message: "原子化边缘代理声明式部署",
       dryRun,
     });
+    if (!dryRun) await ensureWorkerRoute(credentials);
     if (mainOnly) {
       console.log(
         dryRun

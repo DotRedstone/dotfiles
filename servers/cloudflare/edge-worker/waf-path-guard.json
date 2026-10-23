@@ -1,0 +1,5 @@
+{
+  "description": "edge-proxy-next: 拦截未知路径",
+  "expression": "(http.host eq \"edge-next.dotdot.ggff.net\" and not (starts_with(http.request.uri.path, \"/edge/\") or starts_with(http.request.uri.path, \"/sub/\") or starts_with(http.request.uri.path, \"/preferred/\") or starts_with(http.request.uri.path, \"/clash/\") or starts_with(http.request.uri.path, \"/admin/preferred-ips/\")))",
+  "action": "block"
+}

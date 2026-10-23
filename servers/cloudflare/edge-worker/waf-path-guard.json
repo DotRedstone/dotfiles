@@ -1,5 +1,5 @@
 {
-  "description": "edge-proxy-next: 拦截未知路径",
-  "expression": "(http.host eq \"edge-next.dotdot.ggff.net\" and not (starts_with(http.request.uri.path, \"/edge/\") or starts_with(http.request.uri.path, \"/sub/\") or starts_with(http.request.uri.path, \"/preferred/\") or starts_with(http.request.uri.path, \"/clash/\") or starts_with(http.request.uri.path, \"/admin/preferred-ips/\")))",
+  "description": "edge-proxy-next: 拦截未知路径或方法",
+  "expression": "(http.host eq \"edge-next.dotdot.ggff.net\" and not ((((http.request.method eq \"GET\") or (http.request.method eq \"POST\")) and starts_with(http.request.uri.path, \"/edge/\")) or (http.request.method eq \"GET\" and (starts_with(http.request.uri.path, \"/sub/\") or starts_with(http.request.uri.path, \"/preferred/\") or starts_with(http.request.uri.path, \"/clash/\"))) or (http.request.method eq \"POST\" and starts_with(http.request.uri.path, \"/admin/preferred-ips/\"))))",
   "action": "block"
 }

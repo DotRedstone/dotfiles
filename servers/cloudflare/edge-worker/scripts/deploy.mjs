@@ -36,6 +36,7 @@ const preferredPoolVars = {
   DEFAULT_PREFERRED_POOL: "la",
 };
 const dryRun = process.argv.includes("--dry-run");
+const mainOnly = process.argv.includes("--main-only");
 
 function run(command, arguments_, options = {}) {
   const result = spawnSync(command, arguments_, {
@@ -77,13 +78,14 @@ async function cloudflareApi(credentials, apiPath, init = {}) {
   return body.result;
 }
 
-async function ensureNamespace(credentials) {
+async function ensureNamespace(credentials, allowCreate = true) {
   const namespaces = await cloudflareApi(
     credentials,
     `/accounts/${credentials.account_id}/storage/kv/namespaces?per_page=100`,
   );
   const existing = namespaces.find((item) => item.title === namespaceTitle);
   if (existing) return existing.id;
+  if (!allowCreate) throw new Error(`KV namespace ${namespaceTitle} is missing`);
   const created = await cloudflareApi(
     credentials,
     `/accounts/${credentials.account_id}/storage/kv/namespaces`,
@@ -138,13 +140,12 @@ function deployWorker({
     "deploy",
     "--config",
     configPath,
-    "--secrets-file",
-    secretsPath,
     "--strict",
     "--minify",
     "--message",
     message,
   ];
+  if (secretsPath) arguments_.push("--secrets-file", secretsPath);
   if (dryRun) arguments_.push("--dry-run");
   const deployed = spawnSync("npx", arguments_, {
     cwd: sourceDirectory,
@@ -187,7 +188,7 @@ async function main() {
     // Dry run must stay local; the placeholder validates Wrangler's binding shape.
     const namespaceId = dryRun
       ? "00000000000000000000000000000000"
-      : await ensureNamespace(credentials);
+      : await ensureNamespace(credentials, !mainOnly);
     const configPath = path.join(temporaryDirectory, "wrangler.jsonc");
     const workerSecretsPath = path.join(temporaryDirectory, "secrets.json");
     const preferredControlConfigPath = path.join(
@@ -208,7 +209,7 @@ async function main() {
       IP_UPDATE_KEY: edge.ip_update_key,
     };
 
-    if (!dryRun) {
+    if (!dryRun && !mainOnly) {
       await deployClashProfiles(credentials, namespaceId, profiles);
     }
     fs.writeFileSync(
@@ -219,10 +220,8 @@ async function main() {
           name: workerName,
           main: path.join(sourceDirectory, "src", "index.ts"),
           compatibility_date: "2026-09-01",
-          // Keep a private-token control-plane fallback independent of the
-          // custom domain.  It is used only for configuration and preferred
-          // endpoint lists; traffic nodes keep their own CDN hostnames.
-          workers_dev: true,
+          workers_dev: false,
+          preview_urls: false,
           routes: [{ pattern: publicHost, custom_domain: true }],
           kv_namespaces: [{ binding: "EDGE_STATE", id: namespaceId }],
           vars: {
@@ -237,18 +236,28 @@ async function main() {
       )}\n`,
       { mode: 0o600 },
     );
-    fs.writeFileSync(workerSecretsPath, JSON.stringify(workerSecrets), {
-      mode: 0o600,
-    });
+    if (!mainOnly) {
+      fs.writeFileSync(workerSecretsPath, JSON.stringify(workerSecrets), {
+        mode: 0o600,
+      });
+    }
 
     deployWorker({
       sourceDirectory,
       configPath,
-      secretsPath: workerSecretsPath,
+      secretsPath: mainOnly ? undefined : workerSecretsPath,
       credentials,
       message: "原子化边缘代理声明式部署",
       dryRun,
     });
+    if (mainOnly) {
+      console.log(
+        dryRun
+          ? "Main Worker dry-run completed successfully."
+          : `Worker ${workerName} deployed successfully.`,
+      );
+      return;
+    }
     fs.writeFileSync(
       preferredControlConfigPath,
       `${JSON.stringify(

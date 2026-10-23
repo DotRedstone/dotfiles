@@ -41,6 +41,12 @@ Worker；因此不证明真实 binding、Secret 或客户端连接可用。脚�
 node scripts/deploy.mjs
 ```
 
+主 Worker 单独恢复可使用 `node scripts/deploy.mjs --main-only --dry-run` 验证，
+再运行 `node scripts/deploy.mjs --main-only`。该模式要求现有 KV namespace 已存在，
+不上传 Mihomo 配置、不部署优选控制 Worker，也不重传本地 SOPS 中的七项 Secret；
+Wrangler 会继承线上已有 Secret。执行前记录当前部署版本以便回退，执行后仍需
+核对线上绑定和真实入口响应。
+
 以上备份目录的父目录仅允许所有者访问。实际部署前应重新核对旧提交和 dry run；
 若备份被移动，更新环境变量指向同一旧提交。省略环境变量时适配器会拒绝执行，
 不会从新的独立项目克隆中猜测旧来源。
@@ -74,15 +80,23 @@ CloudflareST 适配模板，私有密钥只保留在路由器的 `/root/cfst/edg
 ## 未知路径入口防护
 
 [`waf-path-guard.json`](./waf-path-guard.json) 定义主 Worker 自定义域名的 WAF 规则：
-只允许现有代理传输、订阅、优选池、配置和签名上传的路径前缀进入 Worker，
-其余路径由 Cloudflare 在 Worker 运行前拦截并返回 403。当前账号不支持 WAF
+只允许现有代理传输、订阅、优选池、配置和签名上传的路径前缀及对应 HTTP 方法进入 Worker，
+其余请求由 Cloudflare 在 Worker 运行前拦截并返回 403。当前账号不支持 WAF
 自定义响应，因此不能将拦截结果伪装成 404。前缀内仍由 Worker
-校验令牌、方法和签名。该规则不会保护单独开放的 `workers.dev` 入口；
-在确认旧订阅、管理回退和客户端不再依赖该入口之前，不关闭它。
+校验令牌、方法和签名。主 Worker 的 `workers.dev` 与 Preview URLs 已关闭；
+独立优选控制 Worker 的 `workers.dev` 仍开放，不受这条域名规则保护。
 
 启用前须只读核对该域名的实际 Worker 绑定、现有 WAF 规则和合法客户端路径；
 有请求分析权限时还应核对路径分布。部署后验证合法请求和扫描路径，并在具备
 用量数据时比较 Worker 调用量。若误拦，在
-Cloudflare 的 WAF 自定义规则中停用 `edge-proxy-next: 拦截未知路径` 即可回退，
+Cloudflare 的 WAF 自定义规则中停用 `edge-proxy-next: 拦截未知路径或方法` 即可回退，
 旧 Worker、KV 和订阅不需改动。此文件不会由旧版 `deploy.mjs` 自动发布，
-WAF 规则须独立核对和管理。
+WAF 规则须独立核对和管理。主 Worker 的 `workers.dev` 如需回退，可通过
+Cloudflare Worker 域名设置重新启用；重部署前还需同步调整此脚本中的
+`workers_dev` 与 `preview_urls`，以免声明配置再次覆盖线上状态。
+
+`waf-v2-path-guards.json` 记录优选 v2 与配置投递 v2 的域名入口规则：
+分别只放行 `GET /v2/preferred/`、`POST /v2/admin/`，以及 `GET /u/`。
+这些规则按域名匹配；变更服务路径或方法时，先同步调整规则并验证合法请求。
+误拦时可在 WAF 自定义规则中单独停用对应的 `edge-preferred-v2-canary`
+或 `edge-delivery-v2-canary` 规则。

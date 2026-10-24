@@ -102,17 +102,23 @@ run_pool() {
   cp "$CFST_BIN" "$run_dir/cfst"
   seed_source="${CFST_SEED_FILE:-$ip_file}"
   if [ -s "$seed_source" ]; then
-    sed 's/:443.*//' "$seed_source" > "$run_dir/ip.txt"
+    # 全量扫描也带上上轮有效地址，避免候选范围调整时丢失已知好节点。
+    if [ "$seed_source" != "$ip_file" ] && [ -s "$ip_file" ]; then
+      sed 's/:443.*//' "$ip_file" > "$run_dir/ip.txt"
+      sed 's/:443.*//' "$seed_source" >> "$run_dir/ip.txt"
+    else
+      sed 's/:443.*//' "$seed_source" > "$run_dir/ip.txt"
+    fi
   else
     cp "$WORKDIR/ip.txt" "$run_dir/ip.txt"
   fi
   chmod 755 "$run_dir/cfst"
   chmod 644 "$run_dir/ip.txt"
 
-  result_tmp="$(mktemp /tmp/cfst-${pool}-result.csv.XXXXXX)"
+  result_tmp="$(mktemp "/tmp/cfst-${pool}-result.csv.XXXXXX")"
   ip_tmp="$(mktemp "$WORKDIR/new-ips-${pool}.txt.XXXXXX")"
-  log_tmp="$(mktemp /tmp/cfst-${pool}-run.XXXXXX)"
-  pid_tmp="$(mktemp /tmp/cfst-${pool}-pid.XXXXXX)"
+  log_tmp="$(mktemp "/tmp/cfst-${pool}-run.XXXXXX")"
+  pid_tmp="$(mktemp "/tmp/cfst-${pool}-pid.XXXXXX")"
   rm -f "$pid_tmp"
   chown nobody:nogroup "$result_tmp" "$log_tmp"
   cfst_pid=""

@@ -102,7 +102,7 @@ run_pool() {
   cp "$CFST_BIN" "$run_dir/cfst"
   seed_source="${CFST_SEED_FILE:-$ip_file}"
   if [ -s "$seed_source" ]; then
-    # 全量扫描也带上上轮有效地址，避免候选范围调整时丢失已知好节点。
+    # 全量扫描也探测上轮地址，避免候选范围调整后完全跳过旧池。
     if [ "$seed_source" != "$ip_file" ] && [ -s "$ip_file" ]; then
       sed 's/:443.*//' "$ip_file" > "$run_dir/ip.txt"
       sed 's/:443.*//' "$seed_source" >> "$run_dir/ip.txt"
@@ -165,7 +165,13 @@ run_pool() {
     tail -c 1200 "$log_tmp" >&2 || true
     exit 1
   }
-  awk -F',' -v label="$label" 'NR>1 && $1 ~ /^[0-9a-fA-F:.]+$/ { printf "%s:443#%s-%02d-%.2fMB/s\n", $1, label, NR - 1, $6 }' "$result_tmp" | head -n "${CFST_RESULTS:-8}" > "$ip_tmp"
+  # 只发布本轮有下载测速且达到下限的地址；CSV 也可能包含仅测到延迟的行。
+  awk -F',' -v label="$label" -v min_speed="${CFST_MIN_SPEED:-2}" '
+    NR>1 && $1 ~ /^[0-9a-fA-F:.]+$/ && $6+0 > 0 && $6+0 >= min_speed {
+      count++
+      printf "%s:443#%s-%02d-%.2fMB/s\n", $1, label, count, $6
+    }
+  ' "$result_tmp" | head -n "${CFST_RESULTS:-8}" > "$ip_tmp"
   result_count="$(wc -l < "$ip_tmp")"
   [ "$result_count" -ge "${CFST_MIN_RESULTS:-4}" ] || {
     logger -t cfst "${pool} pool has only $result_count usable endpoints; preserving last known-good list"

@@ -56,7 +56,8 @@ Wrangler 会继承线上已有 Secret。执行前记录当前部署版本以便�
 `edge-preferred-control`。主 Worker 同时绑定自定义域名，并确保同域名的
 `/*` Worker Route 指向该服务。原 `edge-proxy-next` 服务保留，但本次修复前的
 自定义域名请求返回 522，不能视为可用回退。2026-10-24 已验证主域名的扫描路径、
-订阅、优选池和配置下载；WS、XHTTP、Trojan、DNS UDP 与客户端选择仍需真实客户端验收。
+订阅、优选池和配置下载；临时 Mihomo 客户端已验证 WS、XHTTP、Trojan 的
+HTTP 出口以及新优选入口的 VLESS/WS 连通。DNS UDP 与实际设备的默认组选择仍需验收。
 改动链路前应记录当前域名绑定、Route 和 Worker 部署版本；若新部署异常，先恢复
 这些记录中的映射，再按实际健康状态选择旧 provider。
 

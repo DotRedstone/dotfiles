@@ -75,6 +75,9 @@ Wrangler 发布主 Worker 后核对或修正该 Route。仅恢复自定义域名
 主域名可用，应同时验证 Route 的目标和线上响应。
 具体接口及签名格式见独立项目 README。`scripts/router-cfst.sh` 是此部署的路由器
 CloudflareST 适配模板，私有密钥只保留在路由器的 `/root/cfst/edge.env`（`0600`）。
+日常重测以当前池为输入；指定 `CFST_SEED_FILE` 做完整候选扫描时，模板同时带入
+当前池地址并重新测速。只有测速数量达标且签名上传成功后才替换本地结果；模板变更
+不会自动更新路由器现用脚本。
 `node scripts/show-clash-profile-urls.mjs` 会输出含私有 token 的下载地址，只能在受信任
 终端手动使用，不能写入日志或工单。
 

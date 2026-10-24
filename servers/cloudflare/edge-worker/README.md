@@ -92,6 +92,40 @@ CloudflareST 适配模板，私有密钥只保留在路由器的 `/root/cfst/edg
 `node scripts/show-clash-profile-urls.mjs` 会输出含私有 token 的下载地址，只能在受信任
 终端手动使用，不能写入日志或工单。
 
+### 路由器优选的使用与恢复
+
+正常情况下无需手动上传。登录路由器后，用以下命令查看计划、最近一次输出、系统日志
+和两地名单数量；日志可能包含测速目标，勿公开原文：
+
+```sh
+crontab -l | grep run_cfst.sh
+tail -n 30 /root/cfst/last_run.log
+logread | grep cfst | tail -n 30
+wc -l /root/cfst/new-ips-la.txt /root/cfst/new-ips-sg.txt
+```
+
+`updated <pool> preferred endpoint pool` 表示该地上传成功；
+`pool has only ... usable endpoints`、`produced no result` 或 `scan failed` 表示本轮
+未更新该地，原池仍在。不能仅凭名单有 8 行判断本轮成功，应结合日志时间核对。
+任务退出非零、网络测速达不到门槛、上传失败时均保留该地旧池，次日继续抽样；
+连续多日失败时应检查路由器直连网络、测速目标和 Worker 上传日志。
+
+手动触发日常抽样或月度全量时，先确认没有扫描进程，使用与计划任务相同的参数：
+
+```sh
+CFST_SAMPLE_PER_CIDR=2 CFST_LATENCY_THREADS=12 CFST_ATTEMPTS=1 CFST_MIN_SPEED=2 CFST_DOWNLOADS=24 CFST_RESULTS=8 CFST_MIN_RESULTS=8 CFST_MAX_NEW=2 CFST_DURATION=4 CFST_MAX_RUNTIME=900 /root/cfst/run_cfst.sh
+CFST_SEED_FILE=/root/cfst/ip.txt CFST_LATENCY_THREADS=16 CFST_ATTEMPTS=1 CFST_MIN_SPEED=8 CFST_DOWNLOADS=60 CFST_RESULTS=8 CFST_MIN_RESULTS=8 CFST_DURATION=5 CFST_MAX_RUNTIME=21600 /root/cfst/run_cfst.sh
+```
+
+第二条可能持续数小时。脚本自动签名上传，不需输出或复制密钥。部署侧脚本更新后，
+须重新安装到路由器 `/root/cfst/run_cfst.sh`；仅提交仓库不改变现用任务。
+最近一次变更前的脚本、名单和 crontab 保存在路由器
+`/root/cfst/backup-before-monthly-20261024/`。回退时先停下正在运行的扫描，再恢复
+该目录中的脚本与 crontab；如需恢复线上池，分别恢复两份名单并执行
+`/root/cfst/run_cfst.sh --pool la --upload-only` 和
+`/root/cfst/run_cfst.sh --pool sg --upload-only`。上传后核对 Worker 返回的名单，
+不要只看本地文件。
+
 历史灰度记录与路由器回退路径见
 [`../../docs/cloudflare-edge-migration.md`](../../docs/cloudflare-edge-migration.md) 和
 [`../../docs/mihomo-profiles.md`](../../docs/mihomo-profiles.md)。

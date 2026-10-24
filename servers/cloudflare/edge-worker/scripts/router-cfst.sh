@@ -101,7 +101,31 @@ run_pool() {
   }
   cp "$CFST_BIN" "$run_dir/cfst"
   seed_source="${CFST_SEED_FILE:-$ip_file}"
-  if [ -s "$seed_source" ]; then
+  if [ -n "${CFST_SAMPLE_PER_CIDR:-}" ]; then
+    case "$CFST_SAMPLE_PER_CIDR" in *[!0-9]*|""|0) echo "invalid CFST_SAMPLE_PER_CIDR" >&2; return 1 ;; esac
+    [ -s "$WORKDIR/ip.txt" ] || { echo "missing CIDR seed file" >&2; return 1; }
+    sed 's/:443.*//' "$ip_file" > "$run_dir/ip.txt"
+    awk -v day="$(($(date +%s) / 86400))" -v count="$CFST_SAMPLE_PER_CIDR" '
+      function ip_text(value) {
+        return int(value / 16777216) "." int(value / 65536) % 256 "." int(value / 256) % 256 "." value % 256
+      }
+      {
+        sub(/\r$/, "", $0)
+        split($0, part, "/")
+        split(part[1], octet, ".")
+        if (length(octet) != 4 || part[2] !~ /^[0-9]+$/ || part[2] < 0 || part[2] > 32) next
+        size = 2 ^ (32 - part[2])
+        value = ((octet[1] * 256 + octet[2]) * 256 + octet[3]) * 256 + octet[4]
+        base = int(value / size) * size
+        for (i = 0; i < count; i++) {
+          offset = (day * 1103515245 + NR * 1013904223 + i * 2654435761) % size
+          print ip_text(base + offset)
+        }
+      }
+    ' "$WORKDIR/ip.txt" >> "$run_dir/ip.txt"
+    awk '!seen[$0]++' "$run_dir/ip.txt" > "$run_dir/ip.unique"
+    mv "$run_dir/ip.unique" "$run_dir/ip.txt"
+  elif [ -s "$seed_source" ]; then
     # 全量扫描也探测上轮地址，避免候选范围调整后完全跳过旧池。
     if [ "$seed_source" != "$ip_file" ] && [ -s "$ip_file" ]; then
       sed 's/:443.*//' "$ip_file" > "$run_dir/ip.txt"
@@ -166,12 +190,37 @@ run_pool() {
     exit 1
   }
   # 只发布本轮有下载测速且达到下限的地址；CSV 也可能包含仅测到延迟的行。
-  awk -F',' -v label="$label" -v min_speed="${CFST_MIN_SPEED:-2}" '
-    NR>1 && $1 ~ /^[0-9a-fA-F:.]+$/ && $6+0 > 0 && $6+0 >= min_speed {
-      count++
-      printf "%s:443#%s-%02d-%.2fMB/s\n", $1, label, count, $6
+  awk -F',' -v label="$label" -v min_speed="${CFST_MIN_SPEED:-2}" \
+    -v limit="${CFST_RESULTS:-8}" -v max_new="${CFST_MAX_NEW:-2}" \
+    -v gain="${CFST_REPLACE_GAIN:-1.1}" \
+    -v incremental="${CFST_SAMPLE_PER_CIDR:+1}" '
+    FNR == NR { split($1, current, ":"); old[current[1]] = 1; next }
+    FNR > 1 && $1 ~ /^[0-9a-fA-F:.]+$/ && $6+0 > 0 && $6+0 >= min_speed {
+      if (incremental && old[$1]) {
+        old_ip[++old_count] = $1; old_speed[old_count] = $6
+      } else {
+        new_ip[++new_count] = $1; new_speed[new_count] = $6
+      }
     }
-  ' "$result_tmp" | head -n "${CFST_RESULTS:-8}" > "$ip_tmp"
+    END {
+      if (incremental) {
+        old_target = old_count < limit ? old_count : limit
+        new_target = new_count < limit - old_target ? new_count : limit - old_target
+        while (old_target > 0 && new_target < max_new && new_target < new_count &&
+               new_speed[new_target + 1] >= old_speed[old_target] * gain) {
+          old_target--
+          new_target++
+        }
+      } else {
+        old_target = 0
+        new_target = new_count < limit ? new_count : limit
+      }
+      for (i = 1; i <= old_target; i++)
+        printf "%s:443#%s-%02d-%.2fMB/s\n", old_ip[i], label, ++rank, old_speed[i]
+      for (i = 1; i <= new_target; i++)
+        printf "%s:443#%s-%02d-%.2fMB/s\n", new_ip[i], label, ++rank, new_speed[i]
+    }
+  ' "$ip_file" "$result_tmp" > "$ip_tmp"
   result_count="$(wc -l < "$ip_tmp")"
   [ "$result_count" -ge "${CFST_MIN_RESULTS:-4}" ] || {
     logger -t cfst "${pool} pool has only $result_count usable endpoints; preserving last known-good list"
@@ -186,6 +235,11 @@ run_pool() {
 if [ -n "$selected_pool" ]; then
   run_pool "$selected_pool"
 else
+  exec 9>"$RUN_DIR_BASE.lock"
+  if ! flock -n 9; then
+    logger -t cfst 'another CloudflareST scan is still running'
+    exit 75
+  fi
   status=0
   "$0" --pool la || { echo 'la scan failed; prior pool retained' >&2; status=1; }
   "$0" --pool sg || { echo 'sg scan failed; prior pool retained' >&2; status=1; }

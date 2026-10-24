@@ -23,6 +23,8 @@ in
 {
   dot.services.proxyDeliveryPublisher = {
     enable = true;
+    # 路由器按日小范围更新；容忍数次网络波动，超过一周仍停止发布。
+    maxPoolAgeSeconds = 7 * 24 * 60 * 60;
     geoSitePath = toString geoSite;
     geoIpPath = toString geoIp;
   };

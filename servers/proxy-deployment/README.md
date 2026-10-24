@@ -115,8 +115,10 @@ max-age=0`，并原样回显 `X-CF-Optimizer-Nonce`。其他方法返回 405；�
 该位置的访问日志。旧 Xray CDN 主机上的速测入口不变；下载测速仅在路由器的
 root 专用目标路径文件安装后启用。上线时分别验收经候选 IP 直连的 TLS/SNI、
 响应正文长度和缓存状态；本地构建不能证明公网请求已抵达源站。
-本轮生产部署的测速结果未通过运行验收，当前暂停发布与回退边界见
-[优选下载测速部署交接](./download-speed-rollout-handoff.md)。
+2026-10-24 的路由器直连复测已重新生成两地 v2 池，Conduit 发布器也已恢复；
+此前失败的测速口径、暂停发布与回退记录见
+[优选下载测速部署交接](./download-speed-rollout-handoff.md)。当前状态仍应以路由器
+`cf-optimizer` 状态、Cloudflare 受限池和 Conduit 发布任务的实时结果为准。
 
 每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
 提供对应令牌。两地主机分别以 SOPS 保存 `proxy/origin_proof_key` 与

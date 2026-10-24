@@ -186,6 +186,8 @@ run_pool() {
 if [ -n "$selected_pool" ]; then
   run_pool "$selected_pool"
 else
-  run_pool la
-  run_pool sg
+  status=0
+  "$0" --pool la || { echo 'la scan failed; prior pool retained' >&2; status=1; }
+  "$0" --pool sg || { echo 'sg scan failed; prior pool retained' >&2; status=1; }
+  exit "$status"
 fi

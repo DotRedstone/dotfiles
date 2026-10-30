@@ -15,6 +15,11 @@
       "enabled": false,
       "quotaGiB": 1,
       "expiresAt": null
+    },
+    "router": {
+      "enabled": false,
+      "quotaGiB": 50,
+      "expiresAt": null
     }
   }
 }

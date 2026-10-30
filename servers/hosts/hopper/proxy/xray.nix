@@ -19,4 +19,5 @@
     realityVisionEnable = true;
   };
   dot.proxyAccounts.accounts.rotation.enabled = lib.mkForce true;
+  dot.proxyAccounts.accounts.router.enabled = lib.mkForce true;
 }

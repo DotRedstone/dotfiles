@@ -8,7 +8,7 @@
 | 层级 | 已确认状态 | 待验证边界 |
 | --- | --- | --- |
 | 独立源码与锁 | `proxy-stack` main 为 `cd6663b`、脱敏 v2 分支为 `4179daf`，服务器已提交锁仍为 `23a64ff`；`edge-proxy-worker` main 为 `538d974`，服务器已提交的非 Flake 输入仍锁 `306c249` | 新接口尚未更新到服务器锁；远端构建需核对私有仓库读取权限 |
-| main 声明 | Conduit/Hopper 的旧账户与订阅仍在，canary 在旧账户目录中关闭；两地 origin-proof 与通用 probe 模块默认关闭。Target 的默认关闭探测声明属于已废弃的历史准备 | 声明与密文存在不代表服务已部署 |
+| main 声明 | Conduit/Hopper 的旧账户与订阅仍在，canary 在旧账户目录中关闭；两地 origin-proof 与通用 probe 模块默认关闭。Target 的默认关闭探测声明已清理，仍保留历史 SOPS 密文 | 声明与密文存在不代表服务已部署 |
 | 独立预览 | `codex/target-probe-dryrun` 未合并且不再推进；`codex/origin-canary-dryrun` 预备两地 canary、`/proof` 和默认关闭的交叉探测入口，均未合并或部署 | 后者通过双架构 Nix 求值及合成启用求值，未执行主机 `nixos-rebuild test/switch` |
 | Cloudflare | 两个隔离 KV 于 2026-10-13 查询均为 0 键；Target DNS-01 token 留在加密 SOPS 中，新版控制与交付 Worker 尚未部署 | Target 旧 probe 与两地新 probe 名称均无 DNS 记录；证书、Worker 绑定与 v2 池未验收，旧 Worker/KV 保留 |
 | 现网 | Conduit/Hopper 的 Xray、Nginx 和旧 `managed:guest` 身份继续运行；Target 无 443、ACME 或 probe 运行单元。路由器 LuCI/Zashboard 已只读取得 34 个组的 `now` | UI 选组不证明真实出口、两地回源和应用流量；新探测服务未运行 |

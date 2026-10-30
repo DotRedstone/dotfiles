@@ -6,7 +6,7 @@
 
 { ... }: {
   # [Proxy Client - Clash Verge Rev]
-  # Kept as disabled fallback only; active proxy client is FlClash.
+  # Disabled legacy fallback; active proxy is managed by Mihomo.
   programs.clash-verge = {
     enable = false;
     tunMode = true;

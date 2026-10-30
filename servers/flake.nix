@@ -77,8 +77,6 @@
           modules = [
             sops-nix.nixosModules.sops
             ./hosts/target
-            ./hosts/target/probe-source.nix
-            ./hosts/target/probe-tls.nix
           ];
         };
       };

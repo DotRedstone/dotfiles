@@ -27,7 +27,7 @@ Conduit 与 Hopper 从各自公网连接该地址的 `80/443` 均超时。工作
 和探测环境；尚未部署证书与服务。历史准备和凭据后续处理见
 [代理部署数据](../proxy-deployment/README.md#target-历史探测预览已废弃)。
 Cloudflare 上拟用于隔离探测的 `probe-v2-canary.dotdot.ggff.net` 尚无 DNS 记录。
-锁定 Worker 源码曾在 Flake 中预接入 Target 的默认关闭模块；
+锁定 Worker 源码曾在 Flake 中预接入 Target 的默认关闭模块；该模块现已从仓库移除。
 `codex/target-probe-dryrun` 保留为未合并、未部署的历史预览。
 关闭状态的求值未生成探测服务，也未改变防火墙或 Nginx。源码求值与 SSH 核对
 不证明公网 HTTPS 探测可用。

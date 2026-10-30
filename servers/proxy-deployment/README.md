@@ -83,8 +83,8 @@ HMAC 四把密钥互异。每台探测器的 `PROBE_ORIGINS_JSON` 只应包含�
 ### Target 历史探测预览（已废弃）
 
 Target 将在到期后退役，`codex/target-probe-dryrun` 只保留为未合并、未部署的
-历史预览，不再作为灰度路径。main 的 `hosts/target/probe-tls.nix` 与
-`probe-source.nix` 仍默认关闭；Target 现网没有 ACME、probe 单元或 443 监听。
+历史预览，不再作为灰度路径。原 `hosts/target/probe-tls.nix` 与
+`probe-source.nix` 已从本分支移除；Target 现网没有 ACME、probe 单元或 443 监听。
 `servers/secrets/target.yaml` 中已加密登记 `proxy/probe_env` 与
 `proxy/probe_acme_dns_token`，但运行时未加载。Cloudflare 的
 `target-probe-dns01-2026-10-13` token 原为单一 zone 的 DNS-01 凭据，

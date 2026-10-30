@@ -84,11 +84,13 @@
       "x-scheme-handler/clash" = [ "clash-verge.desktop" ];
       "x-scheme-handler/clash-verge" = [ "clash-verge.desktop" ];
       "x-scheme-handler/codex" = [ "chatgpt.desktop" ];
+      "x-scheme-handler/claude" = [ "claude.desktop" ];
     };
 
     associations.added = {
       "inode/directory" = [ "org.kde.dolphin.desktop" ];
       "x-scheme-handler/file" = [ "org.kde.dolphin.desktop" ];
+      "x-scheme-handler/claude" = [ "claude.desktop" ];
     };
 
     associations.removed = {

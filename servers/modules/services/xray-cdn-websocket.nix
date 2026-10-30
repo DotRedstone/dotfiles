@@ -5,6 +5,7 @@
 # Notes:
 # - The DNS record must be Cloudflare-proxied with Full (strict) SSL mode.
 # - This does not replace the direct WebSocket or REALITY listeners.
+# - clientCertificateFile optionally verifies Cloudflare Authenticated Origin Pulls client certificates.
 # ---
 
 {
@@ -35,6 +36,12 @@ in
       type = lib.types.port;
       default = 20001;
       description = "Loopback-reachable Xray VLESS WebSocket inbound port.";
+    };
+
+    clientCertificateFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = "Cloudflare Authenticated Origin Pulls 的客户端 CA 证书文件路径（公开证书）；设置后 Nginx 要求并校验 Cloudflare 的客户端证书。";
     };
   };
 
@@ -80,6 +87,9 @@ in
       sslCertificateKey = config.sops.secrets."xray/cdn_origin_certificate_key".path;
       extraConfig = ''
         include ${config.sops.templates."xray-cdn-speedtest.conf".path};
+      '' + lib.optionalString (cfg.clientCertificateFile != null) ''
+        ssl_client_certificate ${toString cfg.clientCertificateFile};
+        ssl_verify_client on;
       '';
 
       locations."/" = {

@@ -20,6 +20,7 @@
     # --- Desktop & System UI ---
     ./niri
     ./noctalia
+    ./default-apps
     ./activitywatch
     ./autoclicker
     ./theme

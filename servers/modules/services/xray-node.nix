@@ -38,7 +38,7 @@ let
     inbounds = [
       {
         tag = "vless-websocket";
-        listen = "0.0.0.0";
+        listen = cfg.webSocketListenAddress;
         port = cfg.webSocketPort;
         protocol = "vless";
         settings = {
@@ -201,6 +201,12 @@ in
       description = "Public VLESS WebSocket port.";
     };
 
+    webSocketListenAddress = lib.mkOption {
+      type = lib.types.str;
+      default = "0.0.0.0";
+      description = "WS 监听地址，设为 127.0.0.1 时只能经本机 Nginx 访问";
+    };
+
     webSocketClientCount = lib.mkOption {
       type = lib.types.ints.positive;
       default = 1;
@@ -268,10 +274,9 @@ in
       settingsFile = config.sops.templates."xray-node.json".path;
     };
 
-    networking.firewall.allowedTCPPorts = [
-      cfg.webSocketPort
-      cfg.realityPort
-    ];
+    networking.firewall.allowedTCPPorts =
+      lib.optional (cfg.webSocketListenAddress != "127.0.0.1") cfg.webSocketPort
+      ++ [ cfg.realityPort ];
 
     systemd.services.xray = {
       after = [ "network-online.target" ];

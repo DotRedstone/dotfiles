@@ -141,6 +141,7 @@ in
               alias ${config.sops.templates."xray-subscription-${name}.txt".path};
               default_type text/plain;
               add_header Cache-Control "no-store";
+              access_log off;
             }
           '') cfg.entryNames;
         };

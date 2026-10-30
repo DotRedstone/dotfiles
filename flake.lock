@@ -373,17 +373,17 @@
     "noctalia-mihomo-control": {
       "flake": false,
       "locked": {
-        "lastModified": 1791710399,
-        "narHash": "sha256-0q8FNYIgyeNLR6ns1MZ8m1LtOG3OlBA5ZC8A/iNF5/A=",
+        "lastModified": 1792058303,
+        "narHash": "sha256-c82iQyKUInT3k6YePP/iuTbF6yMbPvTomAzhNlJF9GU=",
         "owner": "DotRedstone",
         "repo": "noctalia-mihomo-control",
-        "rev": "7da549e4f9c927eb4f9d1d1beafa8ff35a0615e8",
+        "rev": "b675f266ee0f6c3aa192b6e44c079a5899c3bd6a",
         "type": "github"
       },
       "original": {
         "owner": "DotRedstone",
-        "ref": "v0.1.0",
         "repo": "noctalia-mihomo-control",
+        "rev": "b675f266ee0f6c3aa192b6e44c079a5899c3bd6a",
         "type": "github"
       }
     },

@@ -12,7 +12,7 @@ Nix 选项。独立私有 Flake 通过公开的 `lib.mkConduit`、`lib.mkHopper`
    身份和探测证书名称。固定已审查的公开服务器 Flake 修订并保存私有 lock。
    不在公开仓库或 PR 中提交真实 overlay、构建日志或解密文件。
 2. 先用合成值验证接口；再在私有仓库比较 overlay 的有效 `originId`、
-   `serverName`、Target TLS `domain` 与当前系统声明值是否一致。分别评估
+   `serverName` 与当前系统声明值是否一致。分别评估
    Conduit、Hopper、Target 的系统闭包，并核对 Nginx、ACME、探测及旧回源。
 3. 在有定时回退保护的维护窗口逐机执行 `nixos-rebuild test`，实测 TLS、
    回源证明、SSH 和旧订阅；验收后再 `switch`。保留旧闭包和受限输入。
@@ -29,5 +29,5 @@ nix flake check --no-build --no-write-lock-file \
   path:./servers/private-overlay.example
 ```
 
-本示例保持 Target TLS 探测关闭。私有 overlay 只提供未来启用时的名称，不启用
-服务或修改当前 DNS/证书。
+Target 直接复用公开 Flake 的系统配置，不再通过私有 overlay 扩展模块。
+本示例仅为 Conduit/Hopper 提供合成部署期输入，不启用其他服务或修改当前 DNS/证书。

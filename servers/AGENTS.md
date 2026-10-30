@@ -24,7 +24,7 @@
 
 ```bash
 nix flake check path:/home/dot/.dotfiles/servers
-nix build path:/home/dot/.dotfiles/servers#nixosConfigurations.gcp-free.config.system.build.toplevel
+nix build path:/home/dot/.dotfiles/servers#nixosConfigurations.target.config.system.build.toplevel
 nix flake check --no-build path:/path/to/private-overlay
 nix build path:/path/to/private-overlay#nixosConfigurations.<conduit-or-hopper>.config.system.build.toplevel
 ```

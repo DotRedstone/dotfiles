@@ -24,8 +24,8 @@
 - `origin/main` 早已包含节点地址和自有域名；本 PR 的 `nodes.json` 与
   `owned-domains.json` 仍引用这些既有公开值。它们不是凭据，移除当前 HEAD
   不能撤回旧历史中的披露。
-- 目标主机默认关闭的 `probe-tls.nix` 已将探测域名默认值清空，并在启用时
-  要求提供受限输入；`scripts/check-probe-inputs.mjs` 从 Cloudflare SOPS 读取
+- Target 原有的 `probe-tls.nix` 已移除，不再提供该 TLS 探测模块；
+  `scripts/check-probe-inputs.mjs` 从 Cloudflare SOPS 读取
   探测名称和 origin 身份映射，实测检查仍通过。
 - 两地主机的 `cross-probe.nix` 已去除当前探测证书名称。这些值参与 Nix
   求值、Nginx 与证书配置；[私有 overlay 合成原型](../private-overlay.example/README.md)

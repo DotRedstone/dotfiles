@@ -13,9 +13,7 @@
     nixosConfigurations = {
       conduit = public.lib.mkConduit [ ./conduit.nix ];
       hopper = public.lib.mkHopper [ ./hopper.nix ];
-      target = public.nixosConfigurations.target.extendModules {
-        modules = [ ./target.nix ];
-      };
+      target = public.nixosConfigurations.target;
     };
   };
 }

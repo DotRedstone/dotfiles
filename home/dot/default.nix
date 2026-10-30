@@ -61,6 +61,7 @@
     ./vscode
     ./dev
     ./antigravity
+    ./claude-code
 
     # --- Game ---
     ./axolotl

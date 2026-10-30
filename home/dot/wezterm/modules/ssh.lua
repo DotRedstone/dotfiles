@@ -9,7 +9,7 @@ local M = {}
 function M.apply(config, _)
   -- [SSH Domains]
   config.ssh_domains = {
-    { name = 'Beacon (HK)',    remote_address = 'beacon',   username = 'dot' },
+    { name = 'Beacon (Mac mini)',    remote_address = 'beacon',   username = 'dot' },
     { name = 'Conduit (RN)',   remote_address = 'conduit',  username = 'dot' },
     { name = 'Hopper (Oracle)', remote_address = 'hopper',   username = 'dot' },
     { name = 'Target (Tencent)', remote_address = 'target',  username = 'dot' },

@@ -22,7 +22,7 @@ WezTerm 预集成了以下常用 VPS 节点，可通过快捷键或命令面板�
 | Conduit (RN) | `conduit` | 节点服务器 |
 | Hopper (Oracle) | `hopper` | 备份/Oracle 节点 |
 | Target (Tencent) | `target` | 腾讯云远程构建 |
-| Repeater (Aliyun) | `repeater` | 未纳管外部中转；仅保留 SSH 别名，不登记凭据 |
+| Repeater (Aliyun) | `repeater` | 未纳管外部节点，承担中转并运行 Vaultwarden、Komari、AstrBot 等服务；保留 SSH 别名，不登记登录凭据，仅有 Hopper 备份拉取所用的 restic/SSH 凭据 |
 
 ## 核心快捷键
 

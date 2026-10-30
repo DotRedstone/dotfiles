@@ -146,6 +146,9 @@ export function mihomoValidator({ binary, geoSitePath, geoIpPath }) {
 }
 
 export async function runPublication({ config, secrets, compiler, store, fetchImpl = fetch, now = new Date() }) {
+  if (!Array.isArray(secrets.sharedEdgeSourceIds)) {
+    throw new Error("private runtime must declare shared edge sources");
+  }
   const catalog = loadCatalog(config.catalogDir, secrets.deploymentCatalog);
   compiler.validateCatalog(catalog);
   const pools = await readValidatedPools({
@@ -155,6 +158,7 @@ export async function runPublication({ config, secrets, compiler, store, fetchIm
   return publish({
     catalog, pools, compiler, compilerRevision: config.compilerRevision,
     runtimeByAccount: secrets.runtimeByAccount,
+    sharedEdgeSourceIds: secrets.sharedEdgeSourceIds,
     store, maxPoolAgeSeconds: config.maxPoolAgeSeconds, now,
     validateDocument: mihomoValidator({
       binary: config.mihomoBin,

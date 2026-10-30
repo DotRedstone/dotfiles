@@ -11,8 +11,8 @@ const servers = path.resolve(directory, "..");
 const lock = JSON.parse(fs.readFileSync(path.join(servers, "flake.lock"), "utf8"));
 const worker = lock.nodes.edgeProxyWorker.locked;
 const compiler = lock.nodes.proxyStack.locked.rev;
-const expectedWorker = "052a959dad36e4ea23ca45a1885c657761a5903c";
-const expectedHash = "sha256-dlZaqcG6ap80iBw5ZC9pdwcVFgaNW/fA5ikhNqYz4Ww=";
+const expectedWorker = "ad806d4f7f0737c8c079e91403620671b504f868";
+const expectedHash = "sha256-quUz8e0jdxYZjdHjB/gE8hFhOmFedhp/INyg8GBovWk=";
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { encoding: "utf8", ...options });
@@ -52,10 +52,13 @@ function write(destination, value) {
   fs.writeFileSync(destination, `${JSON.stringify(value, null, 2)}\n`, { mode: 0o600, flag: "wx" });
 }
 
-function prepare(output, accountId, source, dryRun) {
+function prepare(output, accountId, source, dryRun, alternateCompiler) {
   const resources = readResources(dryRun);
   const sources = readSources(dryRun);
   const nodes = read(dryRun ? "nodes.example.json" : "nodes.json");
+  if (dryRun) sources.sources = sources.sources
+    .filter((item) => nodes.origins[item.origin])
+    .map((item) => ({ ...item, type: "signed-upload" }));
   if (resources.version !== 1 || sources.version !== 1 || nodes.version !== 1) {
     throw new Error("unsupported deployment catalog");
   }
@@ -113,7 +116,10 @@ function prepare(output, accountId, source, dryRun) {
   const delivery = {
     ...base(resources.delivery),
     routes: [{ pattern: resources.delivery.customDomain, custom_domain: true }],
-    vars: { EXPECTED_COMPILER_REVISION: compiler },
+    vars: {
+      EXPECTED_COMPILER_REVISION: compiler,
+      ...(alternateCompiler ? { ALTERNATE_COMPILER_REVISION: alternateCompiler } : {}),
+    },
   };
   const references = {
     preferredControl: {
@@ -133,11 +139,26 @@ function prepare(output, accountId, source, dryRun) {
 
 function main() {
   const args = process.argv.slice(2);
-  const dryRun = args.length === 1 && args[0] === "--dry-run";
-  const outputIndex = args.indexOf("--out");
-  const accountIndex = args.indexOf("--account-id");
-  if (!dryRun && (args.length !== 4 || outputIndex < 0 || accountIndex < 0)) {
-    throw new Error("usage: prepare-v2-workers.mjs --dry-run | --out DIR --account-id ID");
+  const values = new Map();
+  for (let index = 0; index < args.length; index++) {
+    const name = args[index];
+    if (!["--dry-run", "--out", "--account-id", "--alternate-compiler-revision"].includes(name) ||
+        values.has(name)) throw new Error("duplicate or unknown v2 Worker option");
+    if (name === "--dry-run") {
+      values.set(name, true);
+    } else {
+      const value = args[++index];
+      if (!value || value.startsWith("--")) throw new Error("missing v2 Worker option value");
+      values.set(name, value);
+    }
+  }
+  const dryRun = values.has("--dry-run");
+  const alternateCompiler = values.get("--alternate-compiler-revision") ?? null;
+  if ((dryRun ? values.has("--out") || values.has("--account-id") :
+      !values.has("--out") || !values.has("--account-id")) ||
+    (alternateCompiler !== null && (!/^[0-9a-f]{40}$/.test(alternateCompiler) ||
+      alternateCompiler === compiler))) {
+    throw new Error("usage: prepare-v2-workers.mjs [--dry-run | --out DIR --account-id ID] [--alternate-compiler-revision SHA]");
   }
   if (worker.rev !== expectedWorker || worker.narHash !== expectedHash || !/^[0-9a-f]{40}$/.test(compiler)) {
     throw new Error("unexpected locked Worker or compiler revision");
@@ -147,12 +168,12 @@ function main() {
   if (run("nix", ["hash", "path", source]) !== expectedHash) {
     throw new Error("locked Worker source hash mismatch");
   }
-  const accountId = dryRun ? "00000000000000000000000000000000" : args[accountIndex + 1];
+  const accountId = dryRun ? "00000000000000000000000000000000" : values.get("--account-id");
   if (!/^[0-9a-f]{32}$/i.test(accountId)) throw new Error("invalid Cloudflare account ID");
-  const output = dryRun ? fs.mkdtempSync(path.join(os.tmpdir(), "preferred-v2-workers-")) : path.resolve(args[outputIndex + 1]);
+  const output = dryRun ? fs.mkdtempSync(path.join(os.tmpdir(), "preferred-v2-workers-")) : path.resolve(values.get("--out"));
   try {
     if (!dryRun) fs.mkdirSync(output, { mode: 0o700 });
-    prepare(output, accountId, source, dryRun);
+    prepare(output, accountId, source, dryRun, alternateCompiler);
     if (dryRun) {
       const checkout = process.env.EDGE_PROXY_WORKER_CHECKOUT;
       if (!checkout || run("git", ["-C", checkout, "rev-parse", "HEAD"]) !== expectedWorker) {

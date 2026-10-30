@@ -61,6 +61,26 @@
         "type": "github"
       }
     },
+    "darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792737899,
+        "narHash": "sha256-P0/GhewcEQmAbzq3QunNWY2jLJaYH9F6c/5dEM/jQ4M=",
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "rev": "bb0b90dbd54e207100de72b5dcbe3188c98a4b69",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "type": "github"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
@@ -372,6 +392,7 @@
         "antigravity-nix": "antigravity-nix",
         "claude-desktop-linux": "claude-desktop-linux",
         "codex-desktop-linux": "codex-desktop-linux",
+        "darwin": "darwin",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
         "niri": "niri",

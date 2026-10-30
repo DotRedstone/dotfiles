@@ -53,6 +53,12 @@
 
     # [Claude Desktop]
     claude-desktop-linux.url = "github:k3d3/claude-desktop-linux-flake";
+
+    # [Darwin]
+    darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, home-manager, antigravity-nix, niri, ... }@inputs:
@@ -115,6 +121,20 @@
         inputs.nixvim.homeModules.nixvim
         inputs.zen-browser.homeModules.default
       ];
+    };
+
+    # [Darwin - beacon (Mac mini headless)]
+    darwinConfigurations.beacon = inputs.darwin.lib.darwinSystem {
+      modules = [
+        ./hosts/beacon
+        home-manager.darwinModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.dot = import ./hosts/beacon/home.nix;
+        }
+      ];
+      specialArgs = { inherit inputs; };
     };
   };
 }

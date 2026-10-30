@@ -11,6 +11,7 @@
 | --- | --- | --- | --- |
 | Warden 硬件、挂载、休眠或主机身份 | `hosts/warden/default.nix` | `hosts/warden/` | `sudo nixos-rebuild dry-run --flake .#warden` |
 | Warden 全局系统能力 | `modules/system/default.nix` | `modules/system/<domain>/` | `sudo nixos-rebuild dry-run --flake .#warden` |
+| Beacon（Mac mini 无头主机） | `hosts/beacon/README.md` | `hosts/beacon/` | `nix eval --raw .#darwinConfigurations.beacon.system.drvPath` |
 | 桌面、Shell、应用和用户服务 | `home/dot/default.nix` | `home/dot/<app>/` | `home-manager build --flake .#dot@warden` |
 | Niri / Noctalia / 视觉语言 | `docs/desktop-niri.md`、`home/dot/noctalia/README.md` | 对应 Home Manager 模块 | `home-manager build --flake .#dot@warden` |
 | Fcitx5 / Rime | `docs/fcitx5-rime.md`、`home/dot/fcitx5/README.md` | `home/dot/fcitx5/` | `home-manager build --flake .#dot@warden` |
@@ -28,6 +29,7 @@
 .
 ├── flake.nix                 Warden 桌面 Flake（x86_64-linux）
 ├── hosts/warden/             此电脑不可复用的硬件和身份
+├── hosts/beacon/             Mac mini 的 nix-darwin 主机配置（aarch64-darwin）
 ├── modules/system/           Warden 可复用的系统能力
 ├── home/dot/                 dot 的 Home Manager 模块
 └── servers/
@@ -38,7 +40,8 @@
     └── cloudflare/           Worker 与边缘控制面
 ```
 
-桌面 Flake 的唯一输出是 `warden` 和 `dot@warden`；服务器主机则以
+桌面 Flake 输出 `warden`、`dot@warden`，以及在 Mac mini 上部署的
+`darwinConfigurations.beacon`；服务器主机则以
 `servers#hopper`、`servers#conduit` 等名称输出。服务器清单中“可 SSH”不等于
 “已声明式受管”，当前收编状态以 `servers/inventory/README.md` 为准。
 `proxy-stack` 只保存通用代码，并作为 `servers/` 的私有远端锁定 input。

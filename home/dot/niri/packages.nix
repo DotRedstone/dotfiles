@@ -8,6 +8,10 @@
   home.packages = with pkgs; [
     # [Core]
     xwayland-satellite
+    (pkgs.runCommand "xembedsniproxy-bin" { } ''
+      mkdir -p $out/bin
+      ln -s ${pkgs.kdePackages.plasma-workspace}/bin/xembedsniproxy $out/bin/xembedsniproxy
+    '')
 
     # [Screenshot & Clipboard]
     cliphist

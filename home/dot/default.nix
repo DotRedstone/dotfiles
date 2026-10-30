@@ -50,6 +50,7 @@
     ./piclist
     ./rustdesk
     ./codex
+    ./claude-desktop
     ./workbuddy
     ./kdeconnect
     ./downloads

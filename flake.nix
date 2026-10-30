@@ -50,6 +50,9 @@
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
     zen-browser.inputs.nixpkgs.follows = "nixpkgs";
     zen-browser.inputs.home-manager.follows = "home-manager";
+
+    # [Claude Desktop]
+    claude-desktop-linux.url = "github:k3d3/claude-desktop-linux-flake";
   };
 
   outputs = { self, nixpkgs, home-manager, antigravity-nix, niri, ... }@inputs:

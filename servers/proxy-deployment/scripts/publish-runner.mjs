@@ -8,18 +8,15 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { publish } from "./publish-core.mjs";
 
 const scriptPath = fileURLToPath(import.meta.url);
-const catalogFiles = [
-  "accounts.json", "nodes.json", "preferred-sources.json", "owned-domains.json",
-];
-
 function jsonFile(file) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
-export function loadCatalog(directory) {
-  const [accounts, nodes, sources, ownedDomains] = catalogFiles.map(
-    (name) => jsonFile(path.join(directory, name)),
-  );
+export function loadCatalog(directory, privateCatalog = null) {
+  const accounts = privateCatalog?.accounts ?? jsonFile(path.join(directory, "accounts.json"));
+  const nodes = jsonFile(path.join(directory, "nodes.json"));
+  const sources = privateCatalog?.sources ?? jsonFile(path.join(directory, "preferred-sources.json"));
+  const ownedDomains = jsonFile(path.join(directory, "owned-domains.json"));
   const profiles = Object.fromEntries(
     ["router", "desktop", "mobile"].map((kind) => [
       kind, jsonFile(path.join(directory, "profiles", `${kind}.json`)),
@@ -149,10 +146,10 @@ export function mihomoValidator({ binary, geoSitePath, geoIpPath }) {
 }
 
 export async function runPublication({ config, secrets, compiler, store, fetchImpl = fetch, now = new Date() }) {
-  const catalog = loadCatalog(config.catalogDir);
+  const catalog = loadCatalog(config.catalogDir, secrets.deploymentCatalog);
   compiler.validateCatalog(catalog);
   const pools = await readValidatedPools({
-    catalog, baseUrl: config.preferredBaseUrl,
+    catalog, baseUrl: secrets.preferredBaseUrl ?? config.preferredBaseUrl,
     token: secrets.preferredReadToken, fetchImpl,
   });
   return publish({
@@ -204,9 +201,11 @@ async function main() {
     throw new Error("compiler source does not match the deployment lock hash");
   }
   const compiler = await import(pathToFileURL(path.join(config.compilerSource, "src/compiler.mjs")).href);
-  if (args.includes("--apply")) requireEnabledAccount(loadCatalog(config.catalogDir));
   const secrets = readPrivateRuntime(value("--secrets"));
   if (secrets.version !== 1) throw new Error("private deployment schema unsupported");
+  if (args.includes("--apply")) {
+    requireEnabledAccount(loadCatalog(config.catalogDir, secrets.deploymentCatalog));
+  }
   const live = cloudflareStore({
     accountId: secrets.cloudflare.accountId,
     namespaceId: secrets.cloudflare.deliveryNamespaceId,

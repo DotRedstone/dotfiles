@@ -17,6 +17,7 @@
     ./postgresql.nix
     ./proxy-delivery-publisher.nix
     ./proxy-origin-proof.nix
+    ./proxy-probe-ingress.nix
     ./proxy-preferred-probe.nix
     ./proxy-accounts.nix
     ./redis.nix

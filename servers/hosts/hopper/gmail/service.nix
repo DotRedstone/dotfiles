@@ -23,6 +23,7 @@
   };
 
   services.nginx.virtualHosts."gmail.bdot.in" = {
+    extraConfig = "client_max_body_size 100m;";
     locations."/" = {
       proxyPass = "http://127.0.0.1:8080";
       proxyWebsockets = true;

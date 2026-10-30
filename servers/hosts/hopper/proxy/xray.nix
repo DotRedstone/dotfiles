@@ -4,7 +4,7 @@
 # Scope: Host
 # ---
 
-{ config, ... }: {
+{ config, lib, ... }: {
   dot.services.xrayNode = {
     enable = true;
     managedAccounts = config.dot.proxyAccounts.accounts;
@@ -18,4 +18,5 @@
     # separately selectable Vision path for long-lived transfers.
     realityVisionEnable = true;
   };
+  dot.proxyAccounts.accounts.rotation.enabled = lib.mkForce true;
 }

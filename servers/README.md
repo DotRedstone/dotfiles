@@ -40,7 +40,8 @@ Cloudflare 边缘代理的通用代码位于独立的
 只保存部署参数、SOPS 引用、Mihomo 基线和路由器适配。它独立于 NixOS 主机模块部署，
 密钥只通过 Worker secret 注入。旧部署适配仍从受限 legacy checkout 归档固定提交；
 隔离 canary 的当前 Flake 修订由 `edgeProxyWorker` 私有 Git SSH 非 Flake 输入锁定，
-曾预接入 Target 的默认关闭模块；这些历史模块已移除，现网未启用探测服务。两地交叉
+曾预接入 Target 的默认关闭模块；这些历史模块已移除，Target 现网未启用探测服务。
+Conduit/Hopper 已启用独立 probe ingress。两地交叉
 探测预览与来源边界见
 [proxy-deployment](./proxy-deployment/README.md)。现网审计、灰度与清理步骤见
 [docs/cloudflare-edge-migration.md](./docs/cloudflare-edge-migration.md)。
@@ -50,8 +51,11 @@ Cloudflare 边缘代理的通用代码位于独立的
 `flake.lock` 固定其 Git 修订；远程构建端须能读取该私有仓库，发布前还须复核
 访问权限与锁定源码。账户、LA/SG 真实端点、优选来源和客户端网络参数留在
 [proxy-deployment](./proxy-deployment/README.md)；SOPS 密钥仍在本仓库。
-隔离 canary 已登记但旧 Xray 目录仍将其关闭；现有 `clash/router-policy.json`、
-`proxy-accounts.json`、旧 Worker 与订阅保持可用，新编译器尚未向现网发布。
+隔离 canary 已登记，通用账户目录默认关闭；第 1 阶段代理候选只在 Conduit/Hopper
+主机层启用它。该代理候选缺少 Hopper 现网 Gmail 基线，不能直接进行整机 `test`；
+范围与组合门槛见[代理源码独立候选](./proxy-deployment/stage1-proxy-only-review.md)。
+现有 `clash/router-policy.json`、`proxy-accounts.json`、旧 Worker 与订阅保持可用，
+新编译器尚未向现网发布。
 `target` 没有加入这次双节点代理。
 从**当前锁定修订**本地构建三类 Worker bundle 的命令是：
 
@@ -109,11 +113,15 @@ nix build \
   path:/home/dot/.dotfiles/servers#nixosConfigurations.target.config.system.build.toplevel
 ```
 
-`conduit` 的镜像接管配置仍可单独构建：
+`conduit` 与 `hopper` 的证书名称、回源身份需由独立私有部署 Flake 提供。
+公开 Flake 只导出 `lib.mkConduit`、`lib.mkHopper` 构造器，不再提供两台
+可直接部署的 `nixosConfigurations`。合成结构和迁移说明见
+[私有 overlay 示例](./private-overlay.example/README.md)。
+在实际私有仓库固定公开 Flake 修订并核对受限输入后，才可从私有入口构建：
 
 ```bash
 nix build \
-  path:/home/dot/.dotfiles/servers#nixosConfigurations.conduit.config.system.build.toplevel
+  path:/path/to/private-overlay#nixosConfigurations.conduit.config.system.build.toplevel
 ```
 
 `hopper` 是 `aarch64-linux`。x86_64 工作站只能评估配置；完整构建需要 ARM

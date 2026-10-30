@@ -5,12 +5,34 @@ import os from "node:os";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
-import { cloudflareStore, readPrivateRuntime, readValidatedPools, requireEnabledAccount, runPublication } from "../scripts/publish-runner.mjs";
+import { cloudflareStore, loadCatalog, readPrivateRuntime, readValidatedPools, requireEnabledAccount, runPublication } from "../scripts/publish-runner.mjs";
 
 const token = "T".repeat(40);
 const catalog = { accounts: { accounts: { sample: {
   enabled: true, sourceIdByOrigin: { la: "sample-net", sg: "sample-net" },
 } } } };
+
+test("loads deployment identities from private runtime without public account files", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "proxy-private-catalog-"));
+  try {
+    fs.mkdirSync(path.join(directory, "profiles"));
+    fs.writeFileSync(path.join(directory, "nodes.json"), JSON.stringify({ version: 1, origins: {} }));
+    fs.writeFileSync(path.join(directory, "owned-domains.json"), JSON.stringify({ version: 1, suffixes: [] }));
+    for (const kind of ["router", "desktop", "mobile"]) {
+      fs.writeFileSync(path.join(directory, "profiles", `${kind}.json`), JSON.stringify({ version: 1, kind }));
+    }
+    const privateCatalog = {
+      accounts: { version: 1, accounts: { sample: { enabled: true } } },
+      sources: { version: 1, sources: [{ sourceId: "sample-net", origin: "la" }] },
+    };
+    const loaded = loadCatalog(directory, privateCatalog);
+    assert.deepEqual(loaded.accounts, privateCatalog.accounts);
+    assert.deepEqual(loaded.sources, privateCatalog.sources);
+    assert.doesNotThrow(() => requireEnabledAccount(loaded));
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
 
 test("reads sops-nix runtime JSON only from an owner-private file", () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "proxy-private-runtime-"));
@@ -143,11 +165,13 @@ test("enabled synthetic account runs Mihomo validation before isolated KV publis
     const result = await runPublication({
       config: {
         catalogDir: directory, compilerRevision: "a".repeat(40),
-        preferredBaseUrl: "https://preferred.example.test",
         maxPoolAgeSeconds: 86400, mihomoBin: process.env.MIHOMO_BIN,
         geoSitePath: process.env.GEOSITE_PATH, geoIpPath: process.env.GEOIP_PATH,
       },
-      secrets: { preferredReadToken: token, runtimeByAccount: { sample: {
+      secrets: {
+        preferredReadToken: token, preferredBaseUrl: "https://preferred.example.test",
+        deploymentCatalog: { accounts: data["accounts.json"], sources: data["preferred-sources.json"] },
+        runtimeByAccount: { sample: {
         accountId: "sample", deliveryBaseUrl: "https://config.example",
         deliveryToken: "A".repeat(40),
         credentials: {

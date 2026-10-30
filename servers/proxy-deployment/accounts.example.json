@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "accounts": {
+    "canary": {
+      "enabled": true,
+      "primaryOrigin": "region-a",
+      "sourceIdByOrigin": {
+        "region-a": "sample-net",
+        "region-b": "sample-net"
+      },
+      "allowedExits": [
+        "region-a-direct",
+        "region-a-cf",
+        "region-b-direct",
+        "region-b-cf"
+      ],
+      "quotaGiB": 1,
+      "expiresAt": null
+    }
+  }
+}

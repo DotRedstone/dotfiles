@@ -24,8 +24,15 @@
 
 ```bash
 nix flake check path:/home/dot/.dotfiles/servers
-nix build path:/home/dot/.dotfiles/servers#nixosConfigurations.<host>.config.system.build.toplevel
+nix build path:/home/dot/.dotfiles/servers#nixosConfigurations.gcp-free.config.system.build.toplevel
+nix flake check --no-build path:/path/to/private-overlay
+nix build path:/path/to/private-overlay#nixosConfigurations.<conduit-or-hopper>.config.system.build.toplevel
 ```
+
+Conduit/Hopper 的求值期身份和证书名称由独立私有 overlay 提供；公开 Flake
+只导出 `lib.mkConduit`、`lib.mkHopper`，不得把旧的公开 Flake 目标当作
+部署入口。私有 Flake 应锁定已审查的公开修订；合成接口见
+[private-overlay.example](./private-overlay.example/README.md)。
 
 Hopper 是 `aarch64-linux`；在 x86_64 工作站上优先评估，完整构建使用远程 ARM
 构建机。部署前优先 `nixos-rebuild test`；确认服务、监听端口和 SSH 会话均正常后，

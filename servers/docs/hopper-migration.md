@@ -1,5 +1,9 @@
 # Oracle A1 应用服务器无 Docker 迁移到 NixOS
 
+当前 Hopper 构建入口已迁至独立私有 overlay；下文公开 Flake 的历史命令
+不再是可执行部署入口。再次构建须使用
+[私有 overlay 示例](../private-overlay.example/README.md)所述受限入口。
+
 本文对应主机 `hopper`（公网地址 `140.245.62.36`），记录从 Ubuntu 24.04、
 1Panel 和 Docker 迁移到原生 NixOS 的实机方案。它既是操作手册，也是对配置
 边界、数据恢复和回滚条件的审计记录。

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "preferredControl": {
+    "workerName": "example-preferred-control",
+    "entrypoint": "src/preferred-v2.ts",
+    "kv": {
+      "title": "example-preferred-state",
+      "binding": "PREFERRED_V2_STATE",
+      "id": "00000000000000000000000000000000"
+    }
+  },
+  "delivery": {
+    "workerName": "example-delivery",
+    "entrypoint": "src/delivery.ts",
+    "customDomain": "delivery.example.test",
+    "kv": {
+      "title": "example-delivery-state",
+      "binding": "DELIVERY_STATE",
+      "id": "11111111111111111111111111111111"
+    }
+  }
+}

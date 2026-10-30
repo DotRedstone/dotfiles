@@ -14,6 +14,9 @@ let
   probe = config.dot.services.proxyPreferredProbe;
   optimizerBody = pkgs.writeText "cf-optimizer-probe.txt"
     (lib.concatStrings (lib.replicate 256 "0123456789abcdef"));
+  optimizerDownloadBody = pkgs.runCommand "cf-optimizer-download.bin" { } ''
+    dd if=/dev/zero of="$out" bs=1M count=8 status=none
+  '';
   acmeCert = config.security.acme.certs.${cfg.serverName};
   certFile = if probe.tlsCertificateFile != null then probe.tlsCertificateFile
     else config.sops.secrets."proxy/probe_tls_cert".path;
@@ -96,6 +99,28 @@ in
 
       dot.services.proxyPreferredProbe.enable = true;
 
+      sops.templates."cf-optimizer-download.conf" = lib.mkIf (cfg.optimizerMarker != "") {
+        owner = "root";
+        group = "nginx";
+        mode = "0440";
+        restartUnits = [ "nginx.service" ];
+        content = ''
+          location = ${config.sops.placeholder."xray/cdn_speedtest_path"} {
+            if ($request_method != GET) { return 405; }
+            if ($args !~ "^nonce=[0-9a-f]{32}$") { return 400; }
+            access_log off;
+            default_type application/octet-stream;
+            gzip off;
+            max_ranges 0;
+            add_header Cache-Control "no-store, max-age=0" always;
+            add_header X-CF-Optimizer-Origin "${cfg.optimizerMarker}" always;
+            add_header X-CF-Optimizer-Nonce $arg_nonce always;
+            add_header X-Content-Type-Options "nosniff" always;
+            alias ${optimizerDownloadBody};
+          }
+        '';
+      };
+
       systemd.services.proxy-preferred-probe = lib.mkIf cfg.acme.enable {
         requires = [ "acme-order-renew-${cfg.serverName}.service" ];
         after = [ "acme-order-renew-${cfg.serverName}.service" ];
@@ -105,6 +130,9 @@ in
         addSSL = true;
         sslCertificate = certFile;
         sslCertificateKey = keyFile;
+        extraConfig = lib.optionalString (cfg.optimizerMarker != "") ''
+          include ${config.sops.templates."cf-optimizer-download.conf".path};
+        '';
         locations."/".extraConfig = "return 404;";
         locations."=/probe" = {
           proxyPass = "https://127.0.0.1:${toString probe.listenPort}";

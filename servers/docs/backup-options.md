@@ -79,7 +79,6 @@ Vaultwarden、数据库、照片/附件和重要 RustFS bucket，值得采用。
 | `repeater` | Vaultwarden 数据库与附件、EasyTier、反代配置、Komari | Vaultwarden 每日；配置每日 |
 | `conduit` | SOPS/Git、Xray/订阅相关运行状态、SSH host key | 每周或配置变更后 |
 | `target` | 待盘点后决定 | 收编时确定 |
-| `gcp-free` | SOPS/Git、Xray 与 EasyTier 状态 | 恢复连接后每周 |
 
 ## 任何方案都必须完成的验证
 

@@ -7,7 +7,6 @@
 { proxyStack ? null, ... }: {
   imports = [
     ./easytier.nix
-    ./gcp-egress-guard.nix
     ./hysteria2-node.nix
     ./komari-agent.nix
     ./mongodb.nix
@@ -25,7 +24,6 @@
     ./restic-client.nix
     ./restic-receiver.nix
     ./rustfs.nix
-    ./xray-gateway.nix
     ./xray-cdn-websocket.nix
     ./xray-subscriptions.nix
   ] ++ [ (if proxyStack == null then ./xray-node.nix else proxyStack.nixosModules.xrayNode) ];

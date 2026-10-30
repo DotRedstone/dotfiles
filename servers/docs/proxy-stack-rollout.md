@@ -65,7 +65,7 @@ v2 池，未发布私有文档或改变现网。
 - 独立 `proxy-stack` Git/Flake 提供 11 个 Mihomo 策略组、按账户地区优先的两地
   CF fallback、两条手动 REALITY、受授权的手动 Worker、规则与配置编译器。
 - Xray 模块从本地服务目录抽出为锁定 input；两台海外主机从部署侧传入旧账户目录，
-  SOPS secret 名称、入站端口和旧身份保持原样。`target` 与 `gcp-free` 仍使用旧模块。
+  SOPS secret 名称、入站端口和旧身份保持原样。`target` 不加入双节点代理；已废弃的 GCP 节点配置已移除。
 - 部署侧新增非秘密的账户、节点、来源、自有域名和三类客户端 profile 目录。
   新目录的 canary 仅完成预备登记；旧 `proxy-accounts.json`、旧订阅、旧 Worker
   和路由器配置保留。

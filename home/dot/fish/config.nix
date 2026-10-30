@@ -31,8 +31,8 @@
       bind -M insert jk "set fish_bind_mode default; commandline -f backward-char force-repaint"
 
       # [Server Deployment Completions]
-      complete -c deploy-server -f -a "hopper conduit target gcp-free" -d "受管服务器"
-      complete -c rebuild-server -f -a "hopper conduit target gcp-free" -d "受管服务器"
+      complete -c deploy-server -f -a "hopper conduit target" -d "受管服务器"
+      complete -c rebuild-server -f -a "hopper conduit target" -d "受管服务器"
     '';
 
     # [Functions]
@@ -42,7 +42,7 @@
         body = ''
           if test (count $argv) -lt 1
               echo "用法: deploy-server <server> [额外参数]"
-              echo "受管服务器: hopper, conduit, target, gcp-free"
+              echo "受管服务器: hopper, conduit, target"
               return 1
           end
 
@@ -65,7 +65,7 @@
         body = ''
           if test (count $argv) -lt 1
               echo "用法: rebuild-server <server> [额外参数]"
-              echo "受管服务器: hopper, conduit, target, gcp-free"
+              echo "受管服务器: hopper, conduit, target"
               return 1
           end
 
@@ -171,7 +171,6 @@
       nrs-hopper  = "deploy-server hopper";
       nrs-conduit = "deploy-server conduit";
       nrs-target  = "deploy-server target";
-      nrs-gcp     = "deploy-server gcp-free";
 
       # --- Home Manager (nh/hms) ---
       hms = "nh home switch ~/.dotfiles";

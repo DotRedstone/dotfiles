@@ -13,14 +13,6 @@ creation_rules:
           # Age recipient derived from the preserved RackNerd SSH host key.
           - age1uxqq9pqxcxf350cg44nl7h4cd7x9tdw8yqmvjmhz6382v46uscfsgedrmu
 
-  - path_regex: secrets/gcp-free\.yaml$
-    key_groups:
-      - age:
-          # Workstation recovery identity.
-          - age1l4sguf839qt6jdc326g2hnv69xn5yl399lgvlhqpj2nmpf5y6g7q8a754a
-          # Preserved Google VM SSH host key.
-          - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAQkTr89CEf9DxiT3s2Bdj6mBw81yUN5DvoKyF3wCPlC root@free-tier-vm"
-
   - path_regex: secrets/hopper\.yaml$
     key_groups:
       - age:

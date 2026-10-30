@@ -61,15 +61,6 @@
           ];
         };
 
-        gcp-free = nixpkgs.lib.nixosSystem {
-          specialArgs = { proxyStack = null; };
-          modules = [
-            disko.nixosModules.disko
-            sops-nix.nixosModules.sops
-            ./hosts/gcp-free
-          ];
-        };
-
         hopper = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit hermes-agent proxyStack; };
           modules = [

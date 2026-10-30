@@ -18,7 +18,6 @@
 
 - `conduit`：洛杉矶边缘节点；仅承载声明式代理与基础设施。
 - `hopper`：Oracle ARM 应用节点；业务按域拆分，原生服务优先。
-- `gcp-free`：GCE 免费层代理节点；地址恢复或退役决定见 inventory。
 - `target`：国内 EasyTier / 反代 / 游戏转发节点。
 
 `repeater` 和其他尚未完整收编的机器不能直接照抄进本目录；先满足

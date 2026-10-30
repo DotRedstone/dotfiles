@@ -18,7 +18,6 @@ SOPS 加密后随 Git 配置保存。
 | --- | --- | --- |
 | `conduit` | RackNerd 洛杉矶 Xray 边缘节点 | 已受管 |
 | `hopper` | Oracle A1 应用与存储节点 | 已受管 |
-| `gcp-free` | GCE `e2-micro` 代理节点 | 已有配置，等待恢复可访问地址或确认退役 |
 | `repeater` | 国内服务节点 | 在线 NixOS，待回收源码后收编 |
 | `target` | 国内反代与 EasyTier 节点 | 已受管，计划到期退役 |
 | `beacon` | 未确认角色 | 当前不可达，待盘点 |
@@ -27,8 +26,6 @@ SOPS 加密后随 Git 配置保存。
 RustFS、MySQL、PostgreSQL、MongoDB、Redis、Nginx、Xray、Komari 与 Hermes，
 不安装容器运行时。
 
-`gcp-free` 的完整安装、恢复和日常维护说明见
-[docs/gcp-free-migration.md](./docs/gcp-free-migration.md)。
 `conduit` 的实机迁移记录与可复现操作说明见
 [docs/conduit-migration.md](./docs/conduit-migration.md)。
 `hopper` 的 ARM64、OCI 网络、数据恢复和两阶段接管说明见
@@ -52,7 +49,7 @@ Cloudflare 边缘代理的通用代码位于独立的
 [proxy-deployment](./proxy-deployment/README.md)；SOPS 密钥仍在本仓库。
 隔离 canary 已登记但旧 Xray 目录仍将其关闭；现有 `clash/router-policy.json`、
 `proxy-accounts.json`、旧 Worker 与订阅保持可用，新编译器尚未向现网发布。
-`target` 和 `gcp-free` 没有加入这次双节点代理。
+`target` 没有加入这次双节点代理。
 从**当前锁定修订**本地构建三类 Worker bundle 的命令是：
 
 ```bash
@@ -92,8 +89,7 @@ Hopper 同时提供一个有界的官方 Nix 二进制缓存中继：它按需�
 - 网络：`systemd-networkd`，共享启用 `BBR + fq`
 - 维护：zram、fstrim、每周 Nix GC
 
-主机服务模块可以追加自己的最小端口集合：`gcp-free` 只额外开放
-`443/tcp`；`conduit` 额外开放 `80/tcp`、`20001/tcp` 和
+主机服务模块可以追加自己的最小端口集合：`conduit` 额外开放 `80/tcp`、`20001/tcp` 和
 `20002/tcp`；`hopper` 同样只额外开放 `80/tcp`、`20001/tcp` 和
 `20002/tcp`，数据库与应用端口全部仅监听回环地址或由防火墙隔离。
 
@@ -105,7 +101,7 @@ Hopper 同时提供一个有界的官方 Nix 二进制缓存中继：它按需�
 ```bash
 nix flake check path:/home/dot/.dotfiles/servers
 nix build \
-  path:/home/dot/.dotfiles/servers#nixosConfigurations.gcp-free.config.system.build.toplevel
+  path:/home/dot/.dotfiles/servers#nixosConfigurations.target.config.system.build.toplevel
 ```
 
 `conduit` 的镜像接管配置仍可单独构建：

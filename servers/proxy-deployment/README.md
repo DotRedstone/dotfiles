@@ -56,6 +56,11 @@ JSON 包含 `version: 1`、`preferredReadToken`、`preferredBaseUrl`、
 `deploymentCatalog`、每账户 `runtimeByAccount`，以及
 `cloudflare.accountId`、`deliveryNamespaceId`、`apiToken`。每账户运行时包含独立
 `deliveryToken`、`deliveryBaseUrl`、两地 UUID、REALITY 公钥与 short ID、WS 路径。
+`sharedEdgeSourceIds` 必须在受限运行时显式列出使用同一次本地 Cloudflare 边缘测速的
+来源；没有共享来源时使用空数组。对登记来源，发布器要求两地池具有相同的来源、
+接入与出口网络及 `collectedAt`，共同候选的速度和相对顺序一致；两地兼容过滤可
+产生不同子序列。检查在写入任何交付 KV 文档之前执行；`collectedAt` 是操作性
+同源约束，不是扫描的密码学证明。
 真实值只进入加密文件；目录和示例不记录其正文。控制面、交付 Worker 使用独立 KV，
 旧 `clash/config/<profile>` 和旧优选池继续由既有 Worker 管理。
 
@@ -66,6 +71,8 @@ manifest 写入、池版本混用、无变化跳过与跨账户键隔离。此�
 已锁在 `5393d0e`，新版 Worker 输入锁在 `052a959`；实际隔离发布见
 [交付 Worker 交接](./delivery-worker-canary-handoff.md)。历史合成测试不等于
 此次云端验收。状态与发布阶段见[发布记录](../docs/proxy-stack-rollout.md)。
+独立 router 账号的两地身份、交付发布、出口验收与回退边界见
+[生产账号交接](./router-production-handoff.md)。
 
 ## 回源证明与可信探测
 
@@ -97,6 +104,16 @@ max-age=0`，并原样回显 `X-CF-Optimizer-Nonce`。其他方法返回 405；�
 两地 TLS/SNI、经 Cloudflare 的实际非缓存回源和 `cf-optimizer` 在接入网络上的
 测量；响应头本身不能证明请求到达了目标源站。回退时撤销各主机
 `cross-probe.nix` 中的 marker 配置并重新激活旧闭包，保留签名 `/probe`。
+
+同一探针虚拟主机另以 SOPS 中的 `xray/cdn_speedtest_path` 挂载 8 MiB 下载正文，
+供 `cf-optimizer` 对已入选候选测量实际下载速度。该路径只在目标机运行时解密，
+不进入公开目录或 Nix store。入口仅接受带单个 32 位十六进制 nonce 的 GET，
+回显 nonce 和该目标的 origin marker，设置 `no-store`，关闭压缩、分段响应和
+该位置的访问日志。旧 Xray CDN 主机上的速测入口不变；下载测速仅在路由器的
+root 专用目标路径文件安装后启用。上线时分别验收经候选 IP 直连的 TLS/SNI、
+响应正文长度和缓存状态；本地构建不能证明公网请求已抵达源站。
+本轮生产部署的测速结果未通过运行验收，当前暂停发布与回退边界见
+[优选下载测速部署交接](./download-speed-rollout-handoff.md)。
 
 每地 origin-proof 服务监听回环，Nginx 不注入 `X-Origin-Proof-Token`；请求方必须
 提供对应令牌。两地主机分别以 SOPS 保存 `proxy/origin_proof_key` 与
@@ -138,6 +155,10 @@ HMAC 四把密钥互异。每台探测器的 `PROBE_ORIGINS_JSON` 只应包含�
 仅供受限部署使用；`workers_dev` 关闭，交付入口使用
 独立 Custom Domain，控制入口由受限部署配置绑定独立 Custom Domain。
 `secret-references.json` 列出需在受限部署环境注入的密钥来源，不含明文。
+编译器换版时，`--alternate-compiler-revision <旧 SHA>` 为交付 Worker 临时生成
+`ALTERNATE_COMPILER_REVISION`；先部署可接受新旧修订的 Worker，核对旧 manifest
+仍可下载，再切换发布器并发布新 manifest。验收三类账户和 provider 后重新生成
+仅接受新修订的配置。两个 SHA 必须是不同的完整提交，过渡绑定只保留到切换验收。
 
 ```bash
 cd /home/dot/.dotfiles

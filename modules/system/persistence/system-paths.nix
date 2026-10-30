@@ -17,6 +17,8 @@
       "/var/lib/AccountsService"
       # Root-owned Mihomo config and provider cache; it contains private URLs.
       "/var/lib/mihomo"
+      # UniVPN client state, certificate cache, and sysconfig
+      "/var/lib/univpn"
     ];
   };
 }

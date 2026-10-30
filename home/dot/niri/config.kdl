@@ -300,6 +300,17 @@ window-rule {
 }
 
 window-rule {
+    match app-id=r#"(?i)^univpn$"#
+    default-column-width { fixed 680; }
+}
+
+window-rule {
+    match app-id=r#"(?i)^univpn$"# title=r#"^(新建连接|连接详情|修改密码|关于|警告|选项|添加新地址|故障反馈)$"#
+    open-floating true
+    opacity 1.0
+}
+
+window-rule {
     match app-id="^org\\.kde\\.dolphin$"
     default-column-width { proportion 0.5; }
 }

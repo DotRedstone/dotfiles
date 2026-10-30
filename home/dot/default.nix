@@ -53,6 +53,7 @@
     ./codex
     ./claude-desktop
     ./workbuddy
+    ./univpn
     ./kdeconnect
     ./downloads
 

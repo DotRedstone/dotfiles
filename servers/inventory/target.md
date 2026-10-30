@@ -10,7 +10,7 @@
 - 主机名为 `target`，2026-10-13 运行 `26.11.20260831.34ab990`，
   `system.stateVersion` 为 `26.05`；SSH 可用，`dot` 可无密码 sudo。
 - 当前没有 failed systemd unit。
-- `hosts/target/` 已收编到当前 `servers/flake.nix`，包含硬件、SSH、防火墙、EasyTier 和反代。
+- `hosts/target/` 已收编到当前 `servers/flake.nix`，包含硬件、SSH、防火墙、EasyTier 和游戏 TCP/UDP 端口转发；没有 HTTP 反代或代理服务。
 - 已接入独立 Restic SFTP 仓库：每日将 EasyTier 持久状态备份到 Hopper，之后镜像至 R2，
   并每月进行异地抽样完整性校验。
 
@@ -36,7 +36,7 @@ Cloudflare 上拟用于隔离探测的 `probe-v2-canary.dotdot.ggff.net` 尚无 
 
 - 硬件、磁盘、启动方式和云平台网络；
 - 正在运行的服务、端口、服务数据和外部依赖；
-- 是否属于国内 EasyTier 网络、是否承载反代或代理入口；
+- 是否属于国内 EasyTier 网络、游戏转发入口是否仍在使用；
 - 需要进入 SOPS 的密钥，以及恢复测试所需的最小数据集。
 
 ## 后续规则

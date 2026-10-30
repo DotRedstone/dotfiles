@@ -31,7 +31,7 @@ EasyTier 运行状态。它每天先写入 Hopper 的 `conduit` 仓库，随后�
 Restic 仓库、镜像至 R2，R2 每月抽样校验。此前从 R2 选择性还原 Vaultwarden 数据库的
 恢复演练仍然有效。
 
-`target` 已收编并接入独立仓库：当前备份 EasyTier 持久状态；其反代规则来自 Nix
+`target` 已收编并接入独立仓库：当前备份 EasyTier 持久状态；其游戏端口转发规则来自 Nix
 配置，本身不需要作为运行时数据备份。
 
 数据库不直接复制在线数据目录。MongoDB 的备份/恢复角色会由 NixOS 单元在备份前校正，

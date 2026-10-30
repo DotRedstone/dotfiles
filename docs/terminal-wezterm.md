@@ -18,11 +18,11 @@ WezTerm 预集成了以下常用 VPS 节点，可通过快捷键或命令面板�
 
 | 节点名称 | 别名 | 描述 |
 | :--- | :--- | :--- |
-| Beacon (HK) | `beacon` | 香港服务器 |
+| Beacon (Mac mini) | `beacon` | 本地 macOS / nix-darwin 无头主机 |
 | Conduit (RN) | `conduit` | 节点服务器 |
 | Hopper (Oracle) | `hopper` | 备份/Oracle 节点 |
 | Target (Tencent) | `target` | 腾讯云远程构建 |
-| Repeater (Aliyun) | `repeater` | 阿里云中转 |
+| Repeater (Aliyun) | `repeater` | 未纳管外部中转；仅保留 SSH 别名，不登记凭据 |
 
 ## 核心快捷键
 

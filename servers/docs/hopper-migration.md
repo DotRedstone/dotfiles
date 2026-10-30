@@ -52,6 +52,13 @@ SOPS 同时加密给工作站恢复身份和由旧机 SSH Ed25519 主机密钥�
 recipient。安装时必须使用 `--copy-host-keys` 保留这把主机密钥，否则新系统
 无法解密服务凭据，SSH 指纹也会改变。
 
+## 当前端口清单补充（以声明配置为准）
+
+- `443/tcp`：`xray-cdn-websocket.nix` 为 Cloudflare 回源 Nginx TLS 虚拟主机开放。
+- `443/udp`：Hysteria2 服务声明的 QUIC 入站端口。
+- 这是对当前声明配置的补充；下文 2026 年 9 月迁移记录中的“当时未开放 443”
+  是历史快照，不代表当前端口清单。本次不改变端口或防火墙行为。
+
 ## 已核对的硬件与网络
 
 - Oracle `VM.Standard.A1.Flex`，`aarch64`，4 vCPU，约 23 GiB 内存。

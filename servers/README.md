@@ -18,9 +18,9 @@ SOPS 加密后随 Git 配置保存。
 | --- | --- | --- |
 | `conduit` | RackNerd 洛杉矶 Xray 边缘节点 | 已受管 |
 | `hopper` | Oracle A1 应用与存储节点 | 已受管 |
-| `repeater` | 国内服务节点 | 在线 NixOS，待回收源码后收编 |
-| `target` | 国内反代与 EasyTier 节点 | 已受管，计划到期退役 |
-| `beacon` | 未确认角色 | 当前不可达，待盘点 |
+| `repeater` | 国内阿里云中转 | 未纳管外部中转，待回收源码后收编 |
+| `target` | 国内 EasyTier 与游戏端口转发节点（无 HTTP 反代或代理服务） | 已受管，计划到期退役 |
+| `beacon` | Apple Silicon Mac mini，原生 macOS / nix-darwin | 根目录 `hosts/beacon` 已声明；不属于 servers Flake |
 
 `conduit` 与国内 EasyTier 网络隔离。`hopper` 原生运行 OpenList、Navidrome、
 RustFS、MySQL、PostgreSQL、MongoDB、Redis、Nginx、Xray、Komari 与 Hermes，
@@ -90,8 +90,10 @@ Hopper 同时提供一个有界的官方 Nix 二进制缓存中继：它按需�
 - 维护：zram、fstrim、每周 Nix GC
 
 主机服务模块可以追加自己的最小端口集合：`conduit` 额外开放 `80/tcp`、`20001/tcp` 和
-`20002/tcp`；`hopper` 同样只额外开放 `80/tcp`、`20001/tcp` 和
-`20002/tcp`，数据库与应用端口全部仅监听回环地址或由防火墙隔离。
+`20002/tcp`、`443/tcp`；`hopper` 额外开放 `80/tcp`、`20001/tcp`、
+`20002/tcp`、`443/tcp`（CDN Nginx）和 `443/udp`（Hysteria2）；
+`target` 的 EasyTier 和游戏转发端口由对应主机模块单独声明。
+数据库与应用端口仅监听回环地址或由防火墙隔离。
 
 ## 构建与检查
 

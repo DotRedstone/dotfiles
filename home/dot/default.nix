@@ -54,6 +54,7 @@
     ./claude-desktop
     ./workbuddy
     ./univpn
+    ./grok-bot
     ./kdeconnect
     ./downloads
 

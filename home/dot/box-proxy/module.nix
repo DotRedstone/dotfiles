@@ -17,10 +17,10 @@ let
     text = ''
       set -euo pipefail
       D="$HOME/.local/state/box-proxy"; PIDF="$D/mihomo.pid"
-      MIH="${BOX_PROXY_MIHOMO:-${lib.getExe cfg.package}}"
+      MIH="''${BOX_PROXY_MIHOMO:-${lib.getExe cfg.package}}"
       PX="http://127.0.0.1:7890"
       alive() { [ -f "$PIDF" ] && kill -0 "$(cat "$PIDF")" 2>/dev/null; }
-      case "${1:-status}" in
+      case "''${1:-status}" in
         on)
           alive && { echo "already running (pid $(cat "$PIDF"))"; exit 0; }
           [ -f "$D/config.yaml" ] || { echo "no config; run: box-proxy refresh" >&2; exit 1; }
@@ -37,7 +37,7 @@ let
           if alive; then echo "running pid $(cat "$PIDF"), listen $PX"; else echo "stopped"; fi
           ;;
         refresh)
-          : "${BOX_PROXY_SUBSCRIPTION_URL:?BOX_PROXY_SUBSCRIPTION_URL not set}"
+          : "''${BOX_PROXY_SUBSCRIPTION_URL:?BOX_PROXY_SUBSCRIPTION_URL not set}"
           umask 077; mkdir -p "$D"; chmod 700 "$D"
           printf 'url = "%s"\n' "$BOX_PROXY_SUBSCRIPTION_URL" | curl -sS -K - --max-time 30 -o "$D/raw.bin" -f
           chmod 600 "$D/raw.bin"

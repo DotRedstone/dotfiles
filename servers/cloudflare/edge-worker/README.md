@@ -6,7 +6,7 @@
 `docs/architecture.md`。本仓库的 `scripts/clash-profiles.mjs` 负责部署专属的
 Router/Device 配置生成与测试；配置基线保存在 `servers/clash/router-policy.json`。
 `scripts/pinned-source.mjs` 仍固定 Worker 源码提交
-`d407e15e4f448d5d5410224144d1c42bf530b453`。部署时必须通过
+`7d3b2c310265cd42c91db74a228cb40a672cccb1`。部署时必须通过
 `EDGE_PROXY_WORKER_LEGACY_REPOSITORY` 指向含此提交的受限本地 checkout；只要该检出包含此提交即可（需先 `git fetch origin main`）；变量名中的
 LEGACY 是历史遗留，并不要求是旧版检出。部署脚本用 `git archive` 导出该
 提交到权限受限的临时目录并运行 `npm ci`，使用其中的 `src/index.ts` 与
@@ -76,7 +76,7 @@ Age 身份。独立项目先运行 `npm ci && npm run check`；这里的部署�
 ```bash
 cd /home/dot/.dotfiles/servers/cloudflare/edge-worker
 export EDGE_PROXY_WORKER_LEGACY_REPOSITORY=/home/dot/Documents/Codex/edge-worker-release.zdIsNs2I/legacy-original-checkout
-git -C "$EDGE_PROXY_WORKER_LEGACY_REPOSITORY" rev-parse --verify d407e15e4f448d5d5410224144d1c42bf530b453^{commit}
+git -C "$EDGE_PROXY_WORKER_LEGACY_REPOSITORY" rev-parse --verify 7d3b2c310265cd42c91db74a228cb40a672cccb1^{commit}
 node --check scripts/pinned-source.mjs
 node --check scripts/deploy.mjs
 node scripts/deploy.mjs --dry-run

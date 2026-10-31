@@ -31,12 +31,14 @@
 
 合并代码本身不等于部署。每合并一层，都先检查对应声明和公开/私有 Flake 锁的兼容性，再在一台服务器上验证旧业务不变，完成 `test`、检查后才 `switch`；确认稳定后再处理另一台。出现异常立即恢复该主机上一代 NixOS generation，不继续下一层或下一台。两台服务器均未完成验收之前不切换路由器默认流量。
 
+**跨仓依赖（先于 #7、#8 的主机选项生效）**：生产配置里 `proxyStack.nixosModules.xrayNode` 会取代本仓库 `servers/modules/services/xray-node.nix`，因此 #7 在本仓库中新增的 `webSocketListenAddress` 选项在私有 Flake 下不会生效；对应实现在私有仓库 `DotRedstone/proxy-stack` 的草稿 PR #1（分支 `hardening/ws-listen-address`，仅修改 `nix/modules/xray-node.nix`，默认值 `0.0.0.0`，默认行为不变）。启用回环监听之前，必须按顺序：1）审阅并合并 proxy-stack #1；2）把私有 overlay 的 `proxyStack` 输入更新并锁定到包含该改动的提交；3）确认两台主机在默认配置下求值与现网一致；4）才允许在主机配置中设置 `dot.services.xrayNode.webSocketListenAddress`。在此之前设置该选项会因选项不存在而求值失败。
+
 ## 3. Cloudflare 与主机分阶段收口
 
 1. **先 Full (strict)**：在目标 CDN 主机名适用的 Cloudflare SSL/TLS 配置作用域设为 `Full (strict)`；如果规则只支持较大作用域，先核对是否影响其他站点。验证 Cloudflare 到源站的证书有效且主机名匹配、TLS 握手和原有 WS 业务均正常。失败则在 Cloudflare 恢复原 SSL/TLS 设置，停止推进。
 2. **后 Authenticated Origin Pulls（AOP）**：启用与该 CDN 主机名及证书配置匹配的 Authenticated Origin Pulls，确认 Cloudflare 能提供预期的客户端证书，并验证当前流量保持正常。此时仅启用 Cloudflare 侧 AOP **不等于**源站已经强制校验证书；必须在下一阶段由 Nginx 配置落实。失败则在 Cloudflare 恢复原 AOP 设置。
 3. **确认真实回源到 Nginx 443**：若 Origin Rule 仍直连 `20001`，先在 Cloudflare 撤销该直连规则或将回源端口调整到 Nginx `443`，逐台核对真实 WS 握手、长连接与旧订阅。未确认所有活跃客户端与 Worker 已不再使用公网 `20001` 之前，**严禁**收紧 Xray 监听地址。失败则在 Cloudflare 恢复原 Origin Rule；此时保持原主机监听状态。
-4. **最后启用主机选项**：准备受信任且公开的 Cloudflare AOP 客户端 CA 证书文件，仅引用其路径，不在此仓库嵌入证书内容或私钥。在私有主机配置中设置 `dot.services.xrayCdnWebSocket.clientCertificateFile`，并设置 `dot.services.xrayNode.webSocketListenAddress = "127.0.0.1"`。先核查生效主机确实使用该 CDN 模块，且 `webSocketPort` 与 Nginx `proxyPass` 一致；这些配置**不得**在本 PR 修改 `hosts/*`。`clientCertificateFile = null` 时 Nginx 的配置应保持原样。
+4. **最后启用主机选项**：先确认私有 overlay 锁定的 `proxyStack` 已包含 proxy-stack #1（见第 2 节“跨仓依赖”）。准备受信任且公开的 Cloudflare AOP 客户端 CA 证书文件，仅引用其路径，不在此仓库嵌入证书内容或私钥。在私有主机配置中设置 `dot.services.xrayCdnWebSocket.clientCertificateFile`，并设置 `dot.services.xrayNode.webSocketListenAddress = "127.0.0.1"`。先核查生效主机确实使用该 CDN 模块，且 `webSocketPort` 与 Nginx `proxyPass` 一致；这些配置**不得**在本 PR 修改 `hosts/*`。`clientCertificateFile = null` 时 Nginx 的配置应保持原样。
 5. **逐台部署**：固定已审阅的公开/私有 Flake 提交，先 Conduit（或明确选定的首台），再 Hopper；每次保留独立 SSH 会话，执行以下模板命令（用受控环境中的真实私有 Flake 和主机名替换占位符）：
 
    ```bash
@@ -52,7 +54,7 @@
 | 步骤 | 验证通过条件 | 失败回滚 |
 | --- | --- | --- |
 | 前置只读盘点 | 两台提交/generation 可追溯，`20001` 外部连接和 Origin Rule 依赖已确认 | 无配置变更；保持原 NixOS generation 和 Cloudflare 设置 |
-| #4、#5、#6、#7、#8 逐层合并及单机发布 | 每个 PR 的 base、diff、依赖正确；每台均先 `test` 后 `switch`，旧业务正常 | 已发布的主机恢复上一代 NixOS generation；未发布的主机保持原状 |
+| #4、#5、#6、#7、#8 逐层合并及单机发布 | 每个 PR 的 base、diff、依赖正确；每台均先 `test` 后 `switch`，旧业务正常；proxy-stack #1 已合并且 overlay 的 proxyStack 已更新后，才可设置 webSocketListenAddress | 已发布的主机恢复上一代 NixOS generation；未发布的主机保持原状 |
 | Full (strict) | Cloudflare 到源站证书校验与 WS/TLS 正常 | 在 Cloudflare 恢复原 SSL/TLS 设置 |
 | AOP | Cloudflare 正常提供客户端证书，原有请求未中断 | 在 Cloudflare 恢复原 AOP 设置 |
 | Origin Rule 改走 443 | 无剩余活跃直连 `20001` 依赖，CDN 流量经 Nginx 可用 | 在 Cloudflare 恢复原 Origin Rule/端口设置 |

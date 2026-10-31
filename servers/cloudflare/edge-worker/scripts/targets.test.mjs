@@ -61,7 +61,7 @@ test("bdot uses its own domains, retains workers.dev and injected KV id", () => 
   const target = parseTarget(["--target", "bdot"], {});
   const main = buildMainConfig(options(target));
   const control = buildPreferredControlConfig(options(target));
-  assert.equal(target.accountKey, "qq");
+  assert.equal(target.accountKey, "sites");
   assert.deepEqual(main.routes, [{ pattern: "edge-next.bdot.in", custom_domain: true }]);
   assert.equal(main.vars.PUBLIC_HOST, "edge-next.bdot.in");
   assert.deepEqual(control.routes, [{ pattern: "preferred-control.bdot.in", custom_domain: true }]);

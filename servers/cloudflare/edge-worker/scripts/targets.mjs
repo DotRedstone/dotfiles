@@ -9,8 +9,7 @@ export const targets = {
     namespaceTitle: "edge-proxy-next-state",
   },
   bdot: {
-    // 仅为 SOPS 键名占位，执行部署前必须由维护者确认。
-    accountKey: "qq",
+    accountKey: "sites",
     publicHost: "edge-next.bdot.in",
     preferredControlHost: "preferred-control.bdot.in",
     workerName: "edge-proxy-next-recovery",

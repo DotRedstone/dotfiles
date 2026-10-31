@@ -31,9 +31,9 @@
 
 `node scripts/deploy.mjs` 默认使用 legacy；可通过 `--target legacy`、`--target bdot`、`--target=bdot` 或环境变量 `EDGE_DEPLOY_TARGET=bdot` 选择目标。命令行参数优先于环境变量，未知目标直接报错。URL 输出脚本 `node scripts/show-clash-profile-urls.mjs --target bdot` 也支持同样的目标选择，其输出含私有 token，不得公开。
 
-部署前需先确认 SOPS 的 `stored.accounts.qq` 是否为 bdot 对应账号键名（当前为待确认占位符），并在该键下安全配置 `account_id`、`api_token`；旧目标继续使用 `stored.accounts.proxy`，Worker Secret 仍来自 `stored.edge_next`。不得将解密值提交到仓库。KV namespace 按所选账号的 `edge-proxy-next-state` title 运行时查找或创建，也可由 `EDGE_KV_NAMESPACE_ID` 环境变量指定已有 ID；`--dry-run` 始终使用占位 ID。密钥和运行时 KV ID 不纳入版本控制。
+bdot 目标使用 SOPS 的 `stored.accounts.sites` 账号键名（包含 bdot.in zone 的账号），旧目标继续使用 `stored.accounts.proxy`，Worker Secret 仍来自 `stored.edge_next`。不得将解密值提交到仓库。KV namespace 按所选账号的 `edge-proxy-next-state` title 运行时查找或创建，也可由 `EDGE_KV_NAMESPACE_ID` 环境变量指定已有 ID；`--dry-run` 始终使用占位 ID。密钥和运行时 KV ID 不纳入版本控制。
 
-原有 `waf-path-guard.json` 和 `waf-v2-path-guards.json` 继续适用于 legacy 域名。新增 `waf-path-guard.bdot.json`、`waf-v2-path-guards.bdot.json` **仅提供规则样例**，应在核对路由和合法请求后独立应用于 bdot.in zone（对应 qq 账号），部署脚本不会自动发布 WAF。preferred-v2-canary 和 delivery-v2-canary 不由 `deploy.mjs` 部署；其部署入口须另行确认，本次只记录域名映射与 WAF 规则。
+原有 `waf-path-guard.json` 和 `waf-v2-path-guards.json` 继续适用于 legacy 域名。新增 `waf-path-guard.bdot.json`、`waf-v2-path-guards.bdot.json` **仅提供规则样例**，应在核对路由和合法请求后独立应用于 bdot.in zone（对应 sites 账号），部署脚本不会自动发布 WAF。preferred-v2-canary 和 delivery-v2-canary 不由 `deploy.mjs` 部署；其部署入口须另行确认，本次只记录域名映射与 WAF 规则。
 
 节点域名为 `la-cdn.bdot.in`、`sg-cdn.bdot.in`、`sg-origin.bdot.in`，**本次不修改 `nodes.json` 或任何节点 origin**。`servers/proxy-deployment/owned-domains.json` 已包含 `bdot.in` 与 `dotdot.ggff.net`，保留后者作为 legacy 至并行期结束。
 

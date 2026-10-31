@@ -4,7 +4,7 @@
 基线及路由器适配。协议实现、配置生成器、测试和 npm 依赖由独立项目
 `/home/dot/Projects/edge-proxy-worker` 维护，接口见该项目的 `README.md` 与
 `docs/architecture.md`。`scripts/pinned-source.mjs` 固定旧版完整 Git 提交
-`e84f549df1293117ffcf6e47dcc8ff4e5f5f6b57`。部署时必须通过
+`d5253c3a4772d2ed5480ec6614eab9ba3d43eba9`。部署时必须通过
 `EDGE_PROXY_WORKER_LEGACY_REPOSITORY` 指向含此提交的受限本地 checkout；新的
 独立项目克隆不包含旧提交。部署脚本用 `git archive` 导出该
 提交到权限受限的临时目录，运行 `npm ci`，再使用其中的 `src/index.ts`、
@@ -58,7 +58,7 @@ Age 身份。独立项目先运行 `npm ci && npm run check`；这里的部署�
 ```bash
 cd /home/dot/.dotfiles/servers/cloudflare/edge-worker
 export EDGE_PROXY_WORKER_LEGACY_REPOSITORY=/home/dot/Documents/Codex/edge-worker-release.zdIsNs2I/legacy-original-checkout
-git -C "$EDGE_PROXY_WORKER_LEGACY_REPOSITORY" rev-parse --verify e84f549df1293117ffcf6e47dcc8ff4e5f5f6b57^{commit}
+git -C "$EDGE_PROXY_WORKER_LEGACY_REPOSITORY" rev-parse --verify d5253c3a4772d2ed5480ec6614eab9ba3d43eba9^{commit}
 node --check scripts/pinned-source.mjs
 node --check scripts/deploy.mjs
 node scripts/deploy.mjs --dry-run

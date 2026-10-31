@@ -3,10 +3,10 @@
 本目录只维护此部署的 Worker 名称、域名、Cloudflare 账号与 SOPS 密钥来源、Mihomo
 基线及路由器适配。协议实现、配置生成器、测试和 npm 依赖由独立项目
 `/home/dot/Projects/edge-proxy-worker` 维护，接口见该项目的 `README.md` 与
-`docs/architecture.md`。`scripts/pinned-source.mjs` 固定旧版完整 Git 提交
+`docs/architecture.md`。`scripts/pinned-source.mjs` 固定要部署的完整 Git 提交
 `d407e15e4f448d5d5410224144d1c42bf530b453`。部署时必须通过
-`EDGE_PROXY_WORKER_LEGACY_REPOSITORY` 指向含此提交的受限本地 checkout；新的
-独立项目克隆不包含旧提交。部署脚本用 `git archive` 导出该
+`EDGE_PROXY_WORKER_LEGACY_REPOSITORY` 指向含此提交的受限本地 checkout；只要该检出包含此提交即可（需先 `git fetch origin main`）；变量名中的
+LEGACY 是历史遗留，并不要求是旧版检出。部署脚本用 `git archive` 导出该
 提交到权限受限的临时目录，运行 `npm ci`，再使用其中的 `src/index.ts`、
 `src/preferred-control.ts` 和 `buildProfiles({ baseline, providers })`。工作树中的后续改动
 不会自动进入部署。

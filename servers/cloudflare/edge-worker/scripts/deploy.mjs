@@ -29,6 +29,8 @@ const baselinePath = path.resolve(
 );
 const dryRun = process.argv.includes("--dry-run");
 const mainOnly = process.argv.includes("--main-only");
+const withSecrets = process.argv.includes("--with-secrets");
+const uploadSecrets = !mainOnly || withSecrets;
 
 function run(command, arguments_, options = {}) {
   const result = spawnSync(command, arguments_, {
@@ -258,7 +260,7 @@ async function main() {
       )}\n`,
       { mode: 0o600 },
     );
-    if (!mainOnly) {
+    if (uploadSecrets) {
       fs.writeFileSync(workerSecretsPath, JSON.stringify(workerSecrets), {
         mode: 0o600,
       });
@@ -267,7 +269,7 @@ async function main() {
     deployWorker({
       sourceDirectory,
       configPath,
-      secretsPath: mainOnly ? undefined : workerSecretsPath,
+      secretsPath: uploadSecrets ? workerSecretsPath : undefined,
       credentials,
       message: "原子化边缘代理声明式部署",
       dryRun,

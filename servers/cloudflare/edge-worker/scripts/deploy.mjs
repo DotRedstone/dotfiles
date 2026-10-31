@@ -192,23 +192,29 @@ async function main() {
   );
   try {
     const sourceDirectory = preparePinnedSource(temporaryDirectory);
-    const { buildProfiles } = await import(
-      pathToFileURL(path.join(sourceDirectory, "scripts", "clash-config.mjs"))
-        .href
-    );
+    let buildProfiles;
+    if (!mainOnly) {
+      ({ buildProfiles } = await import(
+        pathToFileURL(path.join(sourceDirectory, "scripts", "clash-config.mjs"))
+          .href
+      ));
+    }
     const stored = loadSecrets();
     const credentials = stored.accounts?.[target.accountKey];
     if (!credentials) {
       throw new Error(`missing SOPS stored.accounts.${target.accountKey} for target ${target.name}; confirm the account key before deploying`);
     }
     const edge = stored.edge_next;
-    const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
-    const profiles = buildProfiles({
-      baseline,
-      providers: stored.clash?.providers,
-    });
-    if (Object.keys(profiles).length !== 4) {
-      throw new Error("expected exactly four Clash profiles");
+    let profiles;
+    if (!mainOnly) {
+      const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
+      profiles = buildProfiles({
+        baseline,
+        providers: stored.clash?.providers,
+      });
+      if (Object.keys(profiles).length !== 4) {
+        throw new Error("expected exactly four Clash profiles");
+      }
     }
     // Dry run must stay local; the placeholder validates Wrangler's binding shape.
     const namespaceId = dryRun

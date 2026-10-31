@@ -27,6 +27,7 @@
 - [AGENTS.md](./AGENTS.md): 针对 AI 协作助手的技术规范指南。
 - [仓库导航与改动路由](./docs/repository-map.md): 桌面、服务器、边缘 Worker 与文档的最短入口。
 - [服务器 Flake](./servers/README.md): 云服务器的独立入口、主机清单与部署边界。
+- [云电脑 box 的 Home Manager](./home/box/README.md): Debian 云电脑的用户层配置入口与恢复说明。
 - [docs/](./docs/): 详细的功能模块文档：
   - [架构概览](./docs/architecture.md)
   - [日常维护](./docs/maintenance.md)

@@ -93,10 +93,10 @@ node scripts/deploy.mjs
 
 主 Worker 单独恢复可使用 `node scripts/deploy.mjs --main-only --dry-run` 验证，
 再运行 `node scripts/deploy.mjs --main-only`。该模式要求现有 KV namespace 已存在，
-不上传 Mihomo 配置、不部署优选控制 Worker，也不重传本地 SOPS 中的七项 Secret；
+不上传 Mihomo 配置、不部署优选控制 Worker，也不重传本地 SOPS 中的固定七项 Secret 或可选的 `SUB_NODES_JSON`；
 Wrangler 会继承线上已有 Secret。执行前记录当前部署版本以便回退，执行后仍需
 核对线上绑定和真实入口响应。
-`--main-only --with-secrets` 仍不上传 Clash 配置、不部署优选控制 Worker，但会从 SOPS 重传七项 Worker Secret，用于主 Worker 被删除重建后恢复；执行前确认 SOPS 里的 `edge_next` 已是正确值。`--main-only` 不生成或上传 Clash 配置；完整部署使用本仓库的 `scripts/clash-profiles.mjs`，不再要求固定 Worker 提交提供 `scripts/clash-config.mjs`。固定 Worker 提交仍用于 Worker 源码归档与打包。
+`--main-only --with-secrets` 仍不上传 Clash 配置、不部署优选控制 Worker，但会从 SOPS 重传固定七项 Worker Secret，并在配置存在时一并上传 `SUB_NODES_JSON`，用于主 Worker 被删除重建后恢复；执行前确认 SOPS 里的 `edge_next` 已是正确值。`--main-only` 不生成或上传 Clash 配置；完整部署使用本仓库的 `scripts/clash-profiles.mjs`，不再要求固定 Worker 提交提供 `scripts/clash-config.mjs`。固定 Worker 提交仍用于 Worker 源码归档与打包。
 
 以上备份目录的父目录仅允许所有者访问。实际部署前应重新核对旧提交和 dry run；
 若备份被移动，更新环境变量指向同一旧提交。省略环境变量时适配器会拒绝执行，
@@ -116,8 +116,26 @@ HTTP 出口以及新优选入口的 VLESS/WS 连通。DNS UDP 与实际设备的
 
 主 Worker 使用 `EDGE_STATE` KV、`PUBLIC_HOST` 等普通变量，以及
 `VLESS_UUID`、`TROJAN_PASSWORD`、`ROUTE_SECRET`、`SUBSCRIPTION_TOKEN`、
-`PREFERRED_ENDPOINTS_TOKEN`、`CONFIG_TOKENS`、`IP_UPDATE_KEY` 七项 Secret。
-独立优选控制面共用 KV，只接收 `PREFERRED_ENDPOINTS_TOKEN` 和 `IP_UPDATE_KEY`。
+`PREFERRED_ENDPOINTS_TOKEN`、`CONFIG_TOKENS`、`IP_UPDATE_KEY` 七项固定 Secret。
+
+### 订阅节点配置 Secret
+
+`stored.edge_next.sub_nodes_json` 是可选配置。存在时，部署脚本校验并紧凑序列化，
+作为主 Worker Secret `SUB_NODES_JSON` 下发；字段缺失或为空时不创建该 Secret。
+该字段可使用 JSON 文本或对象，结构如下：
+
+- `version`：结构版本。
+- `origins`：按池名称索引的节点配置对象，至少包含一个池。
+- `origins.<pool>.reality`：该池的 Reality 节点配置。
+- `origins.<pool>.reality.server`、`port`、`uuid`、`sni`、`publicKey`、`shortId`：Reality 节点地址、端口、身份标识、SNI、公钥和短 ID；均须非空。
+- `origins.<pool>.reality.flow`：可选的 Reality flow。
+- `origins.<pool>.ws`：该池的 WebSocket 节点配置。
+- `origins.<pool>.ws.host`、`port`、`uuid`、`path`：WebSocket 主机、端口、身份标识和路径；均须非空。
+- `includeWorkerRelay`：可选布尔字段，用于声明是否包含 Worker relay。
+
+校验要求 `version` 为 1，`origins` 为非空对象；每个池均须包含完整的 `reality`
+与 `ws` 字段。校验错误只报告字段路径，不输出字段值。该 Secret 仅加入主 Worker，
+独立优选控制面仍只接收 `PREFERRED_ENDPOINTS_TOKEN` 和 `IP_UPDATE_KEY`。
 两个 Worker 都将 `PREFERRED_POOLS` 设置为 JSON 数组文本 `["la","sg"]`，
 `DEFAULT_PREFERRED_POOL` 设置为 `la`。这保持现有 `la`、`sg` 路径与
 `preferred-endpoints-v2:<pool>` KV 键，并让无 pool 的兼容路径和订阅继续使用 `la`。

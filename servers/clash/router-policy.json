@@ -81,13 +81,13 @@
       "url": "https://www.gstatic.com/generate_204",
       "interval": 300,
       "tolerance": 50,
-      "filter": "LA-CF",
+      "filter": "LA-CF|LA-优选",
       "use": ["VPS-Node-LA-Preferred"]
     },
     {
       "name": "🇺🇸 洛杉矶-优选-手动",
       "type": "select",
-      "filter": "LA-CF",
+      "filter": "LA-CF|LA-优选",
       "use": ["VPS-Node-LA-Preferred"]
     },
     {
@@ -119,13 +119,13 @@
       "url": "https://www.gstatic.com/generate_204",
       "interval": 300,
       "tolerance": 50,
-      "filter": "SG-CF",
+      "filter": "SG-CF|SG-优选",
       "use": ["VPS-Node-SG-Preferred"]
     },
     {
       "name": "🇸🇬 新加坡-优选-手动",
       "type": "select",
-      "filter": "SG-CF",
+      "filter": "SG-CF|SG-优选",
       "use": ["VPS-Node-SG-Preferred"]
     },
     {

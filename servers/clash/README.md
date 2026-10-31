@@ -15,3 +15,7 @@ LAN 客户端的普通 DNS 请求先到路由器 dnsmasq，再转给 Mihomo。�
 ## IPv6 出口
 
 路由器策略关闭了 Mihomo IPv6，因此路由器的 `wan6` 不应自动启动，防火墙也应拒绝 LAN 到 WAN 的 IPv6 转发。两项设置共同防止上游日后提供 IPv6 时客户端绕过代理。检查 `uci get network.wan6.auto` 为 `0`、`ip -6 route show default` 为空，并在 `nft list ruleset` 中确认 LAN IPv6 拒绝规则位于 LAN 到 WAN 的允许规则之前。若将来启用完整 IPv6 代理，应先验证 IPv6 DNS、路由与出口，再移除此保护。
+
+## 与路由器运行配置的对齐
+
+`🧠 AI` 组的候选列表已于 2026-10-31 与路由器运行配置对齐（仅洛杉矶系列）；以路由器运行配置为准。

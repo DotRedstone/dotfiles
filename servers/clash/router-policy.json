@@ -144,7 +144,7 @@
       "proxies": ["🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"]
     },
     { "name": "🤖 ChatGPT", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
-    { "name": "🧠 AI", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
+    { "name": "🧠 AI", "type": "select", "proxies": ["🇺🇸 洛杉矶", "♻️ 洛杉矶-直连-自动", "🇺🇸 洛杉矶-直连-手动", "♻️ 洛杉矶-优选-自动", "🇺🇸 洛杉矶-优选-手动"] },
     { "name": "👨‍💻 开发者工具", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "🟦 OKX", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "🟨 Binance", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },

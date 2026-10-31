@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isDeepStrictEqual } from "node:util";
 
 import {
   buildDeviceProfile,
@@ -57,7 +58,7 @@ const providers = {
 };
 
 function differencePaths(left, right, prefix = "") {
-  if (assert.deepStrictEqual(left, right) === undefined) return [];
+  if (isDeepStrictEqual(left, right)) return [];
   if (
     left !== null &&
     right !== null &&

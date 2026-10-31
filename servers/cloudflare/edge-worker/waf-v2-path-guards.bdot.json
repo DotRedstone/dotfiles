@@ -1,0 +1,12 @@
+[
+  {
+    "description": "edge-preferred-v2-canary: 拦截未知路径或方法 (bdot.in)",
+    "expression": "(http.host eq \"preferred-v2-canary.bdot.in\" and not ((http.request.method eq \"GET\" and starts_with(http.request.uri.path, \"/v2/preferred/\")) or (http.request.method eq \"POST\" and starts_with(http.request.uri.path, \"/v2/admin/\"))))",
+    "action": "block"
+  },
+  {
+    "description": "edge-delivery-v2-canary: 拦截未知路径或方法 (bdot.in)",
+    "expression": "(http.host eq \"delivery-v2-canary.bdot.in\" and not (http.request.method eq \"GET\" and starts_with(http.request.uri.path, \"/u/\")))",
+    "action": "block"
+  }
+]

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { manifestKey, publish } from "../scripts/publish-core.mjs";
+import { manifestKey, publish, releaseHash } from "../scripts/publish-core.mjs";
 
 const source = process.env.PROXY_STACK_SOURCE;
 if (!source) throw new Error("PROXY_STACK_SOURCE must point to the fixed compiler source");
@@ -80,9 +80,23 @@ function run(input, store, extra = {}) {
   });
 }
 
-function newer(input) {
+function hashFor(input) {
+  const accountId = "sample";
+  const account = input.catalog.accounts.accounts[accountId];
+  const pools = account.enabled ? Object.fromEntries(
+    ["la", "sg"].map((origin) => [
+      origin, input.pools[`${account.sourceIdByOrigin[origin]}/${origin}`],
+    ]),
+  ) : null;
+  return releaseHash({
+    compilerRevision: revision, accountId, account,
+    catalog: input.catalog, runtime: input.runtimeByAccount[accountId], pools,
+  });
+}
+
+function changedAddress(input) {
   const changed = structuredClone(input);
-  changed.pools["sample-net/la"].validatedAt = "2026-10-11T01:30:00Z";
+  changed.pools["sample-net/la"].candidates[0].address = "198.51.100.9";
   return changed;
 }
 
@@ -173,6 +187,108 @@ test("writes five immutable documents before the manifest and skips unchanged in
   assert.deepEqual(store.values, before);
 });
 
+test("timestamp and noncompiled pool metadata changes keep release and skip KV writes", async () => {
+  const input = fixture();
+  const store = new MemoryStore();
+  await run(input, store);
+  const original = new Map(store.values);
+  const changed = structuredClone(input);
+  changed.pools["sample-net/la"].collectedAt = "2026-10-11T00:15:00Z";
+  changed.pools["sample-net/la"].validatedAt = "2026-10-11T01:45:00Z";
+  changed.pools["sample-net/la"].egressNetwork = "other-egress";
+  assert.equal(hashFor(changed), hashFor(input));
+  store.puts.length = 0;
+  assert.deepEqual(await run(changed, store),
+    { published: false, accountsChanged: 0, documentsWritten: 0 });
+  assert.deepEqual(store.puts, []);
+  assert.deepEqual(store.values, original);
+});
+
+test("candidate content and original order both change the release", async () => {
+  const input = fixture();
+  const candidates = input.pools["sample-net/la"].candidates;
+  candidates.push({ ...candidates[0], address: "198.51.100.2" });
+  const initial = new MemoryStore();
+  await run(input, initial);
+  const originalRelease = JSON.parse(await initial.get(manifestKey)).accounts.sample.profiles.router;
+  for (const modify of [
+    (pool) => { pool.candidates[1].address = "198.51.100.3"; },
+    (pool) => { pool.candidates.reverse(); },
+  ]) {
+    const changed = structuredClone(input);
+    modify(changed.pools["sample-net/la"]);
+    assert.notEqual(hashFor(changed), hashFor(input));
+    const store = initial.copy();
+    assert.deepEqual(await run(changed, store),
+      { published: true, accountsChanged: 1, documentsWritten: 5 });
+    assert.notEqual(JSON.parse(await store.get(manifestKey)).accounts.sample.profiles.router,
+      originalRelease);
+    assert.equal(store.puts.length, 6);
+  }
+});
+
+test("pool version and candidate port remain included in release hash", () => {
+  const input = fixture();
+  for (const modify of [
+    (pool) => { pool.version = 1; },
+    (pool) => { pool.candidates[0].port = 8443; },
+  ]) {
+    const changed = structuredClone(input);
+    modify(changed.pools["sample-net/la"]);
+    assert.notEqual(hashFor(changed), hashFor(input));
+  }
+  // 单独改变版本或端口时现有 v2/端口检查会拒绝发布；直接检查哈希输入。
+});
+
+test("v2 measurement metrics change compiled provider release", async () => {
+  const input = fixture();
+  const initial = new MemoryStore();
+  await run(input, initial);
+  for (const modify of [
+    (candidate) => { candidate.latencyMs = 43; },
+    (candidate) => { candidate.lossRate = 0.05; },
+    (candidate) => { candidate.downloadMBps = 5; },
+  ]) {
+    const changed = structuredClone(input);
+    modify(changed.pools["sample-net/la"].candidates[0]);
+    assert.notEqual(hashFor(changed), hashFor(input));
+    const store = initial.copy();
+    assert.equal((await run(changed, store)).published, true);
+    assert.equal(store.puts.length, 6);
+  }
+});
+
+test("freshness rejects an expired pool even if normalized hash is unchanged", async () => {
+  const input = fixture();
+  const store = new MemoryStore();
+  await run(input, store);
+  const originalManifest = await store.get(manifestKey);
+  const stale = structuredClone(input);
+  stale.pools["sample-net/la"].collectedAt = "2026-10-09T00:00:00Z";
+  stale.pools["sample-net/la"].validatedAt = "2026-10-09T01:00:00Z";
+  assert.equal(hashFor(stale), hashFor(input));
+  store.puts.length = 0;
+  await assert.rejects(run(stale, store), /validated pool outside freshness window/);
+  assert.equal(store.puts.length, 0);
+  assert.equal(await store.get(manifestKey), originalManifest);
+});
+
+test("disabled accounts retain null pool hashes and unchanged documents", async () => {
+  const input = fixture();
+  input.catalog.accounts.accounts.sample.enabled = false;
+  const store = new MemoryStore();
+  assert.equal((await run(input, store)).published, true);
+  const previous = JSON.parse(await store.get(manifestKey)).accounts.sample;
+  const changed = structuredClone(input);
+  changed.pools = {};
+  assert.equal(hashFor(changed), hashFor(input));
+  store.puts.length = 0;
+  assert.deepEqual(await run(changed, store),
+    { published: false, accountsChanged: 0, documentsWritten: 0 });
+  assert.equal(store.puts.length, 0);
+  assert.deepEqual(JSON.parse(await store.get(manifestKey)).accounts.sample, previous);
+});
+
 test("each document write failure retains the previous manifest", async () => {
   const initial = new MemoryStore();
   await run(fixture(), initial);
@@ -184,7 +300,7 @@ test("each document write failure retains the previous manifest", async () => {
       if (key !== manifestKey && ++writes === failure) throw new Error("injected write failure");
       store.values.set(key, body);
     };
-    await assert.rejects(run(newer(fixture()), store), /injected write failure/);
+    await assert.rejects(run(changedAddress(fixture()), store), /injected write failure/);
     assert.equal(await store.get(manifestKey), oldManifest);
   }
 });
@@ -202,7 +318,7 @@ test("readback mismatch and manifest switch failure retain the previous manifest
   };
   mismatch.get = async (key) => documentWritten && key !== manifestKey &&
     !initial.values.has(key) ? "corrupt" : get(key);
-  await assert.rejects(run(newer(fixture()), mismatch), /document readback mismatch/);
+  await assert.rejects(run(changedAddress(fixture()), mismatch), /document readback mismatch/);
   assert.equal(await mismatch.get(manifestKey), oldManifest);
 
   const switchFailure = initial.copy();
@@ -210,7 +326,7 @@ test("readback mismatch and manifest switch failure retain the previous manifest
     if (key === manifestKey) throw new Error("injected manifest failure");
     switchFailure.values.set(key, body);
   };
-  await assert.rejects(run(newer(fixture()), switchFailure), /injected manifest failure/);
+  await assert.rejects(run(changedAddress(fixture()), switchFailure), /injected manifest failure/);
   assert.equal(await switchFailure.get(manifestKey), oldManifest);
 });
 
@@ -218,7 +334,7 @@ test("mixed pool versions abort before writes", async () => {
   const initial = new MemoryStore();
   await run(fixture(), initial);
   const oldManifest = await initial.get(manifestKey);
-  const input = newer(fixture());
+  const input = changedAddress(fixture());
   input.pools["sample-net/sg"].version = 1;
   const store = initial.copy();
   await assert.rejects(run(input, store), /validated v2 pool unavailable/);

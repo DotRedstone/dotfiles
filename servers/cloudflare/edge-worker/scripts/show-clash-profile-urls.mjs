@@ -3,6 +3,7 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { parseTarget } from "./targets.mjs";
 
 const workerDirectory = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -15,7 +16,7 @@ const secretsPath = path.resolve(
   "secrets",
   "cloudflare.yaml",
 );
-const host = "edge-next.dotdot.ggff.net";
+const host = parseTarget(process.argv.slice(2)).publicHost;
 
 const result = spawnSync(
   "sops",

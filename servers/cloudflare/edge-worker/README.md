@@ -18,6 +18,38 @@
 `servers/clash/router-policy.json`，私有 provider URL、账号、令牌与密钥保存在
 `servers/secrets/cloudflare.yaml` 的 SOPS 密文中，不进入独立项目。
 
+## 域名迁移（bdot.in）
+
+此阶段仅增加并行目标，**默认仍为 legacy**，不修改线上 Cloudflare 配置，也不替换旧 Worker、主机名或 WAF。保留 2–4 周并行观察期；经过独立验收后，再另开 PR 更改默认目标或清理 legacy。
+
+| 用途 | legacy（保留） | bdot（新增） |
+| --- | --- | --- |
+| 主 Worker | `edge-next.dotdot.ggff.net` | `edge-next.bdot.in`（可选，初期旧入口零流量） |
+| preferred-v2-canary | `preferred-v2-canary.dotdot.ggff.net` | `preferred-v2-canary.bdot.in` |
+| delivery-v2-canary | `delivery-v2-canary.dotdot.ggff.net` | `delivery-v2-canary.bdot.in` |
+| preferred-control | 无自定义域（workers.dev） | `preferred-control.bdot.in`（同时保留 workers.dev） |
+
+`node scripts/deploy.mjs` 默认使用 legacy；可通过 `--target legacy`、`--target bdot`、`--target=bdot` 或环境变量 `EDGE_DEPLOY_TARGET=bdot` 选择目标。命令行参数优先于环境变量，未知目标直接报错。URL 输出脚本 `node scripts/show-clash-profile-urls.mjs --target bdot` 也支持同样的目标选择，其输出含私有 token，不得公开。
+
+bdot 目标使用 SOPS 的 `stored.accounts.sites` 账号键名（包含 bdot.in zone 的账号），旧目标继续使用 `stored.accounts.proxy`，Worker Secret 仍来自 `stored.edge_next`。不得将解密值提交到仓库。KV namespace 按所选账号的 `edge-proxy-next-state` title 运行时查找或创建，也可由 `EDGE_KV_NAMESPACE_ID` 环境变量指定已有 ID；`--dry-run` 始终使用占位 ID。密钥和运行时 KV ID 不纳入版本控制。
+
+原有 `waf-path-guard.json` 和 `waf-v2-path-guards.json` 继续适用于 legacy 域名。新增 `waf-path-guard.bdot.json`、`waf-v2-path-guards.bdot.json` **仅提供规则样例**，应在核对路由和合法请求后独立应用于 bdot.in zone（对应 sites 账号），部署脚本不会自动发布 WAF。preferred-v2-canary 和 delivery-v2-canary 不由 `deploy.mjs` 部署；其部署入口须另行确认，本次只记录域名映射与 WAF 规则。
+
+节点域名为 `la-cdn.bdot.in`、`sg-cdn.bdot.in`、`sg-origin.bdot.in`，**本次不修改 `nodes.json` 或任何节点 origin**。`servers/proxy-deployment/owned-domains.json` 已包含 `bdot.in` 与 `dotdot.ggff.net`，保留后者作为 legacy 至并行期结束。
+
+本地回归检查：
+
+```bash
+cd servers/cloudflare/edge-worker
+node --test scripts/
+node scripts/deploy.mjs --dry-run
+node scripts/deploy.mjs --target legacy --dry-run
+node scripts/deploy.mjs --target bdot --dry-run
+for f in waf-*.json; do node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))" && echo ok $f; done
+```
+
+dry-run 仍需本机 SOPS 解密权限、固定版本源码及 npm 网络访问；它不是部署或线上可用性证明。实际切换前记录旧 Worker 绑定、Route、WAF 与订阅检查结果；若新目标失败，停用新入口并继续使用未改动的 legacy 路径。
+
 ## 本地验证与部署
 
 需要 Node.js 22 或更新版本、npm、Git、tar、SOPS，以及可解密上述 SOPS 文件的本机

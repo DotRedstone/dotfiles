@@ -33,6 +33,7 @@
     ./yazi
     ./dolphin
     ./ssh
+    ./box-proxy
     ./secrets
 
     # --- Daily Applications ---

@@ -13,6 +13,7 @@
 | 输入法和 Rime | [`fcitx5/README.md`](./fcitx5/README.md) |
 | Neovim / NixVim | [`nixvim/README.md`](./nixvim/README.md) |
 | 浏览器 | `firefox/`、`chrome/`、`zen-browser/` |
+| 用户级 Mihomo 代理与独立 Chrome | `box-proxy/`、[`docs/box-proxy.md`](../../docs/box-proxy.md) |
 | 终端与交互 Shell | `fish/`、`starship/`、`wezterm/`、`zellij/` |
 | 开发工具 | `dev/`、`vscode/`、`nixvim/`、`cli-tools/` |
 | 应用默认打开方式 | `default-apps/` |

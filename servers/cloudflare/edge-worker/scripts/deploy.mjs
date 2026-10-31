@@ -7,6 +7,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { preparePinnedSource } from "./pinned-source.mjs";
+import { parseTarget, buildMainConfig, buildPreferredControlConfig } from "./targets.mjs";
 
 const workerDirectory = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -26,15 +27,6 @@ const baselinePath = path.resolve(
   "clash",
   "router-policy.json",
 );
-const workerName = "edge-proxy-next-recovery";
-const preferredControlWorkerName = "edge-preferred-control";
-const namespaceTitle = "edge-proxy-next-state";
-const publicHost = "edge-next.dotdot.ggff.net";
-const preferredPools = ["la", "sg"];
-const preferredPoolVars = {
-  PREFERRED_POOLS: JSON.stringify(preferredPools),
-  DEFAULT_PREFERRED_POOL: "la",
-};
 const dryRun = process.argv.includes("--dry-run");
 const mainOnly = process.argv.includes("--main-only");
 
@@ -78,7 +70,7 @@ async function cloudflareApi(credentials, apiPath, init = {}) {
   return body.result;
 }
 
-async function ensureNamespace(credentials, allowCreate = true) {
+async function ensureNamespace(credentials, namespaceTitle, allowCreate = true) {
   const namespaces = await cloudflareApi(
     credentials,
     `/accounts/${credentials.account_id}/storage/kv/namespaces?per_page=100`,
@@ -97,19 +89,19 @@ async function ensureNamespace(credentials, allowCreate = true) {
   return created.id;
 }
 
-async function ensureWorkerRoute(credentials) {
+async function ensureWorkerRoute(credentials, host, workerName) {
   const domains = await cloudflareApi(
     credentials,
     `/accounts/${credentials.account_id}/workers/domains`,
   );
-  const domain = domains.find((item) => item.hostname === publicHost);
+  const domain = domains.find((item) => item.hostname === host);
   if (!domain || domain.service !== workerName) {
     throw new Error(
-      `custom domain ${publicHost} is not attached to ${workerName}`,
+      `custom domain ${host} is not attached to ${workerName}`,
     );
   }
   const routeBase = `/zones/${domain.zone_id}/workers/routes`;
-  const pattern = `${publicHost}/*`;
+  const pattern = `${host}/*`;
   const matches = (await cloudflareApi(credentials, routeBase)).filter(
     (route) => route.pattern === pattern,
   );
@@ -192,6 +184,8 @@ function deployWorker({
 }
 
 async function main() {
+  const target = parseTarget(process.argv.slice(2));
+  console.log(`target=${target.name} host=${target.publicHost}`);
   const runtimeDirectory = process.env.XDG_RUNTIME_DIR ?? os.tmpdir();
   const temporaryDirectory = fs.mkdtempSync(
     path.join(runtimeDirectory, "edge-worker-deploy-"),
@@ -203,7 +197,10 @@ async function main() {
         .href
     );
     const stored = loadSecrets();
-    const credentials = stored.accounts.proxy;
+    const credentials = stored.accounts?.[target.accountKey];
+    if (!credentials) {
+      throw new Error(`missing SOPS stored.accounts.${target.accountKey} for target ${target.name}; confirm the account key before deploying`);
+    }
     const edge = stored.edge_next;
     const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
     const profiles = buildProfiles({
@@ -216,7 +213,8 @@ async function main() {
     // Dry run must stay local; the placeholder validates Wrangler's binding shape.
     const namespaceId = dryRun
       ? "00000000000000000000000000000000"
-      : await ensureNamespace(credentials, !mainOnly);
+      : process.env.EDGE_KV_NAMESPACE_ID?.trim() ||
+        (await ensureNamespace(credentials, target.namespaceTitle, !mainOnly));
     const configPath = path.join(temporaryDirectory, "wrangler.jsonc");
     const workerSecretsPath = path.join(temporaryDirectory, "secrets.json");
     const preferredControlConfigPath = path.join(
@@ -243,22 +241,12 @@ async function main() {
     fs.writeFileSync(
       configPath,
       `${JSON.stringify(
-        {
-          account_id: credentials.account_id,
-          name: workerName,
-          main: path.join(sourceDirectory, "src", "index.ts"),
-          compatibility_date: "2026-09-01",
-          workers_dev: false,
-          preview_urls: false,
-          routes: [{ pattern: publicHost, custom_domain: true }],
-          kv_namespaces: [{ binding: "EDGE_STATE", id: namespaceId }],
-          vars: {
-            PUBLIC_HOST: publicHost,
-            SITE_NAME: "CF-Next",
-            DOH_URL: "https://dns.google/dns-query",
-            ...preferredPoolVars,
-          },
-        },
+        buildMainConfig({
+          target,
+          accountId: credentials.account_id,
+          namespaceId,
+          sourceDirectory,
+        }),
         null,
         2,
       )}\n`,
@@ -278,27 +266,24 @@ async function main() {
       message: "原子化边缘代理声明式部署",
       dryRun,
     });
-    if (!dryRun) await ensureWorkerRoute(credentials);
+    if (!dryRun) await ensureWorkerRoute(credentials, target.publicHost, target.workerName);
     if (mainOnly) {
       console.log(
         dryRun
           ? "Main Worker dry-run completed successfully."
-          : `Worker ${workerName} deployed successfully.`,
+          : `Worker ${target.workerName} deployed successfully.`,
       );
       return;
     }
     fs.writeFileSync(
       preferredControlConfigPath,
       `${JSON.stringify(
-        {
-          account_id: credentials.account_id,
-          name: preferredControlWorkerName,
-          main: path.join(sourceDirectory, "src", "preferred-control.ts"),
-          compatibility_date: "2026-09-01",
-          workers_dev: true,
-          kv_namespaces: [{ binding: "EDGE_STATE", id: namespaceId }],
-          vars: preferredPoolVars,
-        },
+        buildPreferredControlConfig({
+          target,
+          accountId: credentials.account_id,
+          namespaceId,
+          sourceDirectory,
+        }),
         null,
         2,
       )}\n`,
@@ -323,7 +308,7 @@ async function main() {
     console.log(
       dryRun
         ? "Worker dry-run completed successfully."
-        : `Workers ${workerName} and ${preferredControlWorkerName} deployed successfully.`,
+        : `Workers ${target.workerName} and ${target.preferredControlWorkerName} deployed successfully.`,
     );
   } finally {
     fs.rmSync(temporaryDirectory, { recursive: true, force: true });

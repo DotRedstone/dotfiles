@@ -4,9 +4,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 import { preparePinnedSource } from "./pinned-source.mjs";
+import { buildProfiles } from "./clash-profiles.mjs";
 import { parseTarget, buildMainConfig, buildPreferredControlConfig } from "./targets.mjs";
 
 const workerDirectory = path.resolve(
@@ -194,13 +195,6 @@ async function main() {
   );
   try {
     const sourceDirectory = preparePinnedSource(temporaryDirectory);
-    let buildProfiles;
-    if (!mainOnly) {
-      ({ buildProfiles } = await import(
-        pathToFileURL(path.join(sourceDirectory, "scripts", "clash-config.mjs"))
-          .href
-      ));
-    }
     const stored = loadSecrets();
     const credentials = stored.accounts?.[target.accountKey];
     if (!credentials) {

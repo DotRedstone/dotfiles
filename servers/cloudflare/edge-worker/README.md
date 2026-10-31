@@ -1,15 +1,16 @@
 # Edge Proxy Worker 部署适配
 
-本目录只维护此部署的 Worker 名称、域名、Cloudflare 账号与 SOPS 密钥来源、Mihomo
-基线及路由器适配。协议实现、配置生成器、测试和 npm 依赖由独立项目
+本目录维护此部署的 Worker 名称、域名、Cloudflare 账号与 SOPS 密钥来源、Mihomo
+基线及路由器适配。协议实现和 Worker 源码由独立项目
 `/home/dot/Projects/edge-proxy-worker` 维护，接口见该项目的 `README.md` 与
-`docs/architecture.md`。`scripts/pinned-source.mjs` 固定要部署的完整 Git 提交
+`docs/architecture.md`。本仓库的 `scripts/clash-profiles.mjs` 负责部署专属的
+Router/Device 配置生成与测试；配置基线保存在 `servers/clash/router-policy.json`。
+`scripts/pinned-source.mjs` 仍固定 Worker 源码提交
 `d407e15e4f448d5d5410224144d1c42bf530b453`。部署时必须通过
 `EDGE_PROXY_WORKER_LEGACY_REPOSITORY` 指向含此提交的受限本地 checkout；只要该检出包含此提交即可（需先 `git fetch origin main`）；变量名中的
 LEGACY 是历史遗留，并不要求是旧版检出。部署脚本用 `git archive` 导出该
-提交到权限受限的临时目录，运行 `npm ci`，再使用其中的 `src/index.ts`、
-`src/preferred-control.ts` 和 `buildProfiles({ baseline, providers })`。工作树中的后续改动
-不会自动进入部署。
+提交到权限受限的临时目录并运行 `npm ci`，使用其中的 `src/index.ts` 与
+`src/preferred-control.ts`；Clash 配置生成器不再从固定提交动态导入。
 
 旧提交只保存在受限本地备份中；另一台机器必须先安全取得该旧 Git 对象，并显式
 设置上述环境变量，才能重新部署旧 Worker。不得把旧历史导入新的独立项目远端。
@@ -17,6 +18,23 @@ LEGACY 是历史遗留，并不要求是旧版检出。部署脚本用 `git arch
 先检查独立项目接口和版本，再更新适配器引用并重新验证。Mihomo 基线保存在
 `servers/clash/router-policy.json`，私有 provider URL、账号、令牌与密钥保存在
 `servers/secrets/cloudflare.yaml` 的 SOPS 密文中，不进入独立项目。
+
+## Router 与 Device 配置
+
+`scripts/clash-profiles.mjs` 在本仓库生成两套有效配置：`router` 与 `device`。
+为保持既有 KV 键和 Worker 路由兼容，`root` 是 `router` 的别名，
+`desktop` 与 `mobile` 是 `device` 的别名。Device 只覆盖本地监听、TUN、
+LAN 和端口相关键；代理组、规则、provider 目录及 DNS 的其他键沿用 Router。
+
+固定 Worker 提交 `d407e15` 不包含 `scripts/clash-config.mjs`。Router 的
+历史兼容基准取自 `edge-proxy-worker` 的提交
+[`62915b2`](https://github.com/DotRedstone/edge-proxy-worker/blob/62915b2ae45af3160c34e7b7cb5ea9c215fa12b1/scripts/clash-config.mjs)；
+代码保持其 provider 注入与 JSON 序列化行为。**合并或部署前仍须人工用相同输入
+对旧基准与新生成的 Router/root 文件逐字节比较**；本地合成测试不能替代真实输入的
+`cmp` 验收，也不能证明路由器运行配置已匹配。
+
+`servers/proxy-deployment/profiles/*.json` 与 `/u/` 交付属于 v2 金丝雀流程，
+不是本目录 Router/Device 配置的权威来源。
 
 ## 域名迁移（bdot.in）
 
@@ -64,7 +82,7 @@ node --check scripts/deploy.mjs
 node scripts/deploy.mjs --dry-run
 ```
 
-`--dry-run` 解密本地配置、生成四份 Mihomo 配置，并对主 Worker 和独立优选控制面执行
+`--dry-run` 解密本地配置、生成四个兼容配置键（Router/Device 两份内容），并对主 Worker 和独立优选控制面执行
 Wrangler 本地打包。它使用占位 KV ID，不调用 Cloudflare API，也不写 KV 或发布
 Worker；因此不证明真实 binding、Secret 或客户端连接可用。脚本的临时配置与密钥文件
 使用 `0600` 权限，退出时清理。实际部署需单独执行：
@@ -78,14 +96,14 @@ node scripts/deploy.mjs
 不上传 Mihomo 配置、不部署优选控制 Worker，也不重传本地 SOPS 中的七项 Secret；
 Wrangler 会继承线上已有 Secret。执行前记录当前部署版本以便回退，执行后仍需
 核对线上绑定和真实入口响应。
-`--main-only --with-secrets` 仍不上传 Clash 配置、不部署优选控制 Worker，但会从 SOPS 重传七项 Worker Secret，用于主 Worker 被删除重建后恢复；执行前确认 SOPS 里的 `edge_next` 已是正确值。`--main-only` 不再导入固定提交里的 `scripts/clash-config.mjs`，也不生成或上传 Clash 配置，因此可以搭配不含该脚本的新版 edge-proxy-worker 提交使用；完整部署（不带 `--main-only`）仍依赖该脚本，换到新提交前需要另行改造。
+`--main-only --with-secrets` 仍不上传 Clash 配置、不部署优选控制 Worker，但会从 SOPS 重传七项 Worker Secret，用于主 Worker 被删除重建后恢复；执行前确认 SOPS 里的 `edge_next` 已是正确值。`--main-only` 不生成或上传 Clash 配置；完整部署使用本仓库的 `scripts/clash-profiles.mjs`，不再要求固定 Worker 提交提供 `scripts/clash-config.mjs`。固定 Worker 提交仍用于 Worker 源码归档与打包。
 
 以上备份目录的父目录仅允许所有者访问。实际部署前应重新核对旧提交和 dry run；
 若备份被移动，更新环境变量指向同一旧提交。省略环境变量时适配器会拒绝执行，
 不会从新的独立项目克隆中猜测旧来源。
 
-实际部署会查询或创建 `edge-proxy-next-state` KV，将四份私有配置写入
-`clash/config/<profile>`，然后部署 `edge-proxy-next-recovery` 和
+实际部署会查询或创建 `edge-proxy-next-state` KV，将 Router/Device 两份配置写入四个兼容键
+`clash/config/{router,root,desktop,mobile}`（root = router，desktop/mobile = device），然后部署 `edge-proxy-next-recovery` 和
 `edge-preferred-control`。主 Worker 同时绑定自定义域名，并确保同域名的
 `/*` Worker Route 指向该服务。原 `edge-proxy-next` 服务保留，但本次修复前的
 自定义域名请求返回 522，不能视为可用回退。2026-10-24 已验证主域名的扫描路径、

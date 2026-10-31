@@ -1,6 +1,8 @@
 # 路由器代理策略
 
-`router-policy.json` 是现用路由器订阅的基础策略；`mobile-hotspot-policy.json` 属于独立的移动热点配置。路由器的实际 OpenClash 配置还会被其 UCI 设置覆写，修改 JSON 后须检查生成的 `/etc/openclash/config.yaml`。
+`router-policy.json` 是 Router 配置的基础策略；部署适配器同时从该策略生成 Device 配置。`mobile-hotspot-policy.json` 属于独立的移动热点配置。路由器的实际 OpenClash 配置还会被其 UCI 设置覆写，修改 JSON 后须检查生成的 `/etc/openclash/config.yaml`。
+
+Cloudflare Worker 保留四个兼容配置键，但只有 Router 与 Device 两套有效配置：`root` = `router`，`desktop` = `mobile` = `device`。Device 仅覆盖本地监听、TUN、LAN 与端口设置，代理组、规则、provider 及 DNS 其他键保持 Router 内容。`servers/proxy-deployment/profiles/*.json` 与 `/u/` 交付属于 v2 金丝雀，不是权威配置。Router 的历史兼容基准来自 `edge-proxy-worker` 提交 `62915b2`；固定提交 `d407e15` 缺少原配置生成脚本，合并前仍须人工逐字节比较。
 
 ## DNS 链路
 

@@ -16,6 +16,37 @@ function digest(value) {
   return createHash("sha256").update(JSON.stringify(canonical(value))).digest("hex");
 }
 
+// 候选顺序会影响 provider；v2 编译器也用测速指标构造节点名称。
+function releasePoolInput(pools) {
+  if (pools === null) return null;
+  return Object.fromEntries(Object.entries(pools).map(([origin, pool]) => [origin, {
+    version: pool.version,
+    sourceId: pool.sourceId,
+    origin: pool.origin,
+    candidates: pool.candidates.map((candidate) => ({
+      address: candidate.address,
+      port: candidate.port,
+      latencyMs: candidate.latencyMs,
+      lossRate: candidate.lossRate,
+      ...(candidate.downloadMBps === undefined ? {} : { downloadMBps: candidate.downloadMBps }),
+    })),
+  }]));
+}
+
+export function releaseHash({ compilerRevision, accountId, account, catalog, runtime, pools }) {
+  return digest({
+    compilerRevision,
+    accountId,
+    account,
+    nodes: catalog.nodes,
+    sources: catalog.sources,
+    ownedDomains: catalog.ownedDomains,
+    profiles: catalog.profiles,
+    runtime: account.enabled ? runtime : null,
+    pools: releasePoolInput(pools),
+  });
+}
+
 function previousManifest(raw, compiler) {
   if (raw === null) return null;
   const manifest = JSON.parse(raw);
@@ -181,16 +212,8 @@ export async function publish({
       );
       validateSharedEdgePools(account, accountPools, sharedEdgeSourceIds);
     }
-    const release = digest({
-      compilerRevision,
-      accountId,
-      account,
-      nodes: catalog.nodes,
-      sources: catalog.sources,
-      ownedDomains: catalog.ownedDomains,
-      profiles: catalog.profiles,
-      runtime: account.enabled ? runtime : null,
-      pools: accountPools,
+    const release = releaseHash({
+      compilerRevision, accountId, account, catalog, runtime, pools: accountPools,
     });
     const entry = {
       enabled: account.enabled,

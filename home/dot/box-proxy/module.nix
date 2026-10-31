@@ -28,7 +28,11 @@ let
           nohup "$MIH" -d "$D" -f "$D/config.yaml" >"$D/mihomo.log" 2>&1 & echo $! >"$PIDF"
           chmod 600 "$PIDF" "$D/mihomo.log"
           sleep 3
-          alive && echo "on: $PX (pid $(cat "$PIDF"))" || { echo "failed to start" >&2; exit 1; }
+          if alive; then
+            echo "on: $PX (pid $(cat "$PIDF"))";
+          else
+            echo "failed to start" >&2; exit 1;
+          fi
           ;;
         off)
           if alive; then kill "$(cat "$PIDF")"; rm -f "$PIDF"; echo off; else echo "not running"; fi

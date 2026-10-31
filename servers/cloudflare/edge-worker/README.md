@@ -77,7 +77,7 @@ node scripts/deploy.mjs
 再运行 `node scripts/deploy.mjs --main-only`。该模式要求现有 KV namespace 已存在，
 不上传 Mihomo 配置、不部署优选控制 Worker，也不重传本地 SOPS 中的七项 Secret；
 Wrangler 会继承线上已有 Secret。执行前记录当前部署版本以便回退，执行后仍需
-核对线上绑定和真实入口响应。
+核对线上绑定和真实入口响应。`--main-only` 不再导入固定提交里的 `scripts/clash-config.mjs`，也不生成或上传 Clash 配置，因此可以搭配不含该脚本的新版 edge-proxy-worker 提交使用；完整部署（不带 `--main-only`）仍依赖该脚本，换到新提交前需要另行改造。
 
 以上备份目录的父目录仅允许所有者访问。实际部署前应重新核对旧提交和 dry run；
 若备份被移动，更新环境变量指向同一旧提交。省略环境变量时适配器会拒绝执行，

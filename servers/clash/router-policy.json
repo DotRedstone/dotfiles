@@ -17,6 +17,7 @@
     "ipv6": false,
     "enhanced-mode": "fake-ip",
     "fake-ip-range": "198.18.0.1/16",
+    "respect-rules": true,
     "nameserver": [
       "https://8.8.8.8/dns-query",
       "https://1.1.1.1/dns-query"
@@ -207,7 +208,7 @@
     "GEOSITE,speedtest,🚝 测速工具,no-resolve",
     "GEOSITE,geolocation-!cn,🌐 Default,no-resolve",
     "GEOSITE,cn,DIRECT,no-resolve",
-    "GEOIP,cn,DIRECT",
+    "GEOIP,cn,DIRECT,no-resolve",
     "MATCH,🐟 漏网之鱼"
   ],
   "external-controller": "0.0.0.0:9090",

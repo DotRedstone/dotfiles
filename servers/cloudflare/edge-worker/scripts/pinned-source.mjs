@@ -3,7 +3,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 export const sourceRepository = process.env.EDGE_PROXY_WORKER_LEGACY_REPOSITORY;
-export const sourceCommit = "7d3b2c310265cd42c91db74a228cb40a672cccb1";
+export const sourceCommit = "8272bc1b2a5c6dca3a446acfbea39fe6b9b8a7aa";
 
 function run(command, arguments_, options = {}) {
   const result = spawnSync(command, arguments_, {

@@ -1,7 +1,11 @@
-# DSH 本机编码工具适配器（待上游版本确认）
+# DSH 本机 Codex 工具适配器（未实现）
 
-此目录有意不提供伪造的插件实现。
+首版只计划支持 Codex。当前目录不包含插件适配器实现；不得把任务文件交换脚本冒充 DSH 插件或 OAR app-server stdio provider。
 
-当前 PR 的 DSH 包版本仍为用户决策占位，未生成 npm lockfile；因此无法可靠确定插件注册 API、工具 schema、调用生命周期或超时/取消约定。不得根据移动分支猜测接口，也不得把一次性 JSON 文件脚本冒充 OAR app-server stdio provider。
+`dot.hopper.dsh.codingAgents.enable` 带有不可绕过的 readiness 断言，当前始终禁止启用。解除门槛前必须先锁定精确 DSH 发布版本、生成并审查 `package-lock.json` 与真实 `npmDepsHash`，再按该不可变版本的插件 API 实现固定的提交、状态查询和取消工具，并完成 ARM64 构建、CLI/认证及沙箱验收。
 
-后续实现必须只提供固定工具：提交 `tool/prompt/jobId` 到受控任务队列并读取对应结果；不得接收 shell 命令、systemd 参数、任意 cwd、环境变量或 CLI flags。在精确 DSH 版本锁定并按该版本源码/类型定义实现前，适配器和 `dot.hopper.dsh.codingAgents.enable` 均保持不可用。
+runner 的队列路径边界回归测试可在仓库检出后运行：
+
+```sh
+python3 servers/hosts/hopper/services/dsh-agent-runner-tests.py
+```

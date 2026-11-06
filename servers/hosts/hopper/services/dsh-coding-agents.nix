@@ -85,7 +85,6 @@ let
     ProtectSystem = "strict";
     ProtectHome = true;
     ReadWritePaths = [ workspace agentHome jobs ];
-    ConditionPathExists = "!/run/dsh-backup-session/agents-paused";
     InaccessiblePaths = [
       "-/var/lib/dsh/home"
       "-/var/log/dsh"
@@ -224,6 +223,7 @@ in
 
     systemd.services."dsh-coding@" = lib.mkIf cfg.codex.enable {
       description = "Hopper DSH controlled Codex task %i";
+      unitConfig.ConditionPathExists = "!/run/dsh-backup-session/agents-paused";
       # No wantedBy: only the fixed path unit or an administrator can start it.
       serviceConfig = commonServiceConfig // {
         ExecStart = "${pkgs.python3}/bin/python3 ${./dsh-agent-runner.py} --commands ${commands} --tool %i";
@@ -242,6 +242,7 @@ in
 
     systemd.services.dsh-coding-self-test = lib.mkIf cfg.selfTest.enable {
       description = "Hopper DSH coding-agent sandbox boundary self-test";
+      unitConfig.ConditionPathExists = "!/run/dsh-backup-session/agents-paused";
       serviceConfig = commonServiceConfig // {
         ExecStart = "${pkgs.python3}/bin/python3 ${./dsh-agent-runner.py} --self-test";
         TimeoutStartSec = "2min";

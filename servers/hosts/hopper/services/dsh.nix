@@ -115,6 +115,7 @@ in {
 
       systemd.services.dsh = {
         description = "Hopper DeepSeek Harness";
+        unitConfig.ConditionPathExists = "!/run/dsh-backup-session/dsh-paused";
         wantedBy = [ "multi-user.target" ];
         wants = [ "network-online.target" ];
         after = [ "network-online.target" "sops-install-secrets.service" ];
@@ -135,7 +136,6 @@ in {
           RestartSec = "10s";
           TimeoutStopSec = "90s";
           SupplementaryGroups = lib.optionals config.dot.hopper.dsh.codingAgents.enable [ "dsh-workspace" ];
-          ConditionPathExists = "!/run/dsh-backup-session/dsh-paused";
           CacheDirectory = "dsh";
           CacheDirectoryMode = "0700";
           LogsDirectory = "dsh";

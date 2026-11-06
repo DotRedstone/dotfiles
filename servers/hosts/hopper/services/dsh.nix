@@ -21,7 +21,7 @@ let
   packageLockReady = cfg.upstreamVersion != null
     && (cfg.package.packageLockPresent or false)
     && (cfg.package.packageManifestVersion or null) == cfg.upstreamVersion
-    && (cfg.package.packageLockRootVersion or null) == cfg.upstreamVersion
+    && (cfg.package.packageLockDeclaredVersion or null) == cfg.upstreamVersion
     && (cfg.package.packageLockVersion or null) == cfg.upstreamVersion
     && (cfg.package.packageLockResolved or null) != null
     && (cfg.package.packageLockIntegrity or null) != null

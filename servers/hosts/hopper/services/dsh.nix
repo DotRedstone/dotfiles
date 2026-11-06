@@ -53,9 +53,6 @@ in {
     hostName = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
     modelApiKeyEnv = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
     modelApiKeySecret = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
-    meshInterface = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
-    meshListenAddress = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
-    meshCertificate = lib.mkOption { type = lib.types.nullOr lib.types.path; default = null; };
   };
 
   config = lib.mkIf cfg.enable (lib.mkMerge [
@@ -197,7 +194,6 @@ in {
         path = [ pkgs.systemd pkgs.gnutar ];
         serviceConfig = {
           Type = "oneshot";
-          RemainAfterExit = true;
           User = "root";
           UMask = "0077";
           TimeoutStartSec = "5min";

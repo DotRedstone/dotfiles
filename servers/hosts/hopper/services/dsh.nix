@@ -98,11 +98,12 @@ in {
       };
 
       systemd.tmpfiles.rules = [
-        "d ${state} 0710 dsh dsh-workspace -"
         "d ${state}/home 0700 dsh dsh -"
-        "d ${state}/workspaces 2770 dsh dsh-workspace -"
         "d ${state}/workspaces 0700 dsh dsh -"
         "f /var/log/dsh/nginx-error.log 0600 root root -"
+      ] ++ lib.optionals config.dot.hopper.dsh.codingAgents.enable [
+        "d ${state} 0710 dsh dsh-workspace -"
+        "d ${state}/workspaces 2770 dsh dsh-workspace -"
       ];
 
       systemd.services.dsh = {
@@ -126,8 +127,8 @@ in {
           RestartSec = "10s";
           TimeoutStopSec = "90s";
           StateDirectory = "dsh";
-          StateDirectoryMode = "0710";
-          SupplementaryGroups = [ "dsh-workspace" ];
+          StateDirectoryMode = if config.dot.hopper.dsh.codingAgents.enable then "0710" else "0700";
+          SupplementaryGroups = lib.optionals config.dot.hopper.dsh.codingAgents.enable [ "dsh-workspace" ];
           CacheDirectory = "dsh";
           CacheDirectoryMode = "0700";
           LogsDirectory = "dsh";

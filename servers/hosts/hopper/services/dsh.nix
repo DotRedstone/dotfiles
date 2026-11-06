@@ -80,7 +80,7 @@ in {
       users.users.dsh = {
         isSystemUser = true;
         group = "dsh";
-        home = state;
+        home = "${state}/home";
         createHome = false;
         description = "Hopper DeepSeek Harness service";
       };
@@ -121,7 +121,7 @@ in {
         after = [ "network-online.target" "sops-install-secrets.service" ];
         path = [ pkgs.git pkgs.bash pkgs.coreutils ];
         environment = {
-          HOME = state;
+          HOME = "${state}/home";
           DSH_HOME = "${state}/home";
           XDG_CACHE_HOME = "/var/cache/dsh";
         };

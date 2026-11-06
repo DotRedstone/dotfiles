@@ -197,9 +197,10 @@ in
       "d ${agentHome}/cache 0700 dsh-agent dsh-agent -"
       "d ${agentHome}/queue 0700 dsh-agent dsh-agent -"
       "d ${agentHome}/jobs 0700 dsh-agent dsh-agent -"
+      "d ${workspace} 2770 dsh dsh-workspace -"
       "d ${jobs} 2770 dsh dsh-workspace -"
-      "d ${jobs}/codex/claimed 2770 dsh dsh-workspace -"
       "d ${jobs}/codex 2770 dsh dsh-workspace -"
+      "d ${jobs}/codex/claimed 2770 dsh dsh-workspace -"
       "d ${jobs}/codex/results 2770 dsh dsh-workspace -"
       "d ${jobs}/codex/cancel 2770 dsh dsh-workspace -"
     ];

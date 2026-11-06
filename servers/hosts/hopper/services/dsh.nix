@@ -203,6 +203,7 @@ in {
 
       systemd.services.dsh-backup-resume = {
         description = "Restore Hopper DSH writers after local Restic backup";
+        unitConfig.OnFailure = "dsh-backup-recovery-alert.service";
         path = [ pkgs.systemd pkgs.coreutils ];
         serviceConfig = {
           Type = "oneshot";
@@ -210,6 +211,16 @@ in {
           UMask = "0077";
           TimeoutStartSec = "5min";
           ExecStart = "${pkgs.python3}/bin/python3 ${./dsh-backup-session.py} resume";
+        };
+      };
+
+      systemd.services.dsh-backup-recovery-alert = {
+        description = "Emit a secret-free critical alert when DSH backup recovery is incomplete";
+        path = [ pkgs.systemd pkgs.coreutils ];
+        serviceConfig = {
+          Type = "oneshot";
+          User = "root";
+          ExecStart = "${pkgs.systemd}/bin/systemd-cat --priority=crit --identifier=dsh-backup-session ${pkgs.coreutils}/bin/echo DSH-backup-recovery-incomplete-check-state-file";
         };
       };
 

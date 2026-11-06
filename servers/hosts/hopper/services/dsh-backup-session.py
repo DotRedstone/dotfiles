@@ -25,7 +25,7 @@ PATH_UNITS = ("dsh-coding-codex.path",)
 TASK_UNITS = ("dsh-coding@codex.service", "dsh-coding-self-test.service")
 UNITS = (DSH_UNIT, *PATH_UNITS, "dsh-coding@.service", *TASK_UNITS)
 RESTORE_STATES = {"active", "activating", "reloading", "auto-restart"}
-STOPPED_STATES = {"inactive", "failed", ""}
+STOPPED_STATES = {"inactive", "failed"}
 
 
 class SessionError(RuntimeError):
@@ -262,6 +262,8 @@ def resume(*, stop_prepare: bool = False) -> None:
             systemctl("start", unit)
             wait_for(unit, lambda v: v["active"] == "active", 20, "active path watcher")
 
+    if show("restic-backups-hopper-local.service", "Result") == "success":
+        ARCHIVE.unlink(missing_ok=True)
     STATE_FILE.unlink()  # Only after every required restore action succeeded.
     directory_fd = os.open(STATE_DIR, os.O_RDONLY)
     try:

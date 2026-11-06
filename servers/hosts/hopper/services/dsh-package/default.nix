@@ -26,6 +26,7 @@ buildNpmPackage {
   nodejs = nodejs_24;
   inherit npmDepsHash;
   passthru = {
+    inherit npmDepsHash;
     packageLockPresent = lockPresent;
     packageManifestVersion = manifestVersion;
     packageLockDeclaredVersion = lockDeclaredVersion;

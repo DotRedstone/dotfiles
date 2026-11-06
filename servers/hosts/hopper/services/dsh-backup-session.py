@@ -133,13 +133,21 @@ def wait_for(unit: str, predicate, timeout: int, description: str) -> dict:
 def create_gate(path: Path, state: dict, key: str) -> None:
     state[key] = "pending"
     save_state(state)
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
-    with os.fdopen(fd, "w", encoding="ascii") as stream:
-        stream.write(state["session"] + "\n")
-        stream.flush()
-        os.fsync(stream.fileno())
-    state[key] = "owned"
-    save_state(state)
+    fd, temporary = tempfile.mkstemp(prefix=".gate.", dir=STATE_DIR)
+    try:
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "w", encoding="ascii") as stream:
+            stream.write(state["session"] + "\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        state[key] = "owned"
+        save_state(state)
+    finally:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
 
 
 def remove_gate(path: Path, state: dict, key: str, failures: list[str]) -> None:

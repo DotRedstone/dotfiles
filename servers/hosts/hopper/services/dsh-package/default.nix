@@ -9,15 +9,7 @@
 
 { lib, buildNpmPackage, nodejs_24, makeWrapper, python3, pkg-config }:
 let
-  inherit npmDepsHash;
-  passthru = {
-    packageLockPresent = lockPresent;
-    packageManifestVersion = manifestVersion;
-    packageLockDeclaredVersion = lockDeclaredVersion;
-    packageLockVersion = packageVersion;
-    packageLockResolved = packageResolved;
-    packageLockIntegrity = packageIntegrity;
-  };
+  npmDepsHash = lib.fakeHash;
   manifest = builtins.fromJSON (builtins.readFile ./package.json);
   lockPresent = builtins.pathExists ./package-lock.json;
   lock = if lockPresent then builtins.fromJSON (builtins.readFile ./package-lock.json) else {};
@@ -32,7 +24,15 @@ buildNpmPackage {
   version = "1.0.0";
   src = lib.cleanSource ./.;
   nodejs = nodejs_24;
-  npmDepsHash = lib.fakeHash;
+  inherit npmDepsHash;
+  passthru = {
+    packageLockPresent = lockPresent;
+    packageManifestVersion = manifestVersion;
+    packageLockDeclaredVersion = lockDeclaredVersion;
+    packageLockVersion = packageVersion;
+    packageLockResolved = packageResolved;
+    packageLockIntegrity = packageIntegrity;
+  };
   dontNpmBuild = true;
   nativeBuildInputs = [ makeWrapper python3 pkg-config ];
   installPhase = ''

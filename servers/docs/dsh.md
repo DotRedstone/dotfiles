@@ -169,7 +169,7 @@ sudo restic --repo /var/lib/restic/repositories/hopper \
 
 ## 本机编码 agent（追加阶段）
 
-本功能由 `dot.hopper.dsh.codingAgents.enable` 控制，默认关闭。开启后保留原 `dsh` UID 与模型密钥边界，另建无 sudo、wheel、journal、restic 或 SSH 授权的 `dsh-agent` 身份。两者只通过 `/var/lib/dsh/workspaces/coding` 共享工作区；agent 的 home、Codex 登录状态和原始日志位于独立私有目录，不进入备份。
+本功能由 `dot.hopper.dsh.codingAgents.enable` 控制，默认关闭；当前因适配器 readiness 断言而禁止启用。解除门槛前不得创建或运行 agent 单元。设计上保留原 `dsh` UID 与模型密钥边界，另建无 sudo、wheel、journal、restic 或 SSH 授权的 `dsh-agent` 身份。两者只通过 `/var/lib/dsh/workspaces/coding` 共享工作区；agent 的 home、Codex 登录状态和原始日志位于独立私有目录，不进入备份。
 
 首版只保留 Codex 固定包映射，不包含 WorkBuddy、CodeBuddy 或其他 agent。Codex CLI 参数与 stdin 行为必须对选定 nixpkgs 锁定版本执行 `--help` 核验。runner 采用固定可执行文件映射，不接受请求提供命令、参数、环境变量或 cwd；任务输入有长度限制，结果以固定 JSON 文件原子写入。任务通过固定 path 单元触发，不授权 DSH 调用通用 systemd、sudo 或 transient unit。
 
@@ -177,7 +177,7 @@ sudo restic --repo /var/lib/restic/repositories/hopper \
 
 任务模板使用独立 systemd UID、只读系统、隐藏 SOPS/SSH/Restic/数据库路径、禁止绑定监听端口和资源/超时限制。出站网络目的地尚未限制，任务仍可能外传其可读代码并产生模型费用；同机 UID 隔离不是 VM 隔离。不得把含凭据的管理员 checkout、home、Git credential 或 SSH agent 接入工作区。
 
-备份路径显式排除 `/var/lib/dsh-agent`，tar 归档同时排除任务队列和认证目录并使用 `--no-xattrs`。备份事务使用同一 flock 串行锁、会话状态文件及 NixOS `ConditionPathExists` gate；prepare 失败/超时由 `OnFailure` 触发恢复，Restic 成功/失败也触发恢复。恢复逐项尝试 DSH、任务 thaw 与 watcher，保留未完成状态供重试。该流程仍需在目标主机进行 SIGKILL、超时和依赖失败故障注入验收。登录、ARM64 构建、沙箱负向测试、任务取消/超时和恢复演练均未执行。本 PR 不连接服务器、不登录、不部署。
+备份路径显式排除 `/var/lib/dsh-agent`，tar 归档同时排除任务队列和认证目录并使用 `--no-xattrs`。备份事务使用同一 flock 串行锁、会话状态文件及 NixOS `ConditionPathExists` gate；prepare 失败/超时由 `OnFailure` 触发恢复，Restic 成功/失败也触发恢复。恢复逐项尝试 DSH、任务 thaw 与 watcher，保留未完成状态供重试；恢复单元失败会向 systemd journal 写入不含密钥的 critical 告警。该流程仍需在目标主机进行 SIGKILL、超时和依赖失败故障注入验收。登录、ARM64 构建、沙箱负向测试、任务取消/超时和恢复演练均未执行。本 PR 不连接服务器、不登录、不部署。
 
 
 ### 备份期间的 DSH 与编码 agent 协调

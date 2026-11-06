@@ -98,7 +98,9 @@ in {
       };
 
       systemd.tmpfiles.rules = [
+        "d ${state} 0710 dsh dsh-workspace -"
         "d ${state}/home 0700 dsh dsh -"
+        "d ${state}/workspaces 2770 dsh dsh-workspace -"
         "d ${state}/workspaces 0700 dsh dsh -"
         "f /var/log/dsh/nginx-error.log 0600 root root -"
       ];
@@ -124,7 +126,8 @@ in {
           RestartSec = "10s";
           TimeoutStopSec = "90s";
           StateDirectory = "dsh";
-          StateDirectoryMode = "0700";
+          StateDirectoryMode = "0710";
+          SupplementaryGroups = [ "dsh-workspace" ];
           CacheDirectory = "dsh";
           CacheDirectoryMode = "0700";
           LogsDirectory = "dsh";
@@ -170,6 +173,7 @@ in {
       # 独立 staging 路径，追加到现有备份，不覆盖数据库导出。
       services.restic.backups.hopper-local = {
         paths = lib.mkAfter [ stage ];
+        exclude = lib.mkAfter [ "${state}/workspaces/.agent-jobs" "${state}/workspaces/.agent-auth" ];
         backupPrepareCommand = lib.mkAfter ''
           set -euo pipefail
           umask 077
@@ -188,7 +192,10 @@ in {
           if [ -e ${marker} ]; then
             ${pkgs.systemd}/bin/systemctl stop dsh.service
           fi
-          ${pkgs.gnutar}/bin/tar -C /var/lib -cpf ${stage}/dsh.tar dsh
+          ${pkgs.gnutar}/bin/tar --no-xattrs \
+            --exclude=dsh/workspaces/.agent-jobs \
+            --exclude=dsh/workspaces/.agent-auth \
+            -C /var/lib -cpf ${stage}/dsh.tar dsh
           resume_dsh
           trap - EXIT
         '';

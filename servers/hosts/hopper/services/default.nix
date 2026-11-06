@@ -5,5 +5,5 @@
 # ---
 
 { ... }: {
-  imports = [ ./dsh.nix ];
+  imports = [ ./dsh.nix ./dsh-coding-agents.nix ];
 }

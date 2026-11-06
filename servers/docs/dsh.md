@@ -167,3 +167,16 @@ sudo restic --repo /var/lib/restic/repositories/hopper \
 - 备份需要短暂停服；恢复失败、超时和服务恢复路径必须实测。
 - Tunnel/Access 顺序错误可能暴露管理入口；必须先建立并验收 Access 拒绝策略。
 - Hopper 与数据库、存储、代理共享资源；上线前确认磁盘、内存、CPU 与 API 预算。
+
+
+## 本机编码 agent（追加阶段）
+
+本功能由 `dot.hopper.dsh.codingAgents.enable` 控制，默认关闭。开启后保留原 `dsh` UID 与模型密钥边界，另建无 sudo、wheel、journal、restic 或 SSH 授权的 `dsh-agent` 身份。两者只通过 `/var/lib/dsh/workspaces/coding` 共享工作区；agent 的 home、Codex 登录状态和原始日志位于独立私有目录，不进入备份。
+
+当前仅预留 Codex 固定包路径。agy 与 WorkBuddy 开关默认关闭，并由断言阻止启用；WorkBuddy/CodeBuddy 的具体产品与包尚未确认。Codex CLI 参数与 stdin 行为必须对选定 nixpkgs 锁定版本执行 `--help` 核验后，才能解除实现门槛。runner 采用固定可执行文件映射，不接受请求提供命令、参数、环境变量或 cwd；任务输入有长度限制，结果以固定 JSON 文件原子写入。任务通过固定 path 单元触发，不授权 DSH 调用通用 systemd、sudo 或 transient unit。
+
+**DSH 工具适配器仍是明确阻塞项**：本轮未确认 PR 当前 DSH 上游版本，亦未确认该版本插件 API。不得伪造插件入口、把文件脚本冒充 OAR app-server 协议，或将功能描述为已接通 DSH。待精确版本与 API 确认后，单独实现只提交任务文件、读取结果的适配器；在此之前 `codingAgents.enable` 必须保持关闭。
+
+任务模板使用独立 systemd UID、只读系统、隐藏 SOPS/SSH/Restic/数据库路径、禁止绑定监听端口和资源/超时限制。出站网络目的地尚未限制，任务仍可能外传其可读代码并产生模型费用；同机 UID 隔离不是 VM 隔离。不得把含凭据的管理员 checkout、home、Git credential 或 SSH agent 接入工作区。
+
+备份路径显式排除 `/var/lib/dsh-agent`，tar 归档同时排除任务队列和认证目录并使用 `--no-xattrs`。在途任务协调仍须实机验收：备份前必须暂停 watcher、等待任务结束，成功/失败后只恢复原本活跃的 watcher；当前配置未声称这条完整协调流程已经验证。登录、ARM64 构建、沙箱负向测试、任务取消/超时和恢复演练均未执行。本 PR 不连接服务器、不登录、不部署。

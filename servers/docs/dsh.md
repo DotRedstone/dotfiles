@@ -7,9 +7,9 @@
 虚拟主机、监听、SOPS 字段需求或备份路径。
 
 DSH 使用原生 Node 服务，不安装 Docker、Podman 或其他容器运行时。应用只绑定 IPv4
-回环 3080。Cloudflare 模式下 Nginx 3081 也只绑定回环；仅当用户明确选择 EasyTier
-并提供接口专属地址和 TLS 证书时，Nginx 才绑定该内网地址，并仅在该接口放行
-3081/tcp。不会增加全局公网端口。
+回环 3080。Cloudflare 模式下 Nginx 3081 也只绑定回环。EasyTier 入口目前 fail-closed
+禁止启用：共享模块尚未提供可验证的设备接口绑定，不能仅凭用户传入接口字符串保证
+监听地址属于 EasyTier。不会增加全局公网端口。
 
 DSH 是开发者预览软件，能够执行模型生成的命令。独立的 `dsh` 系统用户和 systemd
 沙箱能缩小权限，但不构成 VM、容器或完整安全隔离。不要把工作区链接到
@@ -86,7 +86,7 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 | `dsh/mesh_tls_key` | 当前 EasyTier 入口禁止启用，暂不声明 | 预留键名，不应在本阶段添加 |
 
 模块只声明显式选择的一个模型 key，不批量声明未使用字段。Tunnel 和 mesh 键也只在
-相应模式启用时声明。provider 的 schema、Base URL、model ID 与 apiKeyEnv 映射必须按
+当前 EasyTier 入口被禁止，因此不声明 mesh key。provider 的 schema、Base URL、model ID 与 apiKeyEnv 映射必须按
 选定的不可变版本确认，不能从移动分支推定，也不能把明文 key 写入 WebUI profile。
 
 用户在可信机器执行 `cd servers && sops secrets/hopper.yaml`，只添加实际选择的加密

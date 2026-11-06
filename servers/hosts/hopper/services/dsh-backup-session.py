@@ -146,7 +146,18 @@ def remove_gate(path: Path, state: dict, key: str, failures: list[str]) -> None:
     if state.get(key) not in {"pending", "owned"}:
         return
     try:
-        path.unlink(missing_ok=True)
+        try:
+            fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+        except FileNotFoundError:
+            fd = -1
+        if fd >= 0:
+            try:
+                token = os.read(fd, 128).decode("ascii").strip()
+            finally:
+                os.close(fd)
+            if token != state["session"]:
+                raise SessionError(f"refusing to remove a gate not owned by session {state['session']}")
+            path.unlink()
         state[key] = "removed"
         save_state(state)
     except Exception as error:

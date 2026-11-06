@@ -341,12 +341,6 @@ def resume_locked() -> None:
             except Exception as error:
                 failures.append(f"restore {unit}: {error}")
 
-    if show("restic-backups-hopper-local.service", "Result") == "success":
-        try:
-            ARCHIVE.unlink(missing_ok=True)
-        except Exception as error:
-            failures.append(f"remove completed archive: {error}")
-
     state["errors"] = failures
     save_state(state)
     pending = (

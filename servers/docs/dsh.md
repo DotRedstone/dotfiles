@@ -42,7 +42,7 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 也不能证明 ARM64 运行行为或 CLI 参数。不得据此自动选版。
 
 用户必须先指定已发布的精确 npm 版本（不得使用 `latest`），再生成并审查完整
-``package-lock.json`，核对 resolved/integrity、Linux ARM64 原生依赖、Web assets、
+`package-lock.json`，核对 resolved/integrity、Linux ARM64 原生依赖、Web assets、
 插件与 Node engines。Nix 包使用锁定的 `nodejs_24`，不能忽略 engines，也不能在
 服务启动时执行 `npx` 或联网安装依赖。
 
@@ -62,10 +62,9 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 | --- | --- | --- |
 | DSH 版本 | `upstreamVersion = null`；package.json 为占位符 | 选择精确发布版本，不得 latest |
 | 域名 | `hostName = null` | 指定完整域名并检查占用 |
-| 入口 | `ingress = null` | Cloudflare Tunnel + Access 或 EasyTier 二选一 |
+| 入口 | `ingress = null` | 首版仅支持 Cloudflare Tunnel + Access；EasyTier 暂不纳入 |
 | 模型 provider | 未配置 | 确认 provider、协议、Base URL、模型 ID 与预算 |
 | 模型 key | 默认不注入 | 确认 provider 的环境变量映射后再设置 |
-| EasyTier | 参数为空 | fail-closed 禁止，待共享模块提供并验证实际设备接口后再开放 |
 | 工作区预算 | 未设定 | 确认磁盘预算、监测告警与备份维护窗口 |
 
 启用时检查精确版本、有效域名、入口与 Restic 备份。模型 key 的环境变量名和 SOPS
@@ -83,10 +82,8 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 | `dsh/openai_api_key` | 确认使用对应 provider 后 | DSH 专用 EnvironmentFile |
 | `dsh/anthropic_api_key` | 确认使用对应 provider 后 | DSH 专用 EnvironmentFile |
 | `dsh/cloudflare_tunnel_token` | Cloudflare 模式且 tunnelEnable=true | systemd LoadCredential，仅给 Tunnel |
-| `dsh/mesh_tls_key` | 当前 EasyTier 入口禁止启用，暂不声明 | 预留键名，不应在本阶段添加 |
 
-模块只声明显式选择的一个模型 key，不批量声明未使用字段。Tunnel 和 mesh 键也只在
-当前 EasyTier 入口被禁止，因此不声明 mesh key。provider 的 schema、Base URL、model ID 与 apiKeyEnv 映射必须按
+模块只声明显式选择的一个模型 key，不批量声明未使用字段。首版不声明 EasyTier 相关 SOPS 键。provider 的 schema、Base URL、model ID 与 apiKeyEnv 映射必须按
 选定的不可变版本确认，不能从移动分支推定，也不能把明文 key 写入 WebUI profile。
 
 用户在可信机器执行 `cd servers && sops secrets/hopper.yaml`，只添加实际选择的加密
@@ -174,13 +171,13 @@ sudo restic --repo /var/lib/restic/repositories/hopper \
 
 本功能由 `dot.hopper.dsh.codingAgents.enable` 控制，默认关闭。开启后保留原 `dsh` UID 与模型密钥边界，另建无 sudo、wheel、journal、restic 或 SSH 授权的 `dsh-agent` 身份。两者只通过 `/var/lib/dsh/workspaces/coding` 共享工作区；agent 的 home、Codex 登录状态和原始日志位于独立私有目录，不进入备份。
 
-当前仅预留 Codex 固定包路径。agy 与 WorkBuddy 开关默认关闭，并由断言阻止启用；WorkBuddy/CodeBuddy 的具体产品与包尚未确认。Codex CLI 参数与 stdin 行为必须对选定 nixpkgs 锁定版本执行 `--help` 核验后，才能解除实现门槛。runner 采用固定可执行文件映射，不接受请求提供命令、参数、环境变量或 cwd；任务输入有长度限制，结果以固定 JSON 文件原子写入。任务通过固定 path 单元触发，不授权 DSH 调用通用 systemd、sudo 或 transient unit。
+首版只保留 Codex 固定包映射，不包含 WorkBuddy、CodeBuddy 或其他 agent。Codex CLI 参数与 stdin 行为必须对选定 nixpkgs 锁定版本执行 `--help` 核验。runner 采用固定可执行文件映射，不接受请求提供命令、参数、环境变量或 cwd；任务输入有长度限制，结果以固定 JSON 文件原子写入。任务通过固定 path 单元触发，不授权 DSH 调用通用 systemd、sudo 或 transient unit。
 
-**DSH 工具适配器仍是明确阻塞项**：本轮未确认 PR 当前 DSH 上游版本，亦未确认该版本插件 API。不得伪造插件入口、把文件脚本冒充 OAR app-server 协议，或将功能描述为已接通 DSH。待精确版本与 API 确认后，单独实现只提交任务文件、读取结果的适配器；在此之前 `codingAgents.enable` 必须保持关闭。
+**DSH 工具适配器尚未实现**：本轮未确认 PR 当前 DSH 上游版本，亦未确认该版本插件 API。不得伪造插件入口、把文件脚本冒充 OAR app-server 协议，或将功能描述为已接通 DSH。`codingAgents.enable` 有不可绕过的 readiness 断言，在精确依赖锁定、适配器按锁定 API 实现并完成 CLI/ARM64 验收前禁止启用。
 
 任务模板使用独立 systemd UID、只读系统、隐藏 SOPS/SSH/Restic/数据库路径、禁止绑定监听端口和资源/超时限制。出站网络目的地尚未限制，任务仍可能外传其可读代码并产生模型费用；同机 UID 隔离不是 VM 隔离。不得把含凭据的管理员 checkout、home、Git credential 或 SSH agent 接入工作区。
 
-备份路径显式排除 `/var/lib/dsh-agent`，tar 归档同时排除任务队列和认证目录并使用 `--no-xattrs`。在途任务协调仍须实机验收：备份前暂停 watcher 并冻结在途任务，成功/失败后只恢复原本活跃的 watcher；该流程仍需在目标主机进行故障注入验收。登录、ARM64 构建、沙箱负向测试、任务取消/超时和恢复演练均未执行。本 PR 不连接服务器、不登录、不部署。
+备份路径显式排除 `/var/lib/dsh-agent`，tar 归档同时排除任务队列和认证目录并使用 `--no-xattrs`。备份事务使用同一 flock 串行锁、会话状态文件及 NixOS `ConditionPathExists` gate；prepare 失败/超时由 `OnFailure` 触发恢复，Restic 成功/失败也触发恢复。恢复逐项尝试 DSH、任务 thaw 与 watcher，保留未完成状态供重试。该流程仍需在目标主机进行 SIGKILL、超时和依赖失败故障注入验收。登录、ARM64 构建、沙箱负向测试、任务取消/超时和恢复演练均未执行。本 PR 不连接服务器、不登录、不部署。
 
 
 ### 备份期间的 DSH 与编码 agent 协调

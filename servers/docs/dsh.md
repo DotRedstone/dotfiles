@@ -102,9 +102,15 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 模块只向现有 `hopper-local` 追加独立 staging 路径，不再对 `backupPrepareCommand` /
 `backupCleanupCommand` 赋第二个定义，不替换数据库导出逻辑，也不新增 R2 凭据。
 `dsh-backup-prepare.service` 通过 `Requires` + `After` 在 Restic 前暂停 DSH 与编码 agent
-写入者并生成归档。Restic 成功或失败均触发独立 `dsh-backup-resume.service`。恢复单元
-逐项检查 unmask、start、thaw 与状态验证；任何一步失败都会保留
-`/run/dsh-backup-session/state.json` 并以非零状态结束，不能静默忽略。
+写入者并生成归档。Restic 成功或失败均触发独立 `dsh-backup-resume.service`。DSH、
+Codex watcher、任务模板与 self-test 单元通过 NixOS `[Unit]` 中的
+`ConditionPathExists=!/run/dsh-backup-session/dsh-paused` 或
+`ConditionPathExists=!/run/dsh-backup-session/agents-paused` gate 阻止备份窗口内的新启动。
+prepare/resume 共用 root 私有 `flock(LOCK_EX)` 事务锁；helper 原子创建带 session ID 的
+gate，恢复时校验 token，只删除本次会话拥有的 gate。恢复逐项检查 DSH start、任务 thaw、
+watcher start 与状态验证；任何一步失败都会保留
+`/run/dsh-backup-session/state.json` 并以非零状态结束，不执行 runtime mask/unmask，
+也不记录或恢复原有 mask 状态。
 
 上线后在维护窗口验证：
 
@@ -182,15 +188,22 @@ sudo restic --repo /var/lib/restic/repositories/hopper \
 
 ### 备份期间的 DSH 与编码 agent 协调
 
-备份 helper 先记录原始 unit 状态及原有 mask，再临时 mask DSH、Codex path watcher、
-Codex 模板和任务单元，避免新任务进入。随后停止 watcher，冻结此前正在运行的 Codex
-任务及 self-test，并对 DSH 无条件执行 stop；包括 activating 和 auto-restart 在内的
-状态均须等待 ActiveState 进入 inactive/failed，且 MainPID、ControlPID 都为 0，才开始
-归档。任务队列和认证目录仍从归档中排除。
+备份协调不使用 `systemctl mask`、`unmask` 或 runtime mask，也不读取、记录或恢复单元原有
+mask 状态。DSH、Codex path watcher、Codex 模板任务及 self-test 单元在 NixOS 声明的
+`[Unit]` 中配置 `ConditionPathExists=!/run/dsh-backup-session/dsh-paused` 或
+`ConditionPathExists=!/run/dsh-backup-session/agents-paused`。helper 在 root 私有
+`/run/dsh-backup-session` 下原子创建带本次 session ID 的 gate 文件；gate 存在时，
+对应单元不会启动。这样不会尝试覆盖 `/etc/systemd/system` 中的声明式单元链接或 drop-in。
 
-恢复时先解除本轮新增的 runtime mask，再启动原本应运行的 DSH，等待 systemd exec、
-主进程及 127.0.0.1:3080 TCP 就绪；之后解冻原本运行的任务，最后恢复此前 active 的
-path watcher。原本停止或已被管理员 mask 的单元不会被擅自启动/解封。恢复状态采用
-root 0700 目录和 0600 原子写入文件；状态文件只在所有恢复步骤成功后删除。下一次
-备份若发现旧状态文件，会先尝试恢复，失败则拒绝覆盖旧状态。并发管理员操作仍需安排
-维护窗口；此机制不是跨管理员操作的分布式锁。
+prepare 与 resume 使用同一个 root 私有 lock 文件和 `flock(LOCK_EX)` 串行化；旧事务状态
+尚未恢复时，新 prepare fail-closed。prepare 记录需要恢复的原始 active 状态，停止 watcher，
+冻结此前正在运行的 Codex 任务及 self-test，并对 DSH 执行 stop；包括 activating 和
+auto-restart 在内的状态均须等待 ActiveState 进入 inactive/failed，且 MainPID、ControlPID
+均为 0，才开始归档。任务队列和认证目录仍从归档中排除。
+
+resume 校验 gate 文件中的 session ID，只删除本次会话拥有的 gate，再分别尝试恢复原本
+应运行的 DSH、任务和 watcher；DSH 启动失败不会阻止独立的任务 thaw。DSH 恢复还需等待
+systemd exec、主进程及 127.0.0.1:3080 TCP 就绪。原本未运行的单元不会被擅自启动。
+恢复状态采用 root 0700 目录和 0600 原子写入文件；只有所有必要恢复步骤成功后才删除
+状态文件，失败项保留供重试。`ConditionPathExists` gate 与 flock 的实际 systemd 行为、
+跨 UID 启停和冻结/解冻效果仍须在目标 NixOS 主机或等价 VM 验收。

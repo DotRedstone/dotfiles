@@ -180,7 +180,7 @@ sudo restic --repo /var/lib/restic/repositories/hopper \
 
 任务模板使用独立 systemd UID、只读系统、隐藏 SOPS/SSH/Restic/数据库路径、禁止绑定监听端口和资源/超时限制。出站网络目的地尚未限制，任务仍可能外传其可读代码并产生模型费用；同机 UID 隔离不是 VM 隔离。不得把含凭据的管理员 checkout、home、Git credential 或 SSH agent 接入工作区。
 
-备份路径显式排除 `/var/lib/dsh-agent`，tar 归档同时排除任务队列和认证目录并使用 `--no-xattrs`。在途任务协调仍须实机验收：备份前必须暂停 watcher、等待任务结束，成功/失败后只恢复原本活跃的 watcher；当前配置未声称这条完整协调流程已经验证。登录、ARM64 构建、沙箱负向测试、任务取消/超时和恢复演练均未执行。本 PR 不连接服务器、不登录、不部署。
+备份路径显式排除 `/var/lib/dsh-agent`，tar 归档同时排除任务队列和认证目录并使用 `--no-xattrs`。在途任务协调仍须实机验收：备份前暂停 watcher 并冻结在途任务，成功/失败后只恢复原本活跃的 watcher；该流程仍需在目标主机进行故障注入验收。登录、ARM64 构建、沙箱负向测试、任务取消/超时和恢复演练均未执行。本 PR 不连接服务器、不登录、不部署。
 
 
 ### 备份期间的 DSH 与编码 agent 协调

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Fixed, fail-closed dispatcher for Hopper's local coding-agent jobs."""
+"""Fixed, fail-closed dispatcher for Hopper's local Codex jobs."""
 
 from __future__ import annotations
 
 import argparse
 import json
 import os
+import re
 import signal
 import stat
 import subprocess
@@ -14,24 +15,68 @@ import time
 import uuid
 from pathlib import Path
 
-ROOT = Path("/var/lib/dsh/workspaces")
-WORKSPACE = ROOT / "coding"
-JOBS = ROOT / ".agent-jobs" / "codex"
 STATE = Path("/var/lib/dsh-agent/jobs")
 MAX_REQUEST = 64 * 1024
 MAX_PROMPT = 48 * 1024
 MAX_RESULT = 16 * 1024
 TIMEOUT = 20 * 60
 TOOL = "codex"
+ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}\Z")
+DIR_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
+FILE_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC
 
 
 class JobError(Exception):
     pass
 
 
-def regular_file(path: Path, *, max_size: int) -> bytes:
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
-    fd = os.open(path, flags)
+def open_dir_at(parent: int, name: str) -> int:
+    fd = os.open(name, DIR_FLAGS, dir_fd=parent)
+    info = os.fstat(fd)
+    if not stat.S_ISDIR(info.st_mode) or info.st_mode & stat.S_IWOTH:
+        os.close(fd)
+        raise JobError("unsafe queue directory")
+    return fd
+
+
+def open_queue():
+    """Walk from /var/lib/dsh using dirfds; never follow a mutable symlink."""
+    root = os.open("/", DIR_FLAGS)
+    var = open_dir_at(root, "var")
+    lib = open_dir_at(var, "lib")
+    dsh = open_dir_at(lib, "dsh")
+    workspaces = open_dir_at(dsh, "workspaces")
+    jobs_parent = open_dir_at(workspaces, ".agent-jobs")
+    codex = open_dir_at(jobs_parent, "codex")
+    claimed = open_dir_at(codex, "claimed")
+    results = open_dir_at(codex, "results")
+    for fd in (root, var, lib, dsh, workspaces, jobs_parent):
+        os.close(fd)
+    return codex, claimed, results
+
+
+def open_agent_state() -> int:
+    fd = os.open(STATE.parent, DIR_FLAGS)
+    info = os.fstat(fd)
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        os.close(fd)
+        raise JobError("agent state directory is not private")
+    try:
+        os.mkdir(STATE.name, 0o700, dir_fd=fd)
+    except FileExistsError:
+        pass
+    jobs_fd = open_dir_at(fd, STATE.name)
+    jobs_info = os.fstat(jobs_fd)
+    if jobs_info.st_uid != os.getuid() or jobs_info.st_mode & 0o077:
+        os.close(jobs_fd)
+        os.close(fd)
+        raise JobError("agent jobs directory is not private")
+    os.close(fd)
+    return jobs_fd
+
+
+def read_regular_at(directory: int, name: str, max_size: int) -> bytes:
+    fd = os.open(name, FILE_FLAGS, dir_fd=directory)
     try:
         info = os.fstat(fd)
         if not stat.S_ISREG(info.st_mode) or info.st_size > max_size:
@@ -52,60 +97,59 @@ def regular_file(path: Path, *, max_size: int) -> bytes:
         os.close(fd)
 
 
-def atomic_json(path: Path, value: dict) -> None:
+def atomic_json_at(directory: int, name: str, value: dict) -> None:
     encoded = json.dumps(value, ensure_ascii=True, separators=(",", ":")).encode()
     if len(encoded) > MAX_RESULT:
         encoded = json.dumps(
             {"jobId": value.get("jobId", ""), "status": "failed",
-             "summary": "result exceeded size limit"},
-            separators=(",", ":"),
+             "summary": "result exceeded size limit"}, separators=(",", ":"),
         ).encode()
-    temp = path.with_name("." + path.name + "." + uuid.uuid4().hex)
-    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o660)
+    temp = "." + uuid.uuid4().hex + ".tmp"
+    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                 0o660, dir_fd=directory)
     try:
         with os.fdopen(fd, "wb") as stream:
-            stream.write(encoded)
-            stream.write(b"\n")
+            stream.write(encoded + b"\n")
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temp, path)
+        os.rename(temp, name, src_dir_fd=directory, dst_dir_fd=directory)
+        os.fsync(directory)
     finally:
         try:
-            temp.unlink()
+            os.unlink(temp, dir_fd=directory)
         except FileNotFoundError:
             pass
 
 
 def self_test() -> int:
     checks = {}
-    checks["workspace_writable"] = os.access(WORKSPACE, os.W_OK)
-    checks["agent_home_private"] = STATE.parent.exists() and os.access(STATE.parent, os.W_OK)
-    checks["secrets_hidden"] = not Path("/run/secrets").exists()
-    checks["ssh_hidden"] = not Path("/etc/ssh").exists()
-    checks["dsh_private_home_hidden"] = not Path("/var/lib/dsh/home").exists()
-    checks["restic_hidden"] = not Path("/var/lib/restic").exists()
-    checks["no_sudo"] = subprocess.run(
+    checks["workspace_writable"] = os.access("/var/lib/dsh/workspaces/coding", os.W_OK)
+    checks["agent_home_private"] = os.access(STATE.parent, os.W_OK)
+    checks["secrets_unavailable"] = not os.access("/run/secrets", os.R_OK | os.X_OK)
+    checks["ssh_unavailable"] = not os.access("/etc/ssh", os.R_OK | os.X_OK)
+    checks["dsh_home_unavailable"] = not os.access("/var/lib/dsh/home", os.R_OK | os.X_OK)
+    checks["restic_unavailable"] = not os.access("/var/lib/restic", os.R_OK | os.X_OK)
+    checks["etc_read_only"] = not os.access("/etc", os.W_OK)
+    checks["sudo_denied"] = subprocess.run(
         ["/run/wrappers/bin/sudo", "-n", "true"],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     ).returncode != 0
-    # SocketBindDeny is verified by an explicit bind attempt inside this unit.
     import socket
-    bind_blocked = False
-    for family, address in (
-        (socket.AF_INET, ("127.0.0.1", 0)),
-        (socket.AF_INET6, ("::1", 0)),
+    for label, family, address in (
+        ("ipv4_bind_denied", socket.AF_INET, ("127.0.0.1", 0)),
+        ("ipv6_bind_denied", socket.AF_INET6, ("::1", 0)),
     ):
         sock = socket.socket(family, socket.SOCK_STREAM)
         try:
             sock.bind(address)
+        except PermissionError:
+            checks[label] = True
         except OSError:
-            bind_blocked = True
+            checks[label] = False
         else:
-            bind_blocked = False
-            break
+            checks[label] = False
         finally:
             sock.close()
-    checks["socket_bind_denied"] = bind_blocked
     for key, passed in checks.items():
         print(f"{key}={'PASS' if passed else 'FAIL'}")
     return 0 if all(checks.values()) else 1
@@ -117,7 +161,6 @@ def main() -> int:
     parser.add_argument("--tool")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
-
     if args.self_test:
         return self_test()
     if args.tool != TOOL or not args.commands:
@@ -127,35 +170,38 @@ def main() -> int:
     if not isinstance(executable, str) or not executable.startswith("/nix/store/"):
         raise JobError("invalid fixed executable")
 
-    request_path = JOBS / "request.json"
-    if not request_path.exists():
-        return 0
-    STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
-    os.chmod(STATE, 0o700)
-
-    # Move the watched request out of the path unit's trigger location before
-    # parsing it, so one request cannot cause an endless trigger loop.
-    claimed = STATE / ("claimed-" + uuid.uuid4().hex + ".json")
-    os.rename(request_path, claimed)
-    job_id = "unknown"
+    codex_fd, claimed_fd, results_fd = open_queue()
+    state_fd = open_agent_state()
+    claim_name = "claim-" + uuid.uuid4().hex + ".json"
     child = None
+    validated_job_id = None
+    claimed = False
     try:
-        raw = regular_file(claimed, max_size=MAX_REQUEST)
+        try:
+            os.rename("request.json", claim_name,
+                      src_dir_fd=codex_fd, dst_dir_fd=claimed_fd)
+            claimed = True
+        except FileNotFoundError:
+            return 0
+        raw = read_regular_at(claimed_fd, claim_name, MAX_REQUEST)
         request = json.loads(raw)
         if not isinstance(request, dict) or set(request) != {"tool", "prompt", "jobId"}:
             raise JobError("invalid request schema")
         if request["tool"] != TOOL:
             raise JobError("unsupported tool")
         prompt = request["prompt"]
-        job_id = request["jobId"]
+        candidate = request["jobId"]
         if not isinstance(prompt, str) or not prompt.strip() or len(prompt.encode()) > MAX_PROMPT:
             raise JobError("invalid prompt")
-        if not isinstance(job_id, str) or not job_id or len(job_id) > 80:
+        if not isinstance(candidate, str) or not ID_RE.fullmatch(candidate):
             raise JobError("invalid job id")
-        if any(c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_" for c in job_id):
-            raise JobError("invalid job id")
-        done = STATE / (job_id + ".done")
-        if done.exists():
+        validated_job_id = candidate
+        done_name = validated_job_id + ".done"
+        try:
+            os.stat(done_name, dir_fd=state_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            pass
+        else:
             raise JobError("job id replay rejected")
 
         env = {
@@ -165,28 +211,21 @@ def main() -> int:
             "XDG_DATA_HOME": "/var/lib/dsh-agent/data",
             "XDG_CACHE_HOME": "/var/lib/dsh-agent/cache",
             "PATH": os.environ.get("PATH", ""),
-            "LANG": "C.UTF-8",
-            "LC_ALL": "C.UTF-8",
-            "TERM": "dumb",
-            "NO_COLOR": "1",
+            "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8", "TERM": "dumb", "NO_COLOR": "1",
             "SSL_CERT_FILE": os.environ.get("SSL_CERT_FILE", ""),
-            "GIT_CONFIG_NOSYSTEM": "1",
-            "GIT_CONFIG_GLOBAL": "/dev/null",
-            "GIT_TERMINAL_PROMPT": "0",
-            "GIT_CONFIG_COUNT": "1",
-            "GIT_CONFIG_KEY_0": "credential.helper",
-            "GIT_CONFIG_VALUE_0": "",
+            "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": "/dev/null",
+            "GIT_TERMINAL_PROMPT": "0", "GIT_CONFIG_COUNT": "1",
+            "GIT_CONFIG_KEY_0": "credential.helper", "GIT_CONFIG_VALUE_0": "",
         }
-        # The selected Codex release's CLI syntax must be confirmed against
-        # its --help before enabling this runner on a live host. Never bypass
-        # approvals or sandbox policy to make an incompatible release work.
         argv = [executable, "exec", "--json", "--sandbox", "workspace-write", "-"]
-        log_path = STATE / (job_id + ".log")
-        with open(log_path, "xb") as log:
-            os.chmod(log_path, 0o600)
+        log_name = validated_job_id + ".log"
+        log_fd = os.open(log_name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                         0o600, dir_fd=state_fd)
+        with os.fdopen(log_fd, "wb") as log:
             child = subprocess.Popen(
-                argv, cwd=WORKSPACE, env=env, stdin=subprocess.PIPE,
-                stdout=log, stderr=subprocess.STDOUT, start_new_session=True,
+                argv, cwd="/var/lib/dsh/workspaces/coding", env=env,
+                stdin=subprocess.PIPE, stdout=log, stderr=subprocess.STDOUT,
+                start_new_session=True,
             )
             try:
                 child.communicate(prompt.encode(), timeout=TIMEOUT)
@@ -199,26 +238,33 @@ def main() -> int:
                     child.wait()
                 raise JobError("task timed out")
         status = "succeeded" if child.returncode == 0 else "failed"
-        atomic_json(JOBS / "results" / (job_id + ".json"), {
-            "jobId": job_id, "status": status, "exitCode": child.returncode,
+        atomic_json_at(results_fd, validated_job_id + ".json", {
+            "jobId": validated_job_id, "status": status,
+            "exitCode": child.returncode,
             "summary": "Codex task finished; inspect the isolated workspace before use",
         })
-        done.touch(mode=0o600, exist_ok=False)
+        done_fd = os.open(done_name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                          0o600, dir_fd=state_fd)
+        os.close(done_fd)
         return 0 if child.returncode == 0 else child.returncode
     except Exception as exc:
         safe_message = str(exc).replace("\n", " ")[:240]
+        result_id = validated_job_id or ("rejected-" + uuid.uuid4().hex)
         try:
-            atomic_json(JOBS / "results" / (job_id + ".json"), {
-                "jobId": job_id, "status": "failed", "summary": safe_message,
+            atomic_json_at(results_fd, result_id + ".json", {
+                "jobId": validated_job_id or "", "status": "failed", "summary": safe_message,
             })
         except Exception:
             pass
         return 1
     finally:
-        try:
-            claimed.unlink()
-        except FileNotFoundError:
-            pass
+        if claimed:
+            try:
+                os.unlink(claim_name, dir_fd=claimed_fd)
+            except FileNotFoundError:
+                pass
+        for fd in (codex_fd, claimed_fd, results_fd, state_fd):
+            os.close(fd)
 
 
 if __name__ == "__main__":

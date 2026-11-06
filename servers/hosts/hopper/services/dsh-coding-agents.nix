@@ -4,7 +4,7 @@
 # Scope: Host
 # Notes:
 # - Disabled by default; the DSH plugin adapter remains blocked until its exact upstream API is pinned.
-# - Only the nixpkgs Codex package is executable; agy and WorkBuddy switches are intentionally blocked.
+# - Codex is the only planned executable; the DSH adapter readiness assertion blocks activation.
 # - This is same-host least-privilege isolation, not a VM or a guarantee against data exfiltration.
 # ---
 
@@ -84,7 +84,8 @@ let
 
     ProtectSystem = "strict";
     ProtectHome = true;
-    ReadWritePaths = [ workspace agentHome ];
+    ReadWritePaths = [ workspace agentHome jobs ];
+    ConditionPathExists = "!/run/dsh-backup-session/agents-paused";
     InaccessiblePaths = [
       "-/var/lib/dsh/home"
       "-/var/log/dsh"
@@ -147,18 +148,6 @@ in
       };
     };
 
-    agy.enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "预留 Antigravity CLI 开关；认证与沙箱验收完成前必须保持关闭。";
-    };
-
-    workBuddy.enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "预留 WorkBuddy 产品开关；产品与 CLI 尚未澄清前必须保持关闭。";
-    };
-
     selfTest.enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -177,12 +166,12 @@ in
         message = "本机编码 agent 启用前必须启用 Hopper 本地 Restic 备份。";
       }
       {
-        assertion = !cfg.agy.enable;
-        message = "agy 尚未完成专用 keyring、非交互认证与沙箱验收，必须保持关闭。";
+        assertion = cfg.codex.enable;
+        message = "首版只支持 Codex，codingAgents.enable 必须同时启用 Codex。";
       }
       {
-        assertion = !cfg.workBuddy.enable;
-        message = "WorkBuddy/CodeBuddy 产品与 CLI 尚未澄清及打包，必须保持关闭。";
+        assertion = false;
+        message = "Codex DSH 插件适配器尚未按锁定 DSH API 实现并验收，编码 agent 首版禁止启用。";
       }
     ];
 
@@ -209,8 +198,8 @@ in
       "d ${agentHome}/cache 0700 dsh-agent dsh-agent -"
       "d ${agentHome}/queue 0700 dsh-agent dsh-agent -"
       "d ${agentHome}/jobs 0700 dsh-agent dsh-agent -"
-      "d ${workspace} 2770 dsh dsh-workspace -"
       "d ${jobs} 2770 dsh dsh-workspace -"
+      "d ${jobs}/codex/claimed 2770 dsh dsh-workspace -"
       "d ${jobs}/codex 2770 dsh dsh-workspace -"
       "d ${jobs}/codex/results 2770 dsh dsh-workspace -"
       "d ${jobs}/codex/cancel 2770 dsh dsh-workspace -"

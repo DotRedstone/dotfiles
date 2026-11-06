@@ -106,13 +106,11 @@ in {
       };
 
       systemd.tmpfiles.rules = [
+        "d ${state} ${if config.dot.hopper.dsh.codingAgents.enable then "0710 root dsh-workspace" else "0700 dsh dsh"} -"
         "d ${state}/home 0700 dsh dsh -"
-        "d ${state}/workspaces 0700 dsh dsh -"
+        "d ${state}/workspaces ${if config.dot.hopper.dsh.codingAgents.enable then "2770 dsh dsh-workspace" else "0700 dsh dsh"} -"
         "f /var/log/dsh/nginx-error.log 0600 root root -"
         "d /run/dsh-backup-session 0700 root root -"
-      ] ++ lib.optionals config.dot.hopper.dsh.codingAgents.enable [
-        "d ${state} 0710 dsh dsh-workspace -"
-        "d ${state}/workspaces 2770 dsh dsh-workspace -"
       ];
 
       systemd.services.dsh = {
@@ -136,9 +134,8 @@ in {
           Restart = "on-failure";
           RestartSec = "10s";
           TimeoutStopSec = "90s";
-          StateDirectory = "dsh";
-          StateDirectoryMode = if config.dot.hopper.dsh.codingAgents.enable then "0710" else "0700";
           SupplementaryGroups = lib.optionals config.dot.hopper.dsh.codingAgents.enable [ "dsh-workspace" ];
+          ConditionPathExists = "!/run/dsh-backup-session/dsh-paused";
           CacheDirectory = "dsh";
           CacheDirectoryMode = "0700";
           LogsDirectory = "dsh";
@@ -191,7 +188,10 @@ in {
       # OnSuccess/OnFailure 则覆盖备份成功和失败两条恢复路径。
       systemd.services.dsh-backup-prepare = {
         description = "Quiesce Hopper DSH writers before local Restic backup";
+        requires = [ "mongodb-backup-privileges.service" ];
+        after = [ "mongodb-backup-privileges.service" ];
         path = [ pkgs.systemd pkgs.gnutar ];
+        unitConfig.OnFailure = "dsh-backup-resume.service";
         serviceConfig = {
           Type = "oneshot";
           User = "root";
@@ -203,7 +203,6 @@ in {
 
       systemd.services.dsh-backup-resume = {
         description = "Restore Hopper DSH writers after local Restic backup";
-        after = [ "restic-backups-hopper-local.service" ];
         path = [ pkgs.systemd pkgs.coreutils ];
         serviceConfig = {
           Type = "oneshot";

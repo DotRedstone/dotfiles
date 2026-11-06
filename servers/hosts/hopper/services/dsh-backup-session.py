@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Pause Hopper DSH and coding-agent writers for hopper-local snapshots."""
+"""Transactional DSH quiesce/restore coordinator for hopper-local backups."""
 
 from __future__ import annotations
 
+import fcntl
 import json
 import os
 import shutil
@@ -11,25 +12,42 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
+from contextlib import contextmanager
 from pathlib import Path
 
 SYSTEMCTL = shutil.which("systemctl") or "/run/current-system/sw/bin/systemctl"
 TAR = shutil.which("tar") or "/run/current-system/sw/bin/tar"
 STATE_DIR = Path("/run/dsh-backup-session")
 STATE_FILE = STATE_DIR / "state.json"
+LOCK_FILE = STATE_DIR / "lock"
+DSH_GATE = STATE_DIR / "dsh-paused"
+AGENT_GATE = STATE_DIR / "agents-paused"
 STAGING = Path("/var/lib/restic/staging/dsh")
 ARCHIVE = STAGING / "dsh.tar"
-PREPARE_UNIT = "dsh-backup-prepare.service"
 DSH_UNIT = "dsh.service"
 PATH_UNITS = ("dsh-coding-codex.path",)
 TASK_UNITS = ("dsh-coding@codex.service", "dsh-coding-self-test.service")
-UNITS = (DSH_UNIT, *PATH_UNITS, "dsh-coding@.service", *TASK_UNITS)
-RESTORE_STATES = {"active", "activating", "reloading", "auto-restart"}
+UNITS = (DSH_UNIT, *PATH_UNITS, *TASK_UNITS)
+ACTIVE_STATES = {"active", "activating", "reloading"}
 STOPPED_STATES = {"inactive", "failed"}
 
 
 class SessionError(RuntimeError):
     pass
+
+
+@contextmanager
+def transaction_lock():
+    STATE_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
+    os.chmod(STATE_DIR, 0o700)
+    fd = os.open(LOCK_FILE, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
 
 
 def systemctl(*args: str, check: bool = True) -> str:
@@ -52,15 +70,12 @@ def show(unit: str, prop: str) -> str:
 def inspect_unit(unit: str) -> dict:
     load = show(unit, "LoadState")
     if load in {"", "not-found"}:
-        return {"present": False, "masked_before": False, "masked_by_us": False,
-                "restore": False, "active_before": "not-found",
-                "freeze_pending": False, "frozen": False}
-    file_state = show(unit, "UnitFileState")
-    masked = load == "masked" or file_state in {"masked", "masked-runtime"}
+        return {"present": False, "restore": False, "active_before": "not-found",
+                "freeze_pending": False, "frozen": False, "task_lost": False}
     active = show(unit, "ActiveState")
-    return {"present": True, "masked_before": masked, "masked_by_us": False,
-            "restore": not masked and active in RESTORE_STATES,
-            "active_before": active, "freeze_pending": False, "frozen": False}
+    return {"present": True, "restore": active in ACTIVE_STATES,
+            "active_before": active, "freeze_pending": False,
+            "frozen": False, "task_lost": False}
 
 
 def save_state(state: dict) -> None:
@@ -75,7 +90,7 @@ def save_state(state: dict) -> None:
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary, STATE_FILE)
-        directory_fd = os.open(STATE_DIR, os.O_RDONLY)
+        directory_fd = os.open(STATE_DIR, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
         try:
             os.fsync(directory_fd)
         finally:
@@ -94,7 +109,7 @@ def load_state() -> dict:
         return {}
     except (OSError, json.JSONDecodeError) as error:
         raise SessionError("backup recovery state is unreadable") from error
-    if (not isinstance(state, dict) or state.get("schema") != 1
+    if (not isinstance(state, dict) or state.get("schema") != 2
             or not isinstance(state.get("units"), dict)
             or set(state["units"]) != set(UNITS)):
         raise SessionError("backup recovery state has an invalid schema")
@@ -115,12 +130,27 @@ def wait_for(unit: str, predicate, timeout: int, description: str) -> dict:
     raise SessionError(f"{unit} did not reach {description} within {timeout}s")
 
 
-def mask_unit(unit: str, record: dict, state: dict) -> None:
-    if not record["present"] or record["masked_before"]:
+def create_gate(path: Path, state: dict, key: str) -> None:
+    state[key] = "pending"
+    save_state(state)
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, "w", encoding="ascii") as stream:
+        stream.write(state["session"] + "\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    state[key] = "owned"
+    save_state(state)
+
+
+def remove_gate(path: Path, state: dict, key: str, failures: list[str]) -> None:
+    if state.get(key) not in {"pending", "owned"}:
         return
-    record["masked_by_us"] = True
-    save_state(state)  # Persist before masking so interrupted recovery can unmask.
-    systemctl("mask", "--runtime", unit)
+    try:
+        path.unlink(missing_ok=True)
+        state[key] = "removed"
+        save_state(state)
+    except Exception as error:
+        failures.append(f"remove {path.name}: {error}")
 
 
 def stop_and_confirm(unit: str, timeout: int) -> None:
@@ -141,55 +171,58 @@ def freeze_task(unit: str, record: dict, state: dict) -> None:
         save_state(state)
         return
     pid = show(unit, "MainPID")
-    if record["restore"] and active in RESTORE_STATES and pid not in {"", "0"}:
-        record["freeze_pending"] = True
-        save_state(state)  # Recovery thaws even if this process dies after freeze.
-        systemctl("freeze", unit)
-        wait_for(unit, lambda v: v["freezer"] == "frozen", 20, "frozen")
-        record["frozen"] = True
-        record["freeze_pending"] = False
-        save_state(state)
-    else:
-        # Cancel a queued activation; the request file remains for the watcher.
+    if not record["restore"] or pid in {"", "0"}:
         stop_and_confirm(unit, 40)
         record["restore"] = False
         save_state(state)
+        return
+    record["freeze_pending"] = True
+    save_state(state)
+    systemctl("freeze", unit)
+    wait_for(unit, lambda v: v["freezer"] == "frozen", 20, "frozen")
+    record["frozen"] = True
+    record["freeze_pending"] = False
+    save_state(state)
 
 
 def wait_for_dsh_listener(timeout: int = 60) -> None:
     deadline = time.monotonic() + timeout
-    last_error = "not yet accepting connections"
     while time.monotonic() < deadline:
         try:
             with socket.create_connection(("127.0.0.1", 3080), timeout=1):
                 return
-        except OSError as error:
-            last_error = error.__class__.__name__
+        except OSError:
             time.sleep(0.5)
-    raise SessionError(f"DSH listener 127.0.0.1:3080 not ready: {last_error}")
+    raise SessionError("DSH listener 127.0.0.1:3080 did not become ready")
 
 
-def prepare() -> None:
+def prepare_locked() -> None:
     if STATE_FILE.exists():
-        resume()  # Never discard a marker from an earlier failed recovery.
-    state = {"schema": 1, "units": {unit: inspect_unit(unit) for unit in UNITS}}
+        raise SessionError("an earlier backup session still needs recovery; run resume first")
+    if DSH_GATE.exists() or AGENT_GATE.exists():
+        raise SessionError("a backup gate exists without its state file; manual recovery required")
+    state = {
+        "schema": 2, "session": uuid.uuid4().hex,
+        "units": {unit: inspect_unit(unit) for unit in UNITS},
+        "dsh_gate": "absent", "agent_gate": "absent",
+        "archive_ready": False, "errors": [], "warnings": [],
+    }
     save_state(state)
     try:
-        for unit in UNITS:
-            mask_unit(unit, state["units"][unit], state)
+        # NixOS unit conditions are the gate; runtime masks cannot override /etc units.
+        create_gate(DSH_GATE, state, "dsh_gate")
+        create_gate(AGENT_GATE, state, "agent_gate")
         for unit in PATH_UNITS:
             if state["units"][unit]["present"]:
                 stop_and_confirm(unit, 40)
         for unit in TASK_UNITS:
             freeze_task(unit, state["units"][unit], state)
         if state["units"][DSH_UNIT]["present"]:
-            # Stops active, activating and auto-restart alike; cancels pending restart.
             stop_and_confirm(DSH_UNIT, 180)
 
         STAGING.mkdir(mode=0o700, parents=True, exist_ok=True)
         os.chmod(STAGING, 0o700)
-        temporary = STAGING / "dsh.tar.tmp"
-        temporary.unlink(missing_ok=True)
+        temporary = STAGING / ("dsh-" + state["session"] + ".tar.tmp")
         previous_umask = os.umask(0o077)
         try:
             subprocess.run([TAR, "--no-xattrs",
@@ -200,87 +233,140 @@ def prepare() -> None:
         finally:
             os.umask(previous_umask)
         os.replace(temporary, ARCHIVE)
-        directory_fd = os.open(STAGING, os.O_RDONLY)
+        state["archive_ready"] = True
+        save_state(state)
+        directory_fd = os.open(STAGING, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
         try:
             os.fsync(directory_fd)
         finally:
             os.close(directory_fd)
     except Exception as error:
         try:
-            resume()
+            resume_locked()
         except Exception as recovery_error:
-            raise SessionError(f"prepare failed ({error}); recovery failed ({recovery_error}); marker retained") from recovery_error
+            raise SessionError(
+                f"prepare failed ({error}); recovery failed ({recovery_error}); state retained"
+            ) from recovery_error
         raise
 
 
-def stop_prepare_unit() -> None:
-    if show(PREPARE_UNIT, "LoadState") not in {"", "not-found"}:
-        stop_and_confirm(PREPARE_UNIT, 30)
-
-
-def resume(*, stop_prepare: bool = False) -> None:
-    if stop_prepare:
-        stop_prepare_unit()
+def resume_locked() -> None:
     state = load_state()
     if not state:
+        if DSH_GATE.exists() or AGENT_GATE.exists():
+            raise SessionError("backup gate exists without a recovery state file")
         return
+    failures: list[str] = []
     records = state["units"]
 
-    for unit in UNITS:
-        if records[unit].get("masked_by_us"):
-            systemctl("unmask", "--runtime", unit)
-
+    # Release only the DSH gate before attempting DSH startup.
+    remove_gate(DSH_GATE, state, "dsh_gate", failures)
     dsh = records[DSH_UNIT]
-    if dsh.get("present") and dsh.get("restore"):
-        systemctl("start", DSH_UNIT)
-        wait_for(DSH_UNIT, lambda v: v["active"] == "active" and v["main_pid"] not in {"", "0"},
-                 40, "active with executed main process")
-        wait_for_dsh_listener()
+    if dsh.get("present") and dsh.get("restore") and not state.get("dsh_restored"):
+        try:
+            systemctl("start", DSH_UNIT)
+            wait_for(DSH_UNIT, lambda v: v["active"] == "active"
+                     and v["main_pid"] not in {"", "0"}, 40,
+                     "active with executed main process")
+            wait_for_dsh_listener()
+            state["dsh_restored"] = True
+            save_state(state)
+        except Exception as error:
+            failures.append(f"restore {DSH_UNIT}: {error}")
 
+    # DSH startup failure must not block independent task thaw attempts.
     for unit in TASK_UNITS:
         record = records[unit]
         if not record.get("present") or not record.get("restore"):
             continue
         if not (record.get("freeze_pending") or record.get("frozen")):
             continue
-        if show(unit, "ActiveState") in STOPPED_STATES:
-            raise SessionError(f"previously running task {unit} is no longer active")
-        freezer = show(unit, "FreezerState")
-        if freezer == "freezing":
-            wait_for(unit, lambda v: v["freezer"] == "frozen", 20, "frozen before thaw")
-            freezer = "frozen"
-        if freezer in {"frozen", "thawing"}:
-            systemctl("thaw", unit)
-            wait_for(unit, lambda v: v["freezer"] in {"running", "thawed"},
-                     20, "running after thaw")
-        elif freezer not in {"running", "thawed"}:
-            raise SessionError(f"cannot verify freezer state for {unit}")
+        try:
+            active = show(unit, "ActiveState")
+            if active in STOPPED_STATES:
+                record["task_lost"] = True
+                record["freeze_pending"] = False
+                record["frozen"] = False
+                record["restore"] = False
+                state["warnings"].append(
+                    f"{unit} exited while frozen; it was not restarted; inspect its claimed job/log"
+                )
+                save_state(state)
+                continue
+            freezer = show(unit, "FreezerState")
+            if freezer == "freezing":
+                wait_for(unit, lambda v: v["freezer"] == "frozen", 20, "frozen before thaw")
+                freezer = "frozen"
+            if freezer in {"frozen", "thawing"}:
+                systemctl("thaw", unit)
+                wait_for(unit, lambda v: v["freezer"] in {"running", "thawed"},
+                         20, "running after thaw")
+            elif freezer not in {"running", "thawed"}:
+                raise SessionError(f"unrecognized freezer state {freezer!r}")
+            record["freeze_pending"] = False
+            record["frozen"] = False
+            save_state(state)
+        except Exception as error:
+            failures.append(f"thaw {unit}: {error}")
 
+    # The snapshot is complete; release the task gate and restore the watcher.
+    remove_gate(AGENT_GATE, state, "agent_gate", failures)
     for unit in PATH_UNITS:
         record = records[unit]
-        if record.get("present") and record.get("restore"):
-            systemctl("start", unit)
-            wait_for(unit, lambda v: v["active"] == "active", 20, "active path watcher")
+        if record.get("present") and record.get("restore") and not state.get("watcher_restored"):
+            try:
+                systemctl("start", unit)
+                wait_for(unit, lambda v: v["active"] == "active", 20, "active path watcher")
+                state["watcher_restored"] = True
+                save_state(state)
+            except Exception as error:
+                failures.append(f"restore {unit}: {error}")
 
     if show("restic-backups-hopper-local.service", "Result") == "success":
-        ARCHIVE.unlink(missing_ok=True)
-    STATE_FILE.unlink()  # Only after every required restore action succeeded.
-    directory_fd = os.open(STATE_DIR, os.O_RDONLY)
+        try:
+            ARCHIVE.unlink(missing_ok=True)
+        except Exception as error:
+            failures.append(f"remove completed archive: {error}")
+
+    state["errors"] = failures
+    save_state(state)
+    pending = (
+        (dsh.get("present") and dsh.get("restore") and not state.get("dsh_restored"))
+        or any(r.get("freeze_pending") or r.get("frozen") for r in records.values())
+        or (any(records[u].get("restore") for u in PATH_UNITS)
+            and not state.get("watcher_restored"))
+        or state.get("dsh_gate") in {"pending", "owned"}
+        or state.get("agent_gate") in {"pending", "owned"}
+    )
+    if failures or pending:
+        raise SessionError("recovery incomplete; state retained: " + "; ".join(failures)[:600])
+    for warning in state.get("warnings", []):
+        print("dsh-backup-session warning: " + warning, file=sys.stderr)
+    STATE_FILE.unlink()
+    directory_fd = os.open(STATE_DIR, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
     try:
         os.fsync(directory_fd)
     finally:
         os.close(directory_fd)
 
 
+def prepare() -> None:
+    with transaction_lock():
+        prepare_locked()
+
+
+def resume() -> None:
+    with transaction_lock():
+        resume_locked()
+
+
 def main() -> int:
-    if len(sys.argv) not in {2, 3}:
-        raise SessionError("expected prepare or resume [--stop-prepare]")
-    if sys.argv[1] == "prepare" and len(sys.argv) == 2:
+    if len(sys.argv) != 2 or sys.argv[1] not in {"prepare", "resume"}:
+        raise SessionError("expected prepare or resume")
+    if sys.argv[1] == "prepare":
         prepare()
-    elif sys.argv[1] == "resume" and sys.argv[2:] in ([], ["--stop-prepare"]):
-        resume(stop_prepare=sys.argv[2:] == ["--stop-prepare"])
     else:
-        raise SessionError("unsupported action")
+        resume()
     return 0
 
 
@@ -288,5 +374,5 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception as error:
-        print(f"dsh-backup-session: {str(error)[:300]}", file=sys.stderr)
+        print(f"dsh-backup-session: {str(error)[:500]}", file=sys.stderr)
         raise SystemExit(1)

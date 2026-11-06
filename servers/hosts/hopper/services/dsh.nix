@@ -13,12 +13,19 @@ let
   loopback = lib.concatStringsSep "." (map toString [ 127 0 0 1 ]);
   state = "/var/lib/dsh";
   stage = "/var/lib/restic/staging/dsh";
-  marker = "/run/restic-backups-hopper-local-dsh-was-active";
   cloudflare = cfg.ingress == "cloudflare";
   easytier = cfg.ingress == "easytier";
   hasModelKey = cfg.modelApiKeyEnv != null && cfg.modelApiKeySecret != null;
   validHostName = cfg.hostName != null
     && builtins.match "[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+" cfg.hostName != null;
+  packageLockReady = cfg.upstreamVersion != null
+    && (cfg.package.packageLockPresent or false)
+    && (cfg.package.packageManifestVersion or null) == cfg.upstreamVersion
+    && (cfg.package.packageLockRootVersion or null) == cfg.upstreamVersion
+    && (cfg.package.packageLockVersion or null) == cfg.upstreamVersion
+    && (cfg.package.packageLockResolved or null) != null
+    && (cfg.package.packageLockIntegrity or null) != null
+    && (cfg.package.npmDepsHash or lib.fakeHash) != lib.fakeHash;
   args = [ "web" "--host" loopback "--port" "3080" "--no-open" ]
     ++ lib.optionals (cfg.hostName != null) [
       "--public-url" "https://${cfg.hostName}/"
@@ -54,8 +61,12 @@ in {
   config = lib.mkIf cfg.enable (lib.mkMerge [
     {
       assertions = [
-        { assertion = cfg.upstreamVersion != null && cfg.upstreamVersion != "" && lib.toLower cfg.upstreamVersion != "latest";
-          message = "DSH 必须选择精确上游版本并与 npm 锁文件一致。"; }
+        { assertion = cfg.upstreamVersion != null && builtins.match "[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?" cfg.upstreamVersion != null;
+          message = "DSH 必须选择精确的 semver 发布版本，不能使用范围、标签或 latest。"; }
+        { assertion = packageLockReady;
+          message = "DSH 的 package.json、package-lock.json、resolved/integrity 与真实 npmDepsHash 未全部一致；依赖锁定完成前禁止启用。"; }
+        { assertion = !easytier;
+          message = "DSH EasyTier 入口暂不可启用；共享模块尚未提供可验证的设备接口绑定。"; }
         { assertion = validHostName; message = "DSH 必须在私有 overlay 指定有效域名。"; }
         { assertion = cfg.ingress != null; message = "DSH 必须明确选择入口方式。"; }
         { assertion = config.dot.services.resticBackup.enable; message = "DSH 启用前必须启用 Hopper 本地 Restic 备份。"; }
@@ -101,6 +112,7 @@ in {
         "d ${state}/home 0700 dsh dsh -"
         "d ${state}/workspaces 0700 dsh dsh -"
         "f /var/log/dsh/nginx-error.log 0600 root root -"
+        "d /run/dsh-backup-session 0700 root root -"
       ] ++ lib.optionals config.dot.hopper.dsh.codingAgents.enable [
         "d ${state} 0710 dsh dsh-workspace -"
         "d ${state}/workspaces 2770 dsh dsh-workspace -"
@@ -123,6 +135,7 @@ in {
           WorkingDirectory = "${state}/workspaces";
           EnvironmentFile = if hasModelKey then config.sops.templates."dsh.env".path else "/dev/null";
           ExecStart = "${lib.getExe cfg.package} ${lib.escapeShellArgs args}";
+          Type = "exec";
           Restart = "on-failure";
           RestartSec = "10s";
           TimeoutStopSec = "90s";
@@ -171,50 +184,49 @@ in {
         };
       };
 
-      # 独立 staging 路径，追加到现有备份，不覆盖数据库导出。
+      # 只追加 staging 路径；共享 Restic 模块的字符串型 prepare/cleanup hook 不修改。
       services.restic.backups.hopper-local = {
         paths = lib.mkAfter [ stage ];
-        exclude = lib.mkAfter [ "${state}/workspaces/.agent-jobs" "${state}/workspaces/.agent-auth" ];
-        backupPrepareCommand = lib.mkAfter ''
-          set -euo pipefail
-          umask 077
-          install -d -m 0700 ${stage}
-          rm -f ${marker}
-          if ${pkgs.systemd}/bin/systemctl is-active --quiet dsh.service; then
-            install -m 0600 /dev/null ${marker}
-          fi
-          resume_dsh() {
-            if [ -e ${marker} ]; then
-              ${pkgs.systemd}/bin/systemctl start dsh.service
-              ${pkgs.coreutils}/bin/rm -f ${marker}
-            fi
-          }
-          trap resume_dsh EXIT
-          if [ -e ${marker} ]; then
-            ${pkgs.systemd}/bin/systemctl stop dsh.service
-          fi
-          ${pkgs.gnutar}/bin/tar --no-xattrs \
-            --exclude=dsh/workspaces/.agent-jobs \
-            --exclude=dsh/workspaces/.agent-auth \
-            -C /var/lib -cpf ${stage}/dsh.tar dsh
-          resume_dsh
-          trap - EXIT
-        '';
-        backupCleanupCommand = lib.mkAfter ''
-          ${pkgs.coreutils}/bin/rm -f ${stage}/dsh.tar
-        '';
+        exclude = lib.mkAfter [ "\${state}/workspaces/.agent-jobs" "\${state}/workspaces/.agent-auth" ];
       };
 
-      systemd.services.restic-backups-hopper-local.serviceConfig.ExecStopPost =
-        lib.mkAfter [
-          (pkgs.writeShellScript "restic-hopper-dsh-resume" ''
-            set -euo pipefail
-            if [ -e ${marker} ]; then
-              ${pkgs.systemd}/bin/systemctl start dsh.service
-              ${pkgs.coreutils}/bin/rm -f ${marker}
-            fi
-          '')
-        ];
+      # Requires + After 确保每次 Restic 启动都先完成停写与归档；
+      # OnSuccess/OnFailure 则覆盖备份成功和失败两条恢复路径。
+      systemd.services.dsh-backup-prepare = {
+        description = "Quiesce Hopper DSH writers before local Restic backup";
+        path = [ pkgs.systemd pkgs.gnutar ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          User = "root";
+          UMask = "0077";
+          TimeoutStartSec = "5min";
+          ExecStart = "\${pkgs.python3}/bin/python3 \${./dsh-backup-session.py} prepare";
+        };
+      };
+
+      systemd.services.dsh-backup-resume = {
+        description = "Restore Hopper DSH writers after local Restic backup";
+        after = [ "restic-backups-hopper-local.service" ];
+        path = [ pkgs.systemd pkgs.coreutils ];
+        serviceConfig = {
+          Type = "oneshot";
+          User = "root";
+          UMask = "0077";
+          TimeoutStartSec = "5min";
+          ExecStart = "\${pkgs.python3}/bin/python3 \${./dsh-backup-session.py} resume --stop-prepare";
+        };
+      };
+
+      systemd.services.restic-backups-hopper-local = {
+        requires = [ "dsh-backup-prepare.service" ];
+        after = [ "dsh-backup-prepare.service" ];
+        unitConfig = {
+          OnSuccess = "dsh-backup-resume.service";
+          OnFailure = "dsh-backup-resume.service";
+        };
+      };
+
     }
 
     (lib.mkIf (cloudflare && cfg.tunnelEnable) {
@@ -246,34 +258,5 @@ in {
       };
     })
 
-    (lib.mkIf easytier {
-      assertions = [{
-        assertion = config.dot.services.easytier.enable
-          && cfg.meshInterface != null && cfg.meshInterface != ""
-          && cfg.meshListenAddress != null && cfg.meshListenAddress != ""
-          && cfg.meshListenAddress != loopback
-          && cfg.meshListenAddress != "0.0.0.0"
-          && cfg.meshListenAddress != "::"
-          && cfg.meshCertificate != null;
-        message = "EasyTier 模式需要 EasyTier、接口专属地址和受信任 TLS 证书，禁止通配监听。";
-      }];
-      sops.secrets."dsh/mesh_tls_key" = {
-        owner = "root";
-        group = "root";
-        mode = "0400";
-      };
-      services.nginx.virtualHosts."dsh-local" = {
-        listen = lib.mkForce [{
-          addr = if cfg.meshListenAddress == null then loopback else cfg.meshListenAddress;
-          port = 3081;
-          ssl = true;
-        }];
-        sslCertificateKey = config.sops.secrets."dsh/mesh_tls_key".path;
-        sslCertificate = cfg.meshCertificate;
-      };
-      networking.firewall.interfaces = lib.optionalAttrs (cfg.meshInterface != null) {
-        ${cfg.meshInterface}.allowedTCPPorts = [ 3081 ];
-      };
-    })
   ]);
 }

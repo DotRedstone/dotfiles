@@ -23,8 +23,7 @@ restic、systemd-journal 或 Nix trusted-user 权限。模型 key、出网和工
 浏览器 → Cloudflare Access → 专用 Tunnel → Hopper Nginx 127.0.0.1:3081
                                            → DSH 127.0.0.1:3080
 
-或客户端 → 已确认的 EasyTier + HTTPS → Hopper Nginx（接口地址:3081）
-                                      → DSH 127.0.0.1:3080
+EasyTier 入口暂不可用，待共享模块提供可验证的接口绑定后另行实现。
 ~~~
 
 DSH 自身认证必须保留。Cloudflare Access 是额外认证层，不能关闭 DSH launch-token/
@@ -43,7 +42,7 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 也不能证明 ARM64 运行行为或 CLI 参数。不得据此自动选版。
 
 用户必须先指定已发布的精确 npm 版本（不得使用 `latest`），再生成并审查完整
-`package-lock.json)，核对 resolved/integrity、Linux ARM64 原生依赖、Web assets、
+``package-lock.json`，核对 resolved/integrity、Linux ARM64 原生依赖、Web assets、
 插件与 Node engines。Nix 包使用锁定的 `nodejs_24`，不能忽略 engines，也不能在
 服务启动时执行 `npx` 或联网安装依赖。
 
@@ -103,10 +102,12 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 | `/var/log/dsh` | 可能含启动凭据的日志 | 不进入通用备份 |
 | `/var/lib/restic/staging/dsh/dsh.tar` | 停写后生成的一致性归档 | 加入 hopper-local，再由现有任务镜像 R2 |
 
-模块只在 enable 时向现有 `hopper-local` 追加独立 staging 路径与 prepare/cleanup，
-不替换数据库导出逻辑，也不新增 R2 凭据。仅当 DSH 原本 active 时才停止；归档后恢复。
-EXIT trap 处理正常错误路径，ExecStopPost 处理 prepare 被超时终止的恢复兜底。恢复失败
-必须使备份失败，不能静默忽略。
+模块只向现有 `hopper-local` 追加独立 staging 路径，不再对 `backupPrepareCommand` /
+`backupCleanupCommand` 赋第二个定义，不替换数据库导出逻辑，也不新增 R2 凭据。
+`dsh-backup-prepare.service` 通过 `Requires` + `After` 在 Restic 前暂停 DSH 与编码 agent
+写入者并生成归档。Restic 成功或失败均触发独立 `dsh-backup-resume.service`。恢复单元
+逐项检查 unmask、start、thaw 与状态验证；任何一步失败都会保留
+`/run/dsh-backup-session/state.json` 并以非零状态结束，不能静默忽略。
 
 上线后在维护窗口验证：
 
@@ -180,3 +181,19 @@ sudo restic --repo /var/lib/restic/repositories/hopper \
 任务模板使用独立 systemd UID、只读系统、隐藏 SOPS/SSH/Restic/数据库路径、禁止绑定监听端口和资源/超时限制。出站网络目的地尚未限制，任务仍可能外传其可读代码并产生模型费用；同机 UID 隔离不是 VM 隔离。不得把含凭据的管理员 checkout、home、Git credential 或 SSH agent 接入工作区。
 
 备份路径显式排除 `/var/lib/dsh-agent`，tar 归档同时排除任务队列和认证目录并使用 `--no-xattrs`。在途任务协调仍须实机验收：备份前必须暂停 watcher、等待任务结束，成功/失败后只恢复原本活跃的 watcher；当前配置未声称这条完整协调流程已经验证。登录、ARM64 构建、沙箱负向测试、任务取消/超时和恢复演练均未执行。本 PR 不连接服务器、不登录、不部署。
+
+
+### 备份期间的 DSH 与编码 agent 协调
+
+备份 helper 先记录原始 unit 状态及原有 mask，再临时 mask DSH、Codex path watcher、
+Codex 模板和任务单元，避免新任务进入。随后停止 watcher，冻结此前正在运行的 Codex
+任务及 self-test，并对 DSH 无条件执行 stop；包括 activating 和 auto-restart 在内的
+状态均须等待 ActiveState 进入 inactive/failed，且 MainPID、ControlPID 都为 0，才开始
+归档。任务队列和认证目录仍从归档中排除。
+
+恢复时先解除本轮新增的 runtime mask，再启动原本应运行的 DSH，等待 systemd exec、
+主进程及 127.0.0.1:3080 TCP 就绪；之后解冻原本运行的任务，最后恢复此前 active 的
+path watcher。原本停止或已被管理员 mask 的单元不会被擅自启动/解封。恢复状态采用
+root 0700 目录和 0600 原子写入文件；状态文件只在所有恢复步骤成功后删除。下一次
+备份若发现旧状态文件，会先尝试恢复，失败则拒绝覆盖旧状态。并发管理员操作仍需安排
+维护窗口；此机制不是跨管理员操作的分布式锁。

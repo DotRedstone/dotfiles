@@ -259,24 +259,6 @@ in
       };
     };
 
-    # Recovery is conditional on the path unit having been active before the
-    # backup started. Never enable a watcher that the operator had disabled.
-    systemd.services.restic-backups-hopper-local.serviceConfig.ExecStopPost =
-      lib.mkAfter (
-        lib.optionals cfg.codex.enable [
-          (pkgs.writeShellScript "restic-hopper-dsh-agent-resume" ''
-            set -euo pipefail
-            pause_marker=/run/dsh-coding-agents-paused
-            watcher_marker=/run/restic-backups-hopper-local-dsh-coding-path-was-active
-            task_marker=/run/restic-backups-hopper-local-dsh-coding-task-was-active
 
-            if [ -e "$watcher_marker" ]; then
-              ${pkgs.systemd}/bin/systemctl start dsh-coding-codex.path
-              ${pkgs.coreutils}/bin/rm -f "$watcher_marker"
-            fi
-            ${pkgs.coreutils}/bin/rm -f "$task_marker" "$pause_marker"
-          '')
-        ]
-      );
   };
 }

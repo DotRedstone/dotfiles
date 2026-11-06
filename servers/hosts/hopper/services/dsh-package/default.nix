@@ -8,6 +8,26 @@
 # ---
 
 { lib, buildNpmPackage, nodejs_24, makeWrapper, python3, pkg-config }:
+let
+  inherit npmDepsHash;
+  passthru = {
+    packageLockPresent = lockPresent;
+    packageManifestVersion = manifestVersion;
+    packageLockRootVersion = rootVersion;
+    packageLockVersion = packageVersion;
+    packageLockResolved = packageResolved;
+    packageLockIntegrity = packageIntegrity;
+  };
+  manifest = builtins.fromJSON (builtins.readFile ./package.json);
+  lockPresent = builtins.pathExists ./package-lock.json;
+  lock = if lockPresent then builtins.fromJSON (builtins.readFile ./package-lock.json) else {};
+  manifestVersion = lib.attrByPath [ "dependencies" "@deepseek-ai/dsh" ] null manifest;
+  rootVersion = lib.attrByPath [ "packages" "" "version" ] null lock;
+  lockRootVersion = lib.attrByPath [ "packages" "" "dependencies" "@deepseek-ai/dsh" ] null lock;
+  packageVersion = lib.attrByPath [ "packages" "node_modules/@deepseek-ai/dsh" "version" ] null lock;
+  packageResolved = lib.attrByPath [ "packages" "node_modules/@deepseek-ai/dsh" "resolved" ] null lock;
+  packageIntegrity = lib.attrByPath [ "packages" "node_modules/@deepseek-ai/dsh" "integrity" ] null lock;
+in
 buildNpmPackage {
   pname = "hopper-dsh-runtime";
   version = "1.0.0";

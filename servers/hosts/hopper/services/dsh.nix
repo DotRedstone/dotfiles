@@ -142,7 +142,7 @@ in {
           LogsDirectoryMode = "0700";
           StandardOutput = "append:/var/log/dsh/runtime.log";
           StandardError = "append:/var/log/dsh/runtime.log";
-          UMask = "0077";
+          UMask = if config.dot.hopper.dsh.codingAgents.enable then "0007" else "0077";
           NoNewPrivileges = true;
           ProtectSystem = "strict";
           ProtectHome = true;

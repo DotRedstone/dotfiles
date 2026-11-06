@@ -233,6 +233,7 @@ in
 
     systemd.paths.dsh-coding-codex = lib.mkIf cfg.codex.enable {
       wantedBy = [ "multi-user.target" ];
+      unitConfig.ConditionPathExists = "!/run/dsh-backup-session/agents-paused";
       pathConfig = {
         PathExists = "${jobs}/codex/request.json";
         Unit = "dsh-coding@codex.service";

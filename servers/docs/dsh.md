@@ -65,7 +65,7 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 | 入口 | `ingress = null` | Cloudflare Tunnel + Access 或 EasyTier 二选一 |
 | 模型 provider | 未配置 | 确认 provider、协议、Base URL、模型 ID 与预算 |
 | 模型 key | 默认不注入 | 确认 provider 的环境变量映射后再设置 |
-| EasyTier | 参数为空 | 仅内网模式提供接口名、地址与 TLS 证书 |
+| EasyTier | 参数为空 | fail-closed 禁止，待共享模块提供并验证实际设备接口后再开放 |
 | 工作区预算 | 未设定 | 确认磁盘预算、监测告警与备份维护窗口 |
 
 启用时检查精确版本、有效域名、入口与 Restic 备份。模型 key 的环境变量名和 SOPS
@@ -83,7 +83,7 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 | `dsh/openai_api_key` | 确认使用对应 provider 后 | DSH 专用 EnvironmentFile |
 | `dsh/anthropic_api_key` | 确认使用对应 provider 后 | DSH 专用 EnvironmentFile |
 | `dsh/cloudflare_tunnel_token` | Cloudflare 模式且 tunnelEnable=true | systemd LoadCredential，仅给 Tunnel |
-| `dsh/mesh_tls_key` | EasyTier HTTPS 模式 | Nginx TLS 私钥读取路径 |
+| `dsh/mesh_tls_key` | 当前 EasyTier 入口禁止启用，暂不声明 | 预留键名，不应在本阶段添加 |
 
 模块只声明显式选择的一个模型 key，不批量声明未使用字段。Tunnel 和 mesh 键也只在
 相应模式启用时声明。provider 的 schema、Base URL、model ID 与 apiKeyEnv 映射必须按

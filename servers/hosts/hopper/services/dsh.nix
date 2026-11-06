@@ -184,7 +184,7 @@ in {
       # 只追加 staging 路径；共享 Restic 模块的字符串型 prepare/cleanup hook 不修改。
       services.restic.backups.hopper-local = {
         paths = lib.mkAfter [ stage ];
-        exclude = lib.mkAfter [ "\${state}/workspaces/.agent-jobs" "\${state}/workspaces/.agent-auth" ];
+        exclude = lib.mkAfter [ "${state}/workspaces/.agent-jobs" "${state}/workspaces/.agent-auth" ];
       };
 
       # Requires + After 确保每次 Restic 启动都先完成停写与归档；
@@ -197,7 +197,7 @@ in {
           User = "root";
           UMask = "0077";
           TimeoutStartSec = "5min";
-          ExecStart = "\${pkgs.python3}/bin/python3 \${./dsh-backup-session.py} prepare";
+          ExecStart = "${pkgs.python3}/bin/python3 ${./dsh-backup-session.py} prepare";
         };
       };
 
@@ -210,7 +210,7 @@ in {
           User = "root";
           UMask = "0077";
           TimeoutStartSec = "5min";
-          ExecStart = "\${pkgs.python3}/bin/python3 \${./dsh-backup-session.py} resume --stop-prepare";
+          ExecStart = "${pkgs.python3}/bin/python3 ${./dsh-backup-session.py} resume";
         };
       };
 

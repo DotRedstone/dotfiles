@@ -127,3 +127,11 @@ nix build \
 `hopper` 是 `aarch64-linux`。x86_64 工作站只能评估配置；完整构建需要 ARM
 远程构建机或 `boot.binfmt.emulatedSystems = [ "aarch64-linux" ];`。迁移时在
 ARM64 kexec 安装环境中使用 `--build-on remote`，不要求工作站永久启用模拟。
+
+
+## Hopper DeepSeek Harness
+
+Hopper 的可选 DeepSeek Harness（DSH）模块位于
+[hosts/hopper/services](./hosts/hopper/services/)，默认关闭，不代表现网已启用。
+DSH 进程只绑定 IPv4 回环；入口、版本、模型 provider 和 SOPS 键名均须由用户确认。
+模块边界、备份恢复和上线门槛见 [DSH 运维说明](./docs/dsh.md)。

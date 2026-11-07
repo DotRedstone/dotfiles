@@ -73,19 +73,6 @@ in
       restartUnits = [ "dsh-remote-server.service" ];
     };
 
-    sops.secrets."xray/cdn_origin_certificate" = {
-      owner = "root";
-      group = "nginx";
-      mode = "0440";
-      restartUnits = [ "nginx.service" ];
-    };
-
-    sops.secrets."xray/cdn_origin_certificate_key" = {
-      owner = "root";
-      group = "nginx";
-      mode = "0440";
-      restartUnits = [ "nginx.service" ];
-    };
 
     systemd.tmpfiles.rules = [
       "d ${cfg.stateDir} 0700 dsh-remote dsh-remote -"
@@ -138,9 +125,6 @@ in
 
     services.nginx.virtualHosts."${cfg.hostName}" = {
       serverAliases = lib.optional (originAlias != cfg.hostName) originAlias;
-      addSSL = true;
-      sslCertificate = config.sops.secrets."xray/cdn_origin_certificate".path;
-      sslCertificateKey = config.sops.secrets."xray/cdn_origin_certificate_key".path;
       locations."/" = {
         proxyPass = "http://127.0.0.1:${toString cfg.port}";
         proxyWebsockets = true;

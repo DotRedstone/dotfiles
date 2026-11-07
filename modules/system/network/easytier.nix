@@ -82,7 +82,12 @@ let
 
   easytier-restart = pkgs.writeShellScriptBin "easytier-restart" ''
     echo "Restarting EasyTier service..."
-    sudo systemctl restart easytier
+    exec systemctl restart easytier
+  '';
+
+  easytier-stop = pkgs.writeShellScriptBin "easytier-stop" ''
+    echo "Stopping EasyTier service..."
+    exec systemctl stop easytier
   '';
 in
 {
@@ -91,7 +96,26 @@ in
     easytier-start
     easytier-status
     easytier-restart
+    easytier-stop
   ];
+
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.systemd1.manage-units" &&
+          subject.user == "dot" &&
+          (action.lookup("unit") == "easytier.service" || action.lookup("unit") == "dms-easytier-managed.service") &&
+          ["start", "stop", "restart", "reset-failed"].indexOf(action.lookup("verb")) >= 0) {
+        return polkit.Result.YES;
+      }
+      if (action.id == "org.freedesktop.policykit.exec" &&
+          subject.user == "dot") {
+        var cmd = action.lookup("command_line");
+        if (cmd && (cmd.indexOf("_root-managed-apply") >= 0 || cmd.indexOf("easytier") >= 0)) {
+          return polkit.Result.YES;
+        }
+      }
+    });
+  '';
 
   systemd.services.easytier = {
     description = "EasyTier Mesh VPN Service";

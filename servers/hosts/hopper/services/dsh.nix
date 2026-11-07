@@ -15,7 +15,6 @@ let
   stage = "/var/lib/restic/staging/dsh";
   cloudflare = cfg.ingress == "cloudflare";
   easytier = cfg.ingress == "easytier";
-  hasModelKey = cfg.modelApiKeyEnv != null && cfg.modelApiKeySecret != null;
   validHostName = cfg.hostName != null
     && builtins.match "[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+" cfg.hostName != null;
   packageLockReady = cfg.upstreamVersion != null
@@ -41,18 +40,26 @@ in {
     };
     upstreamVersion = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
-      default = null;
+      default = "0.2.2-rc.1";
       description = "用户确认的精确 npm 发布版本；不得使用 latest。";
     };
     ingress = lib.mkOption {
       type = lib.types.nullOr (lib.types.enum [ "cloudflare" "easytier" ]);
-      default = null;
+      default = "cloudflare";
       description = "明确选择 Cloudflare Tunnel 或 EasyTier 内网入口。";
     };
     tunnelEnable = lib.mkOption { type = lib.types.bool; default = false; };
     hostName = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
-    modelApiKeyEnv = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
-    modelApiKeySecret = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
+    modelBaseUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "https://llm.bdot.in/v1";
+      description = "OpenAI 兼容模型的 Base URL。";
+    };
+    modelRouterTokenSecret = lib.mkOption {
+      type = lib.types.str;
+      default = "dsh/llm_router_token";
+      description = "SOPS 密钥字段名，用于存储 LLM router token。";
+    };
   };
 
   config = lib.mkIf cfg.enable (lib.mkMerge [
@@ -67,11 +74,7 @@ in {
         { assertion = validHostName; message = "DSH 必须在私有 overlay 指定有效域名。"; }
         { assertion = cfg.ingress != null; message = "DSH 必须明确选择入口方式。"; }
         { assertion = config.dot.services.resticBackup.enable; message = "DSH 启用前必须启用 Hopper 本地 Restic 备份。"; }
-        { assertion = (cfg.modelApiKeyEnv == null) == (cfg.modelApiKeySecret == null);
-          message = "模型 key 环境变量与 SOPS 键名必须同时设置或同时留空。"; }
-        { assertion = cfg.modelApiKeyEnv == null || builtins.match "[A-Za-z_][A-Za-z0-9_]*" cfg.modelApiKeyEnv != null;
-          message = "modelApiKeyEnv 必须是有效环境变量名。"; }
-        { assertion = cfg.modelApiKeySecret == null || builtins.match "dsh/[A-Za-z0-9_-]+" cfg.modelApiKeySecret != null;
+        { assertion = builtins.match "dsh/[A-Za-z0-9_-]+" cfg.modelRouterTokenSecret != null;
           message = "模型 SOPS 键名必须位于 dsh/ 命名空间。"; }
         { assertion = !cfg.tunnelEnable || cloudflare; message = "仅 Cloudflare 模式可启用 Tunnel。"; }
       ];
@@ -85,24 +88,11 @@ in {
         description = "Hopper DeepSeek Harness service";
       };
 
-      sops.secrets = lib.optionalAttrs hasModelKey {
-        ${cfg.modelApiKeySecret} = {
-          owner = "root";
-          group = "root";
-          mode = "0400";
-          restartUnits = [ "dsh.service" ];
-        };
-      };
-      sops.templates = lib.optionalAttrs hasModelKey {
-        "dsh.env" = {
-          owner = "root";
-          group = "root";
-          mode = "0400";
-          content = ''
-            ${cfg.modelApiKeyEnv}=${config.sops.placeholder.${cfg.modelApiKeySecret}}
-          '';
-          restartUnits = [ "dsh.service" ];
-        };
+      sops.secrets.${cfg.modelRouterTokenSecret} = {
+        owner = "root";
+        group = "root";
+        mode = "0400";
+        restartUnits = [ "dsh.service" ];
       };
 
       systemd.tmpfiles.rules = [
@@ -113,7 +103,24 @@ in {
         "d /run/dsh-backup-session 0700 root root -"
       ];
 
-      systemd.services.dsh = {
+      systemd.services.dsh = let
+        dshLauncher = pkgs.writeShellScript "dsh-launcher" ''
+          set -euo pipefail
+
+          cred_file="''${CREDENTIALS_DIRECTORY:-}/llm-router-token"
+          if [ ! -f "$cred_file" ] || [ ! -s "$cred_file" ]; then
+            echo "CRITICAL: LLM router token credential missing or empty; refusing to start unauthenticated" >&2
+            exit 1
+          fi
+
+          export OPENAI_BASE_URL="${cfg.modelBaseUrl}"
+          export OPENAI_API_BASE="${cfg.modelBaseUrl}"
+          export OPENAI_API_KEY="$(cat "$cred_file")"
+          export DSH_MODEL_API_KEY="$OPENAI_API_KEY"
+
+          exec ${lib.getExe cfg.package} ${lib.escapeShellArgs args}
+        '';
+      in {
         description = "Hopper DeepSeek Harness";
         unitConfig.ConditionPathExists = "!/run/dsh-backup-session/dsh-paused";
         wantedBy = [ "multi-user.target" ];
@@ -129,12 +136,13 @@ in {
           User = "dsh";
           Group = "dsh";
           WorkingDirectory = "${state}/workspaces";
-          EnvironmentFile = if hasModelKey then config.sops.templates."dsh.env".path else "/dev/null";
-          ExecStart = "${lib.getExe cfg.package} ${lib.escapeShellArgs args}";
+          LoadCredential = "llm-router-token:${config.sops.secrets.${cfg.modelRouterTokenSecret}.path}";
+          ExecStart = "${dshLauncher}";
           Type = "exec";
           Restart = "on-failure";
           RestartSec = "10s";
           TimeoutStopSec = "90s";
+          LimitFSIZE = "1G";
           SupplementaryGroups = lib.optionals config.dot.hopper.dsh.codingAgents.enable [ "dsh-workspace" ];
           CacheDirectory = "dsh";
           CacheDirectoryMode = "0700";

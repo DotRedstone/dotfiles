@@ -9,7 +9,7 @@
 
 { lib, buildNpmPackage, nodejs_24, makeWrapper, python3, pkg-config }:
 let
-  npmDepsHash = lib.fakeHash;
+  npmDepsHash = "sha256-1DgiT45kZdhcAWDgcsJVokiY0GsLArQy/l2n2GlNp+M=";
   manifest = builtins.fromJSON (builtins.readFile ./package.json);
   lockPresent = builtins.pathExists ./package-lock.json;
   lock = if lockPresent then builtins.fromJSON (builtins.readFile ./package-lock.json) else {};

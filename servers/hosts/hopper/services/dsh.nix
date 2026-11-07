@@ -30,10 +30,11 @@ let
     - id: remote
       name: ds-harness-remote
   '';
-  args = lib.optionals remoteEnabled [
+  args = [ "--profile" "web" ]
+    ++ lib.optionals remoteEnabled [
       "--patch" "${remotePatchFile}"
     ]
-    ++ [ "web" "--host" loopback "--port" "3080" "--no-open" ]
+    ++ [ "--host" loopback "--port" "3080" "--no-open" ]
     ++ lib.optionals (cfg.hostName != null) [
       "--public-url" "https://${cfg.hostName}/"
       "--trusted-host" cfg.hostName

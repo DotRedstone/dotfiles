@@ -78,8 +78,8 @@ in {
       enable = lib.mkEnableOption "DSH Remote (ds-harness-remote) 远程连接插件支持";
       relayServer = lib.mkOption {
         type = lib.types.str;
-        default = "dsh.r2049.cn";
-        description = "DSH Remote 默认公用中继服务器地址。";
+        default = if (config.dot.hopper.dshRemoteServer.enable or false) then config.dot.hopper.dshRemoteServer.hostName else "dsh.r2049.cn";
+        description = "DSH Remote 中继服务器地址。";
       };
     };
   };

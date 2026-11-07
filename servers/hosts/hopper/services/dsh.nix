@@ -146,6 +146,8 @@ in {
           export OPENAI_API_BASE="${cfg.modelBaseUrl}"
           export OPENAI_API_KEY="$(cat "$cred_file")"
           export DSH_MODEL_API_KEY="$OPENAI_API_KEY"
+          export DEEPSEEK_API_KEY="$OPENAI_API_KEY"
+          export DEEPSEEK_BASE_URL="${cfg.modelBaseUrl}"
 
           exec ${lib.getExe cfg.package} ${lib.escapeShellArgs args}
         '';

@@ -25,10 +25,18 @@ let
     && (cfg.package.packageLockResolved or null) != null
     && (cfg.package.packageLockIntegrity or null) != null
     && (cfg.package.npmDepsHash or lib.fakeHash) != lib.fakeHash;
+  remoteEnabled = cfg.remote.enable || (config.services.dsh.remote.enable or false);
+  remotePatchFile = pkgs.writeText "dsh-remote-patch.yml" ''
+    - id: remote
+      name: ds-harness-remote
+  '';
   args = [ "web" "--host" loopback "--port" "3080" "--no-open" ]
     ++ lib.optionals (cfg.hostName != null) [
       "--public-url" "https://${cfg.hostName}/"
       "--trusted-host" cfg.hostName
+    ]
+    ++ lib.optionals remoteEnabled [
+      "--patch" "${remotePatchFile}"
     ];
 in {
   options.dot.hopper.dsh = {
@@ -59,6 +67,20 @@ in {
       type = lib.types.str;
       default = "dsh/llm_router_token";
       description = "SOPS 密钥字段名，用于存储 LLM router token。";
+    };
+    remote = {
+      enable = lib.mkEnableOption "DSH Remote (ds-harness-remote) 远程连接插件支持";
+      relayServer = lib.mkOption {
+        type = lib.types.str;
+        default = "dsh.r2049.cn";
+        description = "DSH Remote 默认公用中继服务器地址。";
+      };
+    };
+  };
+
+  options.services.dsh = {
+    remote = {
+      enable = lib.mkEnableOption "兼容别名：启用 DSH Remote 远程连接插件支持";
     };
   };
 
@@ -98,6 +120,7 @@ in {
       systemd.tmpfiles.rules = [
         "d ${state} ${if config.dot.hopper.dsh.codingAgents.enable then "0710 root dsh-workspace" else "0700 dsh dsh"} -"
         "d ${state}/home 0700 dsh dsh -"
+        "d ${state}/home/ds-harness-remote 0700 dsh dsh -"
         "d ${state}/workspaces ${if config.dot.hopper.dsh.codingAgents.enable then "2770 dsh dsh-workspace" else "0700 dsh dsh"} -"
         "f /var/log/dsh/nginx-error.log 0600 root root -"
         "d /run/dsh-backup-session 0700 root root -"

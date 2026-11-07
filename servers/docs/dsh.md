@@ -206,3 +206,19 @@ systemd exec、主进程及 127.0.0.1:3080 TCP 就绪。原本未运行的单元
 恢复状态采用 root 0700 目录和 0600 原子写入文件；只有所有必要恢复步骤成功后才删除
 状态文件，失败项保留供重试。`ConditionPathExists` gate 与 flock 的实际 systemd 行为、
 跨 UID 启停和冻结/解冻效果仍须在目标 NixOS 主机或等价 VM 验收。
+
+
+## DSH Remote（远程连接插件）
+
+本模块提供移动端（如 Android `dsh-Go`、Remote Web）通过 DSH Remote 协议连入 Hopper DSH 的可选插件支持。
+
+- **插件来源与版本**：官方 npm 包 `ds-harness-remote@0.6.3`（基准源码：<https://github.com/liguobao/ds-harness-remote>），严格锁定并禁止第三方同名包。
+- **开关**：`dot.hopper.dsh.remote.enable`（兼容别名 `services.dsh.remote.enable`），默认 `false`。
+- **网络与防火墙**：Host 仅向公用中继服务器（默认 `dsh.r2049.cn`）发起出站加密连接，**不开设任何入站端口**，不修改系统防火墙规则，与现有 Cloudflare Tunnel 配置互不冲突。
+- **凭据与状态隔离**：设备私钥与 GitHub 登录状态保存在 `/var/lib/dsh/home/ds-harness-remote`（`dsh:dsh 0700`），不进入 Nix store，不进入 Git 仓库。
+- **登录与配对流程**：
+  1. 在 Hopper 上启用 `dot.hopper.dsh.remote.enable = true;`。
+  2. DSH 服务启动后加载该插件，可通过日志或交互命令获取 GitHub Device Flow 授权码完成首次登录。
+  3. 在手机端 `dsh-Go` 或浏览器打开 `https://dsh.r2049.cn`，登录相同 GitHub 账号，核对设备指纹后即可连接。
+- **关闭与回退**：将 `remote.enable = false`，DSH 启动参数将移除 `--patch`，完全恢复原生运行状态。
+

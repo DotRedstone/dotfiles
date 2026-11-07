@@ -88,6 +88,30 @@ echo "SUCCESS"
         self.assertNotIn('allowedTCPPorts = [ 3080', content)
         self.assertNotIn('allowedTCPPorts = [ 3081', content)
 
+    def test_dsh_remote_configuration_and_isolation(self):
+        """Verify DSH Remote configuration, state directory permissions, and zero inbound ports."""
+        dsh_nix_path = Path(__file__).with_name("dsh.nix")
+        content = dsh_nix_path.read_text(encoding="utf-8")
+
+        # Remote options declared and default to false
+        self.assertIn("remote = {", content)
+        self.assertIn('enable = lib.mkEnableOption "DSH Remote (ds-harness-remote) 远程连接插件支持";', content)
+        self.assertIn('default = "dsh.r2049.cn";', content)
+        self.assertIn("options.services.dsh = {", content)
+
+        # Patch injection dynamically toggled
+        self.assertIn('remotePatchFile = pkgs.writeText "dsh-remote-patch.yml"', content)
+        self.assertIn("ds-harness-remote", content)
+        self.assertIn('lib.optionals remoteEnabled [', content)
+        self.assertIn('"--patch"', content)
+
+        # State directory 0700 under /var/lib/dsh/home/ds-harness-remote
+        self.assertIn('"d ${state}/home/ds-harness-remote 0700 dsh dsh -"', content)
+
+        # No inbound firewall modifications
+        self.assertNotIn("networking.firewall", content)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+

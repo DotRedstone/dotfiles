@@ -30,13 +30,13 @@ let
     - id: remote
       name: ds-harness-remote
   '';
-  args = [ "web" "--host" loopback "--port" "3080" "--no-open" ]
+  args = lib.optionals remoteEnabled [
+      "--patch" "${remotePatchFile}"
+    ]
+    ++ [ "web" "--host" loopback "--port" "3080" "--no-open" ]
     ++ lib.optionals (cfg.hostName != null) [
       "--public-url" "https://${cfg.hostName}/"
       "--trusted-host" cfg.hostName
-    ]
-    ++ lib.optionals remoteEnabled [
-      "--patch" "${remotePatchFile}"
     ];
 in {
   options.dot.hopper.dsh = {
@@ -122,7 +122,6 @@ in {
         "d ${state}/home 0700 dsh dsh -"
         "d ${state}/home/ds-harness-remote 0700 dsh dsh -"
         "d ${state}/workspaces ${if config.dot.hopper.dsh.codingAgents.enable then "2770 dsh dsh-workspace" else "0700 dsh dsh"} -"
-        "f /var/log/dsh/nginx-error.log 0600 root root -"
         "d /run/dsh-backup-session 0700 root root -"
       ];
 
@@ -194,7 +193,7 @@ in {
         listen = [{ addr = loopback; port = 3081; }];
         extraConfig = ''
           access_log off;
-          error_log /var/log/dsh/nginx-error.log crit;
+          error_log /var/log/nginx/dsh-error.log crit;
           client_max_body_size 25m;
         '';
         locations."/" = {

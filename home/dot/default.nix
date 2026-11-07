@@ -20,6 +20,7 @@
     # --- Desktop & System UI ---
     ./niri
     ./noctalia
+    ./desktop-shells
     ./default-apps
     ./activitywatch
     ./autoclicker
@@ -59,12 +60,13 @@
     ./kdeconnect
     ./downloads
 
-    # --- Development ---
+    # --- Development & Security ---
     ./nixvim
     ./vscode
     ./dev
     ./antigravity
     ./claude-code
+    ./security
 
     # --- Game ---
     ./axolotl
@@ -84,7 +86,7 @@
 
   # [Home Services]
   programs.home-manager.enable = true;
-  services.cliphist.enable = true; # Clipboard history manager
+  services.cliphist.enable = false;
 
   # [Packages]
   # Empty by design; generic tools are in cli-tools, apps are in their own modules.

@@ -42,27 +42,6 @@ blur {
 
 // [Keybindings]
 binds {
-    // Noctalia
-    Mod+R hotkey-overlay-title="启动器" {
-        spawn "noctalia" "msg" "panel-toggle" "launcher";
-    }
-
-    Mod+N hotkey-overlay-title="通知" {
-        spawn "noctalia" "msg" "panel-toggle" "control-center" "notifications";
-    }
-
-    Mod+B hotkey-overlay-title="剪贴板" {
-        spawn "noctalia" "msg" "panel-toggle" "clipboard";
-    }
-
-    Mod+I hotkey-overlay-title="桌面中枢" {
-        spawn "noctalia" "msg" "panel-toggle" "dot/md3_dashboard:panel";
-    }
-
-    Mod+P hotkey-overlay-title="电源" {
-        spawn "noctalia" "msg" "panel-toggle" "session";
-    }
-
     Mod+Slash hotkey-overlay-title="快捷键" {
         show-hotkey-overlay;
     }
@@ -194,12 +173,11 @@ binds {
     Mod+Shift+Equal hotkey-overlay-title="窗口高+" { set-window-height "+10%"; }
 
     // Screenshots
-    // Niri captures a frozen frame before opening its interactive region picker.
-    Mod+Shift+S hotkey-overlay-title="冻结区域截图" {
-        screenshot;
+    Mod+Shift+S hotkey-overlay-title="区域截图标注" {
+        spawn "dms" "ipc" "call" "screenshotPlus" "capture";
     }
 
-    Mod+Shift+A hotkey-overlay-title="区域截图" {
+    Mod+Shift+A hotkey-overlay-title="快速区域截图" {
         spawn "sh" "-c" "grim -g \"$(slurp)\" - | wl-copy";
     }
 
@@ -207,8 +185,8 @@ binds {
         screenshot-window;
     }
 
-    Mod+Shift+P hotkey-overlay-title="冻结画面标注" {
-        spawn "noctalia" "msg" "screenshot-annotate";
+    Mod+Shift+P hotkey-overlay-title="区域截图标注" {
+        spawn "dms" "ipc" "call" "screenshotPlus" "capture";
     }
 
     Mod+Shift+O hotkey-overlay-title="区域文字识别" {
@@ -270,6 +248,11 @@ input {
 
 include "./noctalia.kdl"
 
+// DMS Include Configs
+include "dms/binds.kdl"
+include "dms/wpblur.kdl"
+include "dms/windowrules.kdl"
+
 window-rule {
     match app-id="^java-awt-demo$"
     match app-id=r#"^com-sun-tools-javac-launcher-.*"#
@@ -317,17 +300,17 @@ window-rule {
 
 window-rule {
     match app-id="^codex-desktop$"
-    default-column-width { proportion 0.55; }
+    default-column-width { proportion 0.5; }
 }
 
 window-rule {
     match app-id=r#"(?i)^grok-bot$"#
-    default-column-width { proportion 0.55; }
+    default-column-width { proportion 0.5; }
 }
 
 window-rule {
     match app-id=r#"(?i)^claude(-desktop)?$"#
-    default-column-width { proportion 0.55; }
+    default-column-width { proportion 0.5; }
 }
 
 window-rule {

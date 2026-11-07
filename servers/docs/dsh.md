@@ -49,26 +49,29 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 当前 package.json 的依赖版本是明确占位符，尚未生成 package-lock.json；版本未决定
 时生成锁文件会伪造依赖版本与 integrity。Nix derivation 的 `npmDepsHash` 使用
 `lib.fakeHash`，同样是占位符。选版后须更新 package.json、package-lock.json、
-`upstreamVersion` 和真实 hash，并完成 ARM64 打包、`dsh --version`、
-`dsh web --help`、无真实凭据的 Web 启动与认证冒烟测试。还要验证首次启动不会联网
-安装插件或依赖；若上游无法禁用自动更新或插件市场，暂不允许上线。
+选定并锁定了精确发布版本 `@deepseek-ai/dsh@0.2.2-rc.1`，生成并审查了不可变
+`package-lock.json` 与真实 `npmDepsHash`。在 aarch64 上完成了完整构建，且验证通过
+`dsh --version` 与 `dsh web --help` 参数支持（包括 `--host`、`--port`、`--no-open`、
+`--public-url` 与 `--trusted-host`）。
 
-当前模块中的 `web --host/--port/--no-open/--public-url/--trusted-host` 参数尚未对
-用户选定的不可变版本做验证。不能宣称服务可运行。
+## 私有 Overlay 配置示例
 
-## 待用户决定
+在部署 Hopper 的私有 overlay（如 `hopper.nix`）中配置：
 
-| 项目 | 当前状态 | 约束 |
-| --- | --- | --- |
-| DSH 版本 | `upstreamVersion = null`；package.json 为占位符 | 选择精确发布版本，不得 latest |
-| 域名 | `hostName = null` | 指定完整域名并检查占用 |
-| 入口 | `ingress = null` | 首版仅支持 Cloudflare Tunnel + Access；EasyTier 暂不纳入 |
-| 模型 provider | 未配置 | 确认 provider、协议、Base URL、模型 ID 与预算 |
-| 模型 key | 默认不注入 | 确认 provider 的环境变量映射后再设置 |
-| 工作区预算 | 未设定 | 确认磁盘预算、监测告警与备份维护窗口 |
-
-启用时检查精确版本、有效域名、入口与 Restic 备份。模型 key 的环境变量名和 SOPS
-键名必须成对设置；两者都留空时不产生模型 key 的 SOPS 字段需求。
+~~~nix
+{ ... }: {
+  dot.hopper.dsh = {
+    enable = true;
+    ingress = "cloudflare";
+    tunnelEnable = true;
+    hostName = "dsh.bdot.in";
+    # public-url: https://dsh.bdot.in/，trusted-host: dsh.bdot.in
+    modelBaseUrl = "https://llm.bdot.in/v1";
+    modelRouterTokenSecret = "dsh/llm_router_token";
+    codingAgents.enable = false; # 首版保持关闭
+  };
+}
+~~~
 
 ## SOPS 键名
 
@@ -77,16 +80,12 @@ Nginx access log 关闭，error log 仅保留 crit 级别并限制权限。DSH �
 
 | 键名 | 使用条件 | 读取方 |
 | --- | --- | --- |
-| `dsh/model_api_key` | 自定义 OpenAI 兼容 provider | DSH 专用 EnvironmentFile |
-| `dsh/deepseek_api_key` | 确认使用原生 DeepSeek provider 后 | DSH 专用 EnvironmentFile |
-| `dsh/openai_api_key` | 确认使用对应 provider 后 | DSH 专用 EnvironmentFile |
-| `dsh/anthropic_api_key` | 确认使用对应 provider 后 | DSH 专用 EnvironmentFile |
-| `dsh/cloudflare_tunnel_token` | Cloudflare 模式且 tunnelEnable=true | systemd LoadCredential，仅给 Tunnel |
+| `dsh/llm_router_token` | `dsh.enable = true` | systemd LoadCredential 注入，不写进 store/环境声明/日志 |
+| `dsh/cloudflare_tunnel_token` | Cloudflare 模式且 tunnelEnable=true | systemd LoadCredential，仅给 Tunnel `--token-file` |
 
-模块只声明显式选择的一个模型 key，不批量声明未使用字段。首版不声明 EasyTier 相关 SOPS 键。provider 的 schema、Base URL、model ID 与 apiKeyEnv 映射必须按
-选定的不可变版本确认，不能从移动分支推定，也不能把明文 key 写入 WebUI profile。
+模块通过 `LoadCredential` 把 token 挂载到专属临时目录 `%d/` 中，启动脚本直接在内存中读取后传给进程环境，既不进入全局环境声明，也不在 Nix store 或运行时日志中留下明文。
 
-用户在可信机器执行 `cd servers && sops secrets/hopper.yaml`，只添加实际选择的加密
+用户在可信机器执行 `cd servers && sops secrets/hopper.yaml`，添加上述两个加密
 字段，保留现有键和 MAC。本 PR 不修改、创建或覆盖任何 `servers/secrets/*.yaml`。
 
 ## 数据目录与备份

@@ -90,8 +90,25 @@ impl Bridge {
         fs::create_dir_all(&runtime)?;
         fs::set_permissions(&runtime, fs::Permissions::from_mode(0o700))?;
 
-        let cache_path = runtime.join("keys.env");
-        let state_path = runtime.join("state.tsv");
+        let state_base = env::var_os("XDG_STATE_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| home.join(".local/state"));
+        let state_dir = state_base.join("wechat-notify-bridge");
+        fs::create_dir_all(&state_dir)?;
+        fs::set_permissions(&state_dir, fs::Permissions::from_mode(0o700))?;
+
+        let cache_path = state_dir.join("keys.env");
+        let state_path = state_dir.join("state.tsv");
+
+        let old_cache = runtime.join("keys.env");
+        if !cache_path.exists() && old_cache.exists() {
+            let _ = fs::copy(&old_cache, &cache_path);
+        }
+        let old_state = runtime.join("state.tsv");
+        if !state_path.exists() && old_state.exists() {
+            let _ = fs::copy(&old_state, &state_path);
+        }
+
         let cache = load_key_cache(&cache_path);
 
         Ok(Self {
@@ -265,8 +282,6 @@ impl Bridge {
                 self.keys.insert(label.to_string(), key.clone());
                 return Ok(key);
             }
-            self.cache.remove(label);
-            let _ = save_key_cache(&self.cache_path, &self.cache);
         }
 
         let mut candidates = Vec::new();

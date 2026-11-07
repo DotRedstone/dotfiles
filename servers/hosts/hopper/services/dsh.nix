@@ -27,8 +27,13 @@ let
     && (cfg.package.npmDepsHash or lib.fakeHash) != lib.fakeHash;
   remoteEnabled = cfg.remote.enable || (config.services.dsh.remote.enable or false);
   remotePatchFile = pkgs.writeText "dsh-remote-patch.yml" ''
-    - id: remote
-      name: ds-harness-remote
+    - insert:
+        - id: ds-harness-remote
+          name: ds-harness-remote
+          config:
+            enabled: true
+            role: host
+            serverUrl: https://${cfg.remote.relayServer}
   '';
   args = [ "--profile" "web" ]
     ++ lib.optionals remoteEnabled [
@@ -121,6 +126,7 @@ in {
       systemd.tmpfiles.rules = [
         "d ${state} ${if config.dot.hopper.dsh.codingAgents.enable then "0710 root dsh-workspace" else "0700 dsh dsh"} -"
         "d ${state}/home 0700 dsh dsh -"
+        "L+ ${state}/home/node_modules - - - - ${cfg.package}/libexec/dsh/node_modules"
         "d ${state}/home/ds-harness-remote 0700 dsh dsh -"
         "d ${state}/workspaces ${if config.dot.hopper.dsh.codingAgents.enable then "2770 dsh dsh-workspace" else "0700 dsh dsh"} -"
         "d /run/dsh-backup-session 0700 root root -"

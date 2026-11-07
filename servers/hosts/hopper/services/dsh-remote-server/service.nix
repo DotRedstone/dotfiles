@@ -128,13 +128,17 @@ in
       locations."/" = {
         proxyPass = "http://127.0.0.1:${toString cfg.port}";
         proxyWebsockets = true;
+        recommendedProxySettings = false;
         extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-Proto https;
           proxy_set_header Sec-Fetch-Site "";
           set $client_ip $remote_addr;
           if ($http_cf_connecting_ip) {
             set $client_ip $http_cf_connecting_ip;
           }
           proxy_set_header X-Forwarded-For $client_ip;
+          proxy_set_header X-Real-IP $client_ip;
           proxy_buffering off;
           proxy_request_buffering off;
           proxy_read_timeout 3600s;

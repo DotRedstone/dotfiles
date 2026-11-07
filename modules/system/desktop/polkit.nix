@@ -5,7 +5,10 @@
 # ---
 
 { pkgs, ... }: {
-  environment.systemPackages = [ pkgs.polkit_gnome ];
+  environment.systemPackages = [
+    pkgs.polkit_gnome
+    pkgs.kdePackages.kio-admin
+  ];
 
   # [Polkit Agent Service]
   systemd.user.services.polkit-gnome-authentication-agent-1 = {

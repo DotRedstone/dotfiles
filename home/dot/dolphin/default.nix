@@ -9,5 +9,6 @@
     ./packages.nix
     ./theme.nix
     ./settings.nix
+    ./admin-actions.nix
   ];
 }

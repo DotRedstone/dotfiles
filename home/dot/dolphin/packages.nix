@@ -13,8 +13,8 @@ let
     nativeBuildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/dolphin \
-        --prefix QT_PLUGIN_PATH : "${pkgs.kdePackages.qtsvg}/lib/qt-6/plugins:${pkgs.adwaita-qt6}/lib/qt-6/plugins:${pkgs.kdePackages.plasma-integration}/lib/qt-6/plugins:${pkgs.kdePackages.breeze}/lib/qt-6/plugins:${pkgs.kdePackages.konsole}/lib/qt-6/plugins:${pkgs.kdePackages.kdegraphics-thumbnailers}/lib/qt-6/plugins:${pkgs.kdePackages.ffmpegthumbs}/lib/qt-6/plugins:${pkgs.kdePackages.kimageformats}/lib/qt-6/plugins" \
-        --prefix XDG_DATA_DIRS : "${customPapirus}/share:${pkgs.kdePackages.breeze-icons}/share:${pkgs.kdePackages.breeze}/share:${pkgs.kdePackages.plasma-integration}/share:${pkgs.kdePackages.konsole}/share" \
+        --prefix QT_PLUGIN_PATH : "${pkgs.kdePackages.qtsvg}/lib/qt-6/plugins:${pkgs.adwaita-qt6}/lib/qt-6/plugins:${pkgs.kdePackages.plasma-integration}/lib/qt-6/plugins:${pkgs.kdePackages.breeze}/lib/qt-6/plugins:${pkgs.kdePackages.konsole}/lib/qt-6/plugins:${pkgs.kdePackages.kdegraphics-thumbnailers}/lib/qt-6/plugins:${pkgs.kdePackages.ffmpegthumbs}/lib/qt-6/plugins:${pkgs.kdePackages.kimageformats}/lib/qt-6/plugins:${pkgs.kdePackages.kio-extras}/lib/qt-6/plugins:${pkgs.kdePackages.ark}/lib/qt-6/plugins:${pkgs.kdePackages.kio-admin}/lib/qt-6/plugins" \
+        --prefix XDG_DATA_DIRS : "${customPapirus}/share:${pkgs.kdePackages.breeze-icons}/share:${pkgs.kdePackages.breeze}/share:${pkgs.kdePackages.plasma-integration}/share:${pkgs.kdePackages.konsole}/share:${pkgs.kdePackages.kio-extras}/share:${pkgs.kdePackages.ark}/share:${pkgs.kdePackages.kio-admin}/share" \
         --set QT_STYLE_OVERRIDE "adwaita-dark" \
         --set QT_QPA_PLATFORMTHEME "kde" \
         --run 'export KDE_COLOR_SCHEME_PATH="$HOME/.local/share/color-schemes/noctalia.colors"' \
@@ -35,5 +35,8 @@ in
     pkgs.kdePackages.kimageformats
     pkgs.kdePackages.qtsvg
     pkgs.kdePackages.kio-extras
+    pkgs.kdePackages.ark
+    pkgs.kdePackages.kio-admin
+    pkgs.kdePackages.kdialog
   ];
 }

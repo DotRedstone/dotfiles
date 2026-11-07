@@ -9,7 +9,7 @@
 
 { lib, buildNpmPackage, nodejs_24, makeWrapper, python3, pkg-config }:
 let
-  npmDepsHash = "sha256-1DgiT45kZdhcAWDgcsJVokiY0GsLArQy/l2n2GlNp+M=";
+  npmDepsHash = "sha256-B5qHsQDK07zukbCqRGGAIoYdkt6xRVvI3H5+xqLmjQo=";
   manifest = builtins.fromJSON (builtins.readFile ./package.json);
   lockPresent = builtins.pathExists ./package-lock.json;
   lock = if lockPresent then builtins.fromJSON (builtins.readFile ./package-lock.json) else {};
@@ -42,6 +42,7 @@ buildNpmPackage {
     cp package.json package-lock.json "$out/libexec/dsh/"
     cp -a node_modules "$out/libexec/dsh/"
     makeWrapper ${nodejs_24}/bin/node "$out/bin/dsh" \
+      --prefix NODE_PATH : "$out/libexec/dsh/node_modules" \
       --add-flags "$out/libexec/dsh/node_modules/@deepseek-ai/dsh/lib/bin.js"
     runHook postInstall
   '';

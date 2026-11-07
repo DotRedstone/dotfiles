@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import signal
 import stat
 import subprocess
@@ -19,11 +20,12 @@ STATE = Path("/var/lib/dsh-agent/jobs")
 MAX_REQUEST = 64 * 1024
 MAX_PROMPT = 48 * 1024
 MAX_RESULT = 16 * 1024
-TIMEOUT = 20 * 60
+TIMEOUT = 18 * 60
 TOOL = "codex"
 ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}\Z")
 DIR_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
-FILE_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC
+FILE_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK
+MIN_WORKSPACE_FREE_BYTES = 1024 * 1024 * 1024  # 1 GB
 
 
 class JobError(Exception):
@@ -50,9 +52,10 @@ def open_queue():
     codex = open_dir_at(jobs_parent, "codex")
     claimed = open_dir_at(codex, "claimed")
     results = open_dir_at(codex, "results")
+    cancel = open_dir_at(codex, "cancel")
     for fd in (root, var, lib, dsh, workspaces, jobs_parent):
         os.close(fd)
-    return codex, claimed, results
+    return codex, claimed, results, cancel
 
 
 def open_agent_state() -> int:
@@ -79,12 +82,17 @@ def read_regular_at(directory: int, name: str, max_size: int) -> bytes:
     fd = os.open(name, FILE_FLAGS, dir_fd=directory)
     try:
         info = os.fstat(fd)
-        if not stat.S_ISREG(info.st_mode) or info.st_size > max_size:
-            raise JobError("invalid request file")
+        if not stat.S_ISREG(info.st_mode) or stat.S_ISFIFO(info.st_mode) or stat.S_ISSOCK(info.st_mode):
+            raise JobError("invalid request file: must be a regular file, rejected FIFO/socket")
+        if info.st_size > max_size:
+            raise JobError("invalid request file: size exceeds limit")
         chunks = []
         remaining = max_size + 1
         while remaining:
-            chunk = os.read(fd, min(65536, remaining))
+            try:
+                chunk = os.read(fd, min(65536, remaining))
+            except BlockingIOError:
+                break
             if not chunk:
                 break
             chunks.append(chunk)
@@ -95,6 +103,59 @@ def read_regular_at(directory: int, name: str, max_size: int) -> bytes:
         return data
     finally:
         os.close(fd)
+
+
+def check_workspace_quota(workspace_path: str = "/var/lib/dsh/workspaces") -> None:
+    try:
+        usage = shutil.disk_usage(workspace_path)
+        if usage.free < MIN_WORKSPACE_FREE_BYTES:
+            raise JobError(f"workspace disk quota exceeded: only {usage.free // (1024 * 1024)}MB free")
+    except (FileNotFoundError, OSError):
+        pass
+
+
+def check_cancellation(cancel_fd: int, job_id: str) -> bool:
+    for name in (job_id + ".cancel", job_id):
+        try:
+            os.stat(name, dir_fd=cancel_fd, follow_symlinks=False)
+            return True
+        except FileNotFoundError:
+            pass
+    return False
+
+
+def consume_cancellation(cancel_fd: int, job_id: str) -> None:
+    for name in (job_id + ".cancel", job_id):
+        try:
+            os.unlink(name, dir_fd=cancel_fd)
+        except FileNotFoundError:
+            pass
+
+
+def recover_orphaned_claims(claimed_fd: int, results_fd: int) -> None:
+    """Detect and record failure for claims left behind after crash or restart."""
+    try:
+        now = time.time()
+        for entry in os.scandir(f"/proc/self/fd/{claimed_fd}"):
+            if not entry.name.startswith("claim-") or not entry.name.endswith(".json"):
+                continue
+            try:
+                info = entry.stat(follow_symlinks=False)
+                # Orphaned if older than TIMEOUT + 60s
+                if now - info.st_mtime > (TIMEOUT + 60):
+                    raw = read_regular_at(claimed_fd, entry.name, MAX_REQUEST)
+                    data = json.loads(raw)
+                    job_id = data.get("jobId")
+                    if isinstance(job_id, str) and ID_RE.fullmatch(job_id):
+                        atomic_json_at(results_fd, job_id + ".json", {
+                            "jobId": job_id, "status": "failed",
+                            "summary": "recovered orphaned task after crash/restart",
+                        })
+                    os.unlink(entry.name, dir_fd=claimed_fd)
+            except Exception:
+                pass
+    except Exception:
+        pass
 
 
 def atomic_json_at(directory: int, name: str, value: dict) -> None:
@@ -170,8 +231,10 @@ def main() -> int:
     if not isinstance(executable, str) or not executable.startswith("/nix/store/"):
         raise JobError("invalid fixed executable")
 
-    codex_fd, claimed_fd, results_fd = open_queue()
+    codex_fd, claimed_fd, results_fd, cancel_fd = open_queue()
     state_fd = open_agent_state()
+    recover_orphaned_claims(claimed_fd, results_fd)
+
     claim_name = "claim-" + uuid.uuid4().hex + ".json"
     child = None
     validated_job_id = None
@@ -196,6 +259,17 @@ def main() -> int:
         if not isinstance(candidate, str) or not ID_RE.fullmatch(candidate):
             raise JobError("invalid job id")
         validated_job_id = candidate
+
+        if check_cancellation(cancel_fd, validated_job_id):
+            consume_cancellation(cancel_fd, validated_job_id)
+            atomic_json_at(results_fd, validated_job_id + ".json", {
+                "jobId": validated_job_id, "status": "cancelled",
+                "summary": "task cancelled before start",
+            })
+            return 1
+
+        check_workspace_quota()
+
         done_name = validated_job_id + ".done"
         try:
             os.stat(done_name, dir_fd=state_fd, follow_symlinks=False)
@@ -228,15 +302,48 @@ def main() -> int:
                 start_new_session=True,
             )
             try:
-                child.communicate(prompt.encode(), timeout=TIMEOUT)
-            except subprocess.TimeoutExpired:
+                child.stdin.write(prompt.encode())
+                child.stdin.close()
+            except Exception:
+                pass
+
+            cancelled = False
+            start_time = time.monotonic()
+            while True:
+                if check_cancellation(cancel_fd, validated_job_id):
+                    cancelled = True
+                    break
+                ret = child.poll()
+                if ret is not None:
+                    break
+                if time.monotonic() - start_time > TIMEOUT:
+                    os.killpg(child.pid, signal.SIGTERM)
+                    try:
+                        child.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(child.pid, signal.SIGKILL)
+                        child.wait()
+                    atomic_json_at(results_fd, validated_job_id + ".json", {
+                        "jobId": validated_job_id, "status": "timed_out",
+                        "summary": f"task timed out after {TIMEOUT}s",
+                    })
+                    return 1
+                time.sleep(0.5)
+
+            if cancelled:
                 os.killpg(child.pid, signal.SIGTERM)
                 try:
-                    child.wait(timeout=10)
+                    child.wait(timeout=5)
                 except subprocess.TimeoutExpired:
                     os.killpg(child.pid, signal.SIGKILL)
                     child.wait()
-                raise JobError("task timed out")
+                consume_cancellation(cancel_fd, validated_job_id)
+                atomic_json_at(results_fd, validated_job_id + ".json", {
+                    "jobId": validated_job_id, "status": "cancelled",
+                    "summary": "task cancelled by user request",
+                })
+                return 1
+
         status = "succeeded" if child.returncode == 0 else "failed"
         atomic_json_at(results_fd, validated_job_id + ".json", {
             "jobId": validated_job_id, "status": status,
@@ -263,7 +370,7 @@ def main() -> int:
                 os.unlink(claim_name, dir_fd=claimed_fd)
             except FileNotFoundError:
                 pass
-        for fd in (codex_fd, claimed_fd, results_fd, state_fd):
+        for fd in (codex_fd, claimed_fd, results_fd, cancel_fd, state_fd):
             os.close(fd)
 
 

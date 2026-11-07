@@ -59,5 +59,65 @@ class QueueBoundaryTests(unittest.TestCase):
             self.assertFalse((private / "job-1.json").exists())
 
 
+    def test_read_regular_rejects_fifo(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            fifo_path = root / "test.fifo"
+            os.mkfifo(fifo_path)
+            root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                with self.assertRaises(RUNNER.JobError) as ctx:
+                    RUNNER.read_regular_at(root_fd, "test.fifo", 1024)
+                self.assertIn("rejected FIFO/socket", str(ctx.exception))
+            finally:
+                os.close(root_fd)
+
+    def test_cancellation_detection_and_consumption(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            cancel_dir = root / "cancel"
+            cancel_dir.mkdir()
+            cancel_fd = os.open(cancel_dir, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                job_id = "test-job-cancel-1"
+                self.assertFalse(RUNNER.check_cancellation(cancel_fd, job_id))
+                (cancel_dir / (job_id + ".cancel")).touch()
+                self.assertTrue(RUNNER.check_cancellation(cancel_fd, job_id))
+                RUNNER.consume_cancellation(cancel_fd, job_id)
+                self.assertFalse(RUNNER.check_cancellation(cancel_fd, job_id))
+            finally:
+                os.close(cancel_fd)
+
+    def test_recover_orphaned_claims(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            claimed = root / "claimed"
+            results = root / "results"
+            claimed.mkdir()
+            results.mkdir()
+            orphan = claimed / "claim-orphan-123.json"
+            orphan.write_text('{"tool":"codex","prompt":"test","jobId":"orphan-job-1"}')
+            # Set mtime to past
+            old_time = time.time() - (RUNNER.TIMEOUT + 120)
+            os.utime(orphan, (old_time, old_time))
+
+            claimed_fd = os.open(claimed, os.O_RDONLY | os.O_DIRECTORY)
+            results_fd = os.open(results, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                RUNNER.recover_orphaned_claims(claimed_fd, results_fd)
+            finally:
+                os.close(claimed_fd)
+                os.close(results_fd)
+
+            self.assertFalse(orphan.exists())
+            result_file = results / "orphan-job-1.json"
+            self.assertTrue(result_file.exists())
+            data = json.loads(result_file.read_text())
+            self.assertEqual(data["status"], "failed")
+            self.assertIn("recovered orphaned task", data["summary"])
+
+
 if __name__ == "__main__":
+    import json
+    import time
     unittest.main(verbosity=2)

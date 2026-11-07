@@ -4,6 +4,6 @@
   "private": true,
   "description": "Nix wrapper for DeepSeek Harness; choose an exact upstream release before building.",
   "dependencies": {
-    "@deepseek-ai/dsh": "__USER_DECISION_REQUIRED__"
+    "@deepseek-ai/dsh": "0.2.2-rc.1"
   }
 }

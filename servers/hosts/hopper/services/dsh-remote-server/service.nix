@@ -129,6 +129,7 @@ in
         proxyPass = "http://127.0.0.1:${toString cfg.port}";
         proxyWebsockets = true;
         extraConfig = ''
+          proxy_set_header Sec-Fetch-Site "";
           proxy_buffering off;
           proxy_request_buffering off;
           proxy_read_timeout 3600s;

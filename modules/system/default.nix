@@ -22,5 +22,6 @@
     ./virtualization.nix# Docker & KVM
     ./gaming            # Steam & Gaming platforms
     ./dev.nix           # Development tools
+    ./1password.nix     # 1Password GUI & CLI
   ];
 }

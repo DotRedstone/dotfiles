@@ -42,7 +42,9 @@ EASYTIER_EXTRA_ARGS="--hostname my-nixos --rpc-portal 127.0.0.1:15888"
 ### 常用命令
 
 - **查看状态**: `systemctl status easytier`
-- **重启服务**: `sudo systemctl restart easytier` (或使用 `easytier-restart`)
+- **启动服务**: `systemctl start easytier`
+- **停止服务**: `systemctl stop easytier` (或使用 `easytier-stop`)
+- **重启服务**: `systemctl restart easytier` (或使用 `easytier-restart`)
 - **查看简洁状态**: `easytier-status`
 - **使用 CLI**: `easytier-cli peer`
 
@@ -50,7 +52,8 @@ EASYTIER_EXTRA_ARGS="--hostname my-nixos --rpc-portal 127.0.0.1:15888"
 
 - `easytier-start`: systemd 服务调用的启动包装脚本，负责参数校验和组装。
 - `easytier-status`: 输出包含状态和 peer 数量的 JSON。
-- `easytier-restart`: 调用 `systemctl restart` 的便捷脚本。
+- `easytier-restart`: 调用 `systemctl restart` 的便捷脚本（通过 Polkit 免密执行）。
+- `easytier-stop`: 调用 `systemctl stop` 的便捷脚本（通过 Polkit 免密执行）。
 
 ## 安全说明
 

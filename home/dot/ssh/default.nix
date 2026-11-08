@@ -31,6 +31,13 @@
       Host hopper
         HostName ${config.sops.placeholder."vps/hopper"}
         User dot
+        ServerAliveInterval 30
+        ServerAliveCountMax 5
+        ControlMaster auto
+        ControlPath ~/.ssh/sockets/%r@%h:%p
+        ControlPersist 1h
+        TCPKeepAlive yes
+        IPQoS throughput
 
       Host target
         HostName ${config.sops.placeholder."vps/target"}
@@ -60,4 +67,5 @@
   # Home Manager creates symlinks to nix store (perms 777), which SSH rejects.
   # Force the config file to be a real copy with correct permissions.
   home.file.".ssh/config".force = true;
+  home.file.".ssh/sockets/.keep".text = "";
 }

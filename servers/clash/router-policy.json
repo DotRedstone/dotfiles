@@ -86,6 +86,24 @@
       "use": ["VPS-Node-LA-Preferred"]
     },
     {
+      "name": "⚡ 洛杉矶-优选-轮询并发",
+      "type": "load-balance",
+      "strategy": "round-robin",
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "filter": "LA-CF|LA-优选",
+      "use": ["VPS-Node-LA-Preferred"]
+    },
+    {
+      "name": "⚖️ 洛杉矶-优选-哈希均衡",
+      "type": "load-balance",
+      "strategy": "consistent-hashing",
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "filter": "LA-CF|LA-优选",
+      "use": ["VPS-Node-LA-Preferred"]
+    },
+    {
       "name": "🇺🇸 洛杉矶-优选-手动",
       "type": "select",
       "filter": "LA-CF|LA-优选",
@@ -98,6 +116,8 @@
         "♻️ 洛杉矶-直连-自动",
         "🇺🇸 洛杉矶-直连-手动",
         "♻️ 洛杉矶-优选-自动",
+        "⚡ 洛杉矶-优选-轮询并发",
+        "⚖️ 洛杉矶-优选-哈希均衡",
         "🇺🇸 洛杉矶-优选-手动"
       ]
     },
@@ -124,6 +144,24 @@
       "use": ["VPS-Node-SG-Preferred"]
     },
     {
+      "name": "⚡ 新加坡-优选-轮询并发",
+      "type": "load-balance",
+      "strategy": "round-robin",
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "filter": "SG-CF|SG-优选",
+      "use": ["VPS-Node-SG-Preferred"]
+    },
+    {
+      "name": "⚖️ 新加坡-优选-哈希均衡",
+      "type": "load-balance",
+      "strategy": "consistent-hashing",
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "filter": "SG-CF|SG-优选",
+      "use": ["VPS-Node-SG-Preferred"]
+    },
+    {
       "name": "🇸🇬 新加坡-优选-手动",
       "type": "select",
       "filter": "SG-CF|SG-优选",
@@ -136,6 +174,8 @@
         "♻️ 新加坡-直连-自动",
         "🇸🇬 新加坡-直连-手动",
         "♻️ 新加坡-优选-自动",
+        "⚡ 新加坡-优选-轮询并发",
+        "⚖️ 新加坡-优选-哈希均衡",
         "🇸🇬 新加坡-优选-手动"
       ]
     },
@@ -171,6 +211,8 @@
   "rules": [
     "PROCESS-NAME,CloudflareST_proxy_linux_arm64,DIRECT",
     "IP-CIDR,140.245.62.36/32,DIRECT,no-resolve",
+    "DOMAIN-SUFFIX,1password.com,DIRECT",
+    "DOMAIN-SUFFIX,1passwordservices.com,DIRECT",
     "DOMAIN-SUFFIX,minecraft.net,🎮 Minecraft 登录",
     "DOMAIN-SUFFIX,minecraftservices.com,🎮 Minecraft 登录",
     "DOMAIN-SUFFIX,mojang.com,🎮 Minecraft 登录",

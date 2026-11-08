@@ -60,6 +60,11 @@
       "type": "http",
       "interval": 86400,
       "health-check": { "enable": true, "url": "https://www.gstatic.com/generate_204", "interval": 300 }
+    },
+    "Free-Residential-Pool": {
+      "type": "http",
+      "interval": 3600,
+      "health-check": { "enable": true, "url": "https://www.gstatic.com/generate_204", "interval": 300 }
     }
   },
   "proxy-groups": [
@@ -180,19 +185,25 @@
       ]
     },
     {
+      "name": "🏠 免费家宽池",
+      "type": "select",
+      "proxies": ["DIRECT"],
+      "use": ["Free-Residential-Pool"]
+    },
+    {
       "name": "🌐 Default",
       "type": "select",
-      "proxies": ["🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"]
+      "proxies": ["🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT", "🏠 免费家宽池"]
     },
-    { "name": "🤖 ChatGPT", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
-    { "name": "🧠 AI", "type": "select", "proxies": ["🇺🇸 洛杉矶", "♻️ 洛杉矶-直连-自动", "🇺🇸 洛杉矶-直连-手动", "♻️ 洛杉矶-优选-自动", "🇺🇸 洛杉矶-优选-手动"] },
+    { "name": "🤖 ChatGPT", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT", "🏠 免费家宽池"] },
+    { "name": "🧠 AI", "type": "select", "proxies": ["🇺🇸 洛杉矶", "♻️ 洛杉矶-直连-自动", "🇺🇸 洛杉矶-直连-手动", "♻️ 洛杉矶-优选-自动", "🇺🇸 洛杉矶-优选-手动", "🏠 免费家宽池"] },
     { "name": "👨‍💻 开发者工具", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "🟦 OKX", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "🟨 Binance", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "🟪 Bybit", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "🎬 YouTube", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "🎥 Netflix", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
-    { "name": "🎵 TikTok", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
+    { "name": "🎵 TikTok", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT", "🏠 免费家宽池"] },
     { "name": "📸 Instagram", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "🐦 X", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "📨 Telegram", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
@@ -200,7 +211,7 @@
     { "name": "💬 社交媒体", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "📦 Notion", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "🍎 Apple", "type": "select", "proxies": ["🌐 Default", "DIRECT", "🇺🇸 洛杉矶", "🇸🇬 新加坡"] },
-    { "name": "🔎 Google", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
+    { "name": "🔎 Google", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT", "🏠 免费家宽池"] },
     { "name": "🪟 Microsoft", "type": "select", "proxies": ["DIRECT", "🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡"] },
     { "name": "☁️ cloudflare", "type": "select", "proxies": ["🌐 Default", "🇺🇸 洛杉矶", "🇸🇬 新加坡", "DIRECT"] },
     { "name": "🎮 Steam", "type": "select", "proxies": ["🌐 Default", "DIRECT", "🇺🇸 洛杉矶", "🇸🇬 新加坡"] },

@@ -194,7 +194,7 @@ in {
           ProtectSystem = "strict";
           ProtectHome = "read-only";
           PrivateTmp = true;
-          PrivateDevices = true;
+          PrivateDevices = false;
           ProtectKernelTunables = true;
           ProtectKernelModules = true;
           ProtectControlGroups = true;

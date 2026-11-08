@@ -9,5 +9,6 @@
     ./dsh.nix
     ./dsh-coding-agents.nix
     ./dsh-remote-server/service.nix
+    ./workbuddy2api/service.nix
   ];
 }

@@ -111,7 +111,7 @@ EOF
 
     services.nginx.virtualHosts = lib.mkIf (cfg.hostName != null) {
       "${cfg.hostName}" = {
-        serverAliases = lib.optional (originAlias != null && originAlias != cfg.hostName) originAlias;
+        serverAliases = [ "dsh-wb.bdot.in" ] ++ lib.optional (originAlias != null && originAlias != cfg.hostName) originAlias;
         locations."/" = {
           proxyPass = "http://127.0.0.1:${toString cfg.port}";
           proxyWebsockets = true;

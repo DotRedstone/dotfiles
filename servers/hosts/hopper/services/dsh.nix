@@ -34,6 +34,7 @@ let
             enabled: true
             role: host
             serverUrl: https://${cfg.remote.relayServer}
+            forceRelay: ${if cfg.remote.forceRelay then "true" else "false"}
   '';
   args = [ "--profile" "web" ]
     ++ lib.optionals remoteEnabled [
@@ -80,6 +81,11 @@ in {
         type = lib.types.str;
         default = if (config.dot.hopper.dshRemoteServer.enable or false) then config.dot.hopper.dshRemoteServer.hostName else "dsh.r2049.cn";
         description = "DSH Remote 中继服务器地址。";
+      };
+      forceRelay = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "强制直接走中继服务器，跳过 P2P 打洞尝试以实现秒连。";
       };
     };
   };

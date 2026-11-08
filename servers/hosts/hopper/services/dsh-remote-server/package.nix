@@ -41,6 +41,11 @@ stdenv.mkDerivation {
   installPhase = ''
     mkdir -p "$out/libexec/dsh-remote-server" "$out/bin"
     cp -a rootfs/app/* "$out/libexec/dsh-remote-server/"
+
+    # 强制仅中继：关闭 webrtc 宣告并将支持传输限制为 relay，彻底消除客户端 12 秒 P2P 打洞等待
+    sed -i "s/webrtcEnabled: true/webrtcEnabled: false/g" "$out/libexec/dsh-remote-server/dist/gateway.js"
+    sed -i "s/'transport.lan', 'transport.p2p', 'transport.turn', 'transport.relay'/'transport.relay'/g" "$out/libexec/dsh-remote-server/dist/gateway.js"
+
     makeWrapper ${nodejs_22}/bin/node "$out/bin/dsh-remote-server" \
       --add-flags "$out/libexec/dsh-remote-server/dist/main.js"
   '';

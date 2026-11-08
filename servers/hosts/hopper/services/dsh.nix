@@ -117,6 +117,7 @@ in {
       users.users.dsh = {
         isSystemUser = true;
         group = "dsh";
+        extraGroups = [ "systemd-journal" "nginx" ];
         home = "${state}/home";
         createHome = false;
         description = "Hopper DeepSeek Harness service";
@@ -148,6 +149,7 @@ in {
             exit 1
           fi
 
+          export PATH="/run/wrappers/bin:/run/current-system/sw/bin:$PATH"
           export OPENAI_BASE_URL="${cfg.modelBaseUrl}"
           export OPENAI_API_BASE="${cfg.modelBaseUrl}"
           export OPENAI_API_KEY="$(cat "$cred_file")"
@@ -190,7 +192,7 @@ in {
           UMask = if config.dot.hopper.dsh.codingAgents.enable then "0007" else "0077";
           NoNewPrivileges = true;
           ProtectSystem = "strict";
-          ProtectHome = true;
+          ProtectHome = "read-only";
           PrivateTmp = true;
           PrivateDevices = true;
           ProtectKernelTunables = true;
@@ -198,7 +200,7 @@ in {
           ProtectControlGroups = true;
           RestrictSUIDSGID = true;
           CapabilityBoundingSet = "";
-          RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_INET6" ];
+          RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_INET6" "AF_NETLINK" ];
           ReadWritePaths = [ "${state}/home" "${state}/workspaces" "/var/cache/dsh" "/var/log/dsh" ];
         };
       };

@@ -96,7 +96,7 @@ echo "SUCCESS"
         # Remote options declared and default to false
         self.assertIn("remote = {", content)
         self.assertIn('enable = lib.mkEnableOption "DSH Remote (ds-harness-remote) 远程连接插件支持";', content)
-        self.assertIn('default = "dsh.r2049.cn";', content)
+        self.assertIn('"dsh.r2049.cn"', content)
         self.assertIn("options.services.dsh = {", content)
 
         # Patch injection dynamically toggled

@@ -11,8 +11,17 @@
 
   environment.systemPackages = with pkgs; [
     curl
+    dnsutils
+    fd
     gitMinimal
     htop
+    jq
+    lsof
+    nftables
+    nodejs
+    pnpm
+    python3
+    ripgrep
     tmux
     vim
   ];

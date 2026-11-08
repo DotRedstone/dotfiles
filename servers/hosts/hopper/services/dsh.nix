@@ -36,9 +36,28 @@ let
             serverUrl: https://${cfg.remote.relayServer}
             forceRelay: ${if cfg.remote.forceRelay then "true" else "false"}
   '';
+  profilePatchFile = pkgs.writeText "dsh-profile-patch.yml" ''
+    - insert:
+        - id: optional-session-search
+          name: cordis:group
+          group: true
+          isolate:
+            sessionQuery: true
+          config:
+            - id: optional-session-query-sqlite
+              name: '@deepseek-ai/dsh-session-query-sqlite'
+              config:
+                path: ':memory:'
+                openAt: first-search
+            - id: optional-tool-session-query
+              name: '@deepseek-ai/dsh-tool-session-query'
+  '';
   args = [ "--profile" "web" ]
     ++ lib.optionals remoteEnabled [
       "--patch" "${remotePatchFile}"
+    ]
+    ++ [
+      "--patch" "${profilePatchFile}"
     ]
     ++ [ "--host" loopback "--port" "3080" "--no-open" ]
     ++ lib.optionals (cfg.hostName != null) [
@@ -194,7 +213,7 @@ in {
           ProtectSystem = "strict";
           ProtectHome = "read-only";
           PrivateTmp = true;
-          PrivateDevices = false;
+          PrivateDevices = true;
           ProtectKernelTunables = true;
           ProtectKernelModules = true;
           ProtectControlGroups = true;

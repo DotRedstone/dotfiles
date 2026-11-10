@@ -76,8 +76,7 @@ EOF
 
       stop_all_shells() {
         systemctl --user stop \
-          noctalia.service \
-          niri-noctalia-bar-sync.service \
+          niri-bar-sync.service \
           dms.service \
           clavis-shell.service \
           clavis-clipboard.service 2>/dev/null || true
@@ -86,7 +85,7 @@ EOF
       }
 
       show_status() {
-        for unit in noctalia.service dms.service clavis-shell.service clavis-clipboard.service; do
+        for unit in dms.service clavis-shell.service clavis-clipboard.service; do
           state="$(systemctl --user is-active "$unit" 2>/dev/null || true)"
           printf '%-26s %s\n' "$unit:" "$state"
         done
@@ -95,15 +94,6 @@ EOF
       cmd="''${1:-status}"
       case "$cmd" in
         status)
-          show_status
-          ;;
-        noctalia)
-          echo "正在切换到 Noctalia Shell..."
-          ensure_niri_dms_files
-          save_dms_binds_if_present
-          : > "$binds_file"
-          stop_all_shells
-          systemctl --user start noctalia.service niri-noctalia-bar-sync.service
           show_status
           ;;
         dms|dms2|dux)
@@ -115,7 +105,7 @@ EOF
             write_default_dms_binds "$binds_file"
           fi
           stop_all_shells
-          systemctl --user start dms.service niri-noctalia-bar-sync.service
+          systemctl --user start dms.service niri-bar-sync.service
           sync_tray_items
           show_status
           ;;
@@ -130,7 +120,7 @@ EOF
           show_status
           ;;
         *)
-          echo "用法: desktop-shell <status|noctalia|dms|clavis>" >&2
+          echo "用法: desktop-shell <status|dms|clavis>" >&2
           exit 64
           ;;
       esac

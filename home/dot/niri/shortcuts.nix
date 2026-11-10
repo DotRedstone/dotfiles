@@ -147,11 +147,27 @@ let
     fi
   '';
 
-  niri-noctalia-bar-sync = pkgs.writeShellScriptBin "niri-noctalia-bar-sync" ''
+  niri-bar-sync = pkgs.writeShellScriptBin "niri-bar-sync" ''
     set -u
 
     state_dir="''${XDG_RUNTIME_DIR:-/tmp}/niri-fullscreen-toggle"
     ${pkgs.coreutils}/bin/mkdir -p "$state_dir"
+
+    bar_show() {
+      if ${pkgs.systemd}/bin/systemctl --user is-active --quiet dms.service; then
+        dms ipc call bar reveal id default >/dev/null 2>&1 || true
+      elif ${pkgs.systemd}/bin/systemctl --user is-active --quiet noctalia.service; then
+        noctalia msg bar-show default >/dev/null 2>&1 || true
+      fi
+    }
+
+    bar_hide() {
+      if ${pkgs.systemd}/bin/systemctl --user is-active --quiet dms.service; then
+        dms ipc call bar hide id default >/dev/null 2>&1 || true
+      elif ${pkgs.systemd}/bin/systemctl --user is-active --quiet noctalia.service; then
+        noctalia msg bar-hide default >/dev/null 2>&1 || true
+      fi
+    }
 
     is_focused_window_tracked_fullscreen() {
       window_json="$(niri msg --json focused-window 2>/dev/null || true)"
@@ -218,18 +234,18 @@ in
     niri-mac-shortcut
     niri-power-key
     niri-fullscreen-toggle
-    niri-noctalia-bar-sync
+    niri-bar-sync
   ];
 
-  systemd.user.services.niri-noctalia-bar-sync = {
+  systemd.user.services.niri-bar-sync = {
     Unit = {
-      Description = "Keep Noctalia bar visible outside Niri fullscreen";
-      After = [ "graphical-session.target" "noctalia.service" ];
+      Description = "Keep desktop shell bar visible outside Niri fullscreen";
+      After = [ "graphical-session.target" "dms.service" ];
       PartOf = [ "graphical-session.target" ];
     };
 
     Service = {
-      ExecStart = "${niri-noctalia-bar-sync}/bin/niri-noctalia-bar-sync";
+      ExecStart = "${niri-bar-sync}/bin/niri-bar-sync";
       Restart = "on-failure";
       RestartSec = 2;
     };

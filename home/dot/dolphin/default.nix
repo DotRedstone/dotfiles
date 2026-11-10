@@ -10,5 +10,6 @@
     ./theme.nix
     ./settings.nix
     ./admin-actions.nix
+    ./kded.nix
   ];
 }

@@ -38,5 +38,6 @@ in
     pkgs.kdePackages.ark
     pkgs.kdePackages.kio-admin
     pkgs.kdePackages.kdialog
+    pkgs.kdePackages.kded
   ];
 }

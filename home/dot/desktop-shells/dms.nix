@@ -701,6 +701,13 @@ EOF
       platforms = lib.platforms.linux;
     };
   };
+
+  dmsLauncher = pkgs.writeShellScript "dms-launcher" ''
+    # 从 systemd credential 读入 DeepSeek API key，仅注入给 dms 外壳及其插件，
+    # 不再依赖 environment.d 把密钥广播给整个会话。
+    export DEEPSEEK_API_KEY="$(cat "$CREDENTIALS_DIRECTORY/deepseek_api_key" 2>/dev/null || true)"
+    exec ${dms-shell}/bin/dms run --session
+  '';
 in
 {
   # [Packages]
@@ -800,8 +807,10 @@ in
       BusName = "org.freedesktop.Notifications";
       NotifyAccess = "main";
       Environment = [ "QS_DISABLE_CRASH_HANDLER=1" ];
+      # 仅把 DeepSeek API key 以 credential 形式注入给 dms，不再全局广播。
+      LoadCredential = "deepseek_api_key:${config.sops.secrets."deepseek_api_key".path}";
       ExecStartPre = "${dmsPrepareCommunityTemplates}";
-      ExecStart = "${dms-shell}/bin/dms run --session";
+      ExecStart = "${dmsLauncher}";
       ExecStartPost = [ "${dmsTraySync}" ];
       Restart = "on-failure";
       RestartForceExitStatus = "TEMPFAIL";

@@ -22,6 +22,9 @@
       "wallhaven_api_key" = {
         sopsFile = ../../../secrets/noctalia.yaml;
       };
+      "deepseek_api_key" = {
+        sopsFile = ../../../secrets/noctalia.yaml;
+      };
 
       # VPS Info
       "vps/beacon" = {};

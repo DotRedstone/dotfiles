@@ -14,6 +14,9 @@
       ".config/Code"
       ".vscode"
       ".config/Antigravity"
+      ".BurpSuite"
+      ".local/npm-global"
+      ".dsh"
     ];
   };
 }

@@ -1,0 +1,7 @@
+/* ---
+ * Module: Zen Browser - Noctalia Color Interface
+ * Description: Injects Noctalia primary color into Zen Browser's native accent color variable
+ * --- */
+:root {
+  --zen-primary-color: {{colors.primary.default.hex}} !important;
+}

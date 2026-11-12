@@ -14,11 +14,12 @@
     "browser.tabs.insertRelatedAfterCurrent" = true;
 
     # [Theme & Contrast]
-    "ui.systemUsesDarkTheme" = 1;
-    "browser.theme.content-theme" = 0; # 0 = Dark
-    "browser.theme.toolbar-theme" = 0; # 0 = Dark
-    "layout.css.prefers-color-scheme.content-override" = 0; # 0 = Dark
-    "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
+    "browser.theme.content-theme" = 2; # 2 = Follow system
+    "browser.theme.toolbar-theme" = 2; # 2 = Follow system
+    "layout.css.prefers-color-scheme.content-override" = 2; # 2 = Follow system
+    "extensions.activeThemeID" = "default-theme@mozilla.org";
+    "zen.view.window.scheme" = 2; # 2 = Follow system (Auto)
+    "zen.theme.use-system-colors" = true;
     "devtools.chrome.enabled" = true;
 
     # [Typography]
@@ -40,11 +41,24 @@
     # [Wayland / Mixed DPI]
     "widget.wayland.fractional-scale.enabled" = true;
 
-    # [Privacy & Behavior]
+    # [Privacy & Password Management]
     "general.autoScroll" = true;
-    "signon.rememberSignons" = false; # Use Bitwarden
+    "signon.rememberSignons" = false; # Handled by 1Password
+    "signon.autofillForms" = false;
+    "signon.generation.enabled" = false;
+    "signon.management.page.breach-alerts.enabled" = false;
+    "signon.firefoxRelay.feature" = "disabled";
+    "extensions.formautofill.addresses.enabled" = false;
+    "extensions.formautofill.creditCards.enabled" = false;
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
     "zen.window-sync.enabled" = false; # Keep windows independent instead of mirroring all tabs
+
+    # [WebRTC Privacy & Functionality (RFC 8828)]
+    # Prevent local LAN IP leaks without disabling WebRTC functionality
+    "media.peerconnection.enabled" = true;
+    "media.peerconnection.ice.default_address_only" = true;
+    "media.peerconnection.ice.no_host" = true;
+    "media.peerconnection.ice.proxy_only" = false;
 
     # [Performance]
     "gfx.webrender.all" = true; # Force hardware acceleration

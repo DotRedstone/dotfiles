@@ -37,9 +37,15 @@
     # Avoid toolbar popup offset and jumpiness on mixed-scale Niri outputs.
     "widget.wayland.fractional-scale.enabled" = false;
 
-    # [Privacy & Behavior]
+    # [Privacy & Password Management]
     "general.autoScroll" = true;
-    "signon.rememberSignons" = false; # Use a password manager instead
+    "signon.rememberSignons" = false; # Handled by 1Password
+    "signon.autofillForms" = false;
+    "signon.generation.enabled" = false;
+    "signon.management.page.breach-alerts.enabled" = false;
+    "signon.firefoxRelay.feature" = "disabled";
+    "extensions.formautofill.addresses.enabled" = false;
+    "extensions.formautofill.creditCards.enabled" = false;
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true; # Enable userChrome.css
 
     # [Performance]

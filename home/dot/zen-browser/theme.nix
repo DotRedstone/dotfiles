@@ -16,7 +16,7 @@
          Sidebar & Navigation Contrast Enhancements
          ========================================================================== */
 
-      /* 0. 全局强制深色模式变量与消灭任何白色底色（彻底解决书签侧边栏、活动标签白色问题） */
+      /* 0. 全局配色变量与消灭任何白色底色（彻底解决书签侧边栏、活动标签白色问题） */
       :root,
       #main-window,
       zen-workspace,
@@ -24,7 +24,7 @@
       #tabbrowser-tabs,
       #TabsToolbar,
       #vertical-tabs {
-        color-scheme: dark !important;
+        color-scheme: light dark !important;
         --sidebar-background-color: var(--base) !important;
         --sidebar-text-color: var(--text) !important;
         --sidebar-border-color: var(--outline) !important;
@@ -36,7 +36,7 @@
         --zen-toolbar-element-bg: var(--surface) !important;
       }
 
-      /* 书签、历史侧边栏外框全量深色化 */
+      /* 书签、历史侧边栏外框跟随配色变量 */
       #sidebar-box,
       #sidebar-box #sidebar,
       #sidebar-header,
@@ -46,7 +46,7 @@
         background-color: var(--base) !important;
         background: var(--base) !important;
         color: var(--text) !important;
-        color-scheme: dark !important;
+        color-scheme: light dark !important;
       }
 
       #sidebar-header {
@@ -73,7 +73,7 @@
       #zen-tabbox-wrapper,
       #TabsToolbar,
       #vertical-tabs {
-        color-scheme: dark !important;
+        color-scheme: light dark !important;
         --toolbarbutton-icon-fill: var(--primary) !important;
         --toolbar-field-color: var(--primary) !important;
         --toolbar-field-focus-color: var(--primary) !important;
@@ -313,7 +313,7 @@
       }
 
       /* ==========================================================================
-         Bookmarks & History Sidebar Internal Document Dark Theming
+         Bookmarks & History Sidebar Internal Document Theming
          ========================================================================== */
       @-moz-document url-prefix("chrome://browser/content/places/") {
         :root,
@@ -324,34 +324,34 @@
         #placesList,
         #bookmarks-view,
         #historyTree {
-          background-color: #0f1416 !important;
-          background: #0f1416 !important;
-          color: #dee3e5 !important;
-          color-scheme: dark !important;
+          background-color: var(--base) !important;
+          background: var(--base) !important;
+          color: var(--text) !important;
+          color-scheme: light dark !important;
         }
         treechildren {
-          background-color: #0f1416 !important;
-          color: #dee3e5 !important;
+          background-color: var(--base) !important;
+          color: var(--text) !important;
         }
         treechildren::-moz-tree-cell-text {
-          color: #dee3e5 !important;
+          color: var(--text) !important;
         }
         treechildren::-moz-tree-cell-text(selected) {
-          color: #84d2e5 !important;
+          color: var(--primary) !important;
         }
         treechildren::-moz-tree-row(selected) {
-          background-color: #303637 !important;
+          background-color: var(--hl_med) !important;
         }
         treechildren::-moz-tree-row(hover) {
-          background-color: #252b2d !important;
+          background-color: var(--hl_low) !important;
         }
         treechildren::-moz-tree-image {
-          fill: #84d2e5 !important;
+          fill: var(--primary) !important;
         }
         #search-box {
-          background-color: #171d1e !important;
-          color: #84d2e5 !important;
-          border: 1px solid #3f484b !important;
+          background-color: var(--surface) !important;
+          color: var(--primary) !important;
+          border: 1px solid var(--outline) !important;
         }
       }
     '';

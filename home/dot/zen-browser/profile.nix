@@ -7,7 +7,6 @@
 { pkgs, config, ... }: {
   programs.zen-browser = {
     enable = true;
-    nativeMessagingHosts = [ pkgs.pywalfox-native ];
     profiles.dot = {
       id = 0;
       isDefault = true;

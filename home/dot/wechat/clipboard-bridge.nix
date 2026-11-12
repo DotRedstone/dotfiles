@@ -3,7 +3,7 @@
 # Description: Bridge WeChat's XWayland clipboard with the Wayland session clipboard
 # Scope: Home Manager
 # Notes:
-# - Supports text plus common image MIME types; file lists still depend on native XWayland support.
+# - Supports text, common image MIME types and local file lists (text/uri-list).
 # - Keep this local to WeChat/XWayland instead of changing global clipboard behavior.
 # ---
 
@@ -27,8 +27,12 @@ let
       ${pkgs.coreutils}/bin/sha256sum "$1" | ${pkgs.coreutils}/bin/cut -d' ' -f1
     }
 
+    # text/uri-list 不按普通文本处理：须以原目标名提供，接收方才会识别为文件。
     is_text_mime() {
       case "$1" in
+        text/uri-list)
+          return 1
+          ;;
         text/*|UTF8_STRING|STRING|TEXT)
           return 0
           ;;
@@ -49,6 +53,15 @@ let
           return 0
         fi
       done
+
+      # 文件管理器复制的文件；只接受本地 file:// 列表，网页链接仍按文本同步。
+      if ${pkgs.gnugrep}/bin/grep -Fxq text/uri-list "$types_file" \
+        && ${pkgs.coreutils}/bin/timeout 1s ${pkgs.wl-clipboard}/bin/wl-paste --type text/uri-list 2>/dev/null \
+          | ${pkgs.gnugrep}/bin/grep -q '^file://'; then
+        printf '%s\n' text/uri-list
+        ${pkgs.coreutils}/bin/rm -f "$types_file"
+        return 0
+      fi
 
       for mime in "text/plain;charset=utf-8" text/plain UTF8_STRING STRING TEXT; do
         if ${pkgs.gnugrep}/bin/grep -Fxq "$mime" "$types_file"; then
@@ -80,6 +93,14 @@ let
           return 0
         fi
       done
+
+      if ${pkgs.gnugrep}/bin/grep -Fxq text/uri-list "$targets_file" \
+        && DISPLAY="$DISPLAY" ${pkgs.coreutils}/bin/timeout 1s ${pkgs.xclip}/bin/xclip -selection clipboard -o -target text/uri-list 2>/dev/null \
+          | ${pkgs.gnugrep}/bin/grep -q '^file://'; then
+        printf '%s\n' text/uri-list
+        ${pkgs.coreutils}/bin/rm -f "$targets_file"
+        return 0
+      fi
 
       for target in UTF8_STRING text/plain STRING TEXT; do
         if ${pkgs.gnugrep}/bin/grep -Fxq "$target" "$targets_file"; then

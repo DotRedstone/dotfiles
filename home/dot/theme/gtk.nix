@@ -18,7 +18,6 @@
     };
 
     gtk3.extraConfig = {
-      gtk-application-prefer-dark-theme = 1;
       gtk-xft-antialias = 1;
       gtk-xft-hinting = 1;
       gtk-xft-hintstyle = "hintslight";
@@ -26,7 +25,6 @@
     };
 
     gtk4.extraConfig = {
-      gtk-application-prefer-dark-theme = 1;
       gtk-xft-antialias = 1;
       gtk-xft-hinting = 1;
       gtk-xft-hintstyle = "hintslight";
@@ -51,10 +49,10 @@
   };
 
 
-  # [Force Dark Preference]
+  # [Interface Preference]
+  # color-scheme is owned at runtime by the desktop shell (DMS / Noctalia).
   dconf.settings = {
     "org/gnome/desktop/interface" = {
-      color-scheme = "prefer-dark";
       gtk-theme = "adw-gtk3-dark";
       font-name = "Maple Mono NF 11";
       document-font-name = "Maple Mono NF 11";

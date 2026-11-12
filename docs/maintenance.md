@@ -10,7 +10,7 @@
 | **验证系统配置** | `sudo nixos-rebuild dry-run --flake .#warden` | - |
 | **语法检查** | `nix flake check .` | - |
 | **重载输入法** | `fcitx5 -r -d` | - |
-| **重置桌面 Shell** | `systemctl --user restart noctalia.service` | - |
+| **重置桌面 Shell** | `systemctl --user restart dms.service` | - |
 
 ## 何时需要 Reboot？
 

@@ -8,7 +8,6 @@
   dconf.settings = {
     # [Global GTK Interface]
     "org/gnome/desktop/interface" = {
-      color-scheme = "prefer-dark";
       # Force empty theme to let Libadwaita take control (standard for modern GNOME apps)
       gtk-theme = lib.mkForce "";
     };

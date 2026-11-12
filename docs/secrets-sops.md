@@ -4,11 +4,22 @@
 
 ## 管理规范
 
-- **入口**: `home/dot/secrets/default.nix` 为 Home Manager 的密钥管理入口。
+- **入口**: `home/dot/secrets/default.nix` 为 Home Manager 的密钥管理入口；
+  服务器侧入口在各 `servers/hosts/<name>/default.nix`。
 - **私钥位置**: `age` 私钥应存放于 `~/.config/sops/age/keys.txt`。
-- **加密文件**: 
-  - 全局 Secret: `secrets.yaml`
-  - 模块特定 Secret: 如 `secrets/noctalia.yaml`
+- **加密文件分布**: 按「谁使用」划分，而不是按文件类型划分。
+
+| 位置 | 用途 | 使用方 |
+| :--- | :--- | :--- |
+| `secrets.yaml`（仓库根） | 主机地址：`vps/<name>` | 桌面 `home/dot/ssh/`、`home/dot/secrets/` |
+| `secrets/noctalia.yaml` | 桌面应用凭据（如 AI Key） | 桌面 Home Manager 模块 |
+| `servers/secrets/<host>.yaml` | 单台服务器的密钥 | `servers/` 独立 Flake |
+
+两条约束：
+
+- 桌面侧只读根目录的 `secrets.yaml` 与 `secrets/`；服务器密钥不要混入根目录。
+- `servers/` 是独立 Flake，其密钥规则写在 `servers/.sops.yaml`，与根 `.sops.yaml`
+  互不覆盖。新增主机时两处都要确认 recipient 归属。
 
 ## 已定义的 Secret 框架
 
@@ -18,8 +29,10 @@
 | `vps/beacon` | 香港服务器远程地址 |
 | `vps/conduit` | 节点服务器远程地址 |
 | `vps/hopper` | 备份服务器远程地址 |
-| `vps/target` | 远程构建服务器地址 |
 | `vps/repeater` | 辅助服务器地址 |
+
+> 已退役主机的密钥应连同 `servers/secrets/<host>.yaml` 与 `servers/.sops.yaml`
+> 中的 `creation_rule` 一并删除，不要只删 Nix 引用而留下密钥文件。
 
 ## 安全禁令
 

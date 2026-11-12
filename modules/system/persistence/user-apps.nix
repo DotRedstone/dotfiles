@@ -39,6 +39,19 @@
 
       # [Downloads]
       ".config/gopeed"
+
+      # [Desktop Shell]
+      ".config/dms"
+      ".local/state/dms"
+
+      # [Password Manager]
+      ".config/1Password"
+      ".config/op"
+
+      # [VPN]
+      # UniVPN 用户态配置（sysconfig.ini、log）与 config 符号链接；
+      # 连接凭据 key.ini 在 /var/lib/univpn/config（见 system-paths.nix）。
+      "UniVPN"
     ];
   };
 }

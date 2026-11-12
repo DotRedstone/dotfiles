@@ -7,19 +7,48 @@
 { pkgs, ... }:
 let
   niri-mac-shortcut = pkgs.writeShellScriptBin "niri-mac-shortcut" ''
-    # `wtype -M` only presses a modifier; it does not release it automatically.
-    # Always release modifiers in reverse order so a global Super shortcut cannot
-    # leave Ctrl/Shift logically held in XWayland clients such as WeChat or QQ.
+    WINDOW_JSON=$(niri msg --json focused-window 2>/dev/null || echo "")
+    APP_ID=$(printf '%s' "$WINDOW_JSON" | ${pkgs.jq}/bin/jq -r '.app_id // ""' 2>/dev/null || echo "")
+    WINDOW_PID=$(printf '%s' "$WINDOW_JSON" | ${pkgs.jq}/bin/jq -r '.pid // ""' 2>/dev/null || echo "")
+
+    # Niri 报告的 XWayland 窗口 PID 是 xwayland-satellite 本身。
+    is_xwayland() {
+      [ -n "$WINDOW_PID" ] || return 1
+      case "$(${pkgs.coreutils}/bin/readlink "/proc/$WINDOW_PID/exe" 2>/dev/null)" in
+        *xwayland-satellite*) return 0 ;;
+        *) return 1 ;;
+      esac
+    }
+
+    # 用法：send_keys <ctrl|ctrl_shift> <key>
+    # wtype 的虚拟键盘映射不会被 XWayland 采用，键码按物理映射解释，Ctrl+V 会
+    # 变成 Ctrl+Escape。XWayland 窗口因此改用 xdotool 经 XTEST 直接向 X 服务器
+    # 注入：不经过 Niri 的座位状态，不与仍按住的物理 Super / 字母键冲突。
+    # 注入前在 X 侧松开 Super 且不恢复：Niri 仍认为 Super 按住，连按仍会触发
+    # 快捷键；若像 --clearmodifiers 那样恢复，物理 Super 先松开时会在 X 侧卡住。
+    send_keys() {
+      if is_xwayland; then
+        if [ "$1" = ctrl_shift ]; then
+          combo="ctrl+shift+$2"
+        else
+          combo="ctrl+$2"
+        fi
+        DISPLAY="''${DISPLAY:-:0}" ${pkgs.xdotool}/bin/xdotool keyup --delay 1 Super_L Super_R key --delay 1 "$combo"
+      elif [ "$1" = ctrl_shift ]; then
+        # `wtype -M` 只按下修饰键而不会自动释放，因此按相反顺序显式释放。
+        ${pkgs.wtype}/bin/wtype -M ctrl -M shift -k "$2" -m shift -m ctrl
+      else
+        ${pkgs.wtype}/bin/wtype -M ctrl -k "$2" -m ctrl
+      fi
+    }
+
     send_ctrl() {
-      ${pkgs.wtype}/bin/wtype -M ctrl "$@" -m ctrl
+      send_keys ctrl "$1"
     }
 
     send_ctrl_shift() {
-      ${pkgs.wtype}/bin/wtype -M ctrl -M shift "$@" -m shift -m ctrl
+      send_keys ctrl_shift "$1"
     }
-
-    # Get the app_id of the focused window
-    APP_ID=$(niri msg --json focused-window 2>/dev/null | ${pkgs.jq}/bin/jq -r '.app_id // ""' 2>/dev/null || echo "")
 
     # Terminal detection
     is_terminal() {
@@ -32,45 +61,45 @@ let
     case "$1" in
       copy)
         if is_terminal; then
-          send_ctrl_shift -k c
+          send_ctrl_shift c
         else
-          send_ctrl -k c
+          send_ctrl c
         fi
         ;;
       paste)
         if is_terminal; then
-          send_ctrl_shift -k v
+          send_ctrl_shift v
         else
-          send_ctrl -k v
+          send_ctrl v
         fi
         ;;
       cut)
         if ! is_terminal; then
-          send_ctrl -k x
+          send_ctrl x
         fi
         ;;
       undo)
         if ! is_terminal; then
-          send_ctrl -k z
+          send_ctrl z
         fi
         ;;
       redo)
         if ! is_terminal; then
-          send_ctrl_shift -k z
+          send_ctrl_shift z
         fi
         ;;
       select-all)
         if ! is_terminal; then
-          send_ctrl -k a
+          send_ctrl a
         fi
         ;;
       save)
         if ! is_terminal; then
-          send_ctrl -k s
+          send_ctrl s
         fi
         ;;
       paste-plain)
-        send_ctrl_shift -k v
+        send_ctrl_shift v
         ;;
       esac
   '';
@@ -97,6 +126,11 @@ let
     fi
 
     niri msg action power-on-monitors >/dev/null 2>&1 || true
+    if ${pkgs.systemd}/bin/systemctl --user is-active --quiet dms.service; then
+      dms ipc call lock lock >/dev/null 2>&1 || true
+    elif ${pkgs.systemd}/bin/systemctl --user is-active --quiet clavis-shell.service; then
+      key ipc call lock open >/dev/null 2>&1 || true
+    fi
     if [ -n "$session_id" ]; then
       ${pkgs.systemd}/bin/loginctl lock-session "$session_id" >/dev/null 2>&1 || ${pkgs.systemd}/bin/loginctl lock-sessions >/dev/null 2>&1 || true
     else
@@ -109,12 +143,28 @@ let
   niri-fullscreen-toggle = pkgs.writeShellScriptBin "niri-fullscreen-toggle" ''
     set -u
 
+    bar_show() {
+      if ${pkgs.systemd}/bin/systemctl --user is-active --quiet dms.service; then
+        dms ipc call bar reveal id default >/dev/null 2>&1 || true
+      elif ${pkgs.systemd}/bin/systemctl --user is-active --quiet noctalia.service; then
+        noctalia msg bar-show default >/dev/null 2>&1 || true
+      fi
+    }
+
+    bar_hide() {
+      if ${pkgs.systemd}/bin/systemctl --user is-active --quiet dms.service; then
+        dms ipc call bar hide id default >/dev/null 2>&1 || true
+      elif ${pkgs.systemd}/bin/systemctl --user is-active --quiet noctalia.service; then
+        noctalia msg bar-hide default >/dev/null 2>&1 || true
+      fi
+    }
+
     state_dir="''${XDG_RUNTIME_DIR:-/tmp}/niri-fullscreen-toggle"
     ${pkgs.coreutils}/bin/mkdir -p "$state_dir"
 
     window_json="$(niri msg --json focused-window 2>/dev/null || true)"
     if [ -z "$window_json" ] || [ "$window_json" = "null" ]; then
-      noctalia msg bar-show default >/dev/null 2>&1 || true
+      bar_show
       niri msg action fullscreen-window >/dev/null 2>&1 || true
       exit 0
     fi
@@ -137,9 +187,9 @@ let
     if [ -n "$window_id" ] && { [ -e "$state_file" ] || [ "$is_fullscreen" -eq 1 ]; }; then
       niri msg action fullscreen-window >/dev/null 2>&1 || true
       ${pkgs.coreutils}/bin/rm -f "$state_file" >/dev/null 2>&1 || true
-      noctalia msg bar-show default >/dev/null 2>&1 || true
+      bar_show
     else
-      noctalia msg bar-hide default >/dev/null 2>&1 || true
+      bar_hide
       if [ -n "$window_id" ]; then
         printf '%s\n' "$window_id" > "$state_file"
       fi
@@ -208,9 +258,9 @@ let
       cleanup_stale_state
 
       if is_focused_window_tracked_fullscreen; then
-        noctalia msg bar-hide default >/dev/null 2>&1 || true
+        bar_hide
       else
-        noctalia msg bar-show default >/dev/null 2>&1 || true
+        bar_show
       fi
     }
 

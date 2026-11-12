@@ -113,6 +113,12 @@
                 aw-watcher-window;
             };
           })
+          # mitmproxy 的 TLS 证书测试依赖外部信任链，在本机沙箱内必然失败。
+          (final: prev: {
+            mitmproxy = prev.mitmproxy.overridePythonAttrs (old: {
+              doCheck = false;
+            });
+          })
         ];
       };
       extraSpecialArgs = { inherit inputs; };

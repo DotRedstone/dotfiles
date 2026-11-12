@@ -8,7 +8,7 @@
 let
   wechatSource = {
     url = "https://dldir1.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.deb";
-    hash = "sha256-t9D41T6fZIvCx3pglqBBANAI8tnw05iKKkhZtZkqygo=";
+    hash = "sha256-oNuMru6NHmz+CqXOWHECcPjXSpD/SSD1Oj/CKqCVb+k=";
   };
 
   wechatDeb = pkgs.fetchurl wechatSource;

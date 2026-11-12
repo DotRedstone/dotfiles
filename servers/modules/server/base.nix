@@ -13,6 +13,7 @@
     curl
     gitMinimal
     htop
+    python3
     tmux
     vim
   ];

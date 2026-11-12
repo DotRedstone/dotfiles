@@ -165,7 +165,7 @@ in {
           Restart = "on-failure";
           RestartSec = "10s";
           TimeoutStopSec = "90s";
-          LimitFSIZE = "1G";
+          LimitFSIZE = "50G";
           SupplementaryGroups = lib.optionals config.dot.hopper.dsh.codingAgents.enable [ "dsh-workspace" ];
           CacheDirectory = "dsh";
           CacheDirectoryMode = "0700";

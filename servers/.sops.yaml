@@ -20,11 +20,3 @@ creation_rules:
           - age1l4sguf839qt6jdc326g2hnv69xn5yl399lgvlhqpj2nmpf5y6g7q8a754a
           # Age recipient derived from the preserved Oracle VM SSH host key.
           - age1wyd5x40s66c7n2aqt0ag3y2ylsdlxe45wmn6c2sk73k0vjcnasuq8ym2rq
-
-  - path_regex: secrets/target\.yaml$
-    key_groups:
-      - age:
-          # Workstation recovery identity.
-          - age1l4sguf839qt6jdc326g2hnv69xn5yl399lgvlhqpj2nmpf5y6g7q8a754a
-          # Age recipient derived from the preserved target SSH host key.
-          - age1yr94v5wvdq8fhs50564vumvvedulj3s2pn5yhq243l5unr5yfpksq29q9w

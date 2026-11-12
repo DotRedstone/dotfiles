@@ -18,7 +18,6 @@
 
 - `conduit`：洛杉矶边缘节点；仅承载声明式代理与基础设施。
 - `hopper`：Oracle ARM 应用节点；业务按域拆分，原生服务优先。
-- `target`：国内 EasyTier / 游戏端口转发节点（无 HTTP 反代或代理）。
 
-`repeater` 和其他尚未完整收编的机器不能直接照抄进本目录；先满足
-`../inventory/README.md` 中的收编条件。
+`repeater` 由独立的 `~/Projects/repeater-nixos` Flake 管理（不在本目录）；
+它尚未并入本 Flake 前，不能直接照抄进 `hosts/`。

@@ -71,15 +71,5 @@
         x86_64-linux.proxyStackWorkerBundles = proxyStack.checks.x86_64-linux.workerBundles;
         aarch64-linux.proxyStackWorkerBundles = proxyStack.checks.aarch64-linux.workerBundles;
       };
-
-      nixosConfigurations = {
-        target = nixpkgs.lib.nixosSystem {
-          specialArgs = { proxyStack = null; inherit edgeProxyWorker; };
-          modules = [
-            sops-nix.nixosModules.sops
-            ./hosts/target
-          ];
-        };
-      };
     };
 }

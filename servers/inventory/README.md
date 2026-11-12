@@ -21,8 +21,8 @@ Flake 重建的配置；本目录保存在线状态、缺失信息和收编条�
 | --- | --- | --- |
 | `conduit` | 已受管 | 日常维护与备份策略 |
 | `hopper` | 已受管 | 日常备份策略与恢复演练 |
-| `repeater`（阿里云中转及应用服务节点） | **未纳管外部主机**；在线 NixOS，运行 Vaultwarden、Komari、AstrBot 等服务，整机配置源码缺失 | 仅登记依赖；盘点硬件、网络、服务和数据布局后再考虑收编 |
-| `target` | 已收编，现网尚未退役 | 到期后停止维护；已移除历史 probe 预览模块，见 [target 收编卡](./target.md) |
+| `repeater`（阿里云中转及应用服务节点） | 由独立 `~/Projects/repeater-nixos` Flake 管理；不在本 Flake | 保留依赖登记；后续可考虑并入本 Flake |
+| `target` | 已退役（2026-11-10） | 见 [target 收编卡](./target.md)；已从 Flake 移除 |
 | `beacon` | 根目录 `hosts/beacon` 已有 macOS / nix-darwin 声明，不属于本服务器 Flake | 按根目录说明独立部署；运行可达性未验证 |
 
 `repeater` 不登记登录凭据，仅有 Hopper 备份拉取所用的 restic/SSH 凭据；

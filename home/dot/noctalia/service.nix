@@ -1,9 +1,10 @@
 # ---
 # Module: Noctalia User Service
-# Description: Run Noctalia shell under the user systemd session
+# Description: Declare Noctalia shell user service for on-demand use
 # Scope: Home Manager
 # ---
 # Notes:
+# - Default-disabled; run on demand via `desktop-shell noctalia`.
 # - Keep Niri startup responsible for compositor helpers only; systemd owns the shell lifetime.
 # - ExecStartPre only removes Noctalia's runtime sockets, not user data or generated config.
 # - Kill only the shell process on restart so apps launched through Noctalia are not torn down.
@@ -59,7 +60,5 @@ in
       Restart = "always";
       RestartSec = "2s";
     };
-
-    Install.WantedBy = [ "graphical-session.target" ];
   };
 }

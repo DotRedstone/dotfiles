@@ -42,6 +42,27 @@ let
       fi
     }
 
+    ensure_pinned_source() {
+      expected="nmc path $1"
+      source_list="$("$noctalia" msg plugins source list 2>/dev/null || true)"
+      current="$(printf '%s\n' "$source_list" | "$grep" '^nmc ' | "${pkgs.coreutils}/bin/head" -n 1)"
+      [ "$current" = "$expected" ] && return 0
+
+      old_location=""
+      case "$current" in
+        'nmc path '*) old_location="''${current#nmc path }" ;;
+      esac
+      if [ -n "$current" ]; then
+        "$noctalia" msg plugins source remove nmc >/dev/null 2>&1 || return 1
+      fi
+      if ! "$noctalia" msg plugins source add nmc path "$1" >/dev/null 2>&1; then
+        if [ -n "$old_location" ]; then
+          "$noctalia" msg plugins source add nmc path "$old_location" >/dev/null 2>&1 || true
+        fi
+        return 1
+      fi
+    }
+
     ensure_plugin() {
       id="$1"
 
@@ -62,7 +83,9 @@ let
     ensure_source official git https://github.com/noctalia-dev/official-plugins
     ensure_source community git https://github.com/noctalia-dev/community-plugins
     ensure_source dot path /home/dot/.dotfiles/home/dot/noctalia/plugins
-    ensure_source nmc path ${inputs.noctalia-mihomo-control}
+    if ! ensure_pinned_source ${inputs.noctalia-mihomo-control}; then
+      echo "Noctalia Mihomo 插件源更新失败，已尝试保留旧源。" >&2
+    fi
 
     disable_plugin dot/sidebar
     disable_plugin dot/md3_dashboard

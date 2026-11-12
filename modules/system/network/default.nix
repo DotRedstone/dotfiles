@@ -8,6 +8,7 @@
   imports = [
     ./networkmanager.nix
     ./mihomo.nix
+    ./mihomo-profiles.nix
     ./mihomo-lifecycle.nix
     ./firewall.nix
     ./easytier.nix

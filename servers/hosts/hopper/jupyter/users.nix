@@ -42,6 +42,15 @@
     for account in jupyter-dot jupyter-fogelamp; do
       home_dir="$(getent passwd "$account" | cut -d: -f6)"
       venv_dir="$home_dir/.venvs/python-project"
+      venv_home="${config.services.jupyterhub.jupyterlabEnv}/bin"
+
+      # venv 指向 Nix store 中的解释器；jupyterlabEnv 更新并被 GC 后链接会悬空。
+      # `python -m venv` 不会覆盖已存在的（含悬空）符号链接，因此先删除旧解释器链接，
+      # 保留 site-packages 中用户自行 pip 安装的包。
+      if [ -f "$venv_dir/pyvenv.cfg" ] \
+        && ! grep -qxF "home = $venv_home" "$venv_dir/pyvenv.cfg"; then
+        find "$venv_dir/bin" -maxdepth 1 -type l -name '*thon*' -delete
+      fi
 
       if [ ! -x "$venv_dir/bin/python" ] || [ ! -x "$venv_dir/bin/pip" ]; then
         ${pkgs.util-linux}/bin/runuser -u "$account" -- \

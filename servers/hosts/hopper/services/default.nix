@@ -10,6 +10,7 @@
     ./dsh-coding-agents.nix
     ./dsh-remote-server/service.nix
     ./workbuddy2api/service.nix
+    ./workbuddy2api/autoupdate.nix
     ./cf-home-proxy.nix
   ];
 }

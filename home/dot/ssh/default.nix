@@ -15,7 +15,6 @@
       "vps/beacon"   = {};
       "vps/conduit"  = {};
       "vps/hopper"   = {};
-      "vps/target"   = {};
       "vps/repeater" = {};
     };
 
@@ -38,10 +37,6 @@
         ControlPersist 1h
         TCPKeepAlive yes
         IPQoS throughput
-
-      Host target
-        HostName ${config.sops.placeholder."vps/target"}
-        User dot
 
       Host repeater
         HostName ${config.sops.placeholder."vps/repeater"}

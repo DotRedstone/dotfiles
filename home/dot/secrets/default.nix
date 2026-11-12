@@ -27,7 +27,6 @@
       "vps/beacon" = {};
       "vps/conduit" = {};
       "vps/hopper" = {};
-      "vps/target" = {};
       "vps/repeater" = {};
     };
   };

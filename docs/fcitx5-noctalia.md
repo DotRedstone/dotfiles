@@ -1,5 +1,9 @@
 # Fcitx5 与 Noctalia 主题同步
 
+> **当前状态**：主题由 Noctalia 的 `user-templates.toml` 渲染，而 Noctalia
+> 外壳已改为按需启动。因此输入法主题只会在 Noctalia 运行时刷新，其余时间
+> 沿用上次生成的结果；主题文件本身仍由 Home Manager 声明。
+
 本系统通过 Noctalia 动态生成输入法主题，确保输入法候选框的配色与桌面环境保持一致。
 
 ## 配置结构

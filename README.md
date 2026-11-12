@@ -9,8 +9,8 @@
 
 - **主机 (Host)**: `warden` (Redmi Book Pro 16 2024)
 - **用户 (User)**: `dot`
-- **桌面环境**: [Niri](./docs/desktop-niri.md) + [Noctalia](./docs/noctalia.md)
-- **输入法**: [Fcitx5 + Rime Ice + Noctalia 动态主题](./docs/fcitx5-rime.md)
+- **桌面环境**: [Niri](./docs/desktop-niri.md) + [DMS 2](./home/dot/desktop-shells/README.md)（[Noctalia](./docs/noctalia.md) 保留为按需外壳与视觉系统）
+- **输入法**: [Fcitx5 + Rime Ice](./docs/fcitx5-rime.md)（主题由 [Noctalia 模板](./docs/fcitx5-noctalia.md)渲染）
 - **存储方案**: [Btrfs + Impermanence](./docs/impermanence.md) (无状态根目录)
 - **通知系统**: [QQ 原生通知，WeChat 使用自定义通知桥](./docs/notifications.md)
 

@@ -1,6 +1,11 @@
 # Noctalia 视觉系统
 
-Noctalia 是系统的核心外壳 (Shell) 与视觉样式管理中心，基于 Material Design 3 (MD3) 规范构建。
+> **当前状态**：桌面外壳已是 DMS 2（`dms.service`），`noctalia.service` 仅在
+> `desktop-shell` 显式切换时启动。Noctalia 的视觉系统（MD3 颜色令牌与
+> `user-templates.toml`）仍被各应用主题引用，但因运行时外壳不再常驻，
+> 配色只在 Noctalia 运行时重新渲染；静止期间沿用上次生成的结果。
+
+Noctalia 的视觉样式管理中心基于 Material Design 3 (MD3) 规范构建。
 
 ## 动态配色同步 (User Templates)
 

@@ -9,7 +9,8 @@
 | 要修改的内容 | 入口 |
 | --- | --- |
 | 桌面会话、窗口、快捷键 | `niri/` |
-| Noctalia Shell、插件、翻译与动态主题 | [`noctalia/README.md`](./noctalia/README.md) |
+| 桌面外壳（DMS 2 / Clavis 打包与切换） | [`desktop-shells/README.md`](./desktop-shells/README.md) |
+| Noctalia 视觉系统、插件与动态主题（按需使用） | [`noctalia/README.md`](./noctalia/README.md) |
 | 输入法和 Rime | [`fcitx5/README.md`](./fcitx5/README.md) |
 | Neovim / NixVim | [`nixvim/README.md`](./nixvim/README.md) |
 | 浏览器 | `firefox/`、`chrome/`、`zen-browser/` |

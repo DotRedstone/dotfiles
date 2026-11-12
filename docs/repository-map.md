@@ -13,7 +13,7 @@
 | Warden 全局系统能力 | `modules/system/default.nix` | `modules/system/<domain>/` | `sudo nixos-rebuild dry-run --flake .#warden` |
 | Beacon（Mac mini 无头主机） | `hosts/beacon/README.md` | `hosts/beacon/` | `nix eval --raw .#darwinConfigurations.beacon.system.drvPath` |
 | 桌面、Shell、应用和用户服务 | `home/dot/default.nix` | `home/dot/<app>/` | `home-manager build --flake .#dot@warden` |
-| Niri / Noctalia / 视觉语言 | `docs/desktop-niri.md`、`home/dot/noctalia/README.md` | 对应 Home Manager 模块 | `home-manager build --flake .#dot@warden` |
+| Niri / 桌面 Shell / 视觉语言 | `docs/desktop-niri.md`、`home/dot/desktop-shells/README.md` | 对应 Home Manager 模块 | `home-manager build --flake .#dot@warden` |
 | Fcitx5 / Rime | `docs/fcitx5-rime.md`、`home/dot/fcitx5/README.md` | `home/dot/fcitx5/` | `home-manager build --flake .#dot@warden` |
 | 云主机或服务器服务 | `servers/README.md`、`servers/AGENTS.md` | `servers/hosts/` 或 `servers/modules/` | `nix flake check path:./servers` |
 | 双节点代理通用规则或编译器 | `/home/dot/Projects/proxy-stack/README.md` | 独立 `proxy-stack` 仓库 | `node --test test/*.test.mjs`、`nix flake check path:.` |
@@ -32,11 +32,17 @@
 ├── hosts/beacon/             Mac mini 的 nix-darwin 主机配置（aarch64-darwin）
 ├── modules/system/           Warden 可复用的系统能力
 ├── home/dot/                 dot 的 Home Manager 模块
+├── secrets.yaml              vps 主机地址（SOPS）
+├── secrets/                  桌面应用密钥（SOPS）
+├── docs/                     跨模块概念与维护说明
+├── scripts/                  手动诊断与辅助脚本
 └── servers/
     ├── flake.nix             云服务器 Flake
     ├── hosts/                每台已受管主机的组装层
     ├── modules/server/       所有服务器共享安全基线
     ├── modules/services/     可复用的服务选项模块
+    ├── proxy-deployment/     代理账户、节点来源与部署编排
+    ├── secrets/              服务器 SOPS 密钥
     └── cloudflare/           Worker 与边缘控制面
 ```
 

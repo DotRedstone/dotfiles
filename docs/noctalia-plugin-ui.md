@@ -1,5 +1,9 @@
 # Noctalia 本地插件维护
 
+> **当前状态**：桌面外壳已切换到 DMS 2，`noctalia.service` 不再随图形会话
+> 启动，因此下列插件只在手动运行 Noctalia 时才加载。保留它们是为了
+> `desktop-shell noctalia` 仍可完整切换回去。
+
 本仓库当前使用 Noctalia v5 插件结构。本地插件位于
 [`home/dot/noctalia/plugins/`](../home/dot/noctalia/plugins/)；
 [插件同步模块](../home/dot/noctalia/plugins.nix)负责注册来源并启用所需插件。

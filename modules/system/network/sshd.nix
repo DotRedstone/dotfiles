@@ -10,8 +10,8 @@
     openFirewall = true;
     settings = {
       AllowUsers = [ "dot" "devguest" ];
-      KbdInteractiveAuthentication = false;
-      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = true;
+      PasswordAuthentication = true;
       PermitRootLogin = "no";
     };
   };

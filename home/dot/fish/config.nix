@@ -194,4 +194,24 @@
       bqr = "sudo btrfs quota rescan /";
     };
   };
+
+  # [Bash Bridge]
+  # 登录 shell 是 bash（见 modules/system/users/accounts.nix），交互 shell 从这里
+  # 切到 fish；非交互的 bash -c（SSH 远程命令 / dsh-go / dsh-remote）保持 bash，
+  # 避免 fish 解析 POSIX 语法时报错。
+  programs.bash = {
+    enable = true;
+    # 保留原先手动 ~/.profile 里的环境脚本加载（~/.local/bin 进 PATH）。
+    profileExtra = ''
+      . "$HOME/.local/bin/env"
+    '';
+    bashrcExtra = ''
+      if [ -n "$PS1" ] && command -v fish >/dev/null 2>&1; then
+        exec fish
+      fi
+    '';
+  };
+
+  # 允许 home-manager 覆盖手动创建的 ~/.profile（内容已并入 profileExtra）。
+  home.file.".profile".force = true;
 }

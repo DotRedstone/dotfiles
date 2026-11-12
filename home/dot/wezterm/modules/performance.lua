@@ -1,6 +1,6 @@
 -- ---
 -- Module: WezTerm - Performance
--- Description: WebGPU backend and Wayland enablement
+-- Description: OpenGL backend and Wayland enablement
 -- Scope: Home Manager
 -- ---
 
@@ -8,7 +8,8 @@ local M = {}
 
 function M.apply(config, _)
   -- [Performance & Backend]
-  config.front_end = "WebGpu"
+  -- Use OpenGL for instantaneous config & theme reloading without pipeline teardown
+  config.front_end = "OpenGL"
   config.enable_wayland = true
   config.webgpu_power_preference = "HighPerformance"
 end

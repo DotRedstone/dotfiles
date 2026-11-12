@@ -123,6 +123,12 @@
       ];
     };
 
+    # [Home - box (云电脑，Debian 上的独立 Home Manager)]
+    homeConfigurations."box@cloud" = home-manager.lib.homeManagerConfiguration {
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      modules = [ ./home/box ];
+    };
+
     # [Darwin - beacon (Mac mini headless)]
     darwinConfigurations.beacon = inputs.darwin.lib.darwinSystem {
       modules = [

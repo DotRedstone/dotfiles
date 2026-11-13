@@ -20,5 +20,10 @@
     tree
     gnused
     fastfetch
+
+    # [Disk & Partitioning]
+    gptfdisk       # sgdisk (GPT 分区表)
+    parted         # parted + partprobe
+    btrfs-progs    # mkfs.btrfs / btrfs 子卷与快照
   ];
 }

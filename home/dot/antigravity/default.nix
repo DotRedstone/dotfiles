@@ -8,12 +8,12 @@
 
 let
   antigravity = inputs.antigravity-nix.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-no-fhs;
-  chineseLocalizationVersion = "2.31.0-6379060755038208";
+  chineseLocalizationVersion = "2.17.0-5217732355031040";
   chineseLocalization = pkgs.fetchFromGitHub {
     owner = "Silas-02";
     repo = "antigravity2-win-linux-cn";
-    rev = "fbb963f68eee088e204e58b227ffd848e489271a";
-    hash = "sha256-BMEwbQ4Om8BkTDpkCaZduz3JHEHlwF5cf6qHieo9khU=";
+    rev = "f3cdcf59a187b88de8cb755f15a68f41868d9469";
+    hash = "sha256-Mk3M5BGJ2O6ax2zYqp/l+K7N+P/itM5trCORVuPcTRQ=";
   };
   localizedAntigravity = assert lib.assertMsg
     (antigravity.version == chineseLocalizationVersion)

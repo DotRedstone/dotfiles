@@ -142,5 +142,62 @@
       ];
       specialArgs = { inherit inputs; };
     };
+
+    # [DevShell - PixelOS 编译环境]
+    # AOSP 构建系统（soong/envsetup）依赖 /bin/sh、/usr/lib 等 FHS 路径，
+    # 必须用 buildFHSEnv 包裹，否则在 NixOS 上会因找不到标准路径而崩。
+    devShells.x86_64-linux.pixelos = let
+      pkgs = import nixpkgs {
+        localSystem = system;
+        config.allowUnfree = true;
+      };
+      # AOSP 的构建脚本直接调用 python（PEP394 下 nix 的 python312 只提供 python3），
+      # 这里补一个 python -> python3 别名。
+      pythonWithAlias = pkgs.runCommand "python-with-alias" { } ''
+        mkdir -p "$out/bin"
+        ln -s "${pkgs.python312}/bin/python3" "$out/bin/python"
+      '';
+    in pkgs.buildFHSEnv {
+      name = "pixelos-build";
+      targetPkgs = p: with p; [
+        # [工具链]
+        git
+        git-lfs
+        git-repo
+        python312
+        pythonWithAlias
+        jdk17
+        gnumake
+        gcc
+        binutils
+        bison
+        flex
+        gperf
+        zip
+        unzip
+        rsync
+        bc
+        curl
+        ccache
+        cpio
+        file
+        which
+        perl
+        patchelf
+        # [库]
+        openssl
+        elfutils
+        ncurses
+        libxml2
+        libxslt
+        zlib
+        lz4
+        readline
+        # [Android 16 额外：aconfig/protobuf]
+        protobuf
+      ];
+      multiPkgs = p: [ p.glibc_multi ];
+      runScript = "bash";
+    };
   };
 }

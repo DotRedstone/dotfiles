@@ -19,6 +19,10 @@
       "/var/lib/mihomo"
       # UniVPN client state, certificate cache, and sysconfig
       "/var/lib/univpn"
+      # UniVPN 以 root 运行（pkexec 提权建 TUN），UserPath=/root，UI 主程序把
+      # sysconfig.ini 与登录状态写进 /root/UniVPN（而非 dot 的 ~/UniVPN 或
+      # /var/lib/univpn）。/root 默认不持久化，重启后登录状态丢失。
+      "/root/UniVPN"
     ];
   };
 }

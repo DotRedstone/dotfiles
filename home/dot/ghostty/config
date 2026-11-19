@@ -1,14 +1,35 @@
 # ---
 # Module: Ghostty Configuration
-# Description: 试用期配置，重点验证滚动手感与字体渲染
+# Description: 试用期配置，视觉与 WezTerm 的 visuals/ui/theme 模块对齐
 # Scope: Home Manager
 # ---
 
 # [Font]
+# 与 wezterm/modules/visuals.lua 的字体栈和字号保持一致
 font-family = Maple Mono NF
 font-family = Noto Sans CJK SC
 font-family = Symbols Nerd Font Mono
 font-size = 12
+
+# [Theme]
+# 由 desktop-shells/dms.nix 的 ghostty_noctalia 模板生成，与 WezTerm 的
+# colors/Noctalia.toml 取自同一组颜色令牌。主题缺失时 Ghostty 只告警不退出。
+theme = Noctalia
+
+# [Window Chrome]
+# 对齐 ui.lua：window_decorations = "NONE"、enable_tab_bar = false，
+# 以及 left/right 1cell、top/bottom 0.5cell 的内边距（按 12pt 字宽换算像素）。
+window-decoration = false
+gtk-tabs-location = hidden
+window-padding-x = 10
+window-padding-y = 8
+window-padding-balance = true
+background-opacity = 1
+
+# [Cursor]
+# 对齐 visuals.lua 的 BlinkingBar
+cursor-style = bar
+cursor-style-blink = true
 
 # [Scroll]
 # precision 对应触控板等像素精度设备，discrete 对应滚轮。

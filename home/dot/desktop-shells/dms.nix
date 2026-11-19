@@ -99,6 +99,33 @@ let
     name = "Noctalia"
   '';
 
+  # Ghostty 主题文件只接受 key=value，不能带 WezTerm 的 [metadata] 段。
+  # 颜色令牌与 weztermNoctaliaTemplate 保持一致，避免两个终端配色漂移。
+  ghosttyNoctaliaTemplate = pkgs.writeText "ghostty-noctalia.template" ''
+    palette = 0={{dank16term.color0.default.hex}}
+    palette = 1={{dank16term.color1.default.hex}}
+    palette = 2={{dank16term.color2.default.hex}}
+    palette = 3={{dank16term.color3.default.hex}}
+    palette = 4={{dank16term.color4.default.hex}}
+    palette = 5={{dank16term.color5.default.hex}}
+    palette = 6={{dank16term.color6.default.hex}}
+    palette = 7={{dank16term.color7.default.hex}}
+    palette = 8={{dank16term.color8.default.hex}}
+    palette = 9={{dank16term.color9.default.hex}}
+    palette = 10={{dank16term.color10.default.hex}}
+    palette = 11={{dank16term.color11.default.hex}}
+    palette = 12={{dank16term.color12.default.hex}}
+    palette = 13={{dank16term.color13.default.hex}}
+    palette = 14={{dank16term.color14.default.hex}}
+    palette = 15={{dank16term.color15.default.hex}}
+    background = {{colors.background.default.hex}}
+    foreground = {{colors.on_surface.default.hex}}
+    cursor-color = {{colors.primary.default.hex}}
+    cursor-text = {{colors.on_primary.default.hex}}
+    selection-background = {{colors.primary_container.default.hex}}
+    selection-foreground = {{colors.on_primary_container.default.hex}}
+  '';
+
   dmsObsidianSync = pkgs.writeShellScript "dms-obsidian-sync" ''
     set -eu
     bash "${homeDir}/.local/state/noctalia/community-templates/obsidian/apply.sh" output 2>/dev/null | while IFS= read -r dst; do
@@ -748,6 +775,10 @@ in
     [templates.wezterm_noctalia]
     input_path = "${weztermNoctaliaTemplate}"
     output_path = "${homeDir}/.config/wezterm/colors/Noctalia.toml"
+
+    [templates.ghostty_noctalia]
+    input_path = "${ghosttyNoctaliaTemplate}"
+    output_path = "${homeDir}/.config/ghostty/themes/Noctalia"
 
     [templates.kitty_noctalia]
     input_path = "${dms-shell}/share/quickshell/dms/matugen/templates/kitty.conf"

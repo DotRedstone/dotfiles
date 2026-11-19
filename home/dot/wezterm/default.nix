@@ -24,6 +24,11 @@ in {
     force = true;
   };
 
+  xdg.configFile."wezterm/modules/scroll.lua" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${dotfilesWezterm}/modules/scroll.lua";
+    force = true;
+  };
+
   xdg.configFile."wezterm/modules/ui.lua" = {
     source = config.lib.file.mkOutOfStoreSymlink "${dotfilesWezterm}/modules/ui.lua";
     force = true;

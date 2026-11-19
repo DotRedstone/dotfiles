@@ -14,6 +14,7 @@ package.path = config_dir .. "/?.lua;" .. config_dir .. "/?/init.lua;" .. packag
 
 -- [Modules]
 require("modules.visuals").apply(config, wezterm)
+require("modules.scroll").apply(config, wezterm)
 require("modules.ui").apply(config, wezterm)
 require("modules.performance").apply(config, wezterm)
 require("modules.theme").apply(config, wezterm)

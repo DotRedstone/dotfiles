@@ -27,9 +27,12 @@ window-padding-balance = true
 background-opacity = 1
 
 # [Cursor]
-# 对齐 visuals.lua 的 BlinkingBar
+# 对齐 visuals.lua 的 BlinkingBar + cursor_thickness = "2pt"。
+# adjust-cursor-thickness 是在字体原始值上增减的像素数，不是绝对值；
+# 觉得还细就调到 3 或 4，想更细回到 1。
 cursor-style = bar
 cursor-style-blink = true
+adjust-cursor-thickness = 2
 
 # [Scroll]
 # precision 对应触控板等像素精度设备，discrete 对应滚轮。

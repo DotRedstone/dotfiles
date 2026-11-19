@@ -76,7 +76,6 @@ EOF
 
       stop_all_shells() {
         systemctl --user stop \
-          niri-bar-sync.service \
           dms.service \
           clavis-shell.service \
           clavis-clipboard.service 2>/dev/null || true
@@ -105,7 +104,7 @@ EOF
             write_default_dms_binds "$binds_file"
           fi
           stop_all_shells
-          systemctl --user start dms.service niri-bar-sync.service
+          systemctl --user start dms.service
           sync_tray_items
           show_status
           ;;

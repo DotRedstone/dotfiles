@@ -1,0 +1,23 @@
+# ---
+# Module: Ghostty Configuration
+# Description: 试用期配置，重点验证滚动手感与字体渲染
+# Scope: Home Manager
+# ---
+
+# [Font]
+font-family = Maple Mono NF
+font-family = Noto Sans CJK SC
+font-family = Symbols Nerd Font Mono
+font-size = 12
+
+# [Scroll]
+# precision 对应触控板等像素精度设备，discrete 对应滚轮。
+# 验收滚动是否顺滑时主要看 precision 这一项：1 表示严格跟随像素增量，
+# 可以在行中间停住；discrete 的 3 是每格行数，觉得快就调小。
+mouse-scroll-multiplier = precision:1,discrete:3
+scrollback-limit-lines = unlimited
+scrollbar = system
+
+# [Input]
+# 关闭输入时自动回到底部，阅读历史输出时不被打断。
+scroll-to-bottom = keystroke

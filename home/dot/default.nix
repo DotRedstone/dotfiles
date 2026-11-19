@@ -15,6 +15,7 @@
     ./starship
     ./zellij
     ./wezterm
+    ./ghostty
     # ./kitty (Optional/Disabled)
     
     # --- Desktop & System UI ---
@@ -52,6 +53,7 @@
     ./multimedia
     ./piclist
     ./rustdesk
+    ./uu-remote
     ./codex
     ./claude-desktop
     ./workbuddy

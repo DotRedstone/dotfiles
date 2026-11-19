@@ -143,8 +143,16 @@ let
   niri-fullscreen-toggle = pkgs.writeShellScriptBin "niri-fullscreen-toggle" ''
     set -u
 
+    # DMS 的 bar IPC 会把 visible 写进 settings，而每次 settings 变更都会整棵
+    # 重建 bar 控件树。sync 在滚动切工作区时会连发多个事件，重复下发相同状态
+    # 就会造成反复重建，因此这里先比对当前状态，值没变就不发指令。
+    bar_visible() {
+      [ "$(dms ipc call bar status id default 2>/dev/null)" = "visible" ]
+    }
+
     bar_show() {
       if ${pkgs.systemd}/bin/systemctl --user is-active --quiet dms.service; then
+        bar_visible && return 0
         dms ipc call bar reveal id default >/dev/null 2>&1 || true
       elif ${pkgs.systemd}/bin/systemctl --user is-active --quiet noctalia.service; then
         noctalia msg bar-show default >/dev/null 2>&1 || true
@@ -153,6 +161,7 @@ let
 
     bar_hide() {
       if ${pkgs.systemd}/bin/systemctl --user is-active --quiet dms.service; then
+        bar_visible || return 0
         dms ipc call bar hide id default >/dev/null 2>&1 || true
       elif ${pkgs.systemd}/bin/systemctl --user is-active --quiet noctalia.service; then
         noctalia msg bar-hide default >/dev/null 2>&1 || true
@@ -203,8 +212,16 @@ let
     state_dir="''${XDG_RUNTIME_DIR:-/tmp}/niri-fullscreen-toggle"
     ${pkgs.coreutils}/bin/mkdir -p "$state_dir"
 
+    # DMS 的 bar IPC 会把 visible 写进 settings，而每次 settings 变更都会整棵
+    # 重建 bar 控件树。sync 在滚动切工作区时会连发多个事件，重复下发相同状态
+    # 就会造成反复重建，因此这里先比对当前状态，值没变就不发指令。
+    bar_visible() {
+      [ "$(dms ipc call bar status id default 2>/dev/null)" = "visible" ]
+    }
+
     bar_show() {
       if ${pkgs.systemd}/bin/systemctl --user is-active --quiet dms.service; then
+        bar_visible && return 0
         dms ipc call bar reveal id default >/dev/null 2>&1 || true
       elif ${pkgs.systemd}/bin/systemctl --user is-active --quiet noctalia.service; then
         noctalia msg bar-show default >/dev/null 2>&1 || true
@@ -213,6 +230,7 @@ let
 
     bar_hide() {
       if ${pkgs.systemd}/bin/systemctl --user is-active --quiet dms.service; then
+        bar_visible || return 0
         dms ipc call bar hide id default >/dev/null 2>&1 || true
       elif ${pkgs.systemd}/bin/systemctl --user is-active --quiet noctalia.service; then
         noctalia msg bar-hide default >/dev/null 2>&1 || true

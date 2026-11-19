@@ -15,7 +15,7 @@
 | Neovim / NixVim | [`nixvim/README.md`](./nixvim/README.md) |
 | 浏览器 | `firefox/`、`chrome/`、`zen-browser/` |
 | 用户级 Mihomo 代理与独立 Chrome | `box-proxy/`、[`docs/box-proxy.md`](../../docs/box-proxy.md) |
-| 终端与交互 Shell | `fish/`、`starship/`、`wezterm/`、`zellij/` |
+| 终端与交互 Shell | `fish/`、`starship/`、`ghostty/`、`zellij/` |
 | 开发工具 | `dev/`、`vscode/`、`nixvim/`、`cli-tools/` |
 | 应用默认打开方式 | `default-apps/` |
 | SOPS 解密后的用户密钥映射 | `secrets/` |

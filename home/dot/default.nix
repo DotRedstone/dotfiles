@@ -14,7 +14,6 @@
     ./fish
     ./starship
     ./zellij
-    ./wezterm
     ./ghostty
     # ./kitty (Optional/Disabled)
     

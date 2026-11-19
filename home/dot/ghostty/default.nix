@@ -1,6 +1,6 @@
 # ---
 # Module: Ghostty
-# Description: GPU 加速、原生 Wayland 的终端模拟器，用于评估替代 WezTerm
+# Description: GPU 加速、原生 Wayland 的默认终端模拟器
 # Scope: Home Manager
 # ---
 

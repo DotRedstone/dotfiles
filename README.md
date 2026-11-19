@@ -37,7 +37,7 @@
   - [密钥管理](./docs/secrets-sops.md)
   - [微信集成](./docs/wechat.md)
   - [通知链路](./docs/notifications.md)
-  - [终端 (WezTerm)](./docs/terminal-wezterm.md)
+  - [终端 (Ghostty)](./docs/terminal-ghostty.md)
   - [编辑器 (NixVim)](./docs/editor-nixvim.md)
   - [本机 Mihomo 与 Noctalia](./docs/mihomo.md)
   - [用户级 Mihomo 代理与独立 Chrome](./docs/box-proxy.md)

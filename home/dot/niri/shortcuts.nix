@@ -52,7 +52,7 @@ let
 
     # Terminal detection
     is_terminal() {
-      [[ "$APP_ID" == *"wezterm"* ]] || \
+      [[ "$APP_ID" == *"ghostty"* ]] || \
       [[ "$APP_ID" == "foot" ]] || \
       [[ "$APP_ID" == "alacritty" ]] || \
       [[ "$APP_ID" == "kitty" ]]

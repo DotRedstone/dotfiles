@@ -47,7 +47,7 @@ binds {
     }
 
     // Applications
-    Mod+Return hotkey-overlay-title="终端" { spawn "wezterm"; }
+    Mod+Return hotkey-overlay-title="终端" { spawn "ghostty"; }
     Mod+W hotkey-overlay-title="Zen Browser" { spawn "zen"; }
     Mod+E hotkey-overlay-title="文件" { spawn "dolphin"; }
 

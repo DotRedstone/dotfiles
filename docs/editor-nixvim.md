@@ -48,4 +48,4 @@ NixVim 的配色通过 Noctalia 模板系统同步。
 
 相关链接：
 - [Noctalia 视觉系统](./noctalia.md)
-- [终端 (WezTerm)](./terminal-wezterm.md)
+- [终端 (Ghostty)](./terminal-ghostty.md)

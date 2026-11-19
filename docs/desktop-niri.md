@@ -22,7 +22,7 @@ Niri 启动时会通过 `spawn-at-startup` 执行以下序列：
 ### 应用启动与系统
 | 按键 | 功能 |
 | :--- | :--- |
-| `Mod + Return` | 启动 WezTerm (终端) |
+| `Mod + Return` | 启动 Ghostty (终端) |
 | `Mod + W` | 启动 Firefox (浏览器) |
 | `Mod + E` | 启动 Nautilus (文件管理器) |
 | `Mod + R` | 切换 Noctalia Launcher (启动器) |

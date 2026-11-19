@@ -12,95 +12,8 @@ let
   noctaliaAssets = "${config.programs.noctalia.package}/share/noctalia/assets";
   homeDir = config.home.homeDirectory;
 
-  weztermNoctaliaTemplate = pkgs.writeText "wezterm-noctalia.toml.template" ''
-    [colors]
-    ansi = [
-        "{{dank16term.color0.default.hex}}",
-        "{{dank16term.color1.default.hex}}",
-        "{{dank16term.color2.default.hex}}",
-        "{{dank16term.color3.default.hex}}",
-        "{{dank16term.color4.default.hex}}",
-        "{{dank16term.color5.default.hex}}",
-        "{{dank16term.color6.default.hex}}",
-        "{{dank16term.color7.default.hex}}",
-    ]
-    background = "{{colors.background.default.hex}}"
-    brights = [
-        "{{dank16term.color8.default.hex}}",
-        "{{dank16term.color9.default.hex}}",
-        "{{dank16term.color10.default.hex}}",
-        "{{dank16term.color11.default.hex}}",
-        "{{dank16term.color12.default.hex}}",
-        "{{dank16term.color13.default.hex}}",
-        "{{dank16term.color14.default.hex}}",
-        "{{dank16term.color15.default.hex}}",
-    ]
-    compose_cursor = "{{colors.primary.default.hex}}"
-    cursor_bg = "{{colors.primary.default.hex}}"
-    cursor_border = "{{colors.primary.default.hex}}"
-    cursor_fg = "{{colors.on_primary.default.hex}}"
-    foreground = "{{colors.on_surface.default.hex}}"
-    scrollbar_thumb = "{{colors.primary_container.default.hex}}"
-    selection_bg = "{{colors.primary_container.default.hex}}"
-    selection_fg = "{{colors.on_primary_container.default.hex}}"
-    split = "{{colors.outline_variant.default.hex}}"
-    visual_bell = "{{colors.surface_variant.default.hex}}"
 
-    [colors.indexed]
-    16 = "{{colors.secondary.default.hex}}"
-    17 = "{{colors.primary.default.hex}}"
-
-    [colors.tab_bar]
-    background = "{{colors.surface_container_lowest.default.hex}}"
-    inactive_tab_edge = "{{colors.surface_variant.default.hex}}"
-
-    [colors.tab_bar.active_tab]
-    bg_color = "{{colors.primary.default.hex}}"
-    fg_color = "{{colors.on_primary.default.hex}}"
-    intensity = "Normal"
-    italic = false
-    strikethrough = false
-    underline = "None"
-
-    [colors.tab_bar.inactive_tab]
-    bg_color = "{{colors.surface_container.default.hex}}"
-    fg_color = "{{colors.on_surface.default.hex}}"
-    intensity = "Normal"
-    italic = false
-    strikethrough = false
-    underline = "None"
-
-    [colors.tab_bar.inactive_tab_hover]
-    bg_color = "{{colors.surface_container_high.default.hex}}"
-    fg_color = "{{colors.on_surface.default.hex}}"
-    intensity = "Normal"
-    italic = false
-    strikethrough = false
-    underline = "None"
-
-    [colors.tab_bar.new_tab]
-    bg_color = "{{colors.surface_variant.default.hex}}"
-    fg_color = "{{colors.on_surface.default.hex}}"
-    intensity = "Normal"
-    italic = false
-    strikethrough = false
-    underline = "None"
-
-    [colors.tab_bar.new_tab_hover]
-    bg_color = "{{colors.outline_variant.default.hex}}"
-    fg_color = "{{colors.on_surface.default.hex}}"
-    intensity = "Normal"
-    italic = false
-    strikethrough = false
-    underline = "None"
-
-    [metadata]
-    author = "Noctalia"
-    name = "Noctalia"
-  '';
-
-  # Ghostty 主题文件只接受 key=value，不能带 WezTerm 的 [metadata] 段。
-  # 颜色令牌与 weztermNoctaliaTemplate 保持一致，避免两个终端配色漂移。
+  # Ghostty 主题文件只接受 key=value，不能带段落式元数据。
   ghosttyNoctaliaTemplate = pkgs.writeText "ghostty-noctalia.template" ''
     palette = 0={{dank16term.color0.default.hex}}
     palette = 1={{dank16term.color1.default.hex}}
@@ -296,7 +209,7 @@ EOF
             "telegram": ["org.telegram.desktop", "telegram-desktop", "telegram"],
             "zen": ["zen-beta", "zen-browser", "zen", "app.zen_browser.zen"],
             "zen browser": ["zen-beta", "zen-browser", "zen"],
-            "wezterm": ["org.wezfurlong.wezterm", "wezterm"],
+            "ghostty": ["com.mitchellh.ghostty", "ghostty"],
             "vscode": ["code", "code-url-handler", "vscodium"],
             "code": ["code", "code-url-handler"],
             "antigravity": ["antigravity"]
@@ -771,10 +684,6 @@ in
     [templates.qt6_noctalia]
     input_path = "${noctaliaAssets}/templates/qt/qtct.conf"
     output_path = "${homeDir}/.config/qt6ct/colors/noctalia.conf"
-
-    [templates.wezterm_noctalia]
-    input_path = "${weztermNoctaliaTemplate}"
-    output_path = "${homeDir}/.config/wezterm/colors/Noctalia.toml"
 
     [templates.ghostty_noctalia]
     input_path = "${ghosttyNoctaliaTemplate}"

@@ -39,5 +39,5 @@
 
 相关链接：
 - [微信集成](./wechat.md)
-- [终端 (WezTerm)](./terminal-wezterm.md)
+- [终端 (Ghostty)](./terminal-ghostty.md)
 - [编辑器 (NixVim)](./editor-nixvim.md)

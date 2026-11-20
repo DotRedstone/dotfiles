@@ -12,15 +12,15 @@
 }:
 
 let
-  version = "2026.11.19.901";
+  version = "2026.11.20.1558";
   sources = {
     aarch64-linux = {
       url = "https://github.com/misakano7545/workbuddy2api-panel/releases/download/v${version}/wb2api-panel-${version}-linux-arm64.zip";
-      hash = "sha256-6Litezyyf4jHpC4UrCTv0GhfGYD1tCvdgBw7Y992NW8=";
+      hash = "sha256-KGLRRLSSN/Rbw6cGnUU4JIGTYQv6qyu/rp6ENOQ3aoY=";
     };
     x86_64-linux = {
       url = "https://github.com/misakano7545/workbuddy2api-panel/releases/download/v${version}/wb2api-panel-${version}-linux-amd64.zip";
-      hash = "sha256-elA0PmimPksSe31n6Z4RDK/YgzFRR3QupiUiKMBNCZo=";
+      hash = "sha256-dHFaKqVxe4kGuhkVEbnVYI/ErOIYjnGdQG1lT0DwZmQ=";
     };
   };
   srcInfo = sources.${stdenv.hostPlatform.system}

@@ -140,18 +140,10 @@ let
     niri msg action power-off-monitors >/dev/null 2>&1 || noctalia msg dpms-off >/dev/null 2>&1 || true
   '';
 
-  niri-fullscreen-toggle = pkgs.writeShellScriptBin "niri-fullscreen-toggle" ''
-    set -u
-    # bar 的全屏隐藏由 DMS 的 hideOnFullscreen 原生处理（纯内存态，不写 settings），
-    # 这里只做全屏切换，避免通过 bar IPC 反复改写 visible 触发整棵控件树重建。
-    exec niri msg action fullscreen-window
-  '';
-
 in
 {
   home.packages = [
     niri-mac-shortcut
     niri-power-key
-    niri-fullscreen-toggle
   ];
 }

@@ -12,12 +12,11 @@ let
   niri-ocr = pkgs.writeShellScriptBin "niri-ocr" ''
     set -euo pipefail
 
+    # slurp 支持跨输出选区，而 niri 原生 screenshot 的交互选区只覆盖单输出。
+    # grim 与 tesseract 都能直接走 stdin/stdout，不需要落临时文件。
     geometry="$(${pkgs.slurp}/bin/slurp)" || exit 0
-    image="$(${pkgs.coreutils}/bin/mktemp "''${XDG_RUNTIME_DIR:-/tmp}/niri-ocr-XXXXXX.png")"
-    trap '${pkgs.coreutils}/bin/rm -f "$image"' EXIT
-
-    ${pkgs.grim}/bin/grim -g "$geometry" "$image"
-    ${tesseract}/bin/tesseract "$image" stdout -l chi_sim+eng --psm 3 2>/dev/null \
+    ${pkgs.grim}/bin/grim -g "$geometry" - \
+      | ${tesseract}/bin/tesseract stdin stdout -l chi_sim+eng --psm 3 2>/dev/null \
       | ${pkgs.wl-clipboard}/bin/wl-copy --type 'text/plain;charset=utf-8'
   '';
 in

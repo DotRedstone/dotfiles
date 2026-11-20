@@ -136,67 +136,6 @@ xbel_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 with open(places_path, "w", encoding="utf-8") as f:
     f.write(xbel_content)
 
-# 4. Default Noctalia stylesheet for Dolphin
-dolphin_dir = os.path.expanduser("~/.config/dolphin")
-os.makedirs(dolphin_dir, exist_ok=True)
-qss_path = os.path.join(dolphin_dir, "dolphin.qss")
-if not os.path.exists(qss_path):
-    with open(qss_path, "w", encoding="utf-8") as f:
-        f.write("""/* Dolphin Noctalia Stylesheet */
-KFilePlacesView, QListView#placesView, DolphinPlacesView {
-    background-color: transparent;
-    border: none;
-    outline: none;
-    selection-background-color: transparent;
-    selection-color: #ffffff;
-}
-
-KFilePlacesView::item, QListView#placesView::item {
-    border-radius: 6px;
-    padding: 5px 8px;
-    margin: 2px 8px;
-    color: #e5e1e9;
-    border: none;
-}
-
-KFilePlacesView::item:hover:!selected, QListView#placesView::item:hover:!selected {
-    background-color: rgba(255, 255, 255, 0.07);
-    color: #ffffff;
-}
-
-KFilePlacesView::item:selected, QListView#placesView::item:selected {
-    background-color: rgba(200, 191, 255, 0.16);
-    color: #ffffff;
-    font-weight: 500;
-}
-
-DolphinViewContainer > QWidget {
-    border: none;
-}
-
-QScrollBar:vertical {
-    border: none;
-    background: transparent;
-    width: 6px;
-    margin: 0;
-}
-
-QScrollBar::handle:vertical {
-    background: rgba(255, 255, 255, 0.2);
-    min-height: 20px;
-    border-radius: 3px;
-}
-
-QScrollBar::handle:vertical:hover {
-    background: rgba(255, 255, 255, 0.4);
-}
-
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
-QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-    background: none;
-    border: none;
-}
-""")
 
 # 5. Modern toolbar layout matching Nautilus (kxmlgui5)
 kxmlgui_dir = os.path.expanduser("~/.local/share/kxmlgui5/dolphin")

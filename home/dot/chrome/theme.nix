@@ -2,6 +2,11 @@
 # Module: Chrome - Native Theme Injector
 # Description: Injects Noctalia colors directly into Chrome's native Preferences
 # Scope: Home Manager
+# Notes:
+# - Chrome 在 Linux 上只认 Preferences 里的 browser.theme.* 这组 pref，没有其它
+#   公开注入路径；DMS 的 matugen 模板也不含 Chrome。
+# - 该文件只在 Chrome 未运行时写入：Chrome 退出时会回写 Preferences，运行中写入
+#   会被覆盖，因此不在这里强杀浏览器。需要立即生效时设 CHROME_THEME_RESTART=1。
 # ---
 
 { pkgs, ... }:
@@ -12,90 +17,88 @@ let
     ${pkgs.python3}/bin/python3 - <<'EOF'
 import json
 import os
-import sys
 import subprocess
+import sys
+import time
 
-colors_file = os.path.expanduser("~/.cache/chrome-noctalia-theme/colors.json")
-prefs_path = os.path.expanduser("~/.config/google-chrome/Default/Preferences")
-chromium_prefs_path = os.path.expanduser("~/.config/chromium/Default/Preferences")
+COLORS_FILE = os.path.expanduser("~/.cache/chrome-noctalia-theme/colors.json")
+PREFS_CANDIDATES = [
+    os.path.expanduser("~/.config/google-chrome/Default/Preferences"),
+    os.path.expanduser("~/.config/chromium/Default/Preferences"),
+]
+FORCE_RESTART = os.environ.get("CHROME_THEME_RESTART") == "1"
 
-if not os.path.exists(colors_file):
+
+def profile_in_use(prefs_path):
+    # 只关心写入目标 profile 是否在用：DSH 桌面同样是 chrome 进程，但它跑在
+    # 独立的 --user-data-dir 下，用全局 pgrep 判断会一直命中而永远跳过。
+    profile_root = os.path.dirname(os.path.dirname(prefs_path))
+    return os.path.exists(os.path.join(profile_root, "SingletonLock"))
+
+
+def argb(value: str) -> int:
+    digits = (value or "").strip().lstrip("#")
+    if len(digits) != 6:
+        digits = "000000"
+    packed = (255 << 24) | (int(digits[0:2], 16) << 16) | (int(digits[2:4], 16) << 8) | int(digits[4:6], 16)
+    return packed - 2 ** 32 if packed >= 2 ** 31 else packed
+
+
+def is_dark(value: str) -> bool:
+    digits = (value or "").strip().lstrip("#")
+    if len(digits) != 6:
+        return True
+    red, green, blue = (int(digits[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    return (0.2126 * red + 0.7152 * green + 0.0722 * blue) < 0.5
+
+
+if not os.path.exists(COLORS_FILE):
     sys.exit(0)
 
-actual_prefs = None
-if os.path.exists(prefs_path):
-    actual_prefs = prefs_path
-elif os.path.exists(chromium_prefs_path):
-    actual_prefs = chromium_prefs_path
-else:
+prefs_path = next((p for p in PREFS_CANDIDATES if os.path.exists(p)), None)
+if prefs_path is None:
     sys.exit(0)
 
-# [Process Check]
-chrome_was_running = False
-try:
-    # 仅匹配名为 chrome 的进程，且排除当前脚本进程，避免误报
-    my_pid = str(os.getpid())
-    pids = subprocess.check_output(["pgrep", "-u", os.getlogin(), "-x", "chrome"]).decode().split()
-    if any(p != my_pid for p in pids):
-        chrome_was_running = True
-except subprocess.CalledProcessError:
-    chrome_was_running = False
-except Exception:
-    pass
+running = profile_in_use(prefs_path)
+if running and not FORCE_RESTART:
+    sys.exit(0)
 
-# [Graceful Kill]
-if chrome_was_running:
-    subprocess.run(["pkill", "-u", os.getlogin(), "-x", "chrome"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run(["pkill", "-u", os.getlogin(), "-x", "chromium"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    
-    # [Wait For Lock]
-    import time
-    for _ in range(100):
-        if subprocess.run(["pgrep", "-f", "chrome"], stdout=subprocess.DEVNULL).returncode != 0:
+if running and FORCE_RESTART:
+    subprocess.run(["pkill", "-f", f"--user-data-dir={os.path.dirname(os.path.dirname(prefs_path))}"],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    for _ in range(200):
+        if not profile_in_use(prefs_path):
             break
-        time.sleep(0.01)
+        time.sleep(0.02)
 
-with open(colors_file, 'r', encoding='utf-8') as f:
-    data = json.load(f)
+with open(COLORS_FILE, encoding="utf-8") as handle:
+    colors = json.load(handle)
 
-hex_color = data.get("ntpLink", "#000000").strip().lstrip('#')
-if len(hex_color) != 6:
-    hex_color = "000000"
+accent = argb(colors.get("ntpLink", "#000000"))
+# browser.theme.color_scheme2 取值见 Chrome theme_service.h:
+# kSystem=0、kLight=1、kDark=2。0 并不等于暗色，而是跟随系统明暗，
+# 这里按主题边框色的亮度显式选定，避免与 Noctalia 主题不一致。
+scheme = 2 if is_dark(colors.get("frame", "#000000")) else 1
 
-r = int(hex_color[0:2], 16)
-g = int(hex_color[2:4], 16)
-b = int(hex_color[4:6], 16)
+with open(prefs_path, encoding="utf-8") as handle:
+    prefs = json.load(handle)
 
-argb = (255 << 24) | (r << 16) | (g << 8) | b
-if argb >= 2**31:
-    argb -= 2**32
+theme = prefs.setdefault("browser", {}).setdefault("theme", {})
+theme["user_color2"] = accent
+theme["color"] = accent
+theme["color_scheme2"] = scheme
+theme["color_variant2"] = 1
 
-with open(actual_prefs, 'r', encoding='utf-8') as f:
-    prefs = json.load(f)
-
-if "browser" not in prefs:
-    prefs["browser"] = {}
-if "theme" not in prefs["browser"]:
-    prefs["browser"]["theme"] = {}
-
-# [Theme Injection]
-prefs["browser"]["theme"]["user_color2"] = argb
-prefs["browser"]["theme"]["color"] = argb
-prefs["browser"]["theme"]["color_scheme2"] = 0
-prefs["browser"]["theme"]["color_variant2"] = 1
-prefs["browser"]["theme"]["follows_system_colors"] = False
-
-# [Cleanup Legacy Keys]
+# 清理历史遗留：自动生成的主题与扩展主题都会覆盖上面的 pref。
 prefs.pop("autogenerated", None)
-if "extensions" in prefs and "theme" in prefs["extensions"]:
-    prefs["extensions"].pop("theme", None)
+prefs.get("extensions", {}).pop("theme", None)
 
-with open(actual_prefs, 'w', encoding='utf-8') as f:
-    json.dump(prefs, f, separators=(',', ':'))
+with open(prefs_path, "w", encoding="utf-8") as handle:
+    json.dump(prefs, handle, separators=(",", ":"))
 
-# [Restart]
-if chrome_was_running:
-    subprocess.Popen(["google-chrome-stable"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+if running and FORCE_RESTART:
+    subprocess.Popen(["google-chrome-stable"],
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
 EOF
   '';
 in {

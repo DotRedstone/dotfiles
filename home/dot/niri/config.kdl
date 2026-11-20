@@ -97,8 +97,8 @@ binds {
     // Window Management
     Mod+Q hotkey-overlay-title="关闭" { close-window; }
     Mod+F hotkey-overlay-title="最大化列" { maximize-column; }
-    Mod+Shift+F hotkey-overlay-title="全屏" { spawn "niri-fullscreen-toggle"; }
-    F11 hotkey-overlay-title="全屏" { spawn "niri-fullscreen-toggle"; }
+    Mod+Shift+F hotkey-overlay-title="全屏" { fullscreen-window; }
+    F11 hotkey-overlay-title="全屏" { fullscreen-window; }
     Mod+Comma hotkey-overlay-title="合并入列" { consume-window-into-column; }
     Mod+Period hotkey-overlay-title="移出列" { expel-window-from-column; }
 
@@ -178,7 +178,7 @@ binds {
     }
 
     Mod+Shift+A hotkey-overlay-title="快速区域截图" {
-        spawn "sh" "-c" "grim -g \"$(slurp)\" - | wl-copy";
+        spawn-sh "grim -g \"$(slurp)\" - | wl-copy";
     }
 
     Mod+Shift+W hotkey-overlay-title="窗口截图" {
@@ -194,7 +194,7 @@ binds {
     }
 
     Print hotkey-overlay-title="全屏截图" {
-        spawn "sh" "-c" "grim - | wl-copy";
+        spawn-sh "grim - | wl-copy";
     }
 
     // Media & Fn Keys

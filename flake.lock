@@ -403,6 +403,7 @@
         "noctalia-mihomo-control": "noctalia-mihomo-control",
         "silent-sddm": "silent-sddm",
         "sops-nix": "sops-nix",
+        "xwayclip": "xwayclip",
         "zen-browser": "zen-browser"
       }
     },
@@ -503,6 +504,26 @@
         "owner": "nix-systems",
         "ref": "future-26.11",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "xwayclip": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794934040,
+        "narHash": "sha256-V/9DPL0qH8dV7m5gtfK8gjnjLkYEbuIsF91R/VFKHSw=",
+        "owner": "so1ve",
+        "repo": "xwayclip",
+        "rev": "e9d529ad116a181438a18fbcfd3ad65dc8131ab0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "so1ve",
+        "repo": "xwayclip",
         "type": "github"
       }
     },

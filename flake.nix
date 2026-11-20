@@ -30,6 +30,9 @@
     silent-sddm.inputs.nixpkgs.follows = "nixpkgs";
     niri.url = "github:YaLTeR/niri";
     niri.inputs.nixpkgs.follows = "nixpkgs";
+    # X11↔Wayland 剪贴板桥，用于微信等只走 XWayland 的程序；nixpkgs 未收录。
+    xwayclip.url = "github:so1ve/xwayclip";
+    xwayclip.inputs.nixpkgs.follows = "nixpkgs";
 
     # [Editor]
     nixvim.url = "github:nix-community/nixvim";
@@ -166,7 +169,7 @@
         git-repo
         python312
         pythonWithAlias
-        jdk17
+        jdk21
         gnumake
         gcc
         binutils
@@ -193,6 +196,8 @@
         zlib
         lz4
         readline
+        freetype
+        fontconfig
         # [Android 16 额外：aconfig/protobuf]
         protobuf
       ];

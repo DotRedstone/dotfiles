@@ -25,4 +25,15 @@ in {
     executable = true;
     force = true;
   };
+
+  # 应用首次运行还会把 ~/.local/bin/antigravity-tools 指向同一个未包装二进制，
+  # 而 ~/.local/bin 在 PATH 中优先于 nix-profile，会盖掉可用版本，故一并接管。
+  home.file.".local/bin/antigravity-tools" = {
+    text = ''
+      #!/bin/sh
+      exec ${antigravity-tools}/bin/antigravity-tools "$@"
+    '';
+    executable = true;
+    force = true;
+  };
 }

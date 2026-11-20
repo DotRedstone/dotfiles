@@ -7,6 +7,7 @@
 { ... }: {
   imports = [
     ./dms.nix
+    ./dms-plugin-patches.nix
     ./dms-color-scheme.nix
     ./clavis.nix
     ./switcher.nix

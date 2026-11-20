@@ -26,6 +26,13 @@ window-padding-y = 8
 window-padding-balance = true
 background-opacity = 1
 
+# [Selection]
+# 选中即写入剪贴板。WezTerm 默认把选区写进 primary selection（中键粘贴），
+# Ghostty 默认 copy-on-select = none，所以换过来会感觉「选中没复制」。
+# both：同时写 primary 和 clipboard，Ctrl+V 与中键都能立刻用；
+# 只想要原来的中键行为就改成 primary。
+copy-on-select = both
+
 # [Cursor]
 # 对齐 visuals.lua 的 BlinkingBar + cursor_thickness = "2pt"。
 # adjust-cursor-thickness 是在字体原始值上增减的像素数，不是绝对值；

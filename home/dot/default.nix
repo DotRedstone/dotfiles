@@ -66,6 +66,7 @@
     ./vscode
     ./dev
     ./antigravity
+    ./antigravity-tools
     ./claude-code
     ./security
 

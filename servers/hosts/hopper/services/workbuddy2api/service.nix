@@ -112,9 +112,15 @@ EOF
     services.nginx.virtualHosts = lib.mkIf (cfg.hostName != null) {
       "${cfg.hostName}" = {
         serverAliases = [ "dsh-wb.bdot.in" ] ++ lib.optional (originAlias != null && originAlias != cfg.hostName) originAlias;
+        # ⚠️ 2026-11-21：原来用相对路径 302，从 http 进来会停在 http 上，微信内置浏览器/部分网络会拦；
+        # 走 CF 的时候 origin 是 http，所以这里显式跳 https 绝对地址。
         locations."= /" = {
-          return = "302 /panel/";
+          return = "302 https://$host/panel/";
           extraConfig = "absolute_redirect off;";
+        };
+        # 旧书签 /panel/index.html 会打到后端吐 401 JSON，浏览器里看着像「打不开」——直接跳回面板。
+        locations."= /panel/index.html" = {
+          return = "307 /panel/";
         };
         locations."/" = {
           proxyPass = "http://127.0.0.1:${toString cfg.port}";

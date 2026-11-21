@@ -9,6 +9,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # ⚠️ 2026-11-21：只为了拿 nginx 1.30.7（CVE-2026-118899 / 123007）。
+    # 整体升 nixpkgs 会牵动 hermes-agent / rustfs 在 ARM 上源码重编，撞 90 分钟超时；
+    # 这个输入不 follows 主 nixpkgs，只用来取 nginxStable 这一个包。
+    nixpkgs-nginx.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
@@ -37,6 +41,7 @@
   outputs =
     {
       nixpkgs,
+      nixpkgs-nginx,
       disko,
       hermes-agent,
       gmail-archiver,
@@ -62,6 +67,11 @@
           gmail-archiver.nixosModules.default
           sops-nix.nixosModules.sops
           ./hosts/hopper
+          # 只把 nginx 换成新 nixpkgs 里的版本，其余包仍用主 nixpkgs，避免大包重编。
+          ({ pkgs, ... }: {
+            services.nginx.package =
+              (import nixpkgs-nginx { system = pkgs.stdenv.hostPlatform.system; }).nginxStable;
+          })
         ] ++ privateModules;
       };
     in

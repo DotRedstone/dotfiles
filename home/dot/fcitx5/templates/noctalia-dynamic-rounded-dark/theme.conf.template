@@ -1,6 +1,6 @@
 [Metadata]
 Name=fcitx5-dynamic-rounded-dark
-Version=2.1
+Version=2.2
 Author=dot
 Description="DMS-styled pill-shaped dark dynamic theme for native Wayland apps."
 ScaleWithDPI=True
@@ -11,7 +11,7 @@ HighlightCandidateColor={{colors.on_primary_container.dark.hex}}
 HighlightColor={{colors.primary.dark.hex}}
 HighlightBackgroundColor=#00000000
 EnableBlur=False
-FullWidthHighlight=True
+FullWidthHighlight=False
 PageButtonAlignment=Center
 Spacing=2
 
@@ -22,10 +22,10 @@ BorderColor={{colors.outline_variant.dark.hex}}
 BorderWidth=0
 
 [InputPanel/Background/Margin]
-Left=22
-Right=22
-Top=21
-Bottom=21
+Left=21
+Right=21
+Top=18
+Bottom=18
 
 [InputPanel/Highlight]
 Image=highlight.svg
@@ -34,14 +34,14 @@ BorderColor={{colors.primary_container.dark.hex}}
 BorderWidth=0
 
 [InputPanel/Highlight/Margin]
-Left=16
-Right=16
-Top=15
-Bottom=15
+Left=15
+Right=15
+Top=11
+Bottom=11
 
 [InputPanel/ContentMargin]
-Left=7
-Right=7
+Left=6
+Right=6
 Top=5
 Bottom=5
 
@@ -63,10 +63,10 @@ BorderColor={{colors.outline_variant.dark.hex}}
 BorderWidth=0
 
 [Menu/Background/Margin]
-Left=22
-Right=22
-Top=21
-Bottom=21
+Left=21
+Right=21
+Top=18
+Bottom=18
 
 [Menu/Highlight]
 Image=highlight.svg
@@ -75,14 +75,14 @@ BorderColor={{colors.primary_container.dark.hex}}
 BorderWidth=0
 
 [Menu/Highlight/Margin]
-Left=16
-Right=16
-Top=15
-Bottom=15
+Left=15
+Right=15
+Top=11
+Bottom=11
 
 [Menu/ContentMargin]
-Left=7
-Right=7
+Left=6
+Right=6
 Top=5
 Bottom=5
 

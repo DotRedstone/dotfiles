@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="64" height="64" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0.5" y="0.5" width="63" height="63" rx="21" ry="21" fill="{{colors.surface_container_high.dark.hex}}" fill-opacity="0.96" stroke="{{colors.outline_variant.dark.hex}}" stroke-width="1" stroke-opacity="0.45"/>
+  <rect x="1" y="1" width="62" height="62" rx="20" ry="20" fill="{{colors.surface_container_high.dark.hex}}" fill-opacity="0.96" stroke="{{colors.outline_variant.dark.hex}}" stroke-width="1" stroke-opacity="0.45"/>
 </svg>

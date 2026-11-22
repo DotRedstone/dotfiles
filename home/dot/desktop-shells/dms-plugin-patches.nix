@@ -119,10 +119,45 @@ open(path, "w").write("".join(lines))
 print("dms-plugin-patch: 已修复 ClipboardPlus 面板残留引用")
 PY
   '';
+
+  # [ScreenshotPlus] Avoid clipboard.copyFile pointing to temp PNG deleted after 10s
+  patchScreenshotPlus = pkgs.writeShellScriptBin "dms-screenshot-plus-patch" ''
+    set -eu
+    unset PYTHONHOME PYTHONPATH
+
+    file="''${DMS_SCREENSHOT_PLUS_QML:-$HOME/.config/dms/plugins/screenshotPlus/ScreenshotPlusDaemon.qml}"
+    if [ ! -f "$file" ]; then
+      exit 0
+    fi
+
+    ${pkgs.python3}/bin/python3 - "$file" <<'PY'
+import pathlib, sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+old = """            if (copy) {
+                DMSService.sendRequest("clipboard.copyFile", { "filePath": png }, resp => {
+                    if (resp && resp.error)
+                        console.warn("screenshotPlus: clipboard:", resp.error)
+                })
+            }"""
+new = """            if (copy) {
+                Quickshell.execDetached(["sh", "-c", 'dms cl copy -t image/png < "$1"', "sh", png])
+            }"""
+if new in text:
+    sys.exit(0)
+if old not in text:
+    print("dms-screenshot-plus-patch: ScreenshotPlusDaemon.qml 结构已变化，跳过", file=sys.stderr)
+    sys.exit(0)
+path.write_text(text.replace(old, new, 1), encoding="utf-8")
+print("dms-screenshot-plus-patch: 已改用纯 image/png 写入剪贴板，避免临时文件被删后粘贴失败")
+PY
+  '';
 in {
-  home.packages = [ patchClipboardPlus ];
+  home.packages = [ patchClipboardPlus patchScreenshotPlus ];
 
   home.activation.dmsPluginPatches = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     run ${patchClipboardPlus}/bin/dms-plugin-patch || true
+    run ${patchScreenshotPlus}/bin/dms-screenshot-plus-patch || true
   '';
 }

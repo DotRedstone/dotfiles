@@ -84,16 +84,9 @@ in
         > "$conf"
     fi
 
-    # Ensure required keys exist and migrate legacy theme & font
+    # Ensure required keys exist and migrate to new font
     grep -q '^Vertical Candidate List=' "$conf" || printf '%s\n' 'Vertical Candidate List=False' >> "$conf"
-    if grep -q '^Theme=my-input-theme$' "$conf"; then
-      sed -i 's/^Theme=my-input-theme$/Theme=fcitx5-dynamic-rounded-dark/' "$conf"
-    elif ! grep -q '^Theme=' "$conf"; then
-      printf '%s\n' 'Theme=fcitx5-dynamic-rounded-dark' >> "$conf"
-    fi
-    if grep -q '^DarkTheme=my-input-theme$' "$conf"; then
-      sed -i 's/^DarkTheme=my-input-theme$/DarkTheme=fcitx5-dynamic-rounded-dark/' "$conf"
-    fi
+    grep -q '^Theme=' "$conf" || printf '%s\n' 'Theme=fcitx5-dynamic-rounded-dark' >> "$conf"
     
     if grep -q '^Font=' "$conf"; then
       sed -i 's/^Font=.*/Font="FZYJHK B 14"/' "$conf"

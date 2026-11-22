@@ -130,6 +130,20 @@ PanelWindow {
 
         readonly property bool settled: win.shown && opacity === 1
 
+        Behavior on width {
+            enabled: card.settled
+            NumberAnimation {
+                duration: 90
+                easing.type: Theme.standardEasing
+            }
+        }
+        Behavior on height {
+            enabled: card.settled
+            NumberAnimation {
+                duration: 90
+                easing.type: Theme.standardEasing
+            }
+        }
         Behavior on opacity {
             NumberAnimation {
                 duration: win.shown ? Theme.shortDuration : 70
@@ -162,17 +176,17 @@ PanelWindow {
             color: Theme.withAlpha(Theme.surfaceContainer, 0.97)
             border.width: 1
             border.color: Theme.withAlpha(Theme.outlineVariant, 0.4)
-        }
+            clip: true
 
-        WheelHandler {
-            onWheel: event => {
-                if (event.angleDelta.y !== 0)
-                    win.daemon.send(event.angleDelta.y > 0 ? "page_up" : "page_down");
+            WheelHandler {
+                onWheel: event => {
+                    if (event.angleDelta.y !== 0)
+                        win.daemon.send(event.angleDelta.y > 0 ? "page_up" : "page_down");
+                }
             }
-        }
 
-        Column {
-            id: body
+            Column {
+                id: body
             x: Theme.spacingS
             y: Theme.spacingS
             spacing: Theme.spacingXS
@@ -297,21 +311,21 @@ PanelWindow {
                     Behavior on x {
                         enabled: card.settled
                         NumberAnimation {
-                            duration: 100
+                            duration: 90
                             easing.type: Theme.standardEasing
                         }
                     }
                     Behavior on y {
                         enabled: card.settled
                         NumberAnimation {
-                            duration: 100
+                            duration: 90
                             easing.type: Theme.standardEasing
                         }
                     }
                     Behavior on width {
                         enabled: card.settled
                         NumberAnimation {
-                            duration: 100
+                            duration: 90
                             easing.type: Theme.standardEasing
                         }
                     }
@@ -384,6 +398,7 @@ PanelWindow {
                     }
                 }
             }
+        }
         }
     }
 }

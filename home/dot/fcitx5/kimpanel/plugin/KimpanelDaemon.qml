@@ -70,12 +70,11 @@ PluginComponent {
         const win = focusedWindowRect;
         if (!win)
             return null;
-        const k = s.scale > 0 ? s.scale : 1;
         return {
-            "x": win.x + s.x / k,
-            "y": win.y + s.y / k,
-            "w": s.w / k,
-            "h": s.h / k
+            "x": win.x + s.x,
+            "y": win.y + s.y,
+            "w": s.w,
+            "h": s.h
         };
     }
 

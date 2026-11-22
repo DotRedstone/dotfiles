@@ -199,6 +199,7 @@ class Panel:
             self.win_rect = self.niri.focused_window_rect()
         elif not visible and self._was_visible:
             self.spot = None
+            self.win_rect = None
         self._was_visible = visible
         return {
             "v": 1,

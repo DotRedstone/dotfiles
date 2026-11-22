@@ -47,6 +47,7 @@ PanelWindow {
     property real lockedY: 0
     property real lockedH: 20
     property bool hasLockedAnchor: false
+    property bool hasFallbackAnchor: false
 
     function syncAnchor(reset) {
         if (!screen)
@@ -54,48 +55,41 @@ PanelWindow {
         if (anchor) {
             const ax = anchor.x - screen.x;
             const ay = anchor.y - screen.y;
-            if (reset || !hasLockedAnchor || Math.abs(ay - lockedY) > 24 || Math.abs(ax - lockedX) > 180) {
+            if (reset || !hasLockedAnchor) {
                 lockedX = ax;
                 lockedY = ay;
                 lockedH = Math.max(anchor.h, 16);
                 hasLockedAnchor = true;
+                hasFallbackAnchor = false;
             }
-        } else if (reset) {
+        } else if (reset || !hasFallbackAnchor) {
             const r = daemon.focusedWindowRect;
             const centerX = r ? (r.x - screen.x + r.w / 2) : (width / 2);
-            const bottomY = r ? (r.y - screen.y + r.h) : height;
-            lockedX = Math.round(centerX - 220);
-            lockedY = Math.round(Math.min(bottomY, height) - 116);
+            lockedX = Math.round(centerX - card.width / 2);
             lockedH = 0;
             hasLockedAnchor = false;
+            hasFallbackAnchor = true;
         }
     }
 
     onAnchorChanged: {
-        if (shown)
+        if (shown && !hasLockedAnchor && anchor)
             syncAnchor(false);
     }
 
-    // [Visibility] Short hide debounce avoids flicker between keystrokes
+    // [Visibility] Snappy show/hide without lingering debounce or drop animation
     property bool shown: false
     readonly property bool wanted: panel.visible && onThisScreen
     onWantedChanged: {
         if (wanted) {
             const wasHidden = !shown;
-            hideDebounce.stop();
             if (wasHidden)
                 syncAnchor(true);
             shown = true;
         } else {
-            hideDebounce.restart();
-        }
-    }
-    Timer {
-        id: hideDebounce
-        interval: 40
-        onTriggered: {
-            win.shown = false;
-            win.hasLockedAnchor = false;
+            shown = false;
+            hasLockedAnchor = false;
+            hasFallbackAnchor = false;
         }
     }
     visible: shown || card.opacity > 0
@@ -108,7 +102,9 @@ PanelWindow {
                 return Math.round(below);
             return Math.round(Math.max(edge, lockedY - card.height - gap));
         }
-        return Math.round(Math.max(edge, Math.min(lockedY, height - card.height - edge)));
+        const r = daemon.focusedWindowRect;
+        const bottomY = r ? (r.y - screen.y + r.h) : height;
+        return Math.round(Math.max(edge, Math.min(bottomY, height) - card.height - Theme.spacingXL * 2));
     }
 
     Item {
@@ -119,14 +115,6 @@ PanelWindow {
         width: body.implicitWidth + Theme.spacingS * 2
         height: body.implicitHeight + Theme.spacingS * 2
         opacity: win.shown ? 1 : 0
-
-        onWidthChanged: {
-            if (win.shown && win.width > 0) {
-                const maxLeft = win.width - width - win.edge;
-                if (win.lockedX > maxLeft)
-                    win.lockedX = Math.max(win.edge, maxLeft);
-            }
-        }
 
         readonly property bool settled: win.shown && opacity === 1
 
@@ -146,17 +134,8 @@ PanelWindow {
         }
         Behavior on opacity {
             NumberAnimation {
-                duration: win.shown ? Theme.shortDuration : 70
-                easing.type: Theme.standardEasing
-            }
-        }
-        transform: Translate {
-            y: win.shown ? 0 : 4
-            Behavior on y {
-                NumberAnimation {
-                    duration: Theme.shortDuration
-                    easing.type: Theme.standardEasing
-                }
+                duration: win.shown ? 55 : 35
+                easing.type: Easing.OutCubic
             }
         }
 

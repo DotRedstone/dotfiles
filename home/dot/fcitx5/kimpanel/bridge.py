@@ -8,6 +8,7 @@ import ctypes
 import json
 import os
 import select
+import socket
 import sys
 
 # [Libsystemd]
@@ -124,9 +125,58 @@ def debug(*args):
         print("[kimpanel]", *args, file=sys.stderr, flush=True)
 
 
+# [Niri IPC] Live focused-window geometry (compensates for off-screen column scroll)
+class NiriClient:
+    def __init__(self):
+        self.path = os.environ.get("NIRI_SOCKET", "")
+        self.sock = None
+
+    def focused_window_rect(self):
+        if not self.path:
+            return None
+        for _ in range(2):
+            try:
+                if self.sock is None:
+                    self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                    self.sock.settimeout(0.05)
+                    self.sock.connect(self.path)
+                self.sock.sendall(b'"FocusedWindow"\n')
+                buf = b""
+                while b"\n" not in buf:
+                    chunk = self.sock.recv(4096)
+                    if not chunk:
+                        raise ConnectionError("eof")
+                    buf += chunk
+                win = json.loads(buf.split(b"\n", 1)[0]).get("Ok", {}).get("FocusedWindow")
+                if not win:
+                    return None
+                lay = win.get("layout") or {}
+                tile = lay.get("tile_pos_in_workspace_view")
+                size = lay.get("window_size")
+                if not tile or not size:
+                    return None
+                off = lay.get("window_offset_in_tile") or [0.0, 0.0]
+                return {
+                    "workspaceId": win.get("workspace_id"),
+                    "x": float(tile[0]) + float(off[0]),
+                    "y": float(tile[1]) + float(off[1]),
+                    "w": float(size[0]),
+                    "h": float(size[1]),
+                }
+            except Exception:
+                if self.sock is not None:
+                    try:
+                        self.sock.close()
+                    except Exception:
+                        pass
+                    self.sock = None
+        return None
+
+
 # [State]
 class Panel:
     def __init__(self):
+        self.niri = NiriClient()
         self.enabled = True
         self.show_preedit = self.show_aux = self.show_lookup = False
         self.preedit = self.aux = ""
@@ -135,16 +185,24 @@ class Panel:
         self.cursor = -1
         self.has_prev = self.has_next = False
         self.layout = 0
-        self.spot = {"relative": False, "x": 0, "y": 0, "w": 0, "h": 0, "scale": 1.0}
+        self.spot = None
+        self.win_rect = None
+        self._was_visible = False
         self._last = ""
 
     def snapshot(self):
         cands = self.candidates if self.show_lookup else []
         preedit = self.preedit if self.show_preedit else ""
         aux = self.aux if self.show_aux else ""
+        visible = self.enabled and bool(preedit or aux or cands)
+        if visible and not self._was_visible:
+            self.win_rect = self.niri.focused_window_rect()
+        elif not visible and self._was_visible:
+            self.spot = None
+        self._was_visible = visible
         return {
             "v": 1,
-            "visible": self.enabled and bool(preedit or aux or cands),
+            "visible": visible,
             "preedit": preedit,
             "caret": self.caret,
             "aux": aux,
@@ -154,6 +212,7 @@ class Panel:
             "hasNext": self.has_next,
             "layout": self.layout,
             "spot": self.spot,
+            "win": self.win_rect,
         }
 
     def publish(self):
@@ -166,6 +225,8 @@ class Panel:
     def on_signal(self, member, msg):
         if member == "Enable":
             self.enabled = read_bool(msg)
+            if not self.enabled:
+                self.spot = None
         elif member == "ShowPreedit":
             self.show_preedit = read_bool(msg)
         elif member == "ShowAux":
@@ -182,7 +243,8 @@ class Panel:
             self.cursor = read_int(msg)
         elif member == "UpdateSpotLocation":
             x, y = read_int(msg), read_int(msg)
-            self.spot = {"relative": False, "x": x, "y": y, "w": 0, "h": 0, "scale": 1.0}
+            if x > 0 or y > 0:
+                self.spot = {"relative": False, "x": x, "y": y, "w": 0, "h": 0, "scale": 1.0}
 
     def on_call(self, member, msg):
         if member == "SetLookupTable":
@@ -196,11 +258,17 @@ class Panel:
         elif member in ("SetSpotRect", "SetRelativeSpotRect", "SetRelativeSpotRectV2"):
             x, y, w, h = read_int(msg), read_int(msg), read_int(msg), read_int(msg)
             scale = read_double(msg) if member == "SetRelativeSpotRectV2" else 1.0
-            self.spot = {
-                "relative": member != "SetSpotRect",
-                "x": x, "y": y, "w": w, "h": h,
-                "scale": scale if scale > 0 else 1.0,
-            }
+            if x <= 0 and y <= 0 and w <= 0 and h <= 0:
+                self.spot = None
+            else:
+                is_rel = member != "SetSpotRect"
+                if is_rel:
+                    self.win_rect = self.niri.focused_window_rect()
+                self.spot = {
+                    "relative": is_rel,
+                    "x": x, "y": y, "w": w, "h": h,
+                    "scale": scale if scale > 0 else 1.0,
+                }
             debug(member, self.spot)
 
 

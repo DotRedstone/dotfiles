@@ -40,12 +40,51 @@ PanelWindow {
         return screen === Quickshell.screens[0];
     }
 
+    // [Placement] Lock left-top anchor per composition session to prevent horizontal drift
+    readonly property real edge: Theme.spacingM
+    readonly property real gap: Theme.spacingXS + 2
+    property real lockedX: 0
+    property real lockedY: 0
+    property real lockedH: 20
+    property bool hasLockedAnchor: false
+
+    function syncAnchor(reset) {
+        if (!screen)
+            return;
+        if (anchor) {
+            const ax = anchor.x - screen.x;
+            const ay = anchor.y - screen.y;
+            if (reset || !hasLockedAnchor || Math.abs(ay - lockedY) > 24 || Math.abs(ax - lockedX) > 180) {
+                lockedX = ax;
+                lockedY = ay;
+                lockedH = Math.max(anchor.h, 16);
+                hasLockedAnchor = true;
+            }
+        } else if (reset) {
+            const r = daemon.focusedWindowRect;
+            const centerX = r ? (r.x - screen.x + r.w / 2) : (width / 2);
+            const bottomY = r ? (r.y - screen.y + r.h) : height;
+            lockedX = Math.round(centerX - 220);
+            lockedY = Math.round(Math.min(bottomY, height) - 116);
+            lockedH = 0;
+            hasLockedAnchor = false;
+        }
+    }
+
+    onAnchorChanged: {
+        if (shown)
+            syncAnchor(false);
+    }
+
     // [Visibility] Short hide debounce avoids flicker between keystrokes
     property bool shown: false
     readonly property bool wanted: panel.visible && onThisScreen
     onWantedChanged: {
         if (wanted) {
+            const wasHidden = !shown;
             hideDebounce.stop();
+            if (wasHidden)
+                syncAnchor(true);
             shown = true;
         } else {
             hideDebounce.restart();
@@ -54,34 +93,22 @@ PanelWindow {
     Timer {
         id: hideDebounce
         interval: 40
-        onTriggered: win.shown = false
+        onTriggered: {
+            win.shown = false;
+            win.hasLockedAnchor = false;
+        }
     }
     visible: shown || card.opacity > 0
 
-    // [Placement]
-    readonly property real edge: Theme.spacingM
-    readonly property real gap: Theme.spacingXS + 2
-    readonly property real targetX: {
-        let x;
-        if (anchor)
-            x = anchor.x - screen.x;
-        else if (daemon.focusedWindowRect)
-            x = daemon.focusedWindowRect.x - screen.x + (daemon.focusedWindowRect.w - card.width) / 2;
-        else
-            x = (width - card.width) / 2;
-        return Math.round(Math.max(edge, Math.min(x, width - card.width - edge)));
-    }
+    readonly property real targetX: Math.round(Math.max(edge, Math.min(lockedX, width - card.width - edge)))
     readonly property real targetY: {
-        if (anchor) {
-            const top = anchor.y - screen.y;
-            const below = top + Math.max(anchor.h, 16) + gap;
+        if (hasLockedAnchor) {
+            const below = lockedY + lockedH + gap;
             if (below + card.height + edge <= height)
                 return Math.round(below);
-            return Math.round(Math.max(edge, top - card.height - gap));
+            return Math.round(Math.max(edge, lockedY - card.height - gap));
         }
-        const r = daemon.focusedWindowRect;
-        const bottom = r ? r.y - screen.y + r.h : height;
-        return Math.round(Math.max(edge, Math.min(bottom, height) - card.height - Theme.spacingXL * 2));
+        return Math.round(Math.max(edge, Math.min(lockedY, height - card.height - edge)));
     }
 
     Item {
@@ -92,6 +119,14 @@ PanelWindow {
         width: body.implicitWidth + Theme.spacingS * 2
         height: body.implicitHeight + Theme.spacingS * 2
         opacity: win.shown ? 1 : 0
+
+        onWidthChanged: {
+            if (win.shown && win.width > 0) {
+                const maxLeft = win.width - width - win.edge;
+                if (win.lockedX > maxLeft)
+                    win.lockedX = Math.max(win.edge, maxLeft);
+            }
+        }
 
         readonly property bool settled: win.shown && opacity === 1
 
@@ -108,34 +143,6 @@ PanelWindow {
                     duration: Theme.shortDuration
                     easing.type: Theme.standardEasing
                 }
-            }
-        }
-        Behavior on y {
-            enabled: card.settled
-            NumberAnimation {
-                duration: 80
-                easing.type: Theme.standardEasing
-            }
-        }
-        Behavior on x {
-            enabled: card.settled
-            NumberAnimation {
-                duration: 80
-                easing.type: Theme.standardEasing
-            }
-        }
-        Behavior on width {
-            enabled: card.settled
-            NumberAnimation {
-                duration: 80
-                easing.type: Theme.standardEasing
-            }
-        }
-        Behavior on height {
-            enabled: card.settled
-            NumberAnimation {
-                duration: 80
-                easing.type: Theme.standardEasing
             }
         }
 

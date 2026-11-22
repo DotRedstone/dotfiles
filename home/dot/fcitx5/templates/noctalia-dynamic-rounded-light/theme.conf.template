@@ -19,10 +19,10 @@ BorderColor={{colors.outline_variant.light.hex}}
 BorderWidth=0
 
 [InputPanel/Background/Margin]
-Left=15
-Right=15
-Top=15
-Bottom=15
+Left=10
+Right=10
+Top=10
+Bottom=10
 
 [InputPanel/Highlight]
 Image=highlight.svg
@@ -31,16 +31,16 @@ BorderColor={{colors.primary.light.hex}}
 BorderWidth=0
 
 [InputPanel/Highlight/Margin]
-Left=15
-Right=15
+Left=10
+Right=10
 Top=10
 Bottom=10
 
 [InputPanel/ContentMargin]
-Left=0
-Right=0
-Top=0
-Bottom=0
+Left=3
+Right=3
+Top=3
+Bottom=3
 
 [InputPanel/TextMargin]
 Left=12

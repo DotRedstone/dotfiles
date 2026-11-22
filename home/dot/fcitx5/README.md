@@ -12,11 +12,6 @@
 | Lua processor | `rime/lua/` |
 | Noctalia 动态主题声明 | `theme.nix`、`templates/` |
 | XWayland 安全的静态回退主题 | `custom-themes/` |
-| DMS 候选框插件与 Kimpanel 桥接 | `kimpanel/` |
-
-Kimpanel 候选框由 DMS daemon 插件 `fcitxKimpanel` 渲染，首次需执行
-`dms ipc call plugins enable fcitxKimpanel`。插件停用或 DMS 退出后，Fcitx5 自动回退到 classicui。
-原生 Wayland 应用的光标位置依赖 niri 窗口几何换算。调试桥接时设置 `KIMPANEL_DEBUG=1`。
 
 重要约束：WeChat UOS 经过 XWayland / fcitx4 兼容路径；透明圆角候选框可能呈现黑角。
 对应回退主题必须保持不透明、矩形。不要提交 Noctalia 运行时生成的主题目录。

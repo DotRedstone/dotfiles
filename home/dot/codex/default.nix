@@ -5,10 +5,6 @@
 # ---
 
 { pkgs, inputs, ... }: {
-  imports = [
-    ./switch.nix
-  ];
-
   home.packages = [
     inputs.codex-desktop-linux.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];

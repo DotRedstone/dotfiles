@@ -220,6 +220,7 @@ class Panel:
         payload = json.dumps(self.snapshot(), ensure_ascii=False, separators=(",", ":"))
         if payload != self._last:
             self._last = payload
+            debug("pub", payload)
             sys.stdout.write(payload + "\n")
             sys.stdout.flush()
 

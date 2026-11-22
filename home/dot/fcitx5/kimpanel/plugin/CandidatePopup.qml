@@ -48,51 +48,69 @@ PanelWindow {
     property real lockedH: 20
     property bool hasLockedAnchor: false
     property bool hasFallbackAnchor: false
+    property bool placed: false
+    property bool shown: false
 
-    function syncAnchor(reset) {
+    readonly property bool wanted: panel.visible && onThisScreen
+
+    function placeFallback(lock) {
         if (!screen)
             return;
+        const r = daemon.focusedWindowRect;
+        const centerX = r ? (r.x - screen.x + r.w / 2) : (screen.width / 2);
+        const w = body.implicitWidth + Theme.spacingS * 2;
+        lockedX = Math.round(centerX - w / 2);
+        lockedH = 0;
+        if (lock)
+            hasFallbackAnchor = true;
+    }
+
+    function finalizePlacement() {
+        if (!wanted || !screen)
+            return;
         if (anchor) {
-            const ax = anchor.x - screen.x;
-            const ay = anchor.y - screen.y;
-            if (reset || !hasLockedAnchor) {
-                lockedX = ax;
-                lockedY = ay;
+            if (!hasLockedAnchor) {
+                lockedX = anchor.x - screen.x;
+                lockedY = anchor.y - screen.y;
                 lockedH = Math.max(anchor.h, 16);
                 hasLockedAnchor = true;
                 hasFallbackAnchor = false;
             }
-        } else if (reset || !hasFallbackAnchor) {
-            const r = daemon.focusedWindowRect;
-            const centerX = r ? (r.x - screen.x + r.w / 2) : (width / 2);
-            lockedX = Math.round(centerX - card.width / 2);
-            lockedH = 0;
-            hasLockedAnchor = false;
-            hasFallbackAnchor = true;
+            placed = true;
+            shown = true;
+            return;
+        }
+        if (hasLockedAnchor || hasFallbackAnchor) {
+            placed = true;
+            shown = true;
+            return;
+        }
+        if (body.implicitWidth > 0) {
+            placeFallback(win.count > 0);
+            placed = true;
+            shown = true;
         }
     }
 
-    onAnchorChanged: {
-        if (shown && !hasLockedAnchor && anchor)
-            syncAnchor(false);
-    }
-
-    // [Visibility] Snappy show/hide without lingering debounce or drop animation
-    property bool shown: false
-    readonly property bool wanted: panel.visible && onThisScreen
     onWantedChanged: {
         if (wanted) {
-            const wasHidden = !shown;
-            if (wasHidden)
-                syncAnchor(true);
-            shown = true;
+            if (anchor) {
+                finalizePlacement();
+            } else {
+                Qt.callLater(finalizePlacement);
+            }
         } else {
             shown = false;
+            placed = false;
             hasLockedAnchor = false;
             hasFallbackAnchor = false;
         }
     }
-    visible: shown || card.opacity > 0
+    onAnchorChanged: {
+        if (wanted && !hasLockedAnchor && anchor)
+            finalizePlacement();
+    }
+    visible: wanted || card.opacity > 0
 
     readonly property real targetX: Math.round(Math.max(edge, Math.min(lockedX, width - card.width - edge)))
     readonly property real targetY: {
@@ -114,9 +132,9 @@ PanelWindow {
         y: win.targetY
         width: body.implicitWidth + Theme.spacingS * 2
         height: body.implicitHeight + Theme.spacingS * 2
-        opacity: win.shown ? 1 : 0
+        opacity: (win.shown && win.placed) ? 1 : 0
 
-        readonly property bool settled: win.shown && opacity === 1
+        readonly property bool settled: win.shown && win.placed && opacity === 1
 
         Behavior on width {
             enabled: card.settled
@@ -134,7 +152,7 @@ PanelWindow {
         }
         Behavior on opacity {
             NumberAnimation {
-                duration: win.shown ? 55 : 35
+                duration: (win.shown && win.placed) ? 55 : 35
                 easing.type: Easing.OutCubic
             }
         }
@@ -166,9 +184,15 @@ PanelWindow {
 
             Column {
                 id: body
-            x: Theme.spacingS
-            y: Theme.spacingS
-            spacing: Theme.spacingXS
+                x: Theme.spacingS
+                y: Theme.spacingS
+                spacing: Theme.spacingXS
+
+                onImplicitWidthChanged: {
+                    if (win.wanted && !win.hasLockedAnchor && !win.hasFallbackAnchor && implicitWidth > 0) {
+                        Qt.callLater(win.finalizePlacement);
+                    }
+                }
 
             // [Header] Preedit with caret, aux hint, pager
             Item {

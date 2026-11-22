@@ -101,6 +101,10 @@ PluginComponent {
             }
         }
 
+        stderr: SplitParser {
+            onRead: line => console.info(line)
+        }
+
         onExited: (code, status) => {
             root.panel = Object.assign({}, root.panel, {
                 "visible": false

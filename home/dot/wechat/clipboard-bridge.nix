@@ -26,6 +26,30 @@ let
     patch(
         "src/snapshot.rs",
         """\
+    pub struct Offer {
+        pub mime_type: String,
+        pub data: Vec<u8>,
+    }
+
+    pub struct Snapshot {
+        offers: Vec<Offer>,
+    }""",
+        """\
+    #[derive(Clone)]
+    pub struct Offer {
+        pub mime_type: String,
+        pub data: Vec<u8>,
+    }
+
+    #[derive(Clone)]
+    pub struct Snapshot {
+        offers: Vec<Offer>,
+    }""",
+    )
+
+    patch(
+        "src/snapshot.rs",
+        """\
         pub fn new(mut offers: Vec<Offer>) -> Self {
             offers.sort_by(|left, right| left.mime_type.cmp(&right.mime_type));
             offers.dedup_by(|left, right| left.mime_type == right.mime_type);
@@ -39,6 +63,69 @@ let
             offers.dedup_by(|left, right| left.mime_type == right.mime_type);
 
             Self { offers }
+        }
+
+        pub fn utf8_text_bytes(&self) -> Option<&[u8]> {
+            for mime_type in ["text/plain;charset=utf-8", "UTF8_STRING", "text/plain"] {
+                if let Some(offer) = self.offers.iter().find(|o| o.mime_type == mime_type)
+                    && std::str::from_utf8(&offer.data).is_ok()
+                {
+                    return Some(offer.data.as_slice());
+                }
+            }
+            None
+        }
+
+        pub fn needs_wayland_text_sanitize(&self) -> bool {
+            let Some(utf8) = self.utf8_text_bytes() else {
+                return false;
+            };
+            let has_corrupted_legacy = self.offers.iter().any(|o| {
+                matches!(o.mime_type.as_str(), "STRING" | "TEXT" | "COMPOUND_TEXT")
+                    && o.data.as_slice() != utf8
+            });
+            if has_corrupted_legacy {
+                return true;
+            }
+            let has_non_text_payload = self.offers.iter().any(|o| {
+                o.mime_type.starts_with("image/")
+                    || o.mime_type == "text/uri-list"
+                    || o.mime_type == "x-special/gnome-copied-files"
+            });
+            !has_non_text_payload
+                && !self
+                    .offers
+                    .iter()
+                    .any(|o| o.mime_type == "text/plain;charset=utf-8")
+        }
+
+        pub fn sanitize_text(mut self) -> Self {
+            let Some(utf8) = self.utf8_text_bytes().map(|bytes| bytes.to_vec()) else {
+                return self;
+            };
+            let has_non_text_payload = self.offers.iter().any(|o| {
+                o.mime_type.starts_with("image/")
+                    || o.mime_type == "text/uri-list"
+                    || o.mime_type == "x-special/gnome-copied-files"
+            });
+            self.offers.retain(|o| {
+                !matches!(o.mime_type.as_str(), "STRING" | "TEXT" | "COMPOUND_TEXT")
+            });
+            if !has_non_text_payload {
+                for mime_type in PLAIN_TEXT_MIME_TYPES {
+                    if let Some(existing) =
+                        self.offers.iter_mut().find(|o| o.mime_type == mime_type)
+                    {
+                        existing.data = utf8.clone();
+                    } else {
+                        self.offers.push(Offer {
+                            mime_type: mime_type.to_owned(),
+                            data: utf8.clone(),
+                        });
+                    }
+                }
+            }
+            Self::new(self.offers)
         }
 
         pub fn x11_fingerprint(&self) -> Hash {
@@ -84,6 +171,7 @@ let
                     return Ok(());
                 }
                 let source_fingerprint = snapshot.fingerprint();
+                let snapshot = snapshot.sanitize_text();
                 let destination_fingerprint = snapshot.wayland_fingerprint();
                 if *x11_state == ClipboardState::Content(source_fingerprint)
                     || *x11_state == ClipboardState::Content(destination_fingerprint)
@@ -147,17 +235,29 @@ let
                     return Ok(());
                 }
                 let source_fingerprint = snapshot.fingerprint();
-                let destination_fingerprint = snapshot.x11_fingerprint();
+                let raw_x11_fingerprint = snapshot.x11_fingerprint();
                 if *wayland_state == ClipboardState::Content(source_fingerprint)
-                    || *wayland_state == ClipboardState::Content(destination_fingerprint)
+                    || *wayland_state == ClipboardState::Content(raw_x11_fingerprint)
                     || *x11_state == ClipboardState::Content(source_fingerprint)
-                    || *x11_state == ClipboardState::Content(destination_fingerprint)
+                    || *x11_state == ClipboardState::Content(raw_x11_fingerprint)
                 {
                     debug!("ignoring Wayland clipboard content already known to the bridge");
 
                     return Ok(());
                 }
-                *wayland_state = ClipboardState::Content(source_fingerprint);
+
+                let need_wl_republish = snapshot.needs_wayland_text_sanitize();
+                let snapshot = snapshot.sanitize_text();
+                let destination_fingerprint = snapshot.x11_fingerprint();
+                if need_wl_republish {
+                    let wl_fp = snapshot.wayland_fingerprint();
+                    wayland::publish(snapshot.clone())
+                        .context("failed to republish sanitized Wayland clipboard")?;
+                    *wayland_state = ClipboardState::Content(wl_fp);
+                    info!("republished sanitized UTF-8 Wayland clipboard");
+                } else {
+                    *wayland_state = ClipboardState::Content(source_fingerprint);
+                }
 
                 let x11_targets = snapshot.x11_targets();
                 if x11_targets.is_empty() {

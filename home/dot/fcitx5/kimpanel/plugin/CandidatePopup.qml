@@ -281,6 +281,7 @@ PanelWindow {
                 implicitWidth: grid.implicitWidth
                 implicitHeight: grid.implicitHeight
 
+                readonly property real itemHeight: Math.round((Theme.fontSizeMedium + 1) + Theme.spacingXS * 2 + 6)
                 readonly property Item active: win.panel.cursor >= 0 && win.panel.cursor < repeater.count ? repeater.itemAt(win.panel.cursor) : null
 
                 Rectangle {
@@ -333,8 +334,9 @@ PanelWindow {
                             readonly property bool selected: index === win.panel.cursor
 
                             width: implicitWidth
+                            height: candidates.itemHeight
                             implicitWidth: row.implicitWidth + Theme.spacingS * 2
-                            implicitHeight: row.implicitHeight + Theme.spacingXS * 2 + 2
+                            implicitHeight: candidates.itemHeight
 
                             Rectangle {
                                 anchors.fill: parent
@@ -345,12 +347,13 @@ PanelWindow {
 
                             Row {
                                 id: row
-                                anchors.verticalCenter: parent.verticalCenter
+                                height: parent.height
                                 x: Theme.spacingS
                                 spacing: Theme.spacingXS + 1
 
                                 Text {
-                                    anchors.baseline: candText.baseline
+                                    height: parent.height
+                                    verticalAlignment: Text.AlignVCenter
                                     text: cand.modelData.label
                                     color: cand.selected ? Theme.onPrimaryContainer : Theme.surfaceVariantText
                                     opacity: cand.selected ? 0.8 : 0.7
@@ -360,6 +363,8 @@ PanelWindow {
 
                                 Text {
                                     id: candText
+                                    height: parent.height
+                                    verticalAlignment: Text.AlignVCenter
                                     text: cand.modelData.text
                                     color: cand.selected ? Theme.onPrimaryContainer : Theme.surfaceText
                                     font.family: Theme.fontFamily

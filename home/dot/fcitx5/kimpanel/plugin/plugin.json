@@ -1,0 +1,12 @@
+{
+    "id": "fcitxKimpanel",
+    "name": "Fcitx5 Kimpanel",
+    "description": "Fcitx5 candidate popup rendered by DMS via the Kimpanel D-Bus protocol",
+    "version": "1.0.0",
+    "author": "dot",
+    "type": "daemon",
+    "capabilities": ["input-method"],
+    "component": "./KimpanelDaemon.qml",
+    "icon": "keyboard",
+    "permissions": ["process"]
+}

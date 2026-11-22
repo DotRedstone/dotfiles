@@ -10,6 +10,7 @@
     ./config
     ./rime
     ./theme.nix
+    ./kimpanel
     ./toggle.nix
   ];
 }

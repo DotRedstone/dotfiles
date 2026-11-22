@@ -8,11 +8,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790493315,
-        "narHash": "sha256-3+CxEj+/A4F5e1jieViENf5UgjhPhCgXHc2Jl2jVET0=",
+        "lastModified": 1795244945,
+        "narHash": "sha256-41KHBglN4zwxN7l0QgGK3I6Gbxk8xs8+YcsYkEWUCVY=",
         "owner": "jacopone",
         "repo": "antigravity-nix",
-        "rev": "035886f06f81f9645d83ea2a2bd75db18f4e4a24",
+        "rev": "afdcc816d04795b75233d0d40f8d18c38b15296c",
         "type": "github"
       },
       "original": {
@@ -48,11 +48,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795116828,
-        "narHash": "sha256-Ga6+v7OfOiScMxWCVV0K7p+HaACSq450sNbFs/bqJLg=",
+        "lastModified": 1795267228,
+        "narHash": "sha256-iiZIjUZpoNcoPc4XsE1ZtBbtUrFsllJ3MvGi/6ySIhs=",
         "owner": "ilysenko",
         "repo": "codex-desktop-linux",
-        "rev": "04840e91b661b6ec9394cb34710d6745ad20cbf9",
+        "rev": "2fd3d3d43584765aead76c46ed2b10f3c28cdc91",
         "type": "github"
       },
       "original": {

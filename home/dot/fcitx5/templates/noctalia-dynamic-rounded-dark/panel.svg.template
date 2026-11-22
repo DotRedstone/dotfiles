@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="30" height="30" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <rect x="4" y="4" width="52" height="52" rx="26" fill="{{colors.surface.dark.hex}}" stroke="{{colors.outline_variant.dark.hex}}" stroke-width="6"/>
-  <rect x="6.5" y="6.5" width="47" height="47" rx="23.5" fill="none" stroke="{{colors.outline_variant.dark.hex}}" stroke-width="0.7" stroke-opacity="0.5"/>
+<svg width="48" height="48" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0.5" y="0.5" width="47" height="47" rx="14" fill="{{colors.surface_container_high.dark.hex}}" fill-opacity="0.96" stroke="{{colors.outline_variant.dark.hex}}" stroke-width="1" stroke-opacity="0.45"/>
 </svg>

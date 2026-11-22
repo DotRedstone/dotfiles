@@ -1,5 +1,6 @@
 palette = "noctalia"
 add_newline = false
+scan_timeout = 200
 
 format = """${custom.user_host_noenv}${custom.user_host_env} 󰜥 $directory $git_branch$cmd_duration\n$direnv${custom.venv}$nodejs$rust$golang$c${custom.status_dot}$character"""
 

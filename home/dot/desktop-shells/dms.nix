@@ -172,6 +172,13 @@ EOF
             raise RuntimeError(f"Patch target not found in {rel_path}")
         path.write_text(text.replace(old, new, 1), encoding="utf-8")
 
+    def patch_exact(rel_path: str, old: str, new: str) -> None:
+        path = root / rel_path
+        text = path.read_text(encoding="utf-8")
+        if old not in text:
+            raise RuntimeError(f"Exact patch target not found in {rel_path}")
+        path.write_text(text.replace(old, new, 1), encoding="utf-8")
+
     patch(
         "Common/settings/SettingsSpec.js",
         "    notificationPopupBodyInvokesAction: {\n        def: false\n    },",
@@ -196,10 +203,7 @@ EOF
         dismissNotification(w);
         return true;
     }""",
-        """    function focusNotificationWindow(notif) {
-        if (!notif)
-            return false;
-
+        """    function resolveAppTokens(candidates) {
         const aliasMap = {
             "chatgpt": ["codex-desktop", "codex", "chatgpt"],
             "codex": ["codex-desktop", "chatgpt"],
@@ -257,9 +261,8 @@ EOF
             } catch (e) {}
         }
 
-        addCandidate(notif.desktopEntry);
-        addCandidate(notif.appName);
-        addCandidate(notif.appIcon);
+        for (const c of (candidates || []))
+            addCandidate(c);
 
         const initialTokens = tokens.slice();
         for (const t of initialTokens) {
@@ -270,11 +273,12 @@ EOF
             }
         }
 
-        if (tokens.length === 0)
-            return false;
+        return tokens;
+    }
 
-        const summaryLower = String(notif.summary || "").toLowerCase().trim();
-        const bodyLower = String(notif.body || "").replace(/<[^>]*>/g, "").toLowerCase().trim();
+    function focusWindowByTokens(tokens, summaryLower, bodyLower, minWinSize, allowTitleMatch) {
+        if (!tokens || tokens.length === 0)
+            return false;
 
         if (CompositorService.isNiri && (NiriService.windows?.length ?? 0) > 0) {
             const windows = NiriService.windows;
@@ -295,9 +299,11 @@ EOF
                         score = Math.max(score, 120);
                     } else if (winAppId && tok.length >= 2 && winAppId.length >= 2 && (winAppId.includes(tok) || tok.includes(winAppId) || (moddedWinId && moddedWinId.includes(tok)))) {
                         score = Math.max(score, 95);
-                    } else if (winTitle && winTitle === tok) {
-                        score = Math.max(score, winAppId ? 80 : 45);
-                    } else if (winTitle && tok.length >= 2 && (winTitle.endsWith("— " + tok) || winTitle.endsWith("- " + tok) || winTitle.startsWith(tok + " ") || (tok.length >= 3 && winTitle.includes(tok)))) {
+                    } else if (!winAppId && winTitle && winTitle === tok) {
+                        score = Math.max(score, 45);
+                    } else if (allowTitleMatch && winTitle && winTitle === tok) {
+                        score = Math.max(score, 80);
+                    } else if (allowTitleMatch && winTitle && tok.length >= 2 && (winTitle.endsWith("— " + tok) || winTitle.endsWith("- " + tok) || winTitle.startsWith(tok + " ") || (tok.length >= 3 && winTitle.includes(tok)))) {
                         score = Math.max(score, winAppId ? 60 : 35);
                     }
                 }
@@ -320,6 +326,8 @@ EOF
 
                 let contentScore = 0;
                 const winSize = w.layout?.window_size;
+                if (minWinSize > 0 && winSize && (winSize[0] < minWinSize || winSize[1] < minWinSize))
+                    continue;
                 if (winSize && (winSize[0] < 80 || winSize[1] < 80))
                     contentScore -= 50;
 
@@ -356,12 +364,29 @@ EOF
             const tlAppId = String(tl?.appId || "").toLowerCase().trim();
             const tlTitle = String(tl?.title || "").toLowerCase().trim();
             for (const tok of tokens) {
-                if ((tlAppId && (tlAppId === tok || tlAppId.includes(tok))) || (tlTitle && tlTitle === tok)) {
+                if ((tlAppId && (tlAppId === tok || tlAppId.includes(tok))) || ((allowTitleMatch || !tlAppId) && tlTitle && tlTitle === tok)) {
                     CompositorService.activateToplevel(tl);
                     return true;
                 }
             }
         }
+
+        return false;
+    }
+
+    function focusNotificationWindow(notif) {
+        if (!notif)
+            return false;
+
+        const tokens = resolveAppTokens([notif.desktopEntry, notif.appName, notif.appIcon]);
+        if (tokens.length === 0)
+            return false;
+
+        const summaryLower = String(notif.summary || "").toLowerCase().trim();
+        const bodyLower = String(notif.body || "").replace(/<[^>]*>/g, "").toLowerCase().trim();
+
+        if (focusWindowByTokens(tokens, summaryLower, bodyLower, 0, true))
+            return true;
 
         try {
             const trayItems = (typeof SystemTray !== "undefined" && SystemTray.items) ? (SystemTray.items.values || []) : [];
@@ -381,6 +406,18 @@ EOF
         } catch (e) {}
 
         return false;
+    }
+
+    function activateTrayItem(trayItem) {
+        if (!trayItem)
+            return;
+
+        const tokens = resolveAppTokens([trayItem.id, trayItem.title, trayItem.tooltipTitle, trayItem.icon]);
+        if (focusWindowByTokens(tokens, "", "", 80, false))
+            return;
+
+        if (trayItem.activate)
+            trayItem.activate();
     }
 
     function invokeLastNotification() {
@@ -584,6 +621,42 @@ EOF
                 onClose();
         }
     }""",
+    )
+
+    patch_exact(
+        "Modules/DBar/Widgets/SystemTrayBar.qml",
+        "        if (!trayItem.onlyMenu) {\n            trayItem.activate();\n            return;\n        }",
+        "        if (!trayItem.onlyMenu) {\n            NotificationService.activateTrayItem(trayItem);\n            return;\n        }",
+    )
+
+    patch_exact(
+        "Modules/DBar/Widgets/SystemTrayBar.qml",
+        "                    if (!delegateRoot.trayItem.onlyMenu) {\n                        delegateRoot.trayItem.activate();\n                        return;\n                    }",
+        "                    if (!delegateRoot.trayItem.onlyMenu) {\n                        NotificationService.activateTrayItem(delegateRoot.trayItem);\n                        return;\n                    }",
+    )
+
+    patch_exact(
+        "Modules/DBar/Widgets/TrayOverflowGrid.qml",
+        "import qs.Common\nimport qs.Modules.DBar",
+        "import qs.Common\nimport qs.Services\nimport qs.Modules.DBar",
+    )
+
+    patch_exact(
+        "Modules/DBar/Widgets/TrayOverflowGrid.qml",
+        "                    if (mouse.button === Qt.LeftButton && !overflowItemRoot.trayItem.onlyMenu) {\n                        overflowItemRoot.trayItem.activate();",
+        "                    if (mouse.button === Qt.LeftButton && !overflowItemRoot.trayItem.onlyMenu) {\n                        NotificationService.activateTrayItem(overflowItemRoot.trayItem);",
+    )
+
+    patch_exact(
+        "Modules/DBar/Widgets/TrayOverflowMenu.qml",
+        "import qs.Common\nimport qs.Widgets",
+        "import qs.Common\nimport qs.Services\nimport qs.Widgets",
+    )
+
+    patch_exact(
+        "Modules/DBar/Widgets/TrayOverflowMenu.qml",
+        "                if (!item.onlyMenu) {\n                    item.activate();\n                    root.hide();",
+        "                if (!item.onlyMenu) {\n                    NotificationService.activateTrayItem(item);\n                    root.hide();",
     )
   '';
 

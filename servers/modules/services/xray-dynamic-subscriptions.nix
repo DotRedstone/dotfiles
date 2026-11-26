@@ -18,6 +18,7 @@ let
   cfg = config.dot.services.xrayDynamicSubscriptions;
   entryNames = builtins.attrNames cfg.entries;
   hasEntries = cfg.enable && entryNames != [ ];
+  pythonEnv = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
 
   secretList = lib.unique (
     lib.concatMap (
@@ -66,6 +67,7 @@ let
     import sys
     import urllib.parse
     import urllib.request
+    import yaml
 
     STATE_DIR = pathlib.Path("/var/lib/xray-dynamic-subscriptions")
     ADDR_PATTERN = re.compile(r"^[A-Za-z0-9:.-]+$")
@@ -153,6 +155,215 @@ let
         return f"{base}-{m.group(1)}" if m else base
 
 
+    def atomic_write_nginx(target: pathlib.Path, content: str) -> None:
+        tmp_file = target.parent / f".{target.name}.tmp"
+        tmp_file.write_text(content, encoding="utf-8")
+        os.chmod(tmp_file, 0o640)
+        shutil.chown(tmp_file, group="nginx")
+        os.replace(tmp_file, target)
+
+
+    def build_clash_config(
+        pool_label: str,
+        user_uuid: str,
+        public_address: str,
+        reality_port: int,
+        reality_sni: str,
+        pbk: str,
+        sid: str,
+        cdn_host: str,
+        cdn_port: int,
+        ws_path: str,
+        preferred_endpoints: list[tuple[str, int, str]],
+    ) -> dict:
+        reality_name = f"{pool_label}-直连-Reality"
+        cf_direct_name = f"{pool_label}-CF-直连"
+
+        proxies = [
+            {
+                "name": reality_name,
+                "type": "vless",
+                "server": public_address,
+                "port": reality_port,
+                "uuid": user_uuid,
+                "tls": True,
+                "udp": True,
+                "servername": reality_sni,
+                "network": "tcp",
+                "client-fingerprint": "chrome",
+                "reality-opts": {
+                    "public-key": pbk,
+                    "short-id": sid,
+                },
+            },
+            {
+                "name": cf_direct_name,
+                "type": "vless",
+                "server": cdn_host,
+                "port": cdn_port,
+                "uuid": user_uuid,
+                "tls": True,
+                "udp": True,
+                "servername": cdn_host,
+                "network": "ws",
+                "client-fingerprint": "chrome",
+                "ws-opts": {
+                    "path": ws_path,
+                    "headers": {"Host": cdn_host},
+                },
+            },
+        ]
+
+        preferred_names: list[str] = []
+        for idx, (addr, port, label) in enumerate(preferred_endpoints, start=1):
+            p_name = preferred_node_name(pool_label, idx, label)
+            preferred_names.append(p_name)
+            proxies.append(
+                {
+                    "name": p_name,
+                    "type": "vless",
+                    "server": addr,
+                    "port": port,
+                    "uuid": user_uuid,
+                    "tls": True,
+                    "udp": True,
+                    "servername": cdn_host,
+                    "network": "ws",
+                    "client-fingerprint": "chrome",
+                    "ws-opts": {
+                        "path": ws_path,
+                        "headers": {"Host": cdn_host},
+                    },
+                }
+            )
+
+        auto_candidates = preferred_names if preferred_names else [cf_direct_name, reality_name]
+        manual_candidates = [reality_name, cf_direct_name, *preferred_names]
+        category_proxies = ["🌐 节点选择", "♻️ 优选自动", "🇸🇬 新加坡手动", "DIRECT"]
+
+        proxy_groups = [
+            {
+                "name": "🌐 节点选择",
+                "type": "select",
+                "proxies": ["♻️ 优选自动", "🇸🇬 新加坡手动", reality_name, cf_direct_name, "DIRECT"],
+            },
+            {
+                "name": "♻️ 优选自动",
+                "type": "url-test",
+                "url": "https://www.gstatic.com/generate_204",
+                "interval": 300,
+                "tolerance": 50,
+                "proxies": auto_candidates,
+            },
+            {
+                "name": "🇸🇬 新加坡手动",
+                "type": "select",
+                "proxies": manual_candidates,
+            },
+            {"name": "🧠 AI", "type": "select", "proxies": list(category_proxies)},
+            {"name": "🔎 Google", "type": "select", "proxies": list(category_proxies)},
+            {"name": "🎬 YouTube", "type": "select", "proxies": list(category_proxies)},
+            {"name": "📨 Telegram", "type": "select", "proxies": list(category_proxies)},
+            {"name": "🐦 X", "type": "select", "proxies": list(category_proxies)},
+            {"name": "👨‍💻 开发者工具", "type": "select", "proxies": list(category_proxies)},
+            {"name": "🐟 漏网之鱼", "type": "select", "proxies": ["🌐 节点选择", "DIRECT"]},
+        ]
+
+        rules = [
+            "DOMAIN-SUFFIX,1password.com,🌐 节点选择",
+            "DOMAIN-SUFFIX,1passwordservices.com,🌐 节点选择",
+            "GEOSITE,openai,🧠 AI",
+            "DOMAIN-SUFFIX,claude.ai,🧠 AI",
+            "DOMAIN-SUFFIX,anthropic.com,🧠 AI",
+            "DOMAIN-KEYWORD,gemini,🧠 AI",
+            "DOMAIN-SUFFIX,cursor.sh,🧠 AI",
+            "DOMAIN-SUFFIX,cursorvm.com,🧠 AI",
+            "GEOSITE,github,👨‍💻 开发者工具",
+            "DOMAIN-KEYWORD,docker,👨‍💻 开发者工具",
+            "DOMAIN-KEYWORD,npmjs,👨‍💻 开发者工具",
+            "DOMAIN-KEYWORD,pypi,👨‍💻 开发者工具",
+            "GEOSITE,youtube,🎬 YouTube",
+            "GEOSITE,google,🔎 Google",
+            "GEOSITE,twitter,🐦 X",
+            "GEOSITE,telegram,📨 Telegram",
+            "IP-CIDR,91.108.4.0/22,📨 Telegram,no-resolve",
+            "IP-CIDR,91.108.8.0/22,📨 Telegram,no-resolve",
+            "IP-CIDR,91.108.12.0/22,📨 Telegram,no-resolve",
+            "IP-CIDR,91.108.16.0/22,📨 Telegram,no-resolve",
+            "IP-CIDR,91.108.56.0/22,📨 Telegram,no-resolve",
+            "IP-CIDR,149.154.160.0/20,📨 Telegram,no-resolve",
+            "IP-CIDR,185.76.151.0/24,📨 Telegram,no-resolve",
+            "GEOSITE,geolocation-!cn,🌐 节点选择",
+            "GEOSITE,private,DIRECT",
+            "GEOIP,private,DIRECT,no-resolve",
+            "GEOSITE,cn,DIRECT",
+            "GEOIP,cn,DIRECT,no-resolve",
+            "MATCH,🐟 漏网之鱼",
+        ]
+
+        return {
+            "mixed-port": 7890,
+            "allow-lan": False,
+            "ipv6": False,
+            "mode": "rule",
+            "log-level": "warning",
+            "unified-delay": True,
+            "tcp-concurrent": True,
+            "find-process-mode": "strict",
+            "global-client-fingerprint": "chrome",
+            "profile": {
+                "store-selected": True,
+                "store-fake-ip": True,
+            },
+            "sniffer": {
+                "enable": True,
+                "parse-pure-ip": True,
+                "sniff": {
+                    "HTTP": {"ports": [80, "8080-8880"]},
+                    "TLS": {"ports": [443, 8443]},
+                    "QUIC": {"ports": [443, 8443]},
+                },
+            },
+            "dns": {
+                "enable": True,
+                "ipv6": False,
+                "enhanced-mode": "fake-ip",
+                "fake-ip-range": "198.18.0.1/16",
+                "respect-rules": True,
+                "fake-ip-filter": [
+                    "*.lan",
+                    "*.local",
+                    "+.bdot.in",
+                    "+.540123.xyz",
+                    "+.msftconnecttest.com",
+                    "+.msftncsi.com",
+                ],
+                "default-nameserver": ["223.5.5.5", "119.29.29.29"],
+                "proxy-server-nameserver": [
+                    "https://223.5.5.5/dns-query",
+                    "https://1.12.12.12/dns-query",
+                ],
+                "nameserver": [
+                    "https://1.1.1.1/dns-query",
+                    "https://8.8.8.8/dns-query",
+                ],
+                "nameserver-policy": {
+                    "geosite:private,cn": [
+                        "https://223.5.5.5/dns-query",
+                        "https://1.12.12.12/dns-query",
+                    ],
+                    "geosite:geolocation-!cn": [
+                        "https://1.1.1.1/dns-query",
+                        "https://8.8.8.8/dns-query",
+                    ],
+                },
+            },
+            "proxies": proxies,
+            "proxy-groups": proxy_groups,
+            "rules": rules,
+        }
+
+
     def render_entry(name: str, entry: dict) -> None:
         user_uuid = read_secret(entry["uuidPath"])
         pbk = read_secret(entry["realityPublicKeyPath"])
@@ -161,9 +372,11 @@ let
         preferred_url = read_secret(entry["preferredPoolUrlPath"])
 
         pool_label = entry["poolLabel"]
+        public_address = entry["publicAddress"]
+        reality_port = int(entry["realityPort"])
+        reality_sni = entry["realityServerName"]
         cdn_host = entry["cdnHost"]
         cdn_port = int(entry["cdnPort"])
-
         quoted_uuid = urllib.parse.quote(user_uuid, "")
 
         reality_query = urllib.parse.urlencode(
@@ -171,7 +384,7 @@ let
                 "encryption": "none",
                 "security": "reality",
                 "type": "tcp",
-                "sni": entry["realityServerName"],
+                "sni": reality_sni,
                 "fp": "chrome",
                 "pbk": pbk,
                 "sid": sid,
@@ -180,7 +393,7 @@ let
         reality_name = urllib.parse.quote(f"{pool_label}-直连-Reality", "")
         reality_uri = (
             f"vless://{quoted_uuid}@"
-            f"{format_host(entry['publicAddress'])}:{int(entry['realityPort'])}"
+            f"{format_host(public_address)}:{reality_port}"
             f"?{reality_query}#{reality_name}"
         )
 
@@ -214,13 +427,25 @@ let
             )
 
         encoded = base64.b64encode("\n".join(uris).encode("utf-8")).decode("ascii")
-        out_file = STATE_DIR / f"{name}.txt"
-        tmp_file = STATE_DIR / f".{name}.txt.tmp"
-        tmp_file.write_text(encoded, encoding="utf-8")
-        os.chmod(tmp_file, 0o640)
-        shutil.chown(tmp_file, group="nginx")
-        os.replace(tmp_file, out_file)
-        print(f"rendered {name}: {len(uris)} endpoints")
+        atomic_write_nginx(STATE_DIR / f"{name}.txt", encoded)
+
+        clash_doc = build_clash_config(
+            pool_label=pool_label,
+            user_uuid=user_uuid,
+            public_address=public_address,
+            reality_port=reality_port,
+            reality_sni=reality_sni,
+            pbk=pbk,
+            sid=sid,
+            cdn_host=cdn_host,
+            cdn_port=cdn_port,
+            ws_path=ws_path,
+            preferred_endpoints=endpoints,
+        )
+        clash_yaml = yaml.safe_dump(clash_doc, allow_unicode=True, sort_keys=False)
+        atomic_write_nginx(STATE_DIR / f"{name}.yaml", clash_yaml)
+
+        print(f"rendered {name}: {len(uris)} endpoints (txt + yaml)")
 
 
     def main() -> int:
@@ -341,6 +566,7 @@ in
       owner = "root";
       group = "nginx";
       mode = "0440";
+      reloadUnits = [ "nginx.service" ];
       content = lib.concatMapStringsSep "\n" (
         name:
         let
@@ -351,6 +577,15 @@ in
             alias /var/lib/xray-dynamic-subscriptions/${name}.txt;
             default_type text/plain;
             add_header Cache-Control "private, no-store";
+            access_log off;
+          }
+
+          location = ${config.sops.placeholder.${entry.pathSecret}}/clash.yaml {
+            alias /var/lib/xray-dynamic-subscriptions/${name}.yaml;
+            default_type text/yaml;
+            charset utf-8;
+            add_header Cache-Control "private, no-store";
+            add_header Content-Disposition "attachment; filename=\"${name}-${lib.toLower entry.poolLabel}.yaml\"";
             access_log off;
           }
         ''
@@ -375,7 +610,7 @@ in
         StateDirectory = "xray-dynamic-subscriptions";
         StateDirectoryMode = "0750";
         Group = "nginx";
-        ExecStart = "${pkgs.python3}/bin/python3 ${syncScript} ${manifestFile}";
+        ExecStart = "${pythonEnv}/bin/python3 ${syncScript} ${manifestFile}";
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectHome = true;

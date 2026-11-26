@@ -26,6 +26,7 @@
     ./restic-receiver.nix
     ./rustfs.nix
     ./xray-cdn-websocket.nix
+    ./xray-dynamic-subscriptions.nix
     ./xray-subscriptions.nix
   ] ++ [ (if proxyStack == null then ./xray-node.nix else proxyStack.nixosModules.xrayNode) ];
 }

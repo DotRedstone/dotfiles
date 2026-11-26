@@ -20,6 +20,11 @@
       "enabled": false,
       "quotaGiB": 50,
       "expiresAt": null
+    },
+    "zjj": {
+      "enabled": false,
+      "quotaGiB": 1024,
+      "expiresAt": null
     }
   }
 }

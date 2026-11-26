@@ -1,0 +1,124 @@
+# ---
+# Module: Starship Prompt
+# Description: Capsule-style Starship prompt with language, direnv, and git indicators
+# Scope: Home Manager
+# ---
+
+{ profile, ... }: {
+  programs.starship = {
+    enable = true;
+    enableBashIntegration = true;
+    enableFishIntegration = true;
+    settings = {
+      palette = "noctalia";
+      add_newline = false;
+      scan_timeout = 200;
+
+      format = "\${custom.user_host_noenv}\${custom.user_host_env} 󰜥 $directory $git_branch$cmd_duration\n$direnv\${custom.venv}$nodejs$rust$golang$c\${custom.status_dot}$character";
+
+      palettes.noctalia = {
+        primary = "#b0c8ec";
+        secondary = "#bbc7db";
+        tertiary = "#e1d7ff";
+        error = "#fa746f";
+      };
+
+      custom.user_host_noenv = {
+        when = ''test -z "$VIRTUAL_ENV" && test -z "$DIRENV_DIR" && test ! -f package.json && test ! -f Cargo.toml && test ! -f go.mod'';
+        command = ''printf "${profile.username}•%s" "${profile.hostName}"'';
+        shell = [ "sh" ];
+        format = "[](bold primary)[$output](bold bg:primary fg:235)[](bold primary)";
+      };
+
+      custom.user_host_env = {
+        when = ''test -n "$VIRTUAL_ENV" || test -n "$DIRENV_DIR" || test -f package.json || test -f Cargo.toml || test -f go.mod'';
+        command = ''printf "${profile.username}•%s" "${profile.hostName}"'';
+        shell = [ "sh" ];
+        format = "[](bold tertiary)[$output](bold bg:tertiary fg:235)[](bold tertiary)";
+      };
+
+      username.disabled = true;
+      hostname.disabled = true;
+
+      cmd_duration = {
+        min_time = 0;
+        format = " [](bold tertiary)[󰪢 $duration](bold bg:tertiary fg:235)[](bold tertiary)";
+        disabled = false;
+      };
+
+      direnv = {
+        format = "[](bold primary)[ ](bold bg:primary fg:235)[](bold primary) ";
+        style = "bold";
+        disabled = false;
+      };
+
+      custom.venv = {
+        when = ''test -n "$VIRTUAL_ENV"'';
+        command = ''basename "$VIRTUAL_ENV"'';
+        format = "[](bold primary)[󰌠 $output](bold bg:primary fg:235)[](bold primary) ";
+      };
+
+      nodejs = {
+        format = "[](bold primary)[󰎙 $version](bold bg:primary fg:235)[](bold primary) ";
+        detect_files = [ "package.json" ".node-version" ".nvmrc" ];
+        style = "bold";
+      };
+
+      rust = {
+        format = "[](bold primary)[󱘗 $version](bold bg:primary fg:235)[](bold primary) ";
+        style = "bold";
+      };
+
+      golang = {
+        format = "[](bold primary)[󰟓 $version](bold bg:primary fg:235)[](bold primary) ";
+        style = "bold";
+      };
+
+      c = {
+        format = "[](bold primary)[ $version](bold bg:primary fg:235)[](bold primary) ";
+        style = "bold";
+      };
+
+      directory = {
+        style = "bold bg:secondary fg:235";
+        truncation_length = 6;
+        truncation_symbol = " ••/";
+        home_symbol = "  ";
+        read_only = "  ";
+        format = "[](bold secondary)[󰉋 $path]($style)[](bold secondary)";
+        substitutions = {
+          Desktop = "  ";
+          Documents = "  ";
+          Downloads = "  ";
+          Music = " 󰎈 ";
+          Pictures = "  ";
+          Videos = "  ";
+          GitHub = " 󰊤 ";
+          ".dotfiles" = "  ";
+        };
+      };
+
+      git_branch = {
+        style = "bold bg:primary fg:235";
+        symbol = "󰘬";
+        truncation_length = 12;
+        format = "[](bold primary)[$symbol $branch$all_status]($style)[](bold primary)";
+      };
+
+      git_status.disabled = false;
+
+      custom.status_dot = {
+        when = ''test -z "$VIRTUAL_ENV" && test -z "$DIRENV_DIR" && test ! -f package.json && test ! -f Cargo.toml && test ! -f go.mod'';
+        command = ''echo ""'';
+        format = "[$output ](bold primary)";
+      };
+
+      character = {
+        success_symbol = "[](bold primary)";
+        error_symbol = "[ ](bold error)";
+      };
+
+      package.disabled = true;
+    };
+  };
+}

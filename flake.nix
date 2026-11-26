@@ -1,11 +1,11 @@
 # ---
 # Module: Flake Entry
-# Description: Main entry point for NixOS (warden) and Home Manager (dot) configurations
+# Description: Main entry point for NixOS (warden), Home Manager (dot), and NixOS-WSL (wsl)
 # Scope: Flake
 # ---
 
 {
-  description = "dot's Warden NixOS configuration";
+  description = "dot's NixOS, Home Manager, and WSL configurations";
 
   inputs = {
     # [Core]
@@ -62,6 +62,12 @@
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # [WSL]
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, home-manager, antigravity-nix, niri, ... }@inputs:
@@ -74,6 +80,22 @@
       specialArgs = { inherit inputs; };
       modules = [ 
         ./hosts/warden 
+        { nixpkgs.hostPlatform = system; }
+      ];
+    };
+
+    # [System - WSL]
+    # 日常更新：在 WSL 内 nh os switch -H wsl（NH_FLAKE=/home/${username}/.dotfiles，默认 /home/nixos/.dotfiles）
+    # 不要把这条配置的 -H 改成 warden，也不要改上面的 warden 块。
+    nixosConfigurations.wsl = nixpkgs.lib.nixosSystem {
+      specialArgs = {
+        inherit inputs;
+        profile = import ./hosts/wsl/profile.nix;
+      };
+      modules = [
+        inputs.nixos-wsl.nixosModules.default
+        home-manager.nixosModules.home-manager
+        ./hosts/wsl
         { nixpkgs.hostPlatform = system; }
       ];
     };

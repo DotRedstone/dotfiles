@@ -12,5 +12,6 @@
     ./workbuddy2api/service.nix
     ./workbuddy2api/autoupdate.nix
     ./cf-home-proxy.nix
+    ./aws-quick2api.nix
   ];
 }

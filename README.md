@@ -2,12 +2,12 @@
 
 这是用户 `dot` 的个人 NixOS 系统和 Home Manager 配置文件。
 
-仓库还包含独立的云服务器 Flake；桌面与服务器共享 Git 历史，但不共享构建输出或
+仓库还包含独立的云服务器 Flake；桌面、WSL 与服务器共享 Git 历史，但不共享构建输出或
 部署命令。第一次进入仓库时，先看 [仓库导航与改动路由](./docs/repository-map.md)。
 
 ## 核心架构
 
-- **主机 (Host)**: `warden` (Redmi Book Pro 16 2024)
+- **主机 (Host)**: `warden` (Redmi Book Pro 16 2024)；另有 NixOS-WSL 主机 `wsl`，见 [hosts/wsl/README.md](./hosts/wsl/README.md)
 - **用户 (User)**: `dot`
 - **桌面环境**: [Niri](./docs/desktop-niri.md) + [DMS 2](./home/dot/desktop-shells/README.md)（[Noctalia](./docs/noctalia.md) 保留为按需外壳与视觉系统）
 - **输入法**: [Fcitx5 + Rime Ice](./docs/fcitx5-rime.md)（主题由 [Noctalia 模板](./docs/fcitx5-noctalia.md)渲染）
@@ -20,12 +20,13 @@
 | :--- | :--- |
 | `hms` | 更新 Home Manager 用户配置 (`home-manager switch`) |
 | `nrs` | 更新 NixOS 系统配置 (`sudo nixos-rebuild switch`) |
+| `nrs`（WSL 内） | 更新 WSL 系统与 Home：`nh os switch -H wsl ~/.dotfiles`（默认仓库位于 `/home/nixos/.dotfiles`） |
 | `nix flake check .` | 验证 Flake 语法与结构 |
 
 ## 文档指引
 
 - [AGENTS.md](./AGENTS.md): 针对 AI 协作助手的技术规范指南。
-- [仓库导航与改动路由](./docs/repository-map.md): 桌面、服务器、边缘 Worker 与文档的最短入口。
+- [仓库导航与改动路由](./docs/repository-map.md): 桌面、WSL、服务器、边缘 Worker 与文档的最短入口。
 - [服务器 Flake](./servers/README.md): 云服务器的独立入口、主机清单与部署边界。
 - [docs/](./docs/): 详细的功能模块文档：
   - [架构概览](./docs/architecture.md)

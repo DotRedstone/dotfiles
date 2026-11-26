@@ -1,8 +1,8 @@
 # 架构概览 (Architecture)
 
-本仓库采用两套独立 Flake：根目录管理 `warden` 桌面与 `dot@warden` 用户环境，
-`servers/` 管理云服务器。二者共用 Git 历史和文档规范，但绝不混用构建、部署或
-密钥边界。完整改动路由见 [仓库导航与改动路由](./repository-map.md)。
+本仓库采用两套独立 Flake：根目录管理 `warden` 桌面、`dot@warden` 用户环境与
+NixOS-WSL 主机 `wsl`，`servers/` 管理云服务器。二者共用 Git 历史和文档规范，
+但绝不混用构建、部署或密钥边界。完整改动路由见 [仓库导航与改动路由](./repository-map.md)。
 
 ## 核心结构
 
@@ -10,6 +10,7 @@
 | :--- | :--- | :--- |
 | `flake.nix` | 整个仓库的入口，定义 inputs 和 outputs | Flake |
 | `hosts/warden/` | 主机特定配置（硬件、挂载点、内核参数） | Host |
+| `hosts/wsl/` | NixOS-WSL 主机装配、系统模块与专用 Home | Host |
 | `modules/system/` | NixOS 系统级功能模块 | System |
 | `modules/system/desktop/` | 原子化的桌面环境组件 (Niri, SDDM, Graphics, etc.) | System |
 | `modules/system/users/` | 原子化的用户账户、Shell 及核心工具链配置 | System |
@@ -31,7 +32,7 @@
 
 - **Host vs System**: `hosts/` 目录仅存放与物理硬件强相关的配置。通用的系统逻辑（如 Docker, I18N）应封装在 `modules/system/` 中。
 - **System vs Home**: 系统级配置（如引导、文件系统、全局服务）位于 `modules/system/`；用户级配置（如桌面环境、编辑器、个人应用）位于 `home/dot/`。
-- **Desktop vs Servers**: 根 `flake.nix` 只能构建 `warden` 与 `dot@warden`；云服务器必须从 `servers/flake.nix` 以 `path:./servers` 调用。
+- **Desktop vs Servers**: 根 `flake.nix` 构建 `warden`、`dot@warden`、`beacon` 与 `wsl`；云服务器必须从 `servers/flake.nix` 以 `path:./servers` 调用。不要把 WSL 放进 `servers/`。
 - **Host vs Service (Servers)**: `servers/hosts/<name>/` 只组装该机器；可复用服务逻辑放在 `servers/modules/services/`，不复制粘贴。
 - **禁止全局污染**: 禁止将特定应用的 workaround（如特定环境变量或补丁）写进全局系统配置。应将其保留在应用所在的 Home Manager 模块中。
 
@@ -39,6 +40,7 @@
 
 - **Home Manager 改动**: 运行 `home-manager build --flake .#dot@warden`。
 - **NixOS 系统改动**: 运行 `sudo nixos-rebuild dry-run --flake .#warden`。
+- **WSL 改动**: 运行 `nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath`，或 `nixos-rebuild dry-run --flake .#wsl`。
 - **全局验证**: 运行 `nix flake check .`。
 - **服务器改动**: 运行 `nix flake check path:./servers`；再按架构选择受管主机构建。
 

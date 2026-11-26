@@ -1,7 +1,6 @@
 # 仓库导航与改动路由
 
-本仓库同时保存一台桌面主机和多台云服务器的 NixOS 配置。两者在同一 Git
-历史中协作，但属于 **两个独立 Flake**：不要把其中一方的构建或部署命令用于另一方。
+本仓库同时保存一台桌面主机、一台 NixOS-WSL 主机和多台云服务器的 NixOS 配置。桌面与 WSL 同属根 Flake，服务器是独立 Flake：不要把其中一方的构建或部署命令用于另一方。
 双节点代理的通用实现另在 `/home/dot/Projects/proxy-stack` 独立 Git/Flake 仓库；
 `servers/flake.nix` 通过锁定的 `proxyStack` input 引用它，Warden Flake 不引用。
 
@@ -12,6 +11,7 @@
 | Warden 硬件、挂载、休眠或主机身份 | `hosts/warden/default.nix` | `hosts/warden/` | `sudo nixos-rebuild dry-run --flake .#warden` |
 | Warden 全局系统能力 | `modules/system/default.nix` | `modules/system/<domain>/` | `sudo nixos-rebuild dry-run --flake .#warden` |
 | Beacon（Mac mini 无头主机） | `hosts/beacon/README.md` | `hosts/beacon/` | `nix eval --raw .#darwinConfigurations.beacon.system.drvPath` |
+| NixOS-WSL 主机 `wsl` | `hosts/wsl/README.md` | `hosts/wsl/` | `nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath` |
 | 桌面、Shell、应用和用户服务 | `home/dot/default.nix` | `home/dot/<app>/` | `home-manager build --flake .#dot@warden` |
 | Niri / 桌面 Shell / 视觉语言 | `docs/desktop-niri.md`、`home/dot/desktop-shells/README.md` | 对应 Home Manager 模块 | `home-manager build --flake .#dot@warden` |
 | Fcitx5 / Rime | `docs/fcitx5-rime.md`、`home/dot/fcitx5/README.md` | `home/dot/fcitx5/` | `home-manager build --flake .#dot@warden` |
@@ -27,8 +27,9 @@
 
 ```text
 .
-├── flake.nix                 Warden 桌面 Flake（x86_64-linux）
+├── flake.nix                 根 Flake：warden、dot@warden、beacon、wsl
 ├── hosts/warden/             此电脑不可复用的硬件和身份
+├── hosts/wsl/                NixOS-WSL 主机装配与专用 Home（x86_64-linux）
 ├── hosts/beacon/             Mac mini 的 nix-darwin 主机配置（aarch64-darwin）
 ├── modules/system/           Warden 可复用的系统能力
 ├── home/dot/                 dot 的 Home Manager 模块
@@ -46,7 +47,7 @@
     └── cloudflare/           Worker 与边缘控制面
 ```
 
-桌面 Flake 输出 `warden`、`dot@warden`，以及在 Mac mini 上部署的
+根 Flake 输出 `warden`、`dot@warden`、`nixosConfigurations.wsl`，以及在 Mac mini 上部署的
 `darwinConfigurations.beacon`；服务器主机则以
 `servers#hopper`、`servers#conduit` 等名称输出。服务器清单中“可 SSH”不等于
 “已声明式受管”，当前收编状态以 `servers/inventory/README.md` 为准。

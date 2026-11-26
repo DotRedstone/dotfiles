@@ -8,6 +8,8 @@
 | **部署系统配置** | `sudo nixos-rebuild switch --flake .#warden` | `nrs` |
 | **验证用户配置** | `home-manager build --flake .#dot@warden` | - |
 | **验证系统配置** | `sudo nixos-rebuild dry-run --flake .#warden` | - |
+| **部署 WSL 配置** | `nh os switch ~/.dotfiles -H wsl`（在 WSL 内，默认仓库位于 `/home/nixos/.dotfiles`） | `nrs`（仅 WSL 的 fish 缩写） |
+| **验证 WSL 配置** | `nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath` | - |
 | **语法检查** | `nix flake check .` | - |
 | **重载输入法** | `fcitx5 -r -d` | - |
 | **重置桌面 Shell** | `systemctl --user restart dms.service` | - |

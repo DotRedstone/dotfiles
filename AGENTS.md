@@ -2,7 +2,7 @@
 
 ## 仓库用途
 
-本仓库管理 `warden` 主机与 `dot` 用户的 NixOS、Home Manager 个人配置。面向使用者的入口见 [README.md](./README.md)。
+本仓库管理 `warden` 主机与 `dot` 用户的 NixOS、Home Manager 个人配置，以及一份给他人使用的 NixOS-WSL 主机 `wsl`（默认用户为 `nixos`）。面向使用者的入口见 [README.md](./README.md)。
 
 `servers/` 是独立的 NixOS 服务器 Flake。选择命令前先阅读 [docs/repository-map.md](./docs/repository-map.md)：桌面与服务器共享 Git 历史，但部署目标不同。
 
@@ -28,6 +28,7 @@ home-manager build --flake .#dot@warden
 home-manager switch --flake .#dot@warden
 sudo nixos-rebuild dry-run --flake .#warden
 sudo nixos-rebuild switch --flake .#warden
+nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath
 nix flake check .
 nix flake check path:./servers
 ```
@@ -36,6 +37,7 @@ nix flake check path:./servers
 
 - Home Manager 改动使用 `home-manager build` 或 `home-manager switch` 验证。
 - 系统模块改动使用 `nixos-rebuild dry-run` 或 `nixos-rebuild switch` 验证。
+- WSL 改动使用 `nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath` 或 `nixos-rebuild dry-run --flake .#wsl` 验证；不要用 warden 的 `nrs` 去切换 WSL。
 - 仅修改 Home Manager 时，不运行 `sudo nixos-rebuild switch`。
 - 只验证一侧时，不声称整个配置已通过验证。
 - 服务器改动使用 `servers/flake.nix`，遵循 `servers/AGENTS.md`；不得误将桌面的 `nixos-rebuild` 命令用于远程服务器。
@@ -48,6 +50,7 @@ nix flake check path:./servers
 | --- | --- | --- |
 | Warden 硬件、挂载、主机身份 | `hosts/warden/default.nix` | `hosts/warden/` |
 | Warden 全局系统行为 | `modules/system/default.nix` | 一个 `modules/system/<domain>/` 模块 |
+| NixOS-WSL 主机 `wsl` | `hosts/wsl/README.md`、`hosts/wsl/default.nix` | `hosts/wsl/`（不要改 `home/dot/fish/config.nix`） |
 | 用户应用或桌面行为 | `home/dot/default.nix` | 一个 `home/dot/<app>/` 模块 |
 | 服务器 | `servers/README.md`、`servers/AGENTS.md` | `servers/hosts/` 或 `servers/modules/` |
 | Cloudflare Worker | `servers/cloudflare/README.md` | `servers/cloudflare/edge-worker/` |
@@ -105,6 +108,7 @@ nix flake check path:./servers
 
 - `flake.nix`：Flake 入口。
 - `hosts/warden/`：主机专属硬件、挂载、身份和交换空间。
+- `hosts/wsl/`：NixOS-WSL 主机装配与专用 Home；不要引入 `modules/system` 或 `home/dot` 的 switchboard。
 - `modules/system/`：NixOS 系统模块。
 - `home/dot/`：Home Manager 用户模块。
 - `home/dot/fcitx5/`：Fcitx5、Rime 及输入法主题集成。
@@ -158,7 +162,7 @@ docs(scope): ...
 chore(scope): ...
 ```
 
-推荐作用域：`fcitx5`、`rime`、`noctalia`、`wechat`、`qq`、`persistence`、`i18n`、`niri`、`theme`、`system`、`home`、`repo`。
+推荐作用域：`fcitx5`、`rime`、`noctalia`、`wechat`、`qq`、`persistence`、`i18n`、`niri`、`theme`、`system`、`home`、`wsl`、`repo`。
 
 - 一个提交只包含一种改动类型，不混合重构与行为改动。
 - 提交前说明验证命令及结果。
